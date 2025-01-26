@@ -41,6 +41,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.binary_sensor.coordinator.Bi
 import nodomain.freeyourgadget.gadgetbridge.devices.bm2.Bm2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.bm6.Bm6Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.braun.BraunBPW4500DeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.cardo.Ls24xDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.casio.ecbs100.CasioECBS100DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.casio.gb6900.CasioGB6900DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.casio.gbd200.CasioGBD200DeviceCoordinator;
@@ -1229,6 +1230,7 @@ public enum DeviceType {
     UNA_WATCH(UnaDeviceCoordinator.class),
     ZEBLAZE_BEYOND_3_PRO(Beyond3ProCoordinator.class),
     QN_SCALE(QnScaleCoordinator.class),
+    CARDO_LS24X(Ls24xDeviceCoordinator.class),
     TEST(TestDeviceCoordinator.class);
 
     private DeviceCoordinator coordinator;
