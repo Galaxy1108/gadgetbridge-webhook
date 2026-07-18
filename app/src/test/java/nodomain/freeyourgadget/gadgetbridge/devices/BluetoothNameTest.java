@@ -30,6 +30,7 @@ public class BluetoothNameTest extends TestBase {
             put("Amazfit Balance 3", DeviceType.AMAZFITBALANCE3); // #6895
             put("Balance 3", DeviceType.AMAZFITBALANCE3); // #6895
             put("Amazfit Band 7", DeviceType.AMAZFITBAND7); // #2945
+            put("ScanWatch CA", DeviceType.WITHINGS_SCANWATCH);
             put("Amazfit GTR 3 Pro", DeviceType.AMAZFITGTR3PRO); // #2442
             put("Amazfit GTS", DeviceType.AMAZFITGTS); // #5391
             put("Amazfit GTS 3", DeviceType.AMAZFITGTS3); // #2442

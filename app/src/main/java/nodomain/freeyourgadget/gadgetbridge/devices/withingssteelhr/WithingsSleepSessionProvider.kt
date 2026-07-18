@@ -2,7 +2,7 @@ package nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr
 
 import nodomain.freeyourgadget.gadgetbridge.devices.SleepSessionProvider
 import nodomain.freeyourgadget.gadgetbridge.devices.SleepSessionSegmenter
-import nodomain.freeyourgadget.gadgetbridge.entities.WithingsSteelHRActivitySample
+import nodomain.freeyourgadget.gadgetbridge.entities.AbstractWithingsActivitySample
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.SleepSession
 import nodomain.freeyourgadget.gadgetbridge.model.SleepStage
@@ -16,7 +16,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.SleepStage
  * sleep overlaid from these sessions, e.g. [WithingsSteelHRSampleProvider.getRawActivitySamples]
  */
 class WithingsSleepSessionProvider(
-    private val getRawSamples: (Int, Int) -> List<WithingsSteelHRActivitySample>
+    private val getRawSamples: (Int, Int) -> List<AbstractWithingsActivitySample>
 ) : SleepSessionProvider {
     override fun getSleepSessions(tsFrom: Int, tsTo: Int): List<SleepSession> {
         val samples = getRawSamples(tsFrom - LOOK_BACK_SECONDS, tsTo + LOOK_AHEAD_SECONDS)
@@ -36,7 +36,7 @@ class WithingsSleepSessionProvider(
          * gap ends the session.
          */
         @JvmStatic
-        fun buildSessions(samples: List<WithingsSteelHRActivitySample>): List<SleepSession> {
+        fun buildSessions(samples: List<AbstractWithingsActivitySample>): List<SleepSession> {
             val sleepStages = samples
                 .filter { ActivityKind.isSleep(it.kind) && it.duration > 0 }
                 .map { SleepStage(it.kind, it.timestamp * 1000L, (it.timestamp.toLong() + it.duration) * 1000L) }

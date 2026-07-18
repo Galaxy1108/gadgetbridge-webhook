@@ -180,23 +180,6 @@ public class EcgRepository {
         });
     }
 
-    public static void deleteForDevice(final DaoSession session, final long deviceId) {
-        final List<HuaweiEcgSummarySample> ecgSummary = session.getHuaweiEcgSummarySampleDao().queryBuilder()
-                .where(HuaweiEcgSummarySampleDao.Properties.DeviceId.eq(deviceId))
-                .build()
-                .list();
-        for (final HuaweiEcgSummarySample sample : ecgSummary) {
-            session.getHuaweiEcgDataSampleDao().queryBuilder()
-                    .where(HuaweiEcgDataSampleDao.Properties.EcgId.eq(sample.getEcgId()))
-                    .buildDelete()
-                    .executeDeleteWithoutDetachingEntities();
-        }
-        session.getHuaweiEcgSummarySampleDao().queryBuilder()
-                .where(HuaweiEcgSummarySampleDao.Properties.DeviceId.eq(deviceId))
-                .buildDelete()
-                .executeDeleteWithoutDetachingEntities();
-    }
-
     @NonNull
     public static EcgRecord fromEntity(final HuaweiEcgSummarySample summary) {
         return new EcgRecord(
