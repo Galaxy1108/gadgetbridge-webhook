@@ -71,6 +71,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.workouts.entries.Activity
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentSleepchartBinding;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.TimeSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
@@ -139,8 +140,11 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
 
         final SleepStagesChartData.Overlay overlay = samples.isEmpty() ? null : buildOverlay(db, device, samples, stageSamples, hrData);
 
+        final float spo2Average = calculateSpo2Average(db, device, sleepSessions, samples);
+
         final DeviceChartsProvider chartsProvider = device.getDeviceCoordinator().getChartsProvider();
         final Map<String, ActivitySummarySimpleEntry> customStats = chartsProvider.getDailySleepStats(requireContext(), db, device, getTSStart(), getTSEnd());
+        final SleepBreathingQualityAssessment breathingQualityAssessment = assessSleepBreathingQuality(db, device, sleepSessions);
 
         return new MyChartsData(
                 mySleepChartsData,
@@ -148,12 +152,112 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
                 hrData.getLeft(),
                 hrData.getMiddle(),
                 hrData.getRight(),
+                spo2Average,
                 intensityData.getLeft(),
                 intensityData.getMiddle(),
                 intensityData.getRight(),
                 overlay,
-                customStats
+                customStats,
+                breathingQualityAssessment
         );
+    }
+
+    private SleepBreathingQualityAssessment assessSleepBreathingQuality(final DBHandler db,
+                                                                        final GBDevice device,
+                                                                        final List<SleepSession> sleepSessions) {
+        if (!supportsSleepRespiratoryRate(device) || sleepSessions.isEmpty()) {
+            return null;
+        }
+
+        final DeviceCoordinator coordinator = device.getDeviceCoordinator();
+        final TimeSampleProvider<? extends RespiratoryRateSample> provider = coordinator.getRespiratoryRateSampleProvider(device, db.getDaoSession());
+        if (provider == null) {
+            return null;
+        }
+
+        final long tsStart = sleepSessions.get(0).getStartTime();
+        final long tsEnd = sleepSessions.get(sleepSessions.size() - 1).getEndTime();
+        final List<? extends RespiratoryRateSample> samples = provider.getAllSamples(tsStart, tsEnd);
+        if (samples.isEmpty()) {
+            return null;
+        }
+
+        final Accumulator accumulator = new Accumulator();
+        int calmSamples = 0;
+        int acceptableSamples = 0;
+        for (final RespiratoryRateSample sample : samples) {
+            final float respiratoryRate = sample.getRespiratoryRate();
+            if (respiratoryRate <= 0 || respiratoryRate >= 200) {
+                continue;
+            }
+
+            accumulator.add(respiratoryRate);
+            if (respiratoryRate >= 9 && respiratoryRate <= 22) {
+                calmSamples++;
+            }
+            if (respiratoryRate >= 8 && respiratoryRate <= 26) {
+                acceptableSamples++;
+            }
+        }
+
+        if (accumulator.getCount() == 0) {
+            return null;
+        }
+
+        final double calmRatio = calmSamples / (double) accumulator.getCount();
+        final double acceptableRatio = acceptableSamples / (double) accumulator.getCount();
+        final double average = accumulator.getAverage();
+
+        if (average >= 9 && average <= 22 && calmRatio >= 0.45d) {
+            return SleepBreathingQualityAssessment.OPTIMAL;
+        }
+
+        if (average >= 8 && average <= 26 && acceptableRatio >= 0.35d) {
+            return SleepBreathingQualityAssessment.FAIR;
+        }
+
+        return SleepBreathingQualityAssessment.NEEDS_IMPROVEMENT;
+    }
+
+    private float calculateSpo2Average(final DBHandler db,
+                                       final GBDevice device,
+                                       final List<SleepSession> sleepSessions,
+                                       final List<? extends ActivitySample> samples) {
+        if (!supportsSpO2(device)) {
+            return 0f;
+        }
+
+        final DeviceCoordinator coordinator = device.getDeviceCoordinator();
+        final TimeSampleProvider<? extends Spo2Sample> provider = coordinator.getSpo2SampleProvider(device, db.getDaoSession());
+        if (provider == null) {
+            return 0f;
+        }
+
+        final long tsStart;
+        final long tsEnd;
+        if (!sleepSessions.isEmpty()) {
+            tsStart = sleepSessions.get(0).getStartTime();
+            tsEnd = sleepSessions.get(sleepSessions.size() - 1).getEndTime();
+        } else if (!samples.isEmpty()) {
+            tsStart = samples.get(0).getTimestamp() * 1000L;
+            tsEnd = samples.get(samples.size() - 1).getTimestamp() * 1000L;
+        } else {
+            return 0f;
+        }
+
+        final Accumulator accumulator = new Accumulator();
+        for (final Spo2Sample sample : provider.getAllSamples(tsStart, tsEnd)) {
+            final int spo2 = sample.getSpo2();
+            if (spo2 > 0 && spo2 <= 100) {
+                accumulator.add(spo2);
+            }
+        }
+
+        if (accumulator.getCount() == 0) {
+            return 0f;
+        }
+
+        return (float) accumulator.getAverage();
     }
 
     private SleepStagesChartData.Overlay buildOverlay(final DBHandler db, final GBDevice device,
@@ -329,6 +433,16 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
         binding.sleepchartInfo.setText(buildYouSleptText(pieData));
         binding.sleepchartInfo.setMovementMethod(new ScrollingMovementMethod());
 
+        final SleepBreathingQualityAssessment breathingQualityAssessment = mcd.getBreathingQualityAssessment();
+        if (breathingQualityAssessment == null) {
+            binding.sleepBreathingQualityCard.setVisibility(View.GONE);
+        } else {
+            binding.sleepBreathingQualityCard.setVisibility(View.VISIBLE);
+            binding.sleepBreathingQualityValue.setText(breathingQualityAssessment.titleRes);
+            binding.sleepBreathingQualityDescription.setText(breathingQualityAssessment.descriptionRes);
+            binding.sleepBreathingQualityDisclaimer.setText(R.string.withings_sleep_breathing_quality_disclaimer);
+        }
+
         updateStagesChart(mcd);
         int heartRateMin = mcd.getHeartRateAxisMin();
         int heartRateMax = mcd.getHeartRateAxisMax();
@@ -354,6 +468,14 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
             stats.add(new StatTileData(
                     heartRateAvg > 0 ? workoutValueFormatter.formatValue(heartRateAvg, UNIT_BPM) : getString(R.string.stats_empty_value),
                     getString(R.string.averageHR)
+            ));
+        }
+
+        if (supportsSpO2(getChartsHost().getDevice())) {
+            final int spo2Avg = Math.round(mcd.getSpo2Average());
+            stats.add(new StatTileData(
+                    spo2Avg > 0 ? workoutValueFormatter.formatValue(spo2Avg, UNIT_PERCENTAGE) : getString(R.string.stats_empty_value),
+                    getString(R.string.charts_legend_spo2_average)
             ));
         }
 
@@ -637,6 +759,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
         private final float heartRateAverage;
         private final int heartRateAxisMax;
         private final int heartRateAxisMin;
+        private final float spo2Average;
         private final float intensityAxisMax;
         private final float intensityAxisMin;
         private final float intensityTotal;
@@ -645,26 +768,32 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
 
         private final SleepStagesChartData.Overlay overlay;
 
+        private final SleepBreathingQualityAssessment breathingQualityAssessment;
+
         public MyChartsData(MySleepChartsData pieData,
                             StageSamples stageSamples,
                             float heartRateAverage,
                             int heartRateAxisMin,
                             int heartRateAxisMax,
+                            float spo2Average,
                             float intensityTotal,
                             float intensityAxisMin,
                             float intensityAxisMax,
                             SleepStagesChartData.Overlay overlay,
-                            Map<String, ActivitySummarySimpleEntry> customStats) {
+                            Map<String, ActivitySummarySimpleEntry> customStats,
+                            SleepBreathingQualityAssessment breathingQualityAssessment) {
             this.pieData = pieData;
             this.stageSamples = stageSamples;
             this.heartRateAverage = heartRateAverage;
             this.heartRateAxisMax = heartRateAxisMax;
             this.heartRateAxisMin = heartRateAxisMin;
+            this.spo2Average = spo2Average;
             this.intensityTotal = intensityTotal;
             this.intensityAxisMin = intensityAxisMin;
             this.intensityAxisMax = intensityAxisMax;
             this.overlay = overlay;
             this.customStats = customStats;
+            this.breathingQualityAssessment = breathingQualityAssessment;
         }
 
         public MySleepChartsData getPieData() {
@@ -687,6 +816,10 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
             return heartRateAxisMin;
         }
 
+        public float getSpo2Average() {
+            return spo2Average;
+        }
+
         public float getIntensityAxisMax() {
             return intensityAxisMax;
         }
@@ -705,6 +838,24 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
 
         public Map<String, ActivitySummarySimpleEntry> getCustomStats() {
             return customStats;
+        }
+
+        public SleepBreathingQualityAssessment getBreathingQualityAssessment() {
+            return breathingQualityAssessment;
+        }
+    }
+
+    private enum SleepBreathingQualityAssessment {
+        OPTIMAL(R.string.optimal, R.string.withings_sleep_breathing_quality_optimal_description),
+        FAIR(R.string.fair, R.string.withings_sleep_breathing_quality_fair_description),
+        NEEDS_IMPROVEMENT(R.string.withings_sleep_breathing_quality_needs_improvement, R.string.withings_sleep_breathing_quality_needs_improvement_description);
+
+        private final int titleRes;
+        private final int descriptionRes;
+
+        SleepBreathingQualityAssessment(final int titleRes, final int descriptionRes) {
+            this.titleRes = titleRes;
+            this.descriptionRes = descriptionRes;
         }
     }
 }
