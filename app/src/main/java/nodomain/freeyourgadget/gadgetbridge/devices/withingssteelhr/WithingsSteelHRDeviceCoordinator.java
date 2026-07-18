@@ -16,8 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 
+import java.util.EnumSet;
 import java.util.Locale;
 
 import nodomain.freeyourgadget.gadgetbridge.R;
@@ -28,10 +31,21 @@ import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
+import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.ServiceDeviceSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.activity.WithingsActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.WithingsSteelHRDeviceSupport;
 
 public class WithingsSteelHRDeviceCoordinator extends AbstractBLEDeviceCoordinator {
+
+    @Override
+    public EnumSet<ServiceDeviceSupport.Flags> getInitialFlags() {
+        // Withings uses ANCS (GATT server) for notifications, which is independent
+        // of the WPP conversation queue used for sync. Disabling BUSY_CHECKING
+        // allows notifications to flow through during sync instead of being dropped.
+        return EnumSet.noneOf(ServiceDeviceSupport.Flags.class);
+    }
 
     @Override
     public boolean supports(GBDeviceCandidate candidate) {
@@ -69,6 +83,11 @@ public class WithingsSteelHRDeviceCoordinator extends AbstractBLEDeviceCoordinat
     @Override
     public boolean supportsRecordedActivities(final GBDevice device) {
         return true;
+    }
+
+    @Override
+    public ActivitySummaryParser getActivitySummaryParser(final GBDevice device, final Context context) {
+        return new WithingsActivitySummaryParser();
     }
 
     @Override
@@ -118,6 +137,11 @@ public class WithingsSteelHRDeviceCoordinator extends AbstractBLEDeviceCoordinat
     }
 
     @Override
+    public boolean supportsLiveOnlyHeartRateDisplay(@NonNull GBDevice device) {
+        return true;
+    }
+
+    @Override
     public String[] getSupportedLanguageSettings(GBDevice device) {
         return new String[]{
                 "auto",
@@ -143,6 +167,11 @@ public class WithingsSteelHRDeviceCoordinator extends AbstractBLEDeviceCoordinat
     @Override
     public int getDefaultIconResource() {
         return R.drawable.ic_device_watchxplus;
+    }
+
+    @Override
+    public boolean supportsUnicodeEmojis(@NonNull GBDevice device) {
+        return true;
     }
 
     @Override
