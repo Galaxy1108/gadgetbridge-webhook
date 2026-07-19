@@ -120,11 +120,16 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
 
     @Override
     public boolean supportsRespiratoryRate(@NonNull GBDevice device) {
-        return true;
+        return false;
     }
 
     @Override
     public boolean supportsSleepRespiratoryRate(@NonNull final GBDevice device) {
+        return false;
+    }
+
+    @Override
+    public boolean supportsSleepBreathingQuality(@NonNull final GBDevice device) {
         return true;
     }
 

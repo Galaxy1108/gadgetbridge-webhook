@@ -51,6 +51,7 @@ public class WithingsScanwatchDeviceCoordinatorTest {
         assertFalse(coordinator.supportsSpo2(null));
         assertFalse(coordinator.supportsRespiratoryRate(null));
         assertFalse(coordinator.supportsSleepRespiratoryRate(null));
+        assertFalse(coordinator.supportsSleepBreathingQuality(null));
         assertEquals(60, coordinator.getSmartWakeupMaxInterval(null));
     }
 
@@ -61,6 +62,15 @@ public class WithingsScanwatchDeviceCoordinatorTest {
             assertTrue(coordinator.supportsPhoneCalls(null));
             assertTrue(coordinator.supportsAppNotifications(null));
         }
+    }
+
+    @Test
+    public void scanwatchExposesBreathingQualityWithoutRespiratoryRate() {
+        final WithingsScanwatchDeviceCoordinator coordinator = new WithingsScanwatchDeviceCoordinator();
+
+        assertFalse(coordinator.supportsRespiratoryRate(null));
+        assertFalse(coordinator.supportsSleepRespiratoryRate(null));
+        assertTrue(coordinator.supportsSleepBreathingQuality(null));
     }
 
     private static GBDeviceCandidate candidate(final String name, final UUID service) {

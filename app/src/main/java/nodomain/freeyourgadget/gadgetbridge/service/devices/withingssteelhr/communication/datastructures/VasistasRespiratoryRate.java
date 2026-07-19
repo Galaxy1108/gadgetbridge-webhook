@@ -19,14 +19,9 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.com
 import java.nio.ByteBuffer;
 
 /**
- * Vasistas respiratory rate data structure (TLV type 0x09A0).
+ * Vasistas respiratory rate data structure (TLV type 0x09D9).
  *
- * Wire format: 4 bytes total
- *   - 2 bytes padding (0x0000)
- *   - 2 bytes respiratory rate (unsigned int16, breaths per minute)
- *
- * Invalid/no-data markers use values >= 1000 (e.g. 65535/0xFFFF, 65534/0xFFFE).
- * Valid respiratory rates are typically 5-97 breaths/min.
+ * Wire format: a 32-bit respiratory rate in breaths per minute.
  */
 public class VasistasRespiratoryRate extends WithingsStructure {
     private int respiratoryRate;
@@ -48,20 +43,18 @@ public class VasistasRespiratoryRate extends WithingsStructure {
 
     @Override
     public short getLength() {
-        return 4;
+        return 8;
     }
 
     @Override
     protected void fillinTypeSpecificData(final ByteBuffer buffer) {
-        buffer.putShort((short) 0);
-        buffer.putShort((short) respiratoryRate);
+        buffer.putInt(respiratoryRate);
     }
 
     @Override
     protected void fillFromRawDataAsBuffer(final ByteBuffer rawDataBuffer) {
         if (rawDataBuffer.remaining() >= 4) {
-            rawDataBuffer.getShort(); // skip 2-byte padding
-            respiratoryRate = rawDataBuffer.getShort() & 0xFFFF;
+            respiratoryRate = rawDataBuffer.getInt();
         } else if (rawDataBuffer.remaining() >= 2) {
             respiratoryRate = rawDataBuffer.getShort() & 0xFFFF;
         }
