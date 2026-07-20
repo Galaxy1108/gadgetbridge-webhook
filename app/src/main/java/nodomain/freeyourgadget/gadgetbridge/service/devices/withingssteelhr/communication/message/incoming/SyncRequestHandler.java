@@ -33,5 +33,6 @@ public class SyncRequestHandler implements IncomingMessageHandler {
     @Override
     public void handleMessage(Message message) {
         support.sendToDevice(new WithingsMessage(WithingsMessageType.SYNC_RESPONSE));
+        support.doSync("watch-sync-request");
     }
 }
