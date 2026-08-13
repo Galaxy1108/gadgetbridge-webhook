@@ -3617,44 +3617,6 @@
         <item>3</item>
     </string-array>
 
-    <string-array name="nothing_ear1_audio_mode_names">
-        <item>@string/prefs_active_noise_cancelling</item>
-        <item>@string/prefs_active_noise_cancelling_medium</item>
-        <item>@string/prefs_active_noise_cancelling_light</item>
-        <item>@string/prefs_active_noise_cancelling_adaptive</item>
-        <item>@string/prefs_active_noise_cancelling_transparency</item>
-        <item>@string/off</item>
-    </string-array>
-
-    <string-array name="nothing_ear1_audio_mode_values">
-        <item>anc</item>
-        <item>ancmedium</item>
-        <item>anclight</item>
-        <item>ancadaptive</item>
-        <item>transparency</item>
-        <item>off</item>
-    </string-array>
-
-    <string-array name="nothing_ear1_equalizer_names">
-        <item>@string/nothing_equalizer_rock</item>
-        <item>@string/nothing_equalizer_electronic</item>
-        <item>@string/nothing_equalizer_pop</item>
-        <item>@string/nothing_equalizer_enhance_vocals</item>
-        <item>@string/nothing_equalizer_classical</item>
-        <item>@string/nothing_equalizer_custom</item>
-        <item>@string/nothing_equalizer_dirac</item>
-    </string-array>
-
-    <string-array name="nothing_ear1_equalizer_values">
-        <item>ROCK</item>
-        <item>ELECTRONIC</item>
-        <item>POP</item>
-        <item>ENHANCE_VOCALS</item>
-        <item>CLASSICAL</item>
-        <item>CUSTOM</item>
-        <item>DIRAC</item>
-    </string-array>
-
     <string-array name="notification_list_is_blacklist_names">
         <item>@string/pref_title_notification_use_as_deny</item>
         <item>@string/pref_title_notification_use_as_allow</item>
@@ -4436,33 +4398,6 @@
         <item>voice_assistant_realme</item>
         <item>game_mode</item>
         <item>noise_control</item>
-    </string-array>
-
-    <string-array name="cmf_buds_touch_tap_names">
-        <item>@string/sony_button_mode_off</item>
-        <item>@string/pref_media_playpause</item>
-        <item>@string/pref_media_previous</item>
-        <item>@string/pref_media_next</item>
-        <item>@string/pref_media_volumeup</item>
-        <item>@string/pref_media_volumedown</item>
-        <item>@string/pref_title_touch_voice_assistant</item>
-        <item>@string/redmi_buds_5_pro_combo_all</item>
-        <item>@string/redmi_buds_5_pro_combo_anc_transparency</item>
-        <item>@string/redmi_buds_5_pro_combo_anc_off</item>
-        <item>@string/redmi_buds_5_pro_combo_transparency_off</item>
-    </string-array>
-    <string-array name="cmf_buds_touch_tap_values">
-        <item>off</item>
-        <item>play_pause</item>
-        <item>previous_track</item>
-        <item>next_track</item>
-        <item>volume_up</item>
-        <item>volume_down</item>
-        <item>voice_assistant</item>
-        <item>anc_mode__anc_transparency_off</item>
-        <item>anc_mode__anc_transparency</item>
-        <item>anc_mode__anc_off</item>
-        <item>anc_mode__transparency_off</item>
     </string-array>
 
     <string-array name="soundbrenner_time_sig_entries">

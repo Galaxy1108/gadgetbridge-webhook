@@ -8,7 +8,7 @@ import java.util.Arrays;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEvent;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventUpdatePreferences;
-import nodomain.freeyourgadget.gadgetbridge.devices.nothing.NothingEqualizer;
+import nodomain.freeyourgadget.gadgetbridge.devices.nothing.prefs.NothingEqualizer;
 import nodomain.freeyourgadget.gadgetbridge.test.TestBase;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
@@ -35,7 +35,7 @@ public class NothingProtocolTest extends TestBase {
     public void testEncodeEqualizerCommand() {
         final Ear1Support.NothingProtocol protocol = new Ear1Support.NothingProtocol(true);
 
-        final byte[] packet = protocol.encodeEqualizer(NothingEqualizer.ELECTRONIC.name());
+        final byte[] packet = protocol.encodeEqualizer(NothingEqualizer.ELECTRONIC);
         final byte[] expected = GB.hexStringToByteArray("5560011df00200140200ebcd");
         assertMessageEquals(expected, packet);
     }
