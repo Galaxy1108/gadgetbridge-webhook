@@ -31,8 +31,9 @@
    - 新增 `pref_header_webhook` 分类，含指向 `WebhookSettingsActivity` 的入口。
 5. `app/src/main/res/values/strings.xml` 与 `values-zh-rCN/strings.xml`
    - 追加 `webhook_*`、`pref_header_webhook` 字符串（纯增量）。
-6. `app/build.gradle` — mainline flavor 增加 `applicationId "com.galaxy1108.gadgetbridge"`
-   （fork 独立包名，可与官方版并存安装；`@string/applicationId` 由 AGP 自动生成，无需手改）。
+6. `app/build.gradle` — mainline flavor 增加 `applicationIdSuffix ".webhook"`
+   （安装包名 = `nodomain.freeyourgadget.gadgetbridge.webhook`：保持官方命名主体，
+   仅后缀标识 fork，可与官方版并存安装；`@string/applicationId` 由 AGP 自动生成，无需手改）。
 
 ## 与上游合并
 

@@ -159,9 +159,9 @@ android {
             getIsDefault().set(true)
             // the default build product flavor
             dimension "device_type"
-            // Webhook fork: own applicationId so this fork can be installed alongside
-            // the official Gadgetbridge build without replacing it.
-            applicationId "com.galaxy1108.gadgetbridge"
+            // Webhook fork: keep the official package name as the base, only a
+            // discreet suffix marks this fork (installable alongside the official build).
+            applicationIdSuffix ".webhook"
             //applicationIdSuffix ""
             //versionNameSuffix ""
         }
