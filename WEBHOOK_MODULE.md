@@ -34,6 +34,10 @@
 6. `app/build.gradle` — mainline flavor 增加 `applicationIdSuffix ".webhook"`
    （安装包名 = `nodomain.freeyourgadget.gadgetbridge.webhook`：保持官方命名主体，
    仅后缀标识 fork，可与官方版并存安装；`@string/applicationId` 由 AGP 自动生成，无需手改）。
+7. `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/activities/DashboardFragment.java`
+   — 不再把 `dashboard_data`（当天全部仪表盘数据）写入/读回 saved state：
+   大数据超过 Binder 事务上限会抛 `TransactionTooLargeException`（687KB 实测触发）；
+   代价仅是旋转屏幕后仪表盘异步重载。
 
 ## 与上游合并
 

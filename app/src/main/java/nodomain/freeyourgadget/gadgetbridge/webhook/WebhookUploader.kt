@@ -103,7 +103,7 @@ object WebhookUploader {
         if (!WebhookConfig.isEnabled()) {
             return Result(true, "Webhook upload disabled")
         }
-        val serverUrl = WebhookConfig.getServerUrl()
+        val serverUrl = WebhookConfig.getUploadEndpoint()
         if (serverUrl.isEmpty()) {
             return Result(false, "Server URL not configured")
         }

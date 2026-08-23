@@ -168,9 +168,10 @@ public class DashboardFragment extends Fragment implements MenuProvider {
             }
         });
 
-        if (savedInstanceState != null && savedInstanceState.containsKey("dashboard_data") && dashboardData.isEmpty()) {
-            dashboardData = (DashboardData) savedInstanceState.getSerializable("dashboard_data");
-        } else if (dashboardData.isEmpty()) {
+        // Webhook fork: dashboard_data is no longer persisted in the saved state
+        // (it used to hold a whole day of per-device data, which could exceed the
+        // Binder transaction limit and crash with TransactionTooLargeException).
+        if (dashboardData.isEmpty()) {
             reloadPreferences();
         }
 
@@ -203,7 +204,9 @@ public class DashboardFragment extends Fragment implements MenuProvider {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("dashboard_data", dashboardData);
+        // Webhook fork: intentionally not persisting dashboard_data (it can exceed
+        // the Binder transaction limit → TransactionTooLargeException). The dashboard
+        // reloads its data asynchronously after a configuration change instead.
     }
 
     @Override

@@ -4878,7 +4878,7 @@
     <string name="webhook_pref_enabled">启用 Webhook 上传</string>
     <string name="webhook_pref_enabled_summary">定期将健康数据上传到你的服务器</string>
     <string name="webhook_pref_server_url">服务器地址</string>
-    <string name="webhook_pref_server_url_summary">上传端点的完整 URL，例如 https://example.com/api/v1/plugins/extensions/astrbot_plugin_health_monitor/upload</string>
+    <string name="webhook_pref_server_url_summary">只需填根地址，例如 example.com —— 自动补全 https:// 和上传路径</string>
     <string name="webhook_pref_token">令牌</string>
     <string name="webhook_pref_token_summary">AstrBot API 密钥，以 Bearer 令牌发送</string>
     <string name="webhook_pref_interval">上传间隔（分钟）</string>

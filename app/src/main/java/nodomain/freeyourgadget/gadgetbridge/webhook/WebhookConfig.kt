@@ -87,9 +87,36 @@ object WebhookConfig {
     /** Per-device upload cursor key: last successfully uploaded timestamp (epoch seconds). */
     fun cursorKey(address: String): String = "webhook_cursor_$address"
 
+    /** Default upload path on the AstrBot server (plugin web API). */
+    const val DEFAULT_UPLOAD_PATH = "/api/v1/plugins/extensions/astrbot_plugin_health_monitor/upload"
+
     fun isEnabled(): Boolean = GBApplication.getPrefs().getBoolean(PREF_ENABLED, false)
 
+    /** Raw server address as entered by the user (root address, scheme optional). */
     fun getServerUrl(): String = GBApplication.getPrefs().getString(PREF_SERVER_URL, "").trim()
+
+    /**
+     * Full upload endpoint URL.
+     *
+     * The user only enters the root address (e.g. "example.com" or "http://192.168.1.5"),
+     * everything else is completed automatically:
+     * - "https://" is prepended when no scheme was given;
+     * - the upload path is appended unless the entered value already contains "/api/"
+     *   (backwards compatible with old full-URL configurations).
+     */
+    fun getUploadEndpoint(): String {
+        var url = getServerUrl()
+        if (url.isEmpty()) {
+            return ""
+        }
+        if (!url.contains("://")) {
+            url = "https://$url"
+        }
+        if (!url.contains("/api/")) {
+            url = url.trimEnd('/') + DEFAULT_UPLOAD_PATH
+        }
+        return url
+    }
 
     fun getToken(): String = GBApplication.getPrefs().getString(PREF_TOKEN, "").trim()
 

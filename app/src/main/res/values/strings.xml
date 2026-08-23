@@ -5349,8 +5349,8 @@
     <string name="webhook_pref_binding_code_summary">%1$s — tell the bot "/bind %1$s" in chat to link this phone to your session</string>
     <string name="webhook_pref_enabled">Enable webhook upload</string>
     <string name="webhook_pref_enabled_summary">Periodically upload health data to your server</string>
-    <string name="webhook_pref_server_url">Server URL</string>
-    <string name="webhook_pref_server_url_summary">Full URL of the upload endpoint, e.g. https://example.com/api/v1/plugins/extensions/astrbot_plugin_health_monitor/upload</string>
+    <string name="webhook_pref_server_url">Server address</string>
+    <string name="webhook_pref_server_url_summary">Root address only, e.g. example.com — https:// and the upload path are added automatically</string>
     <string name="webhook_pref_token">Token</string>
     <string name="webhook_pref_token_summary">AstrBot API key, sent as a Bearer token</string>
     <string name="webhook_pref_interval">Upload interval (minutes)</string>
