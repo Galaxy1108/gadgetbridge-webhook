@@ -28,15 +28,6 @@
             app:iconSpaceReserved="false" />
 
         <EditTextPreference
-            android:dependency="webhook_enabled"
-            android:icon="@drawable/ic_vpn_key"
-            android:key="webhook_token"
-            android:inputType="textPassword"
-            android:summary="@string/webhook_pref_token_summary"
-            android:title="@string/webhook_pref_token"
-            app:iconSpaceReserved="false" />
-
-        <EditTextPreference
             android:defaultValue="15"
             android:dependency="webhook_enabled"
             android:icon="@drawable/ic_timer"

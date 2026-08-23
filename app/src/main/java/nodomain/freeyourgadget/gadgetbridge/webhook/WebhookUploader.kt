@@ -107,10 +107,9 @@ object WebhookUploader {
         if (serverUrl.isEmpty()) {
             return Result(false, "Server URL not configured")
         }
+        // Token is optional: the standalone endpoint needs no token, the binding
+        // code is the gate. A token is only sent when configured (old AstrBot-route URLs).
         val token = WebhookConfig.getToken()
-        if (token.isEmpty()) {
-            return Result(false, "Token not configured")
-        }
 
         val nowSeconds = System.currentTimeMillis() / 1000
         var anyFailure = false
@@ -223,10 +222,10 @@ object WebhookUploader {
             body.put("extended", extended)
         }
 
-        val headers = mapOf(
-            "Authorization" to "Bearer $token",
-            "Content-Type" to "application/json",
-        )
+        val headers = mutableMapOf("Content-Type" to "application/json")
+        if (token.isNotEmpty()) {
+            headers["Authorization"] = "Bearer $token"
+        }
 
         val response = InternetUtils.doJsonRequest(
             Uri.parse(serverUrl),
@@ -248,6 +247,15 @@ object WebhookUploader {
                 address
             )
             return Result(true, "OK", samplesJson.length())
+        }
+
+        // Device not bound yet: server rejected the data, phone enters "waiting for
+        // pairing". Reported as success so the worker does not retry in a tight loop;
+        // the next periodic run re-checks and starts uploading once paired.
+        if (response != null && response.optString("status") == "pending_bind") {
+            val message = response.optString("message", "等待配对")
+            LOG.info("Device {} is not paired yet: {}", gbDevice.name, message)
+            return Result(true, message)
         }
 
         val serverMessage = response?.optString("message")?.takeIf { it.isNotBlank() }
