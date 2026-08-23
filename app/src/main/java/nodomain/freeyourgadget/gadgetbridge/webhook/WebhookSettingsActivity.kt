@@ -17,6 +17,7 @@
 package nodomain.freeyourgadget.gadgetbridge.webhook
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
@@ -24,6 +25,7 @@ import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractPreferenceFragment
@@ -57,7 +59,19 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
 
             val prefRunNow = findPreference<Preference>(WebhookConfig.PREF_RUN_NOW)
             prefRunNow?.setOnPreferenceClickListener {
-                WebhookScheduler.executeNow()
+                // Run the upload in the background and show the result, instead of
+                // silently enqueueing a worker.
+                lifecycleScope.launch {
+                    Toast.makeText(requireContext(), R.string.webhook_upload_started, Toast.LENGTH_SHORT).show()
+                    val result = withContext(Dispatchers.IO) { WebhookUploader.uploadAll() }
+                    val text = when {
+                        result.pendingBind -> result.message
+                        result.success -> getString(R.string.webhook_upload_done, result.uploadedSamples)
+                        else -> getString(R.string.webhook_upload_failed, result.message)
+                    }
+                    Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show()
+                    updateStatusRows()
+                }
                 true
             }
 
@@ -117,6 +131,18 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
         }
 
         private fun updateStatusRows() {
+            // Pairing status with the binding code hint when waiting.
+            val bindingCode = WebhookConfig.getOrCreateBindingCode()
+            val pairStatus = WebhookConfig.getPairStatus()
+            val pairSummary = when (pairStatus) {
+                WebhookConfig.PAIR_STATUS_OK -> getString(R.string.webhook_pair_status_ok)
+                WebhookConfig.PAIR_STATUS_PENDING ->
+                    getString(R.string.webhook_pair_status_pending, "GB-$bindingCode")
+                WebhookConfig.PAIR_STATUS_FAILED -> getString(R.string.webhook_pair_status_failed)
+                else -> getString(R.string.webhook_pair_status_unknown)
+            }
+            findPreference<Preference>(WebhookConfig.PREF_PAIR_STATUS)?.summary = pairSummary
+
             val lastExecution = WebhookConfig.getLastExecution()
             val prefLastExecution = findPreference<Preference>(WebhookConfig.PREF_LAST_EXECUTION)
             prefLastExecution?.summary = if (lastExecution > 0) {

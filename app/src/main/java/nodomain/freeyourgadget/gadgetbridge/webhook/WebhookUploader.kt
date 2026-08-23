@@ -51,6 +51,7 @@ object WebhookUploader {
         val success: Boolean,
         val message: String,
         val uploadedSamples: Int = 0,
+        val pendingBind: Boolean = false,
     )
 
     /** Max rows read per extended table in one upload (newest first). */
@@ -113,6 +114,7 @@ object WebhookUploader {
 
         val nowSeconds = System.currentTimeMillis() / 1000
         var anyFailure = false
+        var anyPending = false
         var totalSamples = 0
         var lastMessage = ""
 
@@ -124,7 +126,9 @@ object WebhookUploader {
                     }
                     val result = uploadDevice(gbDevice, db, serverUrl, token, nowSeconds)
                     totalSamples += result.uploadedSamples
-                    if (!result.success) {
+                    if (result.pendingBind) {
+                        anyPending = true
+                    } else if (!result.success) {
                         anyFailure = true
                         lastMessage = result.message
                     }
@@ -132,12 +136,20 @@ object WebhookUploader {
             }
         } catch (e: Exception) {
             LOG.error("Webhook upload failed", e)
+            WebhookConfig.setPairStatus(WebhookConfig.PAIR_STATUS_FAILED)
             return Result(false, e.message ?: "Exception during upload")
         }
 
         WebhookConfig.setLastExecution(System.currentTimeMillis())
         val message = if (anyFailure) "Partial failure: $lastMessage" else "OK, $totalSamples samples uploaded"
         WebhookConfig.setLastStatus(message)
+        WebhookConfig.setPairStatus(
+            when {
+                anyFailure -> WebhookConfig.PAIR_STATUS_FAILED
+                anyPending -> WebhookConfig.PAIR_STATUS_PENDING
+                else -> WebhookConfig.PAIR_STATUS_OK
+            }
+        )
         LOG.info("Webhook upload finished: {}", message)
         return Result(!anyFailure, message, totalSamples)
     }
@@ -255,7 +267,8 @@ object WebhookUploader {
         if (response != null && response.optString("status") == "pending_bind") {
             val message = response.optString("message", "等待配对")
             LOG.info("Device {} is not paired yet: {}", gbDevice.name, message)
-            return Result(true, message)
+            WebhookConfig.setPairStatus(WebhookConfig.PAIR_STATUS_PENDING)
+            return Result(true, message, pendingBind = true)
         }
 
         val serverMessage = response?.optString("message")?.takeIf { it.isNotBlank() }

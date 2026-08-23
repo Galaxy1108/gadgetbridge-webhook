@@ -5362,6 +5362,15 @@
     <string name="webhook_pref_data_types_summary_all">All data categories are uploaded</string>
     <string name="webhook_pref_data_types_summary_count">%1$d of %2$d categories are uploaded</string>
     <string name="webhook_pref_category_status">Status</string>
+    <string name="webhook_pref_pair_status">Pairing status</string>
+    <string name="webhook_pair_status_unknown">Not configured yet</string>
+    <string name="webhook_pair_status_ok">Paired — uploads are being received</string>
+    <string name="webhook_pair_status_pending">Waiting for pairing: tell the bot "/bind %1$s" in chat</string>
+    <string name="webhook_pair_status_failed">Last upload failed, will retry automatically</string>
+    <string name="webhook_upload_started">Uploading now…</string>
+    <string name="webhook_upload_done">Upload OK: %1$d samples</string>
+    <string name="webhook_upload_failed">Upload failed: %1$s</string>
+    <string name="webhook_notify_failed_title">Health data upload failed</string>
     <string name="webhook_pref_last_execution">Last upload</string>
     <string name="webhook_pref_last_status">Last result</string>
     <string name="webhook_pref_category_test">Test</string>

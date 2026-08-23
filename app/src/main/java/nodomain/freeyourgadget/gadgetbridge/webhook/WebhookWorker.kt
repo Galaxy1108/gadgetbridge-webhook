@@ -36,6 +36,8 @@ class WebhookWorker(
         val result = WebhookUploader.uploadAll()
         if (!result.success) {
             LOG.warn("Webhook worker failed: {}", result.message)
+            // Notify the user so a broken configuration / unreachable server is visible.
+            WebhookNotifier.notifyUploadFailed(applicationContext, result.message)
             // Retry with WorkManager backoff; the upload cursor is only advanced on
             // server acknowledgement, so nothing is lost.
             return Result.retry()

@@ -70,6 +70,21 @@ object WebhookConfig {
     /** Human readable result of the last upload, shown on the settings screen. */
     const val PREF_LAST_STATUS = "webhook_last_status"
 
+    /** Last upload outcome type: "ok" / "pending" / "failed" / "" (never ran). */
+    const val PREF_PAIR_STATUS = "webhook_pair_status"
+
+    const val PAIR_STATUS_OK = "ok"
+    const val PAIR_STATUS_PENDING = "pending"
+    const val PAIR_STATUS_FAILED = "failed"
+
+    fun getPairStatus(): String = GBApplication.getPrefs().getString(PREF_PAIR_STATUS, "")
+
+    fun setPairStatus(status: String) {
+        GBApplication.getPrefs().preferences.edit {
+            putString(PREF_PAIR_STATUS, status)
+        }
+    }
+
     /** Epoch millis of the last sync-triggered (immediate) upload, for rate limiting. */
     const val PREF_LAST_IMMEDIATE = "webhook_last_immediate"
 

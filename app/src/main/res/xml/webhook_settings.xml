@@ -62,6 +62,12 @@
     <PreferenceCategory android:title="@string/webhook_pref_category_status">
 
         <Preference
+            android:icon="@drawable/ic_shield"
+            android:key="webhook_pair_status"
+            android:summary="@string/unknown"
+            android:title="@string/webhook_pref_pair_status" />
+
+        <Preference
             android:icon="@drawable/ic_access_time"
             android:key="webhook_last_execution"
             android:summary="@string/unknown"
