@@ -5357,6 +5357,8 @@
     <string name="webhook_pref_interval_summary">Upload every %1$d minutes</string>
     <string name="webhook_pref_allow_insecure">Allow insecure connections</string>
     <string name="webhook_pref_allow_insecure_summary">Allow http:// or self-signed certificates (not recommended)</string>
+    <string name="webhook_pref_data_types">Uploaded data</string>
+    <string name="webhook_pref_data_types_summary">Select which data categories are uploaded</string>
     <string name="webhook_pref_category_status">Status</string>
     <string name="webhook_pref_last_execution">Last upload</string>
     <string name="webhook_pref_last_status">Last result</string>

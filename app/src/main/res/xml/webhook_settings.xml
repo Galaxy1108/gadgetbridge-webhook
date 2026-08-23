@@ -56,6 +56,16 @@
             android:title="@string/webhook_pref_allow_insecure"
             app:iconSpaceReserved="false" />
 
+        <MultiSelectListPreference
+            android:dependency="webhook_enabled"
+            android:entries="@array/webhook_data_types_entries"
+            android:entryValues="@array/webhook_data_types_values"
+            android:icon="@drawable/ic_checklist"
+            android:key="webhook_data_types"
+            android:summary="@string/webhook_pref_data_types_summary"
+            android:title="@string/webhook_pref_data_types"
+            app:iconSpaceReserved="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/webhook_pref_category_status">

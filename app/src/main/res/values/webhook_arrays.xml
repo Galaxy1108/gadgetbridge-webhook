@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Upload data-type selection (values match WebhookConfig.TYPE_*) -->
+    <string-array name="webhook_data_types_entries">
+        <item>Minute samples (steps / heart rate / sleep stages / activity)</item>
+        <item>Distance &amp; calories</item>
+        <item>Battery level</item>
+        <item>Blood oxygen (SpO2)</item>
+        <item>Stress</item>
+        <item>HRV (RR intervals)</item>
+        <item>Sleep respiratory rate</item>
+        <item>Sleep sessions</item>
+        <item>Daily summaries</item>
+        <item>PAI</item>
+        <item>Workout records</item>
+    </string-array>
+    <string-array name="webhook_data_types_values">
+        <item>samples</item>
+        <item>distance</item>
+        <item>battery</item>
+        <item>spo2</item>
+        <item>stress</item>
+        <item>hrv</item>
+        <item>respiration</item>
+        <item>sleep_sessions</item>
+        <item>dailysummary</item>
+        <item>pai</item>
+        <item>workouts</item>
+    </string-array>
+</resources>

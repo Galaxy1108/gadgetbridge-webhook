@@ -37,11 +37,32 @@ object WebhookConfig {
     /** Settings screen only: "upload now" button (not persisted). */
     const val PREF_RUN_NOW = "webhook_run_now"
 
+    /** Which data categories to upload (StringSet of WebhookDataTypes values). */
+    const val PREF_DATA_TYPES = "webhook_data_types"
+
     /** Binding code used to bind this phone's devices to a chat session on the server. */
     const val PREF_BINDING_CODE = "webhook_binding_code"
 
     private const val BINDING_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     private const val BINDING_CODE_LENGTH = 6
+
+    /** Data category keys for the upload data-type switches. */
+    const val TYPE_SAMPLES = "samples"
+    const val TYPE_DISTANCE = "distance"
+    const val TYPE_BATTERY = "battery"
+    const val TYPE_SPO2 = "spo2"
+    const val TYPE_STRESS = "stress"
+    const val TYPE_HRV = "hrv"
+    const val TYPE_RESPIRATION = "respiration"
+    const val TYPE_SLEEP_SESSIONS = "sleep_sessions"
+    const val TYPE_DAILY_SUMMARY = "dailysummary"
+    const val TYPE_PAI = "pai"
+    const val TYPE_WORKOUTS = "workouts"
+
+    val ALL_DATA_TYPES: Set<String> = setOf(
+        TYPE_SAMPLES, TYPE_DISTANCE, TYPE_BATTERY, TYPE_SPO2, TYPE_STRESS, TYPE_HRV,
+        TYPE_RESPIRATION, TYPE_SLEEP_SESSIONS, TYPE_DAILY_SUMMARY, TYPE_PAI, TYPE_WORKOUTS,
+    )
 
     /** When the last upload (any kind) finished, epoch millis. */
     const val PREF_LAST_EXECUTION = "webhook_last_execution"
@@ -76,6 +97,19 @@ object WebhookConfig {
         GBApplication.getPrefs().getInt(PREF_INTERVAL_MINUTES, DEFAULT_INTERVAL_MINUTES).coerceAtLeast(1)
 
     fun allowInsecure(): Boolean = GBApplication.getPrefs().getBoolean(PREF_ALLOW_INSECURE, false)
+
+    /**
+     * Enabled data categories. When the preference was never set, everything is enabled.
+     */
+    fun getEnabledDataTypes(): Set<String> {
+        val stored = GBApplication.getPrefs().getStringSet(PREF_DATA_TYPES, null)
+        if (stored == null) {
+            return ALL_DATA_TYPES
+        }
+        return stored
+    }
+
+    fun isDataTypeEnabled(type: String): Boolean = type in getEnabledDataTypes()
 
     fun getCursor(address: String): Long = GBApplication.getPrefs().getLong(cursorKey(address), 0)
 

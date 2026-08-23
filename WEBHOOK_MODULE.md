@@ -54,8 +54,17 @@ git checkout webhook-module && git merge master
 ```
 
 数据读取走 GB 统一的 `SampleProvider` 抽象（每设备每分钟一条：时间戳 / 归一化活动类型 /
-步数 / 心率 / 强度），与具体手表型号无关；电量取 `GBDevice.getBatteryLevel()`。
+步数 / 心率 / 强度 / 距离 / 卡路里），与具体手表型号无关；电量取 `GBDevice.getBatteryLevel()`。
 首次上传无游标时回补最近 24 小时；单次最大回传 7 天（防异常）。
+
+**扩展指标**：`WebhookUploader.EXTENDED_TABLES` 定义了各类别对应的数据表（血氧 / 压力 /
+HRV(RR 间期) / 睡眠呼吸率 / 睡眠时段 / 每日汇总 / PAI / 运动记录），用原始 SQL 按
+`(DEVICE_ID, TIMESTAMP)` 范围读取，只读实际存在的表；行 JSON 键为小写列名，
+`timestamp` 统一为 epoch 秒；每表每轮最多 2000 条（取最新）。
+
+**上传开关（具体上传哪些数据）**：设置页「上传的数据」多选（`webhook_data_types`，
+默认全选），控制分钟样本内附加的距离/卡路里、设备电量以及上述各类扩展指标是否上传；
+分钟样本主体（步数/心率/睡眠/运动类型）始终上传。
 
 **绑定码（多用户隔离）**：设置页显示 `GB-XXXXXX`（首次进入自动生成并持久化，见
 `WebhookConfig.getOrCreateBindingCode()`），随每次上传的 `device.binding_code` 上报；

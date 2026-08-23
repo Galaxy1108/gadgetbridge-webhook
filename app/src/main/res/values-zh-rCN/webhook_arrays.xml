@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 上传数据类型选择（value 与 WebhookConfig.TYPE_* 一致） -->
+    <string-array name="webhook_data_types_entries">
+        <item>分钟样本（步数/心率/睡眠分期/运动类型）</item>
+        <item>距离与卡路里</item>
+        <item>设备电量</item>
+        <item>血氧 SpO2</item>
+        <item>压力</item>
+        <item>HRV（RR 间期）</item>
+        <item>睡眠呼吸率</item>
+        <item>睡眠时段</item>
+        <item>每日汇总</item>
+        <item>PAI</item>
+        <item>运动记录</item>
+    </string-array>
+    <string-array name="webhook_data_types_values">
+        <item>samples</item>
+        <item>distance</item>
+        <item>battery</item>
+        <item>spo2</item>
+        <item>stress</item>
+        <item>hrv</item>
+        <item>respiration</item>
+        <item>sleep_sessions</item>
+        <item>dailysummary</item>
+        <item>pai</item>
+        <item>workouts</item>
+    </string-array>
+</resources>
