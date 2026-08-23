@@ -1,0 +1,67 @@
+name: Sync upstream
+
+# 定时 + 手动触发：把 Codeberg 上游 master 同步到本仓库 master，
+# 并尝试把 master 合并进 webhook-module（有冲突时会失败并提示人工处理）。
+#
+# master 分支 = 上游 master + .github/（本仓库的 workflow 文件）。
+# 上游永远不会修改 .github/，因此常规 merge 不会产生冲突。
+
+on:
+  schedule:
+    # 每天 02:17 UTC（北京 10:17）自动同步
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      merge_webhook:
+        description: '同步后是否把 master 合并进 webhook-module'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Fetch upstream (Codeberg)
+        run: |
+          git remote add upstream https://codeberg.org/Freeyourgadget/Gadgetbridge.git
+          git fetch --tags upstream master
+
+      - name: Merge upstream into master
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git merge --ff-only upstream/master >/dev/null 2>&1; then
+            echo "upstream master fast-forwarded"
+          else
+            if git merge upstream/master --no-edit \
+                 -m "chore: sync upstream master ($(git rev-parse --short upstream/master))"; then
+              echo "upstream master merged"
+            else
+              echo "::error::Merge conflict with upstream on master — resolve locally and push."
+              git merge --abort
+              exit 1
+            fi
+          fi
+          git push origin master
+
+      - name: Merge master into webhook-module
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.merge_webhook }}
+        run: |
+          git checkout webhook-module
+          if git merge master --no-edit -m "chore: merge master (upstream sync)"; then
+            git push origin webhook-module
+          else
+            echo "::error::Conflict merging master into webhook-module."
+            echo "::error::请在本仓库手动处理：git fetch origin && git checkout webhook-module && git merge origin/master"
+            git merge --abort
+            exit 1
+          fi
