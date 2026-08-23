@@ -89,6 +89,13 @@
             android:key="webhook_run_now"
             android:title="@string/webhook_pref_run_now" />
 
+        <Preference
+            android:dependency="webhook_enabled"
+            android:icon="@drawable/ic_refresh"
+            android:key="webhook_reset_cursor"
+            android:summary="@string/webhook_pref_reset_cursor_summary"
+            android:title="@string/webhook_pref_reset_cursor" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

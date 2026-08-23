@@ -37,6 +37,9 @@ object WebhookConfig {
     /** Settings screen only: "upload now" button (not persisted). */
     const val PREF_RUN_NOW = "webhook_run_now"
 
+    /** Settings screen only: "re-upload history" button (not persisted). */
+    const val PREF_RESET_CURSOR = "webhook_reset_cursor"
+
     /** Which data categories to upload (StringSet of WebhookDataTypes values). */
     const val PREF_DATA_TYPES = "webhook_data_types"
 
@@ -93,14 +96,26 @@ object WebhookConfig {
     /** Minimum gap between sync-triggered uploads, to avoid hammering the server. */
     const val MIN_IMMEDIATE_INTERVAL_MS = 2 * 60 * 1000L
 
-    /** How far back the first upload goes when no cursor exists yet, in seconds. */
-    const val INITIAL_BACKFILL_SECONDS = 24 * 60 * 60L
+    /** How far back the first upload goes when no cursor exists yet, in seconds.
+     *  Bands keep several days of data on the device, so backfill a week. */
+    const val INITIAL_BACKFILL_SECONDS = 7 * 24 * 60 * 60L
 
     /** Safety cap for a single upload request, in seconds (one week). */
     const val MAX_RANGE_SECONDS = 7 * 24 * 60 * 60L
 
     /** Per-device upload cursor key: last successfully uploaded timestamp (epoch seconds). */
     fun cursorKey(address: String): String = "webhook_cursor_$address"
+
+    /** Clears all upload cursors, so the next upload re-backfills the full range. */
+    fun resetCursors() {
+        val editor = GBApplication.getPrefs().preferences.edit()
+        for (key in GBApplication.getPrefs().preferences.all.keys) {
+            if (key.startsWith("webhook_cursor_")) {
+                editor.remove(key)
+            }
+        }
+        editor.apply()
+    }
 
     /** Default upload path on the server (standalone webhook endpoint, no token needed). */
     const val DEFAULT_UPLOAD_PATH = "/upload"

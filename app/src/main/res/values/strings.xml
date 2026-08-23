@@ -5375,4 +5375,8 @@
     <string name="webhook_pref_last_status">Last result</string>
     <string name="webhook_pref_category_test">Test</string>
     <string name="webhook_pref_run_now">Upload now</string>
+    <string name="webhook_pref_reset_cursor">Re-upload history</string>
+    <string name="webhook_pref_reset_cursor_summary">Reset the upload cursor so the last 7 days of data are uploaded again</string>
+    <string name="webhook_reset_cursor_confirm">Reset the upload cursor? The next upload will re-backfill the last 7 days.</string>
+    <string name="webhook_reset_cursor_done">Upload cursor reset — run "Upload now" to re-upload history</string>
 </resources>

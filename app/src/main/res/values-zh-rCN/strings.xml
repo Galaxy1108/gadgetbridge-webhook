@@ -4903,4 +4903,8 @@
     <string name="webhook_pref_last_status">上次结果</string>
     <string name="webhook_pref_category_test">测试</string>
     <string name="webhook_pref_run_now">立即上传</string>
+    <string name="webhook_pref_reset_cursor">重新上传历史数据</string>
+    <string name="webhook_pref_reset_cursor_summary">重置上传游标，下次上传会重新补传最近 7 天的数据</string>
+    <string name="webhook_reset_cursor_confirm">重置上传游标？下次上传将重新补传最近 7 天的数据。</string>
+    <string name="webhook_reset_cursor_done">游标已重置 — 点“立即上传”即可重新补传历史数据</string>
 </resources>

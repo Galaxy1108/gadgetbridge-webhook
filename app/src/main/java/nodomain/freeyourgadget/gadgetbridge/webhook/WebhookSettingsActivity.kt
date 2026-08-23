@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.webhook
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.content.edit
@@ -72,6 +73,20 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
                     Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show()
                     updateStatusRows()
                 }
+                true
+            }
+
+            val prefResetCursor = findPreference<Preference>(WebhookConfig.PREF_RESET_CURSOR)
+            prefResetCursor?.setOnPreferenceClickListener {
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.webhook_pref_reset_cursor)
+                    .setMessage(R.string.webhook_reset_cursor_confirm)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        WebhookConfig.resetCursors()
+                        Toast.makeText(requireContext(), R.string.webhook_reset_cursor_done, Toast.LENGTH_LONG).show()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
                 true
             }
 
