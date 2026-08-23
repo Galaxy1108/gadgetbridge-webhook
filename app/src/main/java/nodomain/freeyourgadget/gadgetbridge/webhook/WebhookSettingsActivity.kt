@@ -17,6 +17,9 @@
 package nodomain.freeyourgadget.gadgetbridge.webhook
 
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.content.edit
@@ -55,8 +58,15 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
             }
 
             val bindingCode = WebhookConfig.getOrCreateBindingCode()
-            findPreference<Preference>(WebhookConfig.PREF_BINDING_CODE)?.summary =
+            val prefBindingCode = findPreference<Preference>(WebhookConfig.PREF_BINDING_CODE)
+            prefBindingCode?.summary =
                 getString(R.string.webhook_pref_binding_code_summary, "GB-$bindingCode")
+            prefBindingCode?.setOnPreferenceClickListener {
+                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("binding code", "GB-$bindingCode"))
+                Toast.makeText(requireContext(), getString(R.string.webhook_binding_code_copied, bindingCode), Toast.LENGTH_SHORT).show()
+                true
+            }
 
             val prefRunNow = findPreference<Preference>(WebhookConfig.PREF_RUN_NOW)
             prefRunNow?.setOnPreferenceClickListener {
