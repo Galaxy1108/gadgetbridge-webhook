@@ -4868,4 +4868,24 @@
     <string name="usb_connect_permission_denied">使用这个 USB 设备的权限被拒。</string>
     <string name="usb_connect_select_device_type">选择设备类型</string>
     <string name="discovery_connect_usb">连接到 USB</string>
+
+    <!-- Webhook upload module (fork) -->
+    <string name="webhook_pref_title">Webhook 上传</string>
+    <string name="pref_header_webhook">Webhook 上传</string>
+    <string name="webhook_pref_category_general">通用</string>
+    <string name="webhook_pref_enabled">启用 Webhook 上传</string>
+    <string name="webhook_pref_enabled_summary">定期将健康数据上传到你的服务器</string>
+    <string name="webhook_pref_server_url">服务器地址</string>
+    <string name="webhook_pref_server_url_summary">上传端点的完整 URL，例如 https://example.com/api/v1/plugins/extensions/astrbot_plugin_health_monitor/upload</string>
+    <string name="webhook_pref_token">令牌</string>
+    <string name="webhook_pref_token_summary">AstrBot API 密钥，以 Bearer 令牌发送</string>
+    <string name="webhook_pref_interval">上传间隔（分钟）</string>
+    <string name="webhook_pref_interval_summary">每 %1$d 分钟上传一次</string>
+    <string name="webhook_pref_allow_insecure">允许不安全的连接</string>
+    <string name="webhook_pref_allow_insecure_summary">允许 http:// 或自签名证书（不推荐）</string>
+    <string name="webhook_pref_category_status">状态</string>
+    <string name="webhook_pref_last_execution">上次上传</string>
+    <string name="webhook_pref_last_status">上次结果</string>
+    <string name="webhook_pref_category_test">测试</string>
+    <string name="webhook_pref_run_now">立即上传</string>
 </resources>

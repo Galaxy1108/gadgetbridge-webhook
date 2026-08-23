@@ -95,6 +95,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.backup.PeriodicZipExporter;
 import nodomain.freeyourgadget.gadgetbridge.util.healthconnect.HealthConnectPermissionManager;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs;
+import nodomain.freeyourgadget.gadgetbridge.webhook.WebhookScheduler;
 
 /**
  * Main Application class that initializes and provides access to certain things like
@@ -270,6 +271,7 @@ public class GBApplication extends Application {
         if (!GBEnvironment.env().isTest()) {
             PeriodicDbExporter.INSTANCE.scheduleNextExecution(context);
             PeriodicZipExporter.INSTANCE.scheduleNextExecution(context);
+            WebhookScheduler.INSTANCE.schedule(context);
         }
 
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

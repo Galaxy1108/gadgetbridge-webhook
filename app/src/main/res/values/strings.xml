@@ -5340,4 +5340,24 @@
     <string name="usb_connect_permission_denied">Permission to use the USB device was denied.</string>
     <string name="usb_connect_select_device_type">Select device type</string>
     <string name="discovery_connect_usb">Connect to USB</string>
+
+    <!-- Webhook upload module (fork) -->
+    <string name="webhook_pref_title">Webhook upload</string>
+    <string name="pref_header_webhook">Webhook upload</string>
+    <string name="webhook_pref_category_general">General</string>
+    <string name="webhook_pref_enabled">Enable webhook upload</string>
+    <string name="webhook_pref_enabled_summary">Periodically upload health data to your server</string>
+    <string name="webhook_pref_server_url">Server URL</string>
+    <string name="webhook_pref_server_url_summary">Full URL of the upload endpoint, e.g. https://example.com/api/v1/plugins/extensions/astrbot_plugin_health_monitor/upload</string>
+    <string name="webhook_pref_token">Token</string>
+    <string name="webhook_pref_token_summary">AstrBot API key, sent as a Bearer token</string>
+    <string name="webhook_pref_interval">Upload interval (minutes)</string>
+    <string name="webhook_pref_interval_summary">Upload every %1$d minutes</string>
+    <string name="webhook_pref_allow_insecure">Allow insecure connections</string>
+    <string name="webhook_pref_allow_insecure_summary">Allow http:// or self-signed certificates (not recommended)</string>
+    <string name="webhook_pref_category_status">Status</string>
+    <string name="webhook_pref_last_execution">Last upload</string>
+    <string name="webhook_pref_last_status">Last result</string>
+    <string name="webhook_pref_category_test">Test</string>
+    <string name="webhook_pref_run_now">Upload now</string>
 </resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/webhook_pref_category_general">
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:icon="@drawable/ic_toggle_on"
+            android:key="webhook_enabled"
+            android:layout="@layout/preference_checkbox"
+            android:summary="@string/webhook_pref_enabled_summary"
+            android:title="@string/webhook_pref_enabled"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:dependency="webhook_enabled"
+            android:icon="@drawable/ic_file_upload"
+            android:key="webhook_server_url"
+            android:inputType="textUri"
+            android:summary="@string/webhook_pref_server_url_summary"
+            android:title="@string/webhook_pref_server_url"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:dependency="webhook_enabled"
+            android:icon="@drawable/ic_vpn_key"
+            android:key="webhook_token"
+            android:inputType="textPassword"
+            android:summary="@string/webhook_pref_token_summary"
+            android:title="@string/webhook_pref_token"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:defaultValue="15"
+            android:dependency="webhook_enabled"
+            android:icon="@drawable/ic_timer"
+            android:inputType="number"
+            android:key="webhook_interval_minutes"
+            android:maxLength="4"
+            android:title="@string/webhook_pref_interval"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:dependency="webhook_enabled"
+            android:icon="@drawable/ic_lock_open"
+            android:key="webhook_allow_insecure"
+            android:layout="@layout/preference_checkbox"
+            android:summary="@string/webhook_pref_allow_insecure_summary"
+            android:title="@string/webhook_pref_allow_insecure"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/webhook_pref_category_status">
+
+        <Preference
+            android:icon="@drawable/ic_access_time"
+            android:key="webhook_last_execution"
+            android:summary="@string/unknown"
+            android:title="@string/webhook_pref_last_execution" />
+
+        <Preference
+            android:icon="@drawable/ic_info"
+            android:key="webhook_last_status"
+            android:summary="@string/unknown"
+            android:title="@string/webhook_pref_last_status" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/webhook_pref_category_test">
+
+        <Preference
+            android:dependency="webhook_enabled"
+            android:icon="@drawable/ic_play"
+            android:key="webhook_run_now"
+            android:title="@string/webhook_pref_run_now" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

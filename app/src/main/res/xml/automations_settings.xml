@@ -38,6 +38,18 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_header_webhook">
+
+        <Preference
+            android:icon="@drawable/ic_file_upload"
+            android:title="@string/webhook_pref_title">
+            <intent
+                android:targetClass="nodomain.freeyourgadget.gadgetbridge.webhook.WebhookSettingsActivity"
+                android:targetPackage="@string/applicationId" />
+        </Preference>
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_header_auto_fetch">
 
         <SwitchPreferenceCompat

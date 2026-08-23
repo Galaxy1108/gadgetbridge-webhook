@@ -68,6 +68,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.DeviceService;
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceCommunicationService;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs;
+import nodomain.freeyourgadget.gadgetbridge.webhook.WebhookScheduler;
 
 public class GB {
     public static final String ACTION_ACTIVITY_SYNC = "nodomain.freeyourgadget.gadgetbridge.action.ACTIVITY_SYNC_FINISH";
@@ -690,6 +691,9 @@ public class GB {
         intent.putExtra(GBDevice.EXTRA_DEVICE, device);
 
         LocalBroadcastManager.getInstance(GBApplication.getContext()).sendBroadcast(intent);
+
+        // Webhook upload module (fork): upload right after a sync finished.
+        WebhookScheduler.INSTANCE.scheduleImmediate(GBApplication.getContext());
 
         if (!GBApplication.getPrefs().getBoolean("intent_api_broadcast_activity_sync", false)) {
             return;

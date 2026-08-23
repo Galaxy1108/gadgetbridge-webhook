@@ -56,8 +56,10 @@
     <uses-permission android:name="nz.eloque.foss_wallet.READ_CARDS"/>
     <uses-permission android:name="nz.eloque.foss_wallet.dev.READ_CARDS"/>
 
-    <!-- Make sure we don't get the INTERNET permission even when a dependency requires it -->
-    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <!-- Webhook upload module (fork): the INTERNET permission is required for direct
+         HTTPS uploads. This is a deliberate deviation from upstream, which removes the
+         permission and uses the Internet Helper app instead. -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Internet Helper -->
     <uses-permission android:name="nodomain.freeyourgadget.internethelper.INTERNET"/>
@@ -227,6 +229,10 @@
         <activity
             android:name=".activities.automations.AutoExportFitSettingsActivity"
             android:label="@string/pref_header_auto_export_fit"
+            android:parentActivityName=".activities.SettingsActivity" />
+        <activity
+            android:name=".webhook.WebhookSettingsActivity"
+            android:label="@string/webhook_pref_title"
             android:parentActivityName=".activities.SettingsActivity" />
         <activity
             android:name=".activities.maps.MapsTrackActivity"
