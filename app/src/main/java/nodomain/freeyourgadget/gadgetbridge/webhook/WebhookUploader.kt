@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.webhook
 
+import android.annotation.SuppressLint
 import android.database.Cursor
 import android.net.Uri
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
@@ -23,11 +24,19 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHandler
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper
-import nodomain.freeyourgadget.gadgetbridge.util.InternetUtils
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 
 /**
  * Uploads the health data of all known devices to the configured webhook endpoint.
@@ -250,15 +259,10 @@ object WebhookUploader {
             headers["Authorization"] = "Bearer $token"
         }
 
-        val response = InternetUtils.doJsonRequest(
-            Uri.parse(serverUrl),
-            "POST",
-            headers,
-            body.toString(),
-            WebhookConfig.allowInsecure(),
-        ) { reason ->
-            LOG.warn("Webhook request to {} failed: {}", serverUrl, reason)
-        }
+        // Use our own client with long timeouts: Cloudflare edges are often slow
+        // (multi-second TLS handshakes), and the default 10s OkHttp timeout would
+        // fail even though the endpoint is reachable.
+        val response = postJson(serverUrl, headers, body.toString())
 
         if (response != null && response.optString("status") == "ok") {
             WebhookConfig.setCursor(address, to)
@@ -396,5 +400,66 @@ object WebhookUploader {
         }
         row.put("timestamp", ts)
         return row
+    }
+
+    // ------------------------------------------------------------------ HTTP
+
+    private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
+
+    /** Default client: long timeouts for slow Cloudflare edges. */
+    private val defaultClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .build()
+    }
+
+    /** Insecure client (self-signed / http-testing), only used when allowInsecure is on. */
+    private val insecureClient: OkHttpClient by lazy {
+        val trustAll = arrayOf<X509TrustManager>(
+            @SuppressLint("CustomX509TrustManager")
+            object : X509TrustManager {
+                @SuppressLint("TrustAllX509TrustManager")
+                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                @SuppressLint("TrustAllX509TrustManager")
+                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+            }
+        )
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, trustAll, SecureRandom())
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .sslSocketFactory(sslContext.socketFactory, trustAll[0])
+            .hostnameVerifier { _, _ -> true }
+            .build()
+    }
+
+    /**
+     * POSTs JSON and parses the response. Returns null on any network failure
+     * (with a log), so callers report "no response from server".
+     */
+    private fun postJson(serverUrl: String, headers: Map<String, String>, body: String): JSONObject? {
+        return try {
+            val builder = Request.Builder().url(serverUrl).post(body.toRequestBody(jsonMediaType))
+            for ((key, value) in headers) {
+                builder.addHeader(key, value)
+            }
+            val client = if (WebhookConfig.allowInsecure()) insecureClient else defaultClient
+            client.newCall(builder.build()).execute().use { response ->
+                val text = response.body?.string()
+                if (text.isNullOrBlank()) {
+                    LOG.warn("Empty response from {}", serverUrl)
+                    return null
+                }
+                JSONObject(text)
+            }
+        } catch (e: Exception) {
+            LOG.warn("Webhook request to {} failed: {}", serverUrl, e.message)
+            null
+        }
     }
 }
