@@ -4868,4 +4868,9 @@
     <string name="pref_summary_general_prefs_key_sort_by_last_connected_ts">Seřadit odpojená zařízení podle toho, kdy byla naposledy připojena, namísto abecedního řazení</string>
     <string name="menuitem_zepp_os_wake_hybridcharge">Wake HybridCharge</string>
     <string name="menuitem_training_calendar">Tréninkový kalendář</string>
+    <string name="usb_connect_title">Nalezeno USB zařízení</string>
+    <string name="usb_connect_permission_needed">Gadgetbridge potřebuje oprávnění k použití tohoto USB zařízení.</string>
+    <string name="usb_connect_permission_denied">Oprávnění k použití USB zařízení bylo zamítnuto.</string>
+    <string name="usb_connect_select_device_type">Vyberte typ zařízení</string>
+    <string name="discovery_connect_usb">Připojit k USB</string>
 </resources>
