@@ -16,7 +16,7 @@
 | `app/src/main/res/xml/webhook_settings.xml` | 设置界面布局 |
 | `WEBHOOK_MODULE.md` | 本文档 |
 
-## 对上游文件的改动（5 处钩子点，合并时注意）
+## 对上游文件的改动（6 处钩子点，合并时注意）
 
 1. `app/src/main/AndroidManifest.xml`
    - INTERNET 权限：上游 `tools:node="remove"` 改为保留（本模块需要直连 HTTPS）。
@@ -31,6 +31,8 @@
    - 新增 `pref_header_webhook` 分类，含指向 `WebhookSettingsActivity` 的入口。
 5. `app/src/main/res/values/strings.xml` 与 `values-zh-rCN/strings.xml`
    - 追加 `webhook_*`、`pref_header_webhook` 字符串（纯增量）。
+6. `app/build.gradle` — mainline flavor 增加 `applicationId "com.galaxy1108.gadgetbridge"`
+   （fork 独立包名，可与官方版并存安装；`@string/applicationId` 由 AGP 自动生成，无需手改）。
 
 ## 与上游合并
 

@@ -1,6 +1,7 @@
 name: Build APK
 
-# 手动触发打包：默认构建 webhook-module 分支的 Debug APK（双 flavor）。
+# 手动触发打包：默认构建 webhook-module 分支的 Debug APK（仅 mainline flavor，
+# banglejs flavor 只给 Bangle.js 手表用，本项目不需要）。
 # 产物在 Actions 运行页的 Artifacts 里下载。
 
 on:
@@ -60,12 +61,12 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build ${{ inputs.variant }} APKs
-        run: ./gradlew :app:assemble${{ inputs.variant }} --stacktrace
+      - name: Build ${{ inputs.variant }} APK (mainline)
+        run: ./gradlew :app:assembleMainline${{ inputs.variant }} --stacktrace
 
-      - name: Upload APKs
+      - name: Upload APK
         uses: actions/upload-artifact@v5
         with:
           name: apk-${{ inputs.variant }}-${{ inputs.branch }}
-          path: app/build/outputs/apk/**/*.apk
+          path: app/build/outputs/apk/mainline/**/*.apk
           if-no-files-found: error
