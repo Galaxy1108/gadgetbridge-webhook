@@ -63,7 +63,8 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
                 getString(R.string.webhook_pref_binding_code_summary, "GB-$bindingCode")
             prefBindingCode?.setOnPreferenceClickListener {
                 val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("binding code", "GB-$bindingCode"))
+                // Copy the full command so it can be pasted into chat directly.
+                clipboard.setPrimaryClip(ClipData.newPlainText("bind command", "/bind GB-$bindingCode"))
                 Toast.makeText(requireContext(), getString(R.string.webhook_binding_code_copied, bindingCode), Toast.LENGTH_SHORT).show()
                 true
             }
