@@ -180,7 +180,16 @@ object WebhookUploader {
         val to = minOf(nowSeconds, from + WebhookConfig.MAX_RANGE_SECONDS)
 
         val enabledTypes = WebhookConfig.getEnabledDataTypes()
-        val samples = provider.getAllActivitySamples(from.toInt(), to.toInt())
+
+        // While the device is waiting for pairing, only send a light heartbeat
+        // (device info + binding code, no samples) — the server rejects the data
+        // anyway, and large payloads over a slow link would just time out.
+        val pendingOnly = WebhookConfig.isPendingBind(address)
+        val samples = if (pendingOnly) {
+            emptyList()
+        } else {
+            provider.getAllActivitySamples(from.toInt(), to.toInt())
+        }
 
         // Live battery level, if the device is currently managed by the DeviceManager.
         val liveDevice = GBApplication.app().deviceManager.getDeviceByAddress(address)
@@ -231,7 +240,7 @@ object WebhookUploader {
         body.put("since", from)
         body.put("samples", samplesJson)
 
-        val extended = readExtended(db, gbDevice, from, to, enabledTypes)
+        val extended = if (pendingOnly) JSONObject() else readExtended(db, gbDevice, from, to, enabledTypes)
         if (extended.length() > 0) {
             body.put("extended", extended)
         }
@@ -253,6 +262,7 @@ object WebhookUploader {
 
         if (response != null && response.optString("status") == "ok") {
             WebhookConfig.setCursor(address, to)
+            WebhookConfig.setPendingBind(address, false)
             LOG.info(
                 "Uploaded {} samples + {} extended categories for {} ({})",
                 samplesJson.length(),
@@ -270,6 +280,8 @@ object WebhookUploader {
             val message = response.optString("message", "等待配对")
             LOG.info("Device {} is not paired yet: {}", gbDevice.name, message)
             WebhookConfig.setPairStatus(WebhookConfig.PAIR_STATUS_PENDING)
+            // From now on only send light heartbeats for this device until it is paired.
+            WebhookConfig.setPendingBind(address, true)
             return Result(true, message, pendingBind = true)
         }
 

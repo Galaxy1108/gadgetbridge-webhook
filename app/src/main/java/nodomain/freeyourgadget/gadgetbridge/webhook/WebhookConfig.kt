@@ -106,6 +106,18 @@ object WebhookConfig {
     /** Per-device upload cursor key: last successfully uploaded timestamp (epoch seconds). */
     fun cursorKey(address: String): String = "webhook_cursor_$address"
 
+    /** Per-device "waiting for pairing" marker: while set, only a light heartbeat is sent. */
+    fun pendingKey(address: String): String = "webhook_pending_$address"
+
+    fun isPendingBind(address: String): Boolean =
+        GBApplication.getPrefs().getBoolean(pendingKey(address), false)
+
+    fun setPendingBind(address: String, pending: Boolean) {
+        GBApplication.getPrefs().preferences.edit {
+            putBoolean(pendingKey(address), pending)
+        }
+    }
+
     /** Clears all upload cursors, so the next upload re-backfills the full range. */
     fun resetCursors() {
         val editor = GBApplication.getPrefs().preferences.edit()
