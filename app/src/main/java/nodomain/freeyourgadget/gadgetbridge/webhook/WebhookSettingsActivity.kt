@@ -175,8 +175,13 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
             } else {
                 getString(R.string.unknown)
             }
-            findPreference<Preference>(WebhookConfig.PREF_LAST_STATUS)?.summary =
+            val lastError = WebhookConfig.getLastError()
+            val prefLastStatus = findPreference<Preference>(WebhookConfig.PREF_LAST_STATUS)
+            prefLastStatus?.summary = if (lastError.isNotEmpty()) {
+                WebhookConfig.getLastStatus().ifEmpty { getString(R.string.unknown) } + "\n" + lastError
+            } else {
                 WebhookConfig.getLastStatus().ifEmpty { getString(R.string.unknown) }
+            }
         }
     }
 

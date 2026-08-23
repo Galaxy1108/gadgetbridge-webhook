@@ -76,6 +76,9 @@ object WebhookConfig {
     /** Last upload outcome type: "ok" / "pending" / "failed" / "" (never ran). */
     const val PREF_PAIR_STATUS = "webhook_pair_status"
 
+    /** Raw network error text of the last failed upload (diagnostics). */
+    const val PREF_LAST_ERROR = "webhook_last_error"
+
     const val PAIR_STATUS_OK = "ok"
     const val PAIR_STATUS_PENDING = "pending"
     const val PAIR_STATUS_FAILED = "failed"
@@ -85,6 +88,14 @@ object WebhookConfig {
     fun setPairStatus(status: String) {
         GBApplication.getPrefs().preferences.edit {
             putString(PREF_PAIR_STATUS, status)
+        }
+    }
+
+    fun getLastError(): String = GBApplication.getPrefs().getString(PREF_LAST_ERROR, "")
+
+    fun setLastError(error: String) {
+        GBApplication.getPrefs().preferences.edit {
+            putString(PREF_LAST_ERROR, error)
         }
     }
 

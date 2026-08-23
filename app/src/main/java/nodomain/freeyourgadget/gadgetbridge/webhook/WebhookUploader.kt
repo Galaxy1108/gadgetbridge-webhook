@@ -154,6 +154,9 @@ object WebhookUploader {
         WebhookConfig.setLastExecution(System.currentTimeMillis())
         val message = if (anyFailure) "Partial failure: $lastMessage" else "OK, $totalSamples samples uploaded"
         WebhookConfig.setLastStatus(message)
+        if (!anyFailure) {
+            WebhookConfig.setLastError("")
+        }
         WebhookConfig.setPairStatus(
             when {
                 anyFailure -> WebhookConfig.PAIR_STATUS_FAILED
@@ -439,8 +442,8 @@ object WebhookUploader {
     }
 
     /**
-     * POSTs JSON and parses the response. Returns null on any network failure
-     * (with a log), so callers report "no response from server".
+     * POSTs JSON and parses the response. Returns null on any network failure,
+     * storing the raw error text for diagnostics (shown on the settings screen).
      */
     private fun postJson(serverUrl: String, headers: Map<String, String>, body: String): JSONObject? {
         return try {
@@ -452,13 +455,17 @@ object WebhookUploader {
             client.newCall(builder.build()).execute().use { response ->
                 val text = response.body?.string()
                 if (text.isNullOrBlank()) {
-                    LOG.warn("Empty response from {}", serverUrl)
+                    val error = "HTTP ${response.code} with empty body"
+                    LOG.warn("Empty response from {}: {}", serverUrl, error)
+                    WebhookConfig.setLastError(error)
                     return null
                 }
                 JSONObject(text)
             }
         } catch (e: Exception) {
-            LOG.warn("Webhook request to {} failed: {}", serverUrl, e.message)
+            val reason = e.message ?: e.toString()
+            LOG.warn("Webhook request to {} failed: {}", serverUrl, reason)
+            WebhookConfig.setLastError(reason)
             null
         }
     }
