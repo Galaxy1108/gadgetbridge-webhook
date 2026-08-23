@@ -257,6 +257,7 @@ public class GBApplication extends Application {
         setupExceptionHandler(prefs.getBoolean("crash_notification", isDebug()));
 
         registerActivityLifecycleCallbacks(new GBActivityLifecycleCallbacks());
+        registerActivityLifecycleCallbacks(nodomain.freeyourgadget.gadgetbridge.webhook.WebhookStateMonitor.INSTANCE);
 
         Weather.initializeCache(new WeatherCacheManager(getCacheDir(), prefs.getBoolean("cache_weather", true)));
 
