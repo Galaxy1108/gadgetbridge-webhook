@@ -5372,6 +5372,8 @@
     <string name="webhook_upload_done">Upload OK: %1$d samples</string>
     <string name="webhook_upload_failed">Upload failed: %1$s</string>
     <string name="webhook_notify_failed_title">Health data upload failed</string>
+    <string name="webhook_notify_pending_title">Device waiting for pairing</string>
+    <string name="webhook_notify_pending_text">%1$s is not paired yet. Send "/bind %2$s" to the bot to start uploading.</string>
     <string name="webhook_pref_last_execution">Last upload</string>
     <string name="webhook_pref_last_status">Last result</string>
     <string name="webhook_pref_category_test">Test</string>

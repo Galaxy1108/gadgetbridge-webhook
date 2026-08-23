@@ -280,8 +280,17 @@ object WebhookUploader {
             val message = response.optString("message", "等待配对")
             LOG.info("Device {} is not paired yet: {}", gbDevice.name, message)
             WebhookConfig.setPairStatus(WebhookConfig.PAIR_STATUS_PENDING)
+            val wasPending = WebhookConfig.isPendingBind(address)
             // From now on only send light heartbeats for this device until it is paired.
             WebhookConfig.setPendingBind(address, true)
+            // Notify once when first entering the waiting state.
+            if (!wasPending) {
+                WebhookNotifier.notifyPendingBind(
+                    GBApplication.getContext(),
+                    gbDevice.name,
+                    WebhookConfig.getOrCreateBindingCode(),
+                )
+            }
             return Result(true, message, pendingBind = true)
         }
 
