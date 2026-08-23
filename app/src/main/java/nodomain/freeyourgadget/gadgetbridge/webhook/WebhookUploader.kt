@@ -97,6 +97,8 @@ object WebhookUploader {
         WebhookConfig.TYPE_PAI to listOf(ExtTable("HuamiPaiSample")),
         WebhookConfig.TYPE_WORKOUTS to listOf(
             ExtTable("BaseActivitySummary", tsColumn = "START_TIME", tsMillis = true),
+            // Huawei/Honor stores workouts in its own table with epoch-second timestamps.
+            ExtTable("HuaweiWorkoutSummarySample", tsColumn = "START_TIMESTAMP"),
         ),
     )
 
