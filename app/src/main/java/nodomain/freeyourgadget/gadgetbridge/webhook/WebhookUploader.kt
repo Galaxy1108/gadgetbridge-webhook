@@ -126,6 +126,8 @@ object WebhookUploader {
         deviceJson.put("address", address)
         deviceJson.put("name", gbDevice.name)
         deviceJson.put("type", gbDevice.type.name)
+        // Binding code lets the server bind this device to a chat session (/bind command).
+        deviceJson.put("binding_code", WebhookConfig.getOrCreateBindingCode())
         if (battery in 0..100) {
             deviceJson.put("battery", battery)
         }

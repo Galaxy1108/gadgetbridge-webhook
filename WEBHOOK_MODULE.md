@@ -56,3 +56,8 @@ git checkout webhook-module && git merge master
 数据读取走 GB 统一的 `SampleProvider` 抽象（每设备每分钟一条：时间戳 / 归一化活动类型 /
 步数 / 心率 / 强度），与具体手表型号无关；电量取 `GBDevice.getBatteryLevel()`。
 首次上传无游标时回补最近 24 小时；单次最大回传 7 天（防异常）。
+
+**绑定码（多用户隔离）**：设置页显示 `GB-XXXXXX`（首次进入自动生成并持久化，见
+`WebhookConfig.getOrCreateBindingCode()`），随每次上传的 `device.binding_code` 上报；
+对服务器机器人发送 `/bind GB-XXXXXX` 即可把设备绑定到你的会话，之后查询与告警都按
+会话隔离（详见插件仓库 README）。

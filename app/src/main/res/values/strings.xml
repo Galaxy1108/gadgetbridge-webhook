@@ -5345,6 +5345,8 @@
     <string name="webhook_pref_title">Webhook upload</string>
     <string name="pref_header_webhook">Webhook upload</string>
     <string name="webhook_pref_category_general">General</string>
+    <string name="webhook_pref_binding_code">Binding code</string>
+    <string name="webhook_pref_binding_code_summary">%1$s — tell the bot "/bind %1$s" in chat to link this phone to your session</string>
     <string name="webhook_pref_enabled">Enable webhook upload</string>
     <string name="webhook_pref_enabled_summary">Periodically upload health data to your server</string>
     <string name="webhook_pref_server_url">Server URL</string>

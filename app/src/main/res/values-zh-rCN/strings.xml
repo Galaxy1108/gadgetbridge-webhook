@@ -4873,6 +4873,8 @@
     <string name="webhook_pref_title">Webhook 上传</string>
     <string name="pref_header_webhook">Webhook 上传</string>
     <string name="webhook_pref_category_general">通用</string>
+    <string name="webhook_pref_binding_code">绑定码</string>
+    <string name="webhook_pref_binding_code_summary">%1$s — 在聊天中向机器人发送 /bind %1$s，即可把本手机的设备绑定到你的会话</string>
     <string name="webhook_pref_enabled">启用 Webhook 上传</string>
     <string name="webhook_pref_enabled_summary">定期将健康数据上传到你的服务器</string>
     <string name="webhook_pref_server_url">服务器地址</string>

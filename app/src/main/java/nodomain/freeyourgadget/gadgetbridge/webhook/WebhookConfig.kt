@@ -37,6 +37,12 @@ object WebhookConfig {
     /** Settings screen only: "upload now" button (not persisted). */
     const val PREF_RUN_NOW = "webhook_run_now"
 
+    /** Binding code used to bind this phone's devices to a chat session on the server. */
+    const val PREF_BINDING_CODE = "webhook_binding_code"
+
+    private const val BINDING_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    private const val BINDING_CODE_LENGTH = 6
+
     /** When the last upload (any kind) finished, epoch millis. */
     const val PREF_LAST_EXECUTION = "webhook_last_execution"
 
@@ -101,5 +107,28 @@ object WebhookConfig {
         GBApplication.getPrefs().preferences.edit {
             putLong(PREF_LAST_IMMEDIATE, timestampMillis)
         }
+    }
+
+    /**
+     * The binding code for this phone, generated once on first access and persisted.
+     * Sent with every upload so the server can bind this device to a chat session.
+     * Displayed on the settings screen as "GB-XXXXXX".
+     */
+    fun getOrCreateBindingCode(): String {
+        val prefs = GBApplication.getPrefs()
+        val existing = prefs.getString(PREF_BINDING_CODE, "")
+        if (existing.isNotEmpty()) {
+            return existing
+        }
+        val random = java.security.SecureRandom()
+        val code = buildString {
+            repeat(BINDING_CODE_LENGTH) {
+                append(BINDING_CODE_ALPHABET[random.nextInt(BINDING_CODE_ALPHABET.length)])
+            }
+        }
+        prefs.preferences.edit {
+            putString(PREF_BINDING_CODE, code)
+        }
+        return code
     }
 }

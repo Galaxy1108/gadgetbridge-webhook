@@ -41,6 +41,10 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.webhook_settings, rootKey)
 
+            val bindingCode = WebhookConfig.getOrCreateBindingCode()
+            findPreference<Preference>(WebhookConfig.PREF_BINDING_CODE)?.summary =
+                getString(R.string.webhook_pref_binding_code_summary, "GB-$bindingCode")
+
             val prefRunNow = findPreference<Preference>(WebhookConfig.PREF_RUN_NOW)
             prefRunNow?.setOnPreferenceClickListener {
                 WebhookScheduler.executeNow()
