@@ -460,7 +460,17 @@ object WebhookUploader {
                     WebhookConfig.setLastError(error)
                     return null
                 }
-                JSONObject(text)
+                try {
+                    JSONObject(text)
+                } catch (e: org.json.JSONException) {
+                    // Response was not JSON (e.g. a Cloudflare error page). Surface the
+                    // status code and a snippet so the real cause is visible.
+                    val snippet = text.replace('\n', ' ').take(150)
+                    val error = "HTTP ${response.code}: $snippet"
+                    LOG.warn("Non-JSON response from {}: {}", serverUrl, error)
+                    WebhookConfig.setLastError(error)
+                    null
+                }
             }
         } catch (e: Exception) {
             val reason = e.message ?: e.toString()
