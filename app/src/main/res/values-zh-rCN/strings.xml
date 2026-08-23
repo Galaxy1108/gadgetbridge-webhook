@@ -4887,6 +4887,8 @@
     <string name="webhook_pref_allow_insecure_summary">允许 http:// 或自签名证书（不推荐）</string>
     <string name="webhook_pref_data_types">上传的数据</string>
     <string name="webhook_pref_data_types_summary">选择要上传的数据类别</string>
+    <string name="webhook_pref_data_types_summary_all">全部数据类别均已上传</string>
+    <string name="webhook_pref_data_types_summary_count">已上传 %1$d/%2$d 个数据类别</string>
     <string name="webhook_pref_category_status">状态</string>
     <string name="webhook_pref_last_execution">上次上传</string>
     <string name="webhook_pref_last_status">上次结果</string>

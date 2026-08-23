@@ -17,12 +17,14 @@
 package nodomain.freeyourgadget.gadgetbridge.webhook
 
 import android.os.Bundle
+import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractPreferenceFragment
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractSettingsActivityV2
@@ -41,6 +43,14 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.webhook_settings, rootKey)
 
+            // First visit: persist the default "upload everything" selection so the
+            // multi-select list shows all categories checked instead of an empty list.
+            if (!GBApplication.getPrefs().preferences.contains(WebhookConfig.PREF_DATA_TYPES)) {
+                GBApplication.getPrefs().preferences.edit {
+                    putStringSet(WebhookConfig.PREF_DATA_TYPES, WebhookConfig.ALL_DATA_TYPES)
+                }
+            }
+
             val bindingCode = WebhookConfig.getOrCreateBindingCode()
             findPreference<Preference>(WebhookConfig.PREF_BINDING_CODE)?.summary =
                 getString(R.string.webhook_pref_binding_code_summary, "GB-$bindingCode")
@@ -56,6 +66,13 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
                 scheduleDelayed()
                 true
             }
+
+            val prefDataTypes = findPreference<Preference>(WebhookConfig.PREF_DATA_TYPES)
+            prefDataTypes?.setOnPreferenceChangeListener { _: Preference?, _: Any? ->
+                updateDataTypesSummary()
+                true
+            }
+            updateDataTypesSummary()
 
             val prefInterval = findPreference<Preference>(WebhookConfig.PREF_INTERVAL_MINUTES)
             prefInterval?.setOnPreferenceChangeListener { _: Preference?, newValue: Any? ->
@@ -87,6 +104,16 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
                 getString(R.string.webhook_pref_interval_summary, WebhookConfig.DEFAULT_INTERVAL_MINUTES)
             }
             findPreference<Preference>(WebhookConfig.PREF_INTERVAL_MINUTES)?.summary = summary
+        }
+
+        private fun updateDataTypesSummary() {
+            val enabled = WebhookConfig.getEnabledDataTypes()
+            val summary = if (enabled.size == WebhookConfig.ALL_DATA_TYPES.size) {
+                getString(R.string.webhook_pref_data_types_summary_all)
+            } else {
+                getString(R.string.webhook_pref_data_types_summary_count, enabled.size, WebhookConfig.ALL_DATA_TYPES.size)
+            }
+            findPreference<Preference>(WebhookConfig.PREF_DATA_TYPES)?.summary = summary
         }
 
         private fun updateStatusRows() {
