@@ -27,20 +27,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: Install Android SDK components
+      # ubuntu-24.04 runner 镜像的 sdkmanager 不在 PATH 上，
+      # 这里自包含安装 cmdline-tools（与本地验证过的版本一致）。
+      - name: Install Android cmdline-tools
         run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          mkdir -p "$RUNNER_TEMP/android-sdk/cmdline-tools"
+          curl -sL -o /tmp/cmdline-tools.zip \
+            "https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip"
+          unzip -q /tmp/cmdline-tools.zip -d "$RUNNER_TEMP/android-sdk/cmdline-tools"
+          mv "$RUNNER_TEMP/android-sdk/cmdline-tools/cmdline-tools" \
+             "$RUNNER_TEMP/android-sdk/cmdline-tools/latest"
+          echo "ANDROID_HOME=$RUNNER_TEMP/android-sdk" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$RUNNER_TEMP/android-sdk" >> "$GITHUB_ENV"
+          echo "$RUNNER_TEMP/android-sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      - name: Accept licenses and install SDK components
+        run: |
+          yes | sdkmanager --licenses > /dev/null
           sdkmanager "platforms;android-37.0" "build-tools;36.0.0" "build-tools;37.0.0"
 
       - name: Set up Gradle cache
@@ -50,7 +64,7 @@ jobs:
         run: ./gradlew :app:assemble${{ inputs.variant }} --stacktrace
 
       - name: Upload APKs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: apk-${{ inputs.variant }}-${{ inputs.branch }}
           path: app/build/outputs/apk/**/*.apk
