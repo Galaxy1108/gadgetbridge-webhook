@@ -967,7 +967,7 @@
     <string name="lefun_prefs_hydration_reminder_title">Recordatori d\'hidratació</string>
     <string name="bip_prefs_shortcuts">Dreceres</string>
     <string name="movement_intensity">Intensitat de moviment</string>
-    <string name="firmware_update_progress">La càrrega és en procés \n%1d%% a %.2fkbps (mitjana %.2fkbps) \nPart %1d de %1d</string>
+    <string name="firmware_update_progress">La càrrega és en procés \n%1$d%% a %2$.2fkbps (mitjana %3$.2fkbps) \nPart %4$d de %5$d</string>
     <string name="devicestatus_upload_failed">Ha fallat la càrrega</string>
     <string name="devicestatus_upload_started">Ha començat la càrrega</string>
     <string name="devicestatus_upload_completed">S\'ha completat la càrrega</string>
@@ -1483,7 +1483,6 @@
     <string name="pref_header_spo2">Oxigenació sanguínia</string>
     <string name="pref_sleepasandroid_feat_movement">Acceleròmetre</string>
     <string name="pref_title_huawei_account">Compte de Huawei</string>
-    <string name="pref_sleepasandroid_feat_spo2">SpO₂</string>
     <string name="pref_sleepasandroid_feat_alarms">Alarmes</string>
     <string name="min_val">Mínim: %d</string>
     <string name="max_val">Màxim: %d</string>
@@ -1506,7 +1505,7 @@
     <string name="pref_switch_controls_ambient_off">Ambiental ↔ Desactivat</string>
     <string name="share_debug_info">Comparteix informació de depuració</string>
     <string name="activity_type_diving">Busseig</string>
-    <string name="chart_cycling_point_label_distance">Avui: %.1f km\nTotal: %.1f km</string>
+    <string name="chart_cycling_point_label_distance">Avui: %1$.1f km\nTotal: %2$.1f km</string>
     <string name="open_camera">Obre la càmera</string>
     <string name="serbian_latin">Serbi (llatí)</string>
     <string name="bahasa_melayu">Malai</string>
