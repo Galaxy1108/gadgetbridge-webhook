@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
@@ -143,11 +144,17 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
             }
         }
 
-        /** Executes the upload with a spinner, then shows the result. */
+        /** Executes the upload with a Material spinner dialog, then shows the result. */
         private fun runUpload(maxRangeSeconds: Long) {
+            val density = requireContext().resources.displayMetrics.density
+            val spinner = CircularProgressIndicator(requireContext()).apply {
+                isIndeterminate = true
+                val size = (56 * density).toInt()
+                layoutParams = android.view.ViewGroup.LayoutParams(size, size)
+            }
             val progress = AlertDialog.Builder(requireContext())
                 .setTitle(R.string.webhook_upload_started)
-                .setView(android.widget.ProgressBar(requireContext(), null, android.R.attr.progressBarStyle))
+                .setView(spinner)
                 .setCancelable(false)
                 .show()
             lifecycleScope.launch {

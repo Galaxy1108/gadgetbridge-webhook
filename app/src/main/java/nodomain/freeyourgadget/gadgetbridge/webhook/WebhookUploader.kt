@@ -417,11 +417,15 @@ object WebhookUploader {
                     continue
                 }
                 try {
+                    // tsMillis tables store epoch milliseconds (e.g. BaseActivitySummary.START_TIME),
+                    // while our cursor range is in seconds — convert for the comparison.
+                    val fromArg = if (t.tsMillis) from * 1000 else from
+                    val toArg = if (t.tsMillis) to * 1000 else to
                     val cursor = session.database.rawQuery(
                         "SELECT * FROM ${t.name} WHERE ${t.deviceColumn} = ?" +
                             " AND ${t.tsColumn} > ? AND ${t.tsColumn} <= ?" +
                             " ORDER BY ${t.tsColumn} DESC LIMIT $MAX_EXTENDED_ROWS_PER_TABLE",
-                        arrayOf(deviceId.toString(), from.toString(), to.toString()),
+                        arrayOf(deviceId.toString(), fromArg.toString(), toArg.toString()),
                     )
                     cursor.use {
                         while (it.moveToNext()) {

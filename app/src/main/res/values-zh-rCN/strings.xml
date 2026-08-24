@@ -4873,7 +4873,7 @@
     <string name="pref_header_webhook">Webhook 上传</string>
     <string name="webhook_pref_category_general">通用</string>
     <string name="webhook_pref_binding_code">绑定码</string>
-    <string name="webhook_pref_binding_code_summary">绑定码\n%1$s\n点击复制完整命令，发给机器人即可绑定本手机</string>
+    <string name="webhook_pref_binding_code_summary">%1$s\n点击复制完整命令，发给机器人即可绑定本手机</string>
     <string name="webhook_binding_code_copied">已复制绑定命令：/bind GB-%1$s</string>
     <string name="webhook_pref_enabled">启用 Webhook 上传</string>
     <string name="webhook_pref_enabled_summary">定期将健康数据上传到你的服务器</string>
