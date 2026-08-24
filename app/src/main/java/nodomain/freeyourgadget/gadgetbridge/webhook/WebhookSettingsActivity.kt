@@ -35,6 +35,7 @@ import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractPreferenceFragment
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractSettingsActivityV2
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
+import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.Date
@@ -71,18 +72,23 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
 
             val prefRunNow = findPreference<Preference>(WebhookConfig.PREF_RUN_NOW)
             prefRunNow?.setOnPreferenceClickListener {
-                // Run the upload in the background and show the result, instead of
-                // silently enqueueing a worker.
-                lifecycleScope.launch {
-                    Toast.makeText(requireContext(), R.string.webhook_upload_started, Toast.LENGTH_SHORT).show()
-                    val result = withContext(Dispatchers.IO) { WebhookUploader.uploadAll() }
-                    val text = when {
-                        result.pendingBind -> result.message
-                        result.success -> getString(R.string.webhook_upload_done, result.uploadedSamples)
-                        else -> getString(R.string.webhook_upload_failed, result.message)
-                    }
-                    Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show()
-                    updateStatusRows()
+                // Estimate the backlog: if any device has more than the default
+                // range (7 days) of unsent data, ask the user how much to upload.
+                val backlogDays = WebhookUploader.estimateBacklogDays()
+                if (backlogDays > WebhookConfig.MAX_RANGE_SECONDS / 86400) {
+                    AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.webhook_upload_large_title)
+                        .setMessage(getString(R.string.webhook_upload_large_confirm, backlogDays))
+                        .setPositiveButton(R.string.webhook_upload_large_full) { _, _ ->
+                            runUpload(Long.MAX_VALUE / 2)
+                        }
+                        .setNeutralButton(R.string.webhook_upload_large_partial) { _, _ ->
+                            runUpload(WebhookConfig.MAX_RANGE_SECONDS)
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+                } else {
+                    runUpload(WebhookConfig.MAX_RANGE_SECONDS)
                 }
                 true
             }
@@ -134,6 +140,26 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(200)
                 WebhookScheduler.schedule(requireContext())
+            }
+        }
+
+        /** Executes the upload with a spinner, then shows the result. */
+        private fun runUpload(maxRangeSeconds: Long) {
+            val progress = AlertDialog.Builder(requireContext())
+                .setTitle(R.string.webhook_upload_started)
+                .setView(android.widget.ProgressBar(requireContext(), null, android.R.attr.progressBarStyle))
+                .setCancelable(false)
+                .show()
+            lifecycleScope.launch {
+                val result = withContext(Dispatchers.IO) { WebhookUploader.uploadAll(maxRangeSeconds) }
+                progress.dismiss()
+                val text = when {
+                    result.pendingBind -> result.message
+                    result.success -> getString(R.string.webhook_upload_done, result.uploadedSamples)
+                    else -> getString(R.string.webhook_upload_failed, result.message)
+                }
+                Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show()
+                updateStatusRows()
             }
         }
 

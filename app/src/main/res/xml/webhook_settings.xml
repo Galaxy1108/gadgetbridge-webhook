@@ -21,6 +21,7 @@
         <EditTextPreference
             android:dependency="webhook_enabled"
             android:icon="@drawable/ic_file_upload"
+            android:hint="example.com"
             android:key="webhook_server_url"
             android:inputType="textUri"
             android:summary="@string/webhook_pref_server_url_summary"

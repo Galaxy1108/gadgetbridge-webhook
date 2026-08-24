@@ -33,6 +33,7 @@ object WebhookNotifier {
     private const val CHANNEL_ID = "webhook_upload"
     private const val NOTIFICATION_ID = 4201
     private const val NOTIFICATION_ID_PENDING = 4202
+    private const val NOTIFICATION_ID_BACKLOG = 4203
 
     fun notifyUploadFailed(context: Context, reason: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -61,6 +62,40 @@ object WebhookNotifier {
             .build()
 
         notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * Notifies when the automatic upload found a large backlog of unsent data,
+     * so the user can open the settings and choose the upload range manually.
+     */
+    fun notifyLargeBacklog(context: Context, days: Long) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(
+            NotificationChannel(CHANNEL_ID, "Webhook 上传", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "健康数据上传提示"
+            }
+        )
+
+        val intent = Intent(context, WebhookSettingsActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            2,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val text = context.getString(R.string.webhook_notify_backlog_text, days)
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_timer)
+            .setContentTitle(context.getString(R.string.webhook_notify_backlog_title))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(NOTIFICATION_ID_BACKLOG, notification)
     }
 
     /**

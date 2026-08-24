@@ -5352,7 +5352,7 @@
     <string name="webhook_pref_enabled">Enable webhook upload</string>
     <string name="webhook_pref_enabled_summary">Periodically upload health data to your server</string>
     <string name="webhook_pref_server_url">Server address</string>
-    <string name="webhook_pref_server_url_summary">Root address only, e.g. example.com — https:// and the upload path are added automatically</string>
+    <string name="webhook_pref_server_url_summary">Root address only; https:// and the upload path are added automatically</string>
     <string name="webhook_pref_token">Token</string>
     <string name="webhook_pref_token_summary">AstrBot API key, sent as a Bearer token</string>
     <string name="webhook_pref_interval">Upload interval (minutes)</string>
@@ -5369,11 +5369,17 @@
     <string name="webhook_pair_status_ok">Paired — uploads are being received</string>
     <string name="webhook_pair_status_pending">Waiting for pairing: tell the bot "/bind %1$s" in chat</string>
     <string name="webhook_pair_status_failed">Last upload failed, will retry automatically</string>
-    <string name="webhook_upload_started">Uploading now…</string>
+    <string name="webhook_upload_started">Uploading…</string>
+    <string name="webhook_upload_large_title">Large upload</string>
+    <string name="webhook_upload_large_confirm">About %1$d days of data have not been uploaded yet. Upload everything, or only the last 7 days?</string>
+    <string name="webhook_upload_large_full">Everything</string>
+    <string name="webhook_upload_large_partial">Last 7 days</string>
     <string name="webhook_upload_done">Upload OK: %1$d samples</string>
     <string name="webhook_upload_failed">Upload failed: %1$s</string>
     <string name="webhook_notify_failed_title">Health data upload failed</string>
     <string name="webhook_notify_pending_title">Device waiting for pairing</string>
+    <string name="webhook_notify_backlog_title">Large amount of data pending</string>
+    <string name="webhook_notify_backlog_text">About %1$d days of data have not been uploaded. Open the settings to choose: upload everything or only the last 7 days.</string>
     <string name="webhook_notify_pending_text">%1$s is not paired yet. Send "/bind %2$s" to the bot to start uploading.</string>
     <string name="webhook_pref_last_execution">Last upload</string>
     <string name="webhook_pref_last_status">Last result</string>

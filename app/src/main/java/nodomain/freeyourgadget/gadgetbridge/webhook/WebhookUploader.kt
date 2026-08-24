@@ -111,7 +111,41 @@ object WebhookUploader {
         ),
     )
 
-    fun uploadAll(): Result {
+    /**
+     * Uploads all devices. [maxRangeSeconds] caps how far back a single upload may
+     * go (the periodic worker uses the 7-day default; a manual upload may pass a
+     * larger value after the user confirmed a full re-upload).
+     */
+    /**
+     * How many days of unsent data exist in total across all devices
+     * (based on the upload cursors).
+     */
+    fun estimateBacklogDays(): Long {
+        val now = System.currentTimeMillis() / 1000
+        var maxDays = 0L
+        try {
+            GBApplication.acquireDB().use { db ->
+                for (gbDevice in DeviceHelper.getInstance().availableDevices) {
+                    if (!gbDevice.type.isSupported) {
+                        continue
+                    }
+                    var from = WebhookConfig.getCursor(gbDevice.address)
+                    if (from <= 0) {
+                        from = now - WebhookConfig.INITIAL_BACKFILL_SECONDS
+                    }
+                    val days = (now - from) / 86400
+                    if (days > maxDays) {
+                        maxDays = days
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            LOG.warn("Could not estimate backlog", e)
+        }
+        return maxDays
+    }
+
+    fun uploadAll(maxRangeSeconds: Long = WebhookConfig.MAX_RANGE_SECONDS): Result {
         if (!WebhookConfig.isEnabled()) {
             return Result(true, "Webhook upload disabled")
         }
@@ -135,7 +169,7 @@ object WebhookUploader {
                     if (!gbDevice.type.isSupported) {
                         continue
                     }
-                    val result = uploadDevice(gbDevice, db, serverUrl, token, nowSeconds)
+                    val result = uploadDevice(gbDevice, db, serverUrl, token, nowSeconds, maxRangeSeconds)
                     totalSamples += result.uploadedSamples
                     if (result.pendingBind) {
                         anyPending = true
@@ -174,6 +208,7 @@ object WebhookUploader {
         serverUrl: String,
         token: String,
         nowSeconds: Long,
+        maxRangeSeconds: Long,
     ): Result {
         val address = gbDevice.address
         val coordinator = gbDevice.deviceCoordinator
@@ -186,16 +221,21 @@ object WebhookUploader {
         if (from <= 0) {
             from = nowSeconds - WebhookConfig.INITIAL_BACKFILL_SECONDS
         }
-        // Always re-scan the last 24h: Huawei bands store data locally and sync it
-        // to the phone later (e.g. after being worn again). Without this lookback,
-        // the cursor would already be past those late-arriving samples and the real
-        // data would never be uploaded. The server upserts idempotently, so
-        // re-uploading is harmless.
-        from = minOf(from, nowSeconds - 24 * 60 * 60L)
+        // Re-scan window: at least the last 24h, but if the cursor is old (the
+        // band and phone were disconnected for a while, so the band only synced
+        // its locally stored history when reconnected), scan back by the cursor
+        // age — capped at 7 days, the typical on-device storage period.
+        // The server upserts idempotently, so re-uploading is harmless.
+        val cursorAge = nowSeconds - from
+        val lookbackSeconds = minOf(
+            WebhookConfig.INITIAL_BACKFILL_SECONDS,
+            maxOf(24 * 60 * 60L, cursorAge),
+        )
+        from = minOf(from, nowSeconds - lookbackSeconds)
         if (from >= nowSeconds) {
             return Result(true, "Nothing new for ${gbDevice.name}")
         }
-        val to = minOf(nowSeconds, from + WebhookConfig.MAX_RANGE_SECONDS)
+        val to = minOf(nowSeconds, from + maxRangeSeconds)
 
         val enabledTypes = WebhookConfig.getEnabledDataTypes()
 

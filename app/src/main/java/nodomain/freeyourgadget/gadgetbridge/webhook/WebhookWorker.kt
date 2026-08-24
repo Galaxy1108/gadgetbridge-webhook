@@ -33,6 +33,13 @@ class WebhookWorker(
 ) : Worker(context, workerParams) {
 
     override fun doWork(): Result {
+        // Large backlog: notify the user so they can manually choose the upload
+        // range (the automatic upload keeps the 7-day cap).
+        val backlogDays = WebhookUploader.estimateBacklogDays()
+        if (backlogDays > WebhookConfig.MAX_RANGE_SECONDS / 86400) {
+            WebhookNotifier.notifyLargeBacklog(applicationContext, backlogDays)
+        }
+
         val result = WebhookUploader.uploadAll()
         if (!result.success) {
             LOG.warn("Webhook worker failed: {}", result.message)
