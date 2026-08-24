@@ -147,14 +147,35 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
         /** Executes the upload with a Material spinner dialog, then shows the result. */
         private fun runUpload(maxRangeSeconds: Long) {
             val density = requireContext().resources.displayMetrics.density
+            val spinnerSize = (28 * density).toInt()
             val spinner = CircularProgressIndicator(requireContext()).apply {
                 isIndeterminate = true
-                val size = (56 * density).toInt()
-                layoutParams = android.view.ViewGroup.LayoutParams(size, size)
+            }
+            // "Uploading… ○" on one centered row.
+            val row = android.widget.LinearLayout(requireContext()).apply {
+                orientation = android.widget.LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER
+                val pad = (20 * density).toInt()
+                setPadding(pad, pad, pad, pad)
+                addView(
+                    android.widget.TextView(requireContext()).apply {
+                        text = getString(R.string.webhook_upload_started)
+                        textSize = 16f
+                    },
+                    android.widget.LinearLayout.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                        android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ),
+                )
+                addView(
+                    spinner,
+                    android.widget.LinearLayout.LayoutParams(spinnerSize, spinnerSize).apply {
+                        marginStart = (16 * density).toInt()
+                    },
+                )
             }
             val progress = AlertDialog.Builder(requireContext())
-                .setTitle(R.string.webhook_upload_started)
-                .setView(spinner)
+                .setView(row)
                 .setCancelable(false)
                 .show()
             lifecycleScope.launch {
