@@ -130,7 +130,9 @@ android {
 
         // Note: always bump BOTH versionCode and versionName!
         versionName "0.93.0"
-        versionCode 252
+        // Fork build number: bumped on each release build (changelog shows entries
+        // with a higher versionCode). versionName stays aligned with upstream.
+        versionCode 253
         vectorDrawables.useSupportLibrary = true
         buildConfigField "String", "GIT_HASH_SHORT", "\"${getGitHashShort()}\""
         buildConfigField "String", "GIT_DIRTY_STATUS", "\"${getGitDirtyFlag()}\""
