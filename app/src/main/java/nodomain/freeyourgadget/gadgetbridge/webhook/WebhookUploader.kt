@@ -203,9 +203,30 @@ object WebhookUploader {
             provider.getAllActivitySamples(from.toInt(), to.toInt())
         }
 
-        // Live battery level, if the device is currently managed by the DeviceManager.
+                // Live battery level, if the device is currently managed by the DeviceManager.
         val liveDevice = GBApplication.app().deviceManager.getDeviceByAddress(address)
         val battery = (liveDevice ?: gbDevice).getBatteryLevel(0)
+
+        // Diagnostics: what the provider actually returned (first samples).
+        LOG.info(
+            "Webhook: {} provider={} range=[{}..{}] samples={}",
+            address,
+            provider.javaClass.simpleName,
+            from,
+            to,
+            samples.size,
+        )
+        samples.take(5).forEach { s ->
+            LOG.info(
+                "Webhook: sample ts={} kind={} rawKind={} steps={} hr={} intensity={}",
+                s.timestamp,
+                provider.normalizeType(s.rawKind).name,
+                s.rawKind,
+                s.steps,
+                s.heartRate,
+                s.intensity,
+            )
+        }
 
         val deviceJson = JSONObject()
         deviceJson.put("address", address)
