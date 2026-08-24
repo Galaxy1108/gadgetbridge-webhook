@@ -375,6 +375,14 @@ object WebhookUploader {
     }
 
     /**
+     * greenDAO stores tables as UPPER_SNAKE (e.g. "BASE_ACTIVITY_SUMMARY") while
+     * the entity class name is camelCase ("BaseActivitySummary"). SQLite treats
+     * quoted identifiers as case-sensitive, so we must use the real table name.
+     */
+    private fun dbTableName(className: String): String =
+        className.replace(Regex("(?<=[a-z0-9])(?=[A-Z])"), "_").uppercase()
+
+    /**
      * Reads the enabled extended metric tables for this device via raw SQL and
      * returns a JSON object like {"spo2": [{"timestamp":..., "spo2": 97}, ...]}.
      * All values are normalized to epoch seconds; blob columns are skipped.
@@ -393,19 +401,59 @@ object WebhookUploader {
         val knownTables = mutableSetOf<String>()
 
         fun tableExists(name: String): Boolean {
-            if (name in knownTables) {
+            val dbName = dbTableName(name)
+            if (dbName in knownTables) {
                 return true
             }
             val cursor = session.database.rawQuery(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-                arrayOf(name),
+                arrayOf(dbName),
             )
             val exists = cursor.use { it.moveToFirst() }
             if (exists) {
-                knownTables.add(name)
+                knownTables.add(dbName)
             }
             return exists
         }
+
+        // ---- diagnostics (temporary): dump what the extended reader actually sees ----
+        try {
+            val devRows = session.database.rawQuery("SELECT _id, NAME, IDENTIFIER FROM DEVICE", null).use { c ->
+                val sb = StringBuilder()
+                while (c.moveToNext()) {
+                    sb.append("[id=").append(c.getLong(0)).append(" name=").append(c.getString(1))
+                        .append(" idt=").append(c.getString(2)).append("] ")
+                }
+                sb.toString()
+            }
+            LOG.warn("Webhook diag: deviceEntityId={} devices={}", deviceId, devRows)
+            for ((category, tables) in EXTENDED_TABLES) {
+                if (category !in enabledTypes) {
+                    continue
+                }
+                for (t in tables) {
+                    if (!tableExists(t.name)) {
+                        LOG.warn("Webhook diag: table {} MISSING", t.name)
+                        continue
+                    }
+                    val total = session.database.rawQuery("SELECT COUNT(*) FROM ${dbTableName(t.name)}", null)
+                        .use { if (it.moveToFirst()) it.getLong(0) else -1 }
+                    val byDevice = session.database.rawQuery(
+                        "SELECT ${t.deviceColumn}, COUNT(*) FROM ${dbTableName(t.name)} GROUP BY ${t.deviceColumn}", null,
+                    ).use { c ->
+                        val sb = StringBuilder()
+                        while (c.moveToNext()) {
+                            sb.append("dev=").append(c.getLong(0)).append(":").append(c.getLong(1)).append(" ")
+                        }
+                        sb.toString()
+                    }
+                    LOG.warn("Webhook diag: table={} total={} byDevice={}", t.name, total, byDevice)
+                }
+            }
+        } catch (e: Exception) {
+            LOG.warn("Webhook diag failed: {}", e.message)
+        }
+        // ---- end diagnostics ----
 
         for ((category, tables) in EXTENDED_TABLES) {
             if (category !in enabledTypes) {
@@ -422,7 +470,7 @@ object WebhookUploader {
                     val fromArg = if (t.tsMillis) from * 1000 else from
                     val toArg = if (t.tsMillis) to * 1000 else to
                     val cursor = session.database.rawQuery(
-                        "SELECT * FROM ${t.name} WHERE ${t.deviceColumn} = ?" +
+                        "SELECT * FROM ${dbTableName(t.name)} WHERE ${t.deviceColumn} = ?" +
                             " AND ${t.tsColumn} > ? AND ${t.tsColumn} <= ?" +
                             " ORDER BY ${t.tsColumn} DESC LIMIT $MAX_EXTENDED_ROWS_PER_TABLE",
                         arrayOf(deviceId.toString(), fromArg.toString(), toArg.toString()),
