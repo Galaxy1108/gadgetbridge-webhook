@@ -186,6 +186,12 @@ object WebhookUploader {
         if (from <= 0) {
             from = nowSeconds - WebhookConfig.INITIAL_BACKFILL_SECONDS
         }
+        // Always re-scan the last 24h: Huawei bands store data locally and sync it
+        // to the phone later (e.g. after being worn again). Without this lookback,
+        // the cursor would already be past those late-arriving samples and the real
+        // data would never be uploaded. The server upserts idempotently, so
+        // re-uploading is harmless.
+        from = minOf(from, nowSeconds - 24 * 60 * 60L)
         if (from >= nowSeconds) {
             return Result(true, "Nothing new for ${gbDevice.name}")
         }
