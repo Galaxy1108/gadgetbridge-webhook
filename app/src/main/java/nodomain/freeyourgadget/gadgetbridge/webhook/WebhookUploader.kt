@@ -71,6 +71,9 @@ object WebhookUploader {
         val tsColumn: String = "TIMESTAMP",
         val deviceColumn: String = "DEVICE_ID",
         val tsMillis: Boolean = false,
+        /** Rows from different tables sharing the same timestamp get distinct seq so the
+         *  server keeps both (BASE_ACTIVITY_SUMMARY and HUAWEI_WORKOUT_SUMMARY_SAMPLE). */
+        val seq: Int = 0,
     )
 
     /**
@@ -107,7 +110,8 @@ object WebhookUploader {
         WebhookConfig.TYPE_WORKOUTS to listOf(
             ExtTable("BaseActivitySummary", tsColumn = "START_TIME", tsMillis = true),
             // Huawei/Honor stores workouts in its own table with epoch-second timestamps.
-            ExtTable("HuaweiWorkoutSummarySample", tsColumn = "START_TIMESTAMP"),
+            // seq=1 so the same timestamp keeps both rows on the server.
+            ExtTable("HuaweiWorkoutSummarySample", tsColumn = "START_TIMESTAMP", seq = 1),
         ),
     )
 
@@ -488,6 +492,44 @@ object WebhookUploader {
                 result.put(category, rows)
             }
         }
+
+        // Workout process data (5-second HR/step-rate/speed from Huawei) goes to its own
+        // category so the server can present it as detail without mixing with summaries.
+        if (WebhookConfig.TYPE_WORKOUTS in enabledTypes &&
+            tableExists("HuaweiWorkoutDataSample") && tableExists("HuaweiWorkoutSummarySample")
+        ) {
+            try {
+                val cursor = session.database.rawQuery(
+                    "SELECT TIMESTAMP, HEART_RATE, STEP_RATE, SPEED FROM HUAWEI_WORKOUT_DATA_SAMPLE" +
+                        " WHERE WORKOUT_ID IN (SELECT WORKOUT_ID FROM HUAWEI_WORKOUT_SUMMARY_SAMPLE" +
+                        " WHERE DEVICE_ID = ? AND START_TIMESTAMP > ? AND START_TIMESTAMP <= ?)" +
+                        " AND TIMESTAMP > ? AND TIMESTAMP <= ? ORDER BY TIMESTAMP DESC LIMIT 5000",
+                    arrayOf(
+                        deviceId.toString(), from.toString(), to.toString(),
+                        from.toString(), to.toString(),
+                    ),
+                )
+                val hrRows = JSONArray()
+                cursor.use {
+                    while (it.moveToNext()) {
+                        val row = JSONObject()
+                        row.put("timestamp", it.getLong(0))
+                        val hr = it.getLong(1)
+                        if (hr > 0) row.put("heart_rate", hr)
+                        val sr = it.getLong(2)
+                        if (sr > 0) row.put("step_rate", sr)
+                        val sp = it.getLong(3)
+                        if (sp > 0) row.put("speed", sp)
+                        hrRows.put(row)
+                    }
+                }
+                if (hrRows.length() > 0) {
+                    result.put("workout_hr", hrRows)
+                }
+            } catch (e: Exception) {
+                LOG.warn("Failed to read workout process data: {}", e.message)
+            }
+        }
         return result
     }
 
@@ -521,6 +563,9 @@ object WebhookUploader {
             ts /= 1000
         }
         row.put("timestamp", ts)
+        if (table.seq > 0) {
+            row.put("seq", table.seq)
+        }
         return row
     }
 
