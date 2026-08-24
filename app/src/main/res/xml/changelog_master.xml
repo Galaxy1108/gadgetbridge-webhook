@@ -1573,13 +1573,4 @@
         <change>Do not remove newline and whitespace characters from notification content</change>
         <change>Debug: Add companion device list to debug activity</change>
     </release>
-    <release version="0.93.0" versioncode="253">
-      <change>新增 Webhook 健康数据上传模块：步数 / 心率 / 睡眠分期 / 运动记录 / 血氧 / 压力 / HRV 等自动上传到自建服务器（AstrBot 插件）</change>
-      <change>多用户设备绑定：手机设置页显示绑定码，对机器人发送 /bind GB-XXXXXX 即可配对（配对前数据不落库）</change>
-      <change>独立上传端点：无需令牌，经 Cloudflare Tunnel 暴露；上传失败 / 等待配对 / 数据积压均有系统通知</change>
-      <change>数据类别开关：可勾选要上传的数据；首次回补 7 天，断连多日自动补传，数据量过大时提示选择上传范围</change>
-      <change>自然语言健康查询：现在心率多少 / 今天走了多少步 / 昨晚睡眠怎么样 / 最近运动记录</change>
-      <change>异常告警：心率过高 / 电量过低推送至绑定会话（仅评估最近 30 分钟数据，避免历史回补误报）</change>
-      <change>修复：运动记录查询（时间单位错误）、电量查询、仪表盘保存状态过大导致的崩溃</change>
-    </release>
 </changelog>

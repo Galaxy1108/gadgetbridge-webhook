@@ -130,9 +130,9 @@ android {
 
         // Note: always bump BOTH versionCode and versionName!
         versionName "0.93.0"
-        // Fork build number: bumped on each release build (changelog shows entries
-        // with a higher versionCode). versionName stays aligned with upstream.
-        versionCode 253
+        // Fork keeps versionCode/versionName aligned with upstream (no bumping);
+        // builds are told apart by the APK filename, which carries the git hash.
+        versionCode 252
         vectorDrawables.useSupportLibrary = true
         buildConfigField "String", "GIT_HASH_SHORT", "\"${getGitHashShort()}\""
         buildConfigField "String", "GIT_DIRTY_STATUS", "\"${getGitDirtyFlag()}\""
@@ -283,6 +283,14 @@ androidComponents {
                     variant.applicationId.zip(output.versionName) { appId, versionName ->
                         "${appId}_${versionName}.apk"
                     }
+                )
+            }
+        } else {
+            // webhook fork: debug/release builds keep upstream versionCode/versionName,
+            // so the APK filename carries the git hash to tell builds apart.
+            variant.outputs.each { output ->
+                output.outputFileName.set(
+                    "gadgetbridge-webhook-${variant.name}-${getGitHashShort() ?: "nogit"}.apk"
                 )
             }
         }
