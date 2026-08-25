@@ -4867,4 +4867,13 @@
     <string name="usb_connect_permission_denied">使用这个 USB 设备的权限被拒。</string>
     <string name="usb_connect_select_device_type">选择设备类型</string>
     <string name="discovery_connect_usb">连接到 USB</string>
+    <string name="url_stable">稳定</string>
+    <string name="url_development">开发</string>
+    <string name="pref_title_xiaomi_device_id">设备 ID</string>
+    <string name="pref_summary_xiaomi_device_id">手机的标识符，该标识符是在手表与厂商应用配对时在手表上注册的。运行 Wear OS 的手表除了需要身份认证密钥，也需要这个。</string>
+    <string name="pref_summary_opentracks_packagename_not_installed">安装 OpenTracks 从 Gadgetbridge 启动/停止 GPS 轨迹记录。</string>
+    <string name="subtitle_list_custom_value_required">值不能为空</string>
+    <string name="gpx_include_navigation">包含逐向导航</string>
+    <string name="gpx_include_navigation_straight">包含“继续直走”指令</string>
+    <string name="gpx_roundabout_exit">退出 %1$d</string>
 </resources>
