@@ -334,6 +334,8 @@
     <string name="pref_summary_banglejs_phone_gps_update_interval">The interval for how often the GPS position is being updated, in ms</string>
     <string name="pref_title_banglejs_webview_url">App loader URL</string>
     <string name="pref_summary_banglejs_webview_url">If you want a custom app loader put your https://…/android.html URL here. Otherwise, leave blank for https://banglejs.com/apps</string>
+    <string name="url_stable">Stable</string>
+    <string name="url_development">Development</string>
     <string name="pref_title_rtl">Right-To-Left</string>
     <string name="pref_summary_rtl">Enable this if your device can not show right-to-left languages</string>
     <string name="pref_rtl_max_line_length">Right-To-Left Max Line Length</string>
@@ -602,6 +604,8 @@
     <string name="pref_summary_authkey">Change the auth key to a common key on all your Android devices from which you would like to connect from. The previous default key for all devices is 0123456789@ABCDE</string>
     <string name="pref_explanation_authkey">Some devices require a special pairing key for the very first initialization of the device. Tap here for more details on the website.</string>
     <string name="pref_explanation_authkey_new_protocol">If you get \"Update the app to latest version\" message on the band, make sure to check the \"New Auth Protocol\" above. Tap here for more details on the website.</string>
+    <string name="pref_title_xiaomi_device_id">Device ID</string>
+    <string name="pref_summary_xiaomi_device_id">Identifier of the phone as it was registered with the watch when it was paired with the vendor app. Required in addition to the auth key by watches that run Wear OS.</string>
     <string name="prefs_hr_alarm_activity">Heart rate alarm during sports activity</string>
     <string name="prefs_hr_alarm_low">Low limit</string>
     <string name="prefs_hr_alarm_high">High limit</string>
@@ -3846,6 +3850,8 @@
     <string name="fossil_hr_button_config_info">Some buttons cannot be configured because their functions are hard-coded in the watch firmware.\n\nWarning: long-pressing the upper button when a watchface from the official Fossil app is installed will also toggle between showing/hiding widgets.</string>
     <string name="pref_title_opentracks_packagename">OpenTracks package name</string>
     <string name="pref_summary_opentracks_packagename">Used for starting/stopping GPS track recording in external fitness app.</string>
+    <string name="pref_summary_opentracks_packagename_not_installed">Install OpenTracks to start/stop GPS track recording from Gadgetbridge.</string>
+    <string name="subtitle_list_custom_value_required">Value cannot be empty</string>
     <string name="pref_summary_navigation_forward">Forward instructions from navigation apps to the watch</string>
     <string name="pref_title_navigation_forward">Send navigation to watch</string>
     <string name="pref_summary_supported_devices">This feature is not supported by all devices. Click here for more information.</string>
@@ -4234,6 +4240,7 @@
     <string name="devicetype_xiaomi_watch_s1" translatable="false">Xiaomi Watch S1</string>
     <string name="devicetype_xiaomi_watch_s3" translatable="false">Xiaomi Watch S3</string>
     <string name="devicetype_xiaomi_watch_s4" translatable="false">Xiaomi Watch S4</string>
+    <string name="devicetype_xiaomi_watch_5" translatable="false">Xiaomi Watch 5</string>
     <string name="devicetype_xiaomi_watch_s1_active" translatable="false">Xiaomi Watch S1 Active</string>
     <string name="devicetype_xiaomi_watch_s1_pro" translatable="false">Xiaomi Watch S1 Pro</string>
     <string name="devicetype_mi_watch_color_sport" translatable="false">Mi Watch Color Sport</string>
@@ -4858,6 +4865,7 @@
     <string name="devicetype_s52" translatable="false">S52</string>
     <string name="devicetype_kieslect_calling_smartwatch_kr_pro" translatable="false">Kieslect Calling Smartwatch Kr Pro</string>
     <string name="devicetype_r1" translatable="false">R1</string>
+    <string name="devicetype_grv_fc1" translatable="false">GRV FC1</string>
     <string name="devicetype_haylou_watch_2_pro" translatable="false">Haylou Watch 2 Pro</string>
     <string name="devicetype_dotn_p66d" translatable="false">Dotn P66D</string>
     <string name="devicetype_blackview_r3max" translatable="false">Blackview R3Max</string>
@@ -5341,4 +5349,7 @@
     <string name="usb_connect_permission_denied">Permission to use the USB device was denied.</string>
     <string name="usb_connect_select_device_type">Select device type</string>
     <string name="discovery_connect_usb">Connect to USB</string>
+    <string name="gpx_include_navigation">Include turn-by-turn navigation</string>
+    <string name="gpx_include_navigation_straight">Include \'Continue straight\' instructions</string>
+    <string name="gpx_roundabout_exit">Exit %1$d</string>
 </resources>

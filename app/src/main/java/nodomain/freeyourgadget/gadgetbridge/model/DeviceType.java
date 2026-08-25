@@ -203,6 +203,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.generic_scale.GenericWeightS
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.BlackviewR3MaxCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.D3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.DotnP66DCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.GrvFc1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.HaylouWatch2ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.ImikiFrame2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.KieslectCallingSmartwatchKrProCoordinator;
@@ -520,6 +521,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.RedmiWatch5Ac
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.RedmiWatch5Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.RedmiWatch5LiteCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.RedmiWatchMoveCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatch5Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS1ActiveCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS1ProCoordinator;
@@ -627,6 +629,7 @@ public enum DeviceType {
     XIAOMI_WATCH_S1(XiaomiWatchS1Coordinator.class),
     XIAOMI_WATCH_S3(XiaomiWatchS3Coordinator.class),
     XIAOMI_WATCH_S4(XiaomiWatchS4Coordinator.class),
+    XIAOMI_WATCH_5(XiaomiWatch5Coordinator.class),
     AMAZFITGTS3(AmazfitGTS3Coordinator.class),
     AMAZFITGTR3(AmazfitGTR3Coordinator.class),
     AMAZFITGTR4(AmazfitGTR4Coordinator.class),
@@ -979,6 +982,7 @@ public enum DeviceType {
     DOTN_P66D(DotnP66DCoordinator.class),
     QECNATO_S10(QecnatoS10Coordinator.class),
     R1(R1Coordinator.class),
+    GRV_FC1(GrvFc1Coordinator.class),
     IMIKI_FRAME_2(ImikiFrame2Coordinator.class),
     KIESLECT_CALLING_SMARTWATCH_KR_PRO(KieslectCallingSmartwatchKrProCoordinator.class),
     HAYLOU_WATCH_2_PRO(HaylouWatch2ProCoordinator.class),
