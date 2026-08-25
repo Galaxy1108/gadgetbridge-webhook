@@ -567,7 +567,7 @@ object WebhookUploader {
             val asLong = value as? Long
             val normalize = (column.equals("MIN_HEART_RATE_PEAK", ignoreCase = true) ||
                 column.equals("MAX_HEART_RATE_PEAK", ignoreCase = true) ||
-                (t.name == "HuaweiWorkoutSummarySample" && column.equals("TYPE", ignoreCase = true))) &&
+                (table.name == "HuaweiWorkoutSummarySample" && column.equals("TYPE", ignoreCase = true))) &&
                 asLong != null && asLong < 0
             if (normalize) {
                 row.put(column.lowercase(), asLong!! + 256)
