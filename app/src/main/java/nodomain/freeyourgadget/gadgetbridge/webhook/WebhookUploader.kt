@@ -514,12 +514,14 @@ object WebhookUploader {
                     while (it.moveToNext()) {
                         val row = JSONObject()
                         row.put("timestamp", it.getLong(0))
-                        // GB stores per-point heart rate as a signed byte, so HR > 127
-                        // overflows to a negative value (e.g. 180 -> -76). Normalize.
+                        // GB stores per-point heart rate / step rate as signed bytes,
+                        // so values > 127 overflow to negatives (180 -> -76). The GB
+                        // charts mask with & 0xFF on read; do the same here.
                         var hr = it.getLong(1)
                         if (hr < 0) hr += 256
                         if (hr > 0) row.put("heart_rate", hr)
-                        val sr = it.getLong(2)
+                        var sr = it.getLong(2)
+                        if (sr < 0) sr += 256
                         if (sr > 0) row.put("step_rate", sr)
                         val sp = it.getLong(3)
                         if (sp > 0) row.put("speed", sp)
@@ -559,16 +561,17 @@ object WebhookUploader {
             if (column == "DEVICE_ID" || column == "USER_ID") {
                 continue
             }
-            // GB stores workout min/max HR peaks as signed bytes; normalize
-            // values that overflowed (e.g. 180 -> -76).
-            if (column.equals("MIN_HEART_RATE_PEAK", ignoreCase = true) ||
-                column.equals("MAX_HEART_RATE_PEAK", ignoreCase = true)
-            ) {
-                val asLong = value as? Long ?: continue
-                if (asLong < 0) {
-                    row.put(column.lowercase(), asLong + 256)
-                    continue
-                }
+            // GB stores several workout fields as signed bytes; normalize values
+            // that overflowed (e.g. HR peak 180 -> -76, activity type 128 -> -128)
+            // the same way the GB chart code masks with & 0xFF.
+            val asLong = value as? Long
+            val normalize = (column.equals("MIN_HEART_RATE_PEAK", ignoreCase = true) ||
+                column.equals("MAX_HEART_RATE_PEAK", ignoreCase = true) ||
+                (t.name == "HuaweiWorkoutSummarySample" && column.equals("TYPE", ignoreCase = true))) &&
+                asLong != null && asLong < 0
+            if (normalize) {
+                row.put(column.lowercase(), asLong!! + 256)
+                continue
             }
             row.put(column.lowercase(), value)
         }
