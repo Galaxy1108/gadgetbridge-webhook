@@ -4873,4 +4873,13 @@
     <string name="usb_connect_permission_denied">Oprávnění k použití USB zařízení bylo zamítnuto.</string>
     <string name="usb_connect_select_device_type">Vyberte typ zařízení</string>
     <string name="discovery_connect_usb">Připojit k USB</string>
+    <string name="url_stable">Stabilní</string>
+    <string name="url_development">Vývojová</string>
+    <string name="pref_title_xiaomi_device_id">ID zařízení</string>
+    <string name="pref_summary_xiaomi_device_id">Identifikátor telefonu tak, jak byl zaregistrován na hodinkách při spárování s aplikací výrobce. Vyžadováno navíc k autentifikačnímu klíči hodinkami, které používají Wear OS.</string>
+    <string name="pref_summary_opentracks_packagename_not_installed">Nainstalujte si OpenTracks pro spuštění/zastavení nahrávání GPS stop z Gadgetbridge.</string>
+    <string name="subtitle_list_custom_value_required">Hodnota nemůže být prázdná</string>
+    <string name="gpx_include_navigation">Zahrnout podrobnou navigaci</string>
+    <string name="gpx_include_navigation_straight">Zahrnout instrukce „Pokračujte rovně“</string>
+    <string name="gpx_roundabout_exit">Výjezd %1$d</string>
 </resources>
