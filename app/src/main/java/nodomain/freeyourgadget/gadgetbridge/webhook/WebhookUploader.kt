@@ -514,7 +514,10 @@ object WebhookUploader {
                     while (it.moveToNext()) {
                         val row = JSONObject()
                         row.put("timestamp", it.getLong(0))
-                        val hr = it.getLong(1)
+                        // GB stores per-point heart rate as a signed byte, so HR > 127
+                        // overflows to a negative value (e.g. 180 -> -76). Normalize.
+                        var hr = it.getLong(1)
+                        if (hr < 0) hr += 256
                         if (hr > 0) row.put("heart_rate", hr)
                         val sr = it.getLong(2)
                         if (sr > 0) row.put("step_rate", sr)
@@ -555,6 +558,17 @@ object WebhookUploader {
             }
             if (column == "DEVICE_ID" || column == "USER_ID") {
                 continue
+            }
+            // GB stores workout min/max HR peaks as signed bytes; normalize
+            // values that overflowed (e.g. 180 -> -76).
+            if (column.equals("MIN_HEART_RATE_PEAK", ignoreCase = true) ||
+                column.equals("MAX_HEART_RATE_PEAK", ignoreCase = true)
+            ) {
+                val asLong = value as? Long ?: continue
+                if (asLong < 0) {
+                    row.put(column.lowercase(), asLong + 256)
+                    continue
+                }
             }
             row.put(column.lowercase(), value)
         }
