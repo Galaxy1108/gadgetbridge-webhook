@@ -4457,4 +4457,5 @@
     <string name="projectedTimeHalfMarathon">Halbmarathon-Prognose</string>
     <string name="projectedTimeMarathon">Marathon-Prognose</string>
     <string name="metric_garmin_hill_score">Hill Score</string>
+    <string name="pref_log_level_trace_title">Detailliertes Logging</string>
 </resources>
