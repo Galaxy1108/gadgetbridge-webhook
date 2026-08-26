@@ -4173,4 +4173,19 @@
     <string name="casio_interval_timer_skip">Hopp over</string>
     <string name="casio_interval_timer_total">Totalt: %1$s × %2$d = %3$s</string>
     <string name="pref_export_directory">Eksporter katalog</string>
+    <string name="soundcore_equalizer_preset_podcast">Podcast</string>
+    <string name="soundcore_equalizer_preset_dance">Dance</string>
+    <string name="soundcore_equalizer_band7_freq">6.4 kHz</string>
+    <string name="soundcore_equalizer_band1_freq">100 Hz</string>
+    <string name="soundcore_3d_surround_title">3D Surround Sound</string>
+    <string name="soundcore_equalizer_band6_freq">3.2 kHz</string>
+    <string name="soundcore_equalizer_band8_freq">12.8 kHz</string>
+    <string name="qhybrid_button_function_stopwatch">Stoppeklokke</string>
+    <string name="endurain_setup_login_type_local">Lokal</string>
+    <string name="endurain_setup_mfa_code">MFA-kode</string>
+    <string name="endurain_setup_next">Neste</string>
+    <string name="warning_network_required_title">Nettverk kreves</string>
+    <string name="endurain_verify_mfa">Verifiser MFA</string>
+    <string name="endurain_no_sso_providers_available">Ingen SSO-tilbydere tilgjengelig</string>
+    <string name="electrical_current">Nåværende</string>
 </resources>
