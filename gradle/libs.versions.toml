@@ -34,7 +34,7 @@ gson = "2.14.0"
 guava = "33.7.0-android"
 hamcrest = "3.0"
 json = "20260814"
-jsoup = "1.23.1"
+jsoup = "1.23.2"
 junit = "4.13.2"
 kotlin = "2.4.10"
 logback-android = "3.0.0"
@@ -46,13 +46,16 @@ msgpack = "0.9.12"
 okhttp = "5.5.0"
 protobuf = "4.36.0"
 protobuf-plugin = "0.10.0"
+kaitai-plugin = "0.2.0"
 robolectric = "4.16.1"
 searchpreference = "2.7.3"
 slf4j = "2.0.18"
+snakeyaml = "2.6"
 solarpositioning = "2.0.13"
 security-crypto = "1.1.0"
 browser = "1.10.0"
 exifinterface = "1.4.2"
+kaitai-struct-runtime = "0.11"
 
 [libraries]
 ahocorasick = { group = "org.ahocorasick", name = "ahocorasick", version.ref = "ahocorasick" }
@@ -112,10 +115,12 @@ protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protob
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 searchpreference = { group = "com.github.ByteHamster", name = "SearchPreference", version.ref = "searchpreference" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 solarpositioning = { group = "net.e175.klaus", name = "solarpositioning", version.ref = "solarpositioning" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+kaitai-struct-runtime = { group = "io.kaitai", name = "kaitai-struct-runtime", version.ref = "kaitai-struct-runtime" }
 
 [bundles]
 android-emojify = [
@@ -141,3 +146,4 @@ mapsforge = [
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
+kaitai = { id = "org.freeyourgadget.kaitai", version.ref = "kaitai-plugin" }

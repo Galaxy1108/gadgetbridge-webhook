@@ -332,6 +332,31 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 });
             }
 
+            pref = findPreference("use_updated_location_if_available");
+            if (pref != null) {
+                pref.setOnPreferenceChangeListener((preference, newVal) -> {
+                    if (Boolean.TRUE.equals(newVal) &&
+                            ActivityCompat.checkSelfPermission(requireContext().getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(R.string.warning)
+                                .setMessage(R.string.location_permission_required)
+                                .setIcon(R.drawable.ic_warning)
+                                .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
+                                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setData(Uri.fromParts("package", requireContext().getPackageName(), null));
+                                    // highlight the permissions entry on supported devices
+                                    final Bundle fragmentArgs = new Bundle();
+                                    fragmentArgs.putString(":settings:fragment_args_key", "permission_settings");
+                                    intent.putExtra(":settings:show_fragment_args", fragmentArgs);
+                                    startActivity(intent);
+                                })
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .show();
+                    }
+                    return true;
+                });
+            }
+
             pref = findPreference("weather_city");
             if (pref != null) {
                 pref.setOnPreferenceChangeListener((preference, newVal) -> {
