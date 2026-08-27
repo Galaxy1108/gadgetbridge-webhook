@@ -1667,7 +1667,7 @@
     <string name="watchface_setting_button_toggle_backlight">Включить подсветку</string>
     <string name="pref_title_touch_volume">Громкость</string>
     <string name="devicetype_binary_sensor">Бинарный датчик</string>
-    <string name="pref_header_intent_api">Интернет API</string>
+    <string name="pref_header_intent_api">Intent API</string>
     <string name="offline_voice_respond_screen_on">Отвечать, когда экран включен</string>
     <string name="kind_app">Приложение</string>
     <string name="pref_title_lower_button_short_press_action">Действие при быстром нажатии на нижнюю кнопку</string>
@@ -1710,7 +1710,7 @@
     <string name="auto_reconnect_ble_summary">Периодически пытаться переподключиться</string>
     <string name="application_name_banglejs_nightly">Bangle.js Gadgetbridge (Ночнушка)</string>
     <string name="activity_db_management_autoexport_scheduled_no">Авто-экспорт не был запланирован.</string>
-    <string name="activity_prefs_allow_bluetooth_intent_api">Bluetooth ИНТЕРНЕТ API</string>
+    <string name="activity_prefs_allow_bluetooth_intent_api">Bluetooth Intent API</string>
     <string name="menuitem_wifi">Wi-Fi</string>
     <string name="activity_db_management_autoexport_scheduled_yes">Авто-экспорт был изначально запланирован на %1$s</string>
     <string name="activity_db_management_autoexport_location">Не удалось определить местоположение. Возможно, эта проблема связана с новой системой разрешений в Android. Скорее всего, автоэкспорт сейчас не работает.</string>
@@ -2573,7 +2573,7 @@
     <string name="error_showing_changelog">Не удалось открыть журнал изменений</string>
     <string name="activity_type_worn">Ношение</string>
     <string name="pref_dashboard_widget_today_24h_title">24ч стиль</string>
-    <string name="bottom_nav_dashboard">Приборная панель</string>
+    <string name="bottom_nav_dashboard">Сводка</string>
     <string name="notification_channel_scan_service_name">Служба сканирования</string>
     <string name="huawei_trusleep_warning">Внимание: функциональнось TruSleep™ сделана не полностью. При её включении на некоторых устройствах все данные о сне будут отображаться в Gadgetbridge как неглубокий сон!</string>
     <string name="activity_type_mountain_hike">Горная прогулка</string>
@@ -3261,7 +3261,7 @@
     <string name="first_start_overview_desc">В Гаджетбридже есть два основных вида, каждый из которых имеет свое предназначение.</string>
     <string name="first_start_get_started_add_first_device_button">Добавьте первое устройство</string>
     <string name="music_delete_multiple_confirm_description">Вы уверены, что хотите удалить песни \"%1$d\"?</string>
-    <string name="first_start_overview_dashboard">Приборная панель позволяет быстро получить представление о том, как обстоят ваши дела на сегодняшний день. В календаре отображается состояние ваших целей за целый месяц.</string>
+    <string name="first_start_overview_dashboard">Экран сводки позволяет быстро получить представление о том, как обстоят ваши дела на сегодняшний день. В календаре отображается состояние ваших целей за целый месяц.</string>
     <string name="first_start_overview_devices">В окне устройств отображаются все настроенные устройства и их состояние, а также доступ к функциям конкретного устройства, таким как подробные графики, настройки, приложения и сигналы тревоги.</string>
     <string name="first_start_permissions_request_button">Запрос</string>
     <string name="first_start_get_started_desc">Чтобы начать работу, добавьте свое первое устройство прямо с этого экрана, восстановите резервную копию или начните с чистой базы данных.</string>
@@ -3769,7 +3769,7 @@
     <string name="pref_even_realities_g1_screen_depth_title">Глубина экрана</string>
     <string name="pref_even_realities_g1_screen_depth_summary">Изменяет бинокулярное разделение и видимую глубину отображения</string>
     <string name="pref_even_realities_g1_screen_activation_angle_title">Угол активации</string>
-    <string name="pref_even_realities_g1_screen_activation_angle_summary">Изменяет высоту, на которую пользователю необходимо поднять голову, чтобы отобразилась приборная панель</string>
+    <string name="pref_even_realities_g1_screen_activation_angle_summary">Изменяет высоту, на которую пользователю необходимо поднять голову, чтобы отобразилась сводка</string>
     <string name="pref_even_realities_g1_screen_calibrate_angle_title">Калибровать угол</string>
     <string name="pref_even_realities_g1_screen_calibrate_angle_summary">Обнулите угол наклона очков, посмотрите прямо перед собой и нажмите здесь</string>
     <string name="even_realities_frame_shape_G1A">G1A/Округлый</string>
