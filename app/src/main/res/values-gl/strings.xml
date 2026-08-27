@@ -504,4 +504,9 @@
     <string name="controlcenter_change_fm_frequency">Cambiar frecuencia FM</string>
     <string name="controlcenter_change_led_color">Cambiar cor LED</string>
     <string name="find_lost_device_message">Buscar a %1$s\?</string>
+    <string name="about_activity_title_generic">Sobre Gadgetbridge</string>
+    <string name="about_description_generic">Substituta libre e sen servidor das aplicacións Android de código propietario dos fabricantes de dispositivos.</string>
+    <string name="application_name_banglejs_main">Bangle.js Gadgetbridge</string>
+    <string name="title_activity_controlcenter_banglejs_main">Bangle.js Gadgetbridge</string>
+    <string name="about_activity_title_banglejs_main">Sobre Bangle.js Gadgetbridge</string>
 </resources>
