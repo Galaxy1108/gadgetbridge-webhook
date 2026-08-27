@@ -4188,4 +4188,10 @@
     <string name="endurain_verify_mfa">Verifiser MFA</string>
     <string name="endurain_no_sso_providers_available">Ingen SSO-tilbydere tilgjengelig</string>
     <string name="electrical_current">Nåværende</string>
+    <string name="pref_title_general_prefs_key_sort_by_last_connected_ts">Sorter etter siste tilkoblingsdato</string>
+    <string name="pref_summary_general_prefs_key_sort_by_last_connected_ts">Sorter frakoblede enheter etter når de sist var tilkoblet, i stedet for alfabetisk</string>
+    <string name="url_development">Utvikling</string>
+    <string name="casio_interval_timer_slot">Trinn %1$d</string>
+    <string name="pref_title_xiaomi_device_id">Enhets-ID</string>
+    <string name="stamina">Utholdenhet</string>
 </resources>
