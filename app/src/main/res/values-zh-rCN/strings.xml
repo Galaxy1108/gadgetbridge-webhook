@@ -4877,4 +4877,5 @@
     <string name="gpx_include_navigation_straight">包含“继续直走”指令</string>
     <string name="gpx_roundabout_exit">退出 %1$d</string>
     <string name="location_permission_required">此功能需要位置权限。要允许 Gadgetbridge 在后台运行时进行更新，请在下一个屏幕上打开“权限”&gt;“位置”，然后选择“始终允许”。</string>
+    <string name="weather_condition_light_shower_sleet">小雨夹雪</string>
 </resources>
