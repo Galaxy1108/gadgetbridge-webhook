@@ -168,6 +168,8 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     private boolean mFirstConnect = false;
     private boolean isBusyFetching;
 
+    private int maxPacketSize = 400;
+
     private SleepAsAndroidSender sleepAsAndroidSender;
     private ScheduledExecutorService saaAlarmScheduler;
 
@@ -489,6 +491,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             ));
         } else if (deviceEvent instanceof MaxPacketSizeDeviceEvent maxPacketSizeDeviceEvent) {
             LOG.debug("Got new max packet size of {}", maxPacketSizeDeviceEvent.getMaxPacketSize());
+            maxPacketSize = maxPacketSizeDeviceEvent.getMaxPacketSize();
             fileTransferHandler.setMaxPacketSize(maxPacketSizeDeviceEvent.getMaxPacketSize());
         } else if (deviceEvent instanceof SupportedFileTypesDeviceEvent) {
             this.supportedFileTypeList.clear();
@@ -542,7 +545,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             currentlyDownloading = null;
         } else if (deviceEvent instanceof IncomingFitDefinitionDeviceEvent) {
-            final FitLocalMessageHandler fitLocalMessageHandler = new FitLocalMessageHandler(this, ((IncomingFitDefinitionDeviceEvent) deviceEvent).getRecordDefinitions());
+            final FitLocalMessageHandler fitLocalMessageHandler = new FitLocalMessageHandler(this, ((IncomingFitDefinitionDeviceEvent) deviceEvent).getRecordDefinitions(), maxPacketSize);
             messageHandlers.add(fitLocalMessageHandler);
         } else {
             super.evaluateGBDeviceEvent(deviceEvent);
@@ -740,7 +743,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         final FitLocalMessageBuilder weatherLocalMessage = encodeWeather(weather);
 
-        final FitLocalMessageHandler weatherHandler = new FitLocalMessageHandler(this, weatherLocalMessage);
+        final FitLocalMessageHandler weatherHandler = new FitLocalMessageHandler(this, weatherLocalMessage, maxPacketSize);
         messageHandlers.add(weatherHandler);
 
         sendOutgoingMessage("send " + weatherLocalMessage.getDefinitions().size() + " weather definitions", weatherHandler.init());
@@ -798,6 +801,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             }
         }
 
+        // Always ensure that todayDailyForecast or weatherDailyForecast have the same fields set,
+        // since they share the same message type in the definition message
+        final int dailyMessageType = weatherLocalMessage.getNextAvailableLocalMessageType();
+
         final FitWeather.Builder todayDailyForecast = new FitWeather.Builder();
         todayDailyForecast.setWeatherReport(WeatherReport.daily_forecast);
         todayDailyForecast.setTimestamp((long) weather.getTimestamp());
@@ -813,9 +820,8 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         todayDailyForecast.weatherUvIndex(weather.getUvIndex());
         todayDailyForecast.weatherAtmosphericPressure(weather.getPressure());
         // TODO: FIT encoding unclear for weather.getCloudCover()
-        weatherLocalMessage.addRecordData(todayDailyForecast.build(weatherLocalMessage.getNextAvailableLocalMessageType()));
+        weatherLocalMessage.addRecordData(todayDailyForecast.build(dailyMessageType));
 
-        final int dailyMessageType = weatherLocalMessage.getNextAvailableLocalMessageType();
         for (int day = 0; day < 4; day++) {
             if (day < weather.getForecasts().size()) {
                 WeatherSpec.Daily daily = weather.getForecasts().get(day);

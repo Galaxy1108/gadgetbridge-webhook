@@ -40,12 +40,14 @@ public class BluetoothNameTest extends TestBase {
             put("Soundcore Q30", DeviceType.SOUNDCORE_Q30); // #4316
             put("soundcore Q30", DeviceType.SOUNDCORE_Q30); // #6371
             put("soundcore  Q30", DeviceType.SOUNDCORE_Q30); // #6371 - unsure
+            put("Alt Vibe", DeviceType.ALT_VIBE); // #6575
             put("P8", DeviceType.WASPOS); // from wasp-os source
             put("P8DFU", DeviceType.WASPOS); // from wasp-os source
             put("P80", DeviceType.COLMI_P80);
             put("L 70", DeviceType.L70);
             put("V73", DeviceType.COLMI_V73); // #5715
             put("R05_9805", DeviceType.YAWELL_R05); // #3896
+            put("Swiss Peak-BA93", DeviceType.GLORYFIT_SWISS_PEAK); //#6626
             put("FC1(ID-8309)", DeviceType.GRV_FC1); //#6531
             put("BT103(ID-AB01)", DeviceType.OUKITEL_BT103);
             put("P66D(ID-AB01)", DeviceType.DOTN_P66D);
@@ -254,6 +256,9 @@ public class BluetoothNameTest extends TestBase {
             put("Soundcore Life Tune", DeviceType.SOUNDCORE_LIFE_TUNE); // #6396
             put("Soundcore Life Tune XR", DeviceType.SOUNDCORE_LIFE_TUNE_XR); // #6396
             put("OsmoAction4-ABCD", DeviceType.DJI_OSMO_ACTION_4);
+            put("Bose QC 35 II", DeviceType.BOSE_QC35);
+            put("Bose NC 700 Headphones", DeviceType.BOSE_NC700);
+            put("LE-Bose NC 700 Headphones", DeviceType.BOSE_NC700);
         }};
 
         for (Map.Entry<String, DeviceType> e : bluetoothNameToExpectedType.entrySet()) {

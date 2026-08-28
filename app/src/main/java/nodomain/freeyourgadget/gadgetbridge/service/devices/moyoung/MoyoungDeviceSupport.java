@@ -196,12 +196,15 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
-        final int mtu = ((AbstractMoyoungDeviceCoordinator) getDevice().getDeviceCoordinator()).getMtu();
+        final AbstractMoyoungDeviceCoordinator coordinator = (AbstractMoyoungDeviceCoordinator) getDevice().getDeviceCoordinator();
+        final int mtu = coordinator.getMtu();
         builder.requestMtu(mtu + 3);  // Add 3 bytes for the BLE overhead
 
         builder.setDeviceState(GBDevice.State.INITIALIZING);
         builder.notify(MoyoungConstants.UUID_CHARACTERISTIC_DATA_IN, true);
-        deviceInfoProfile.requestDeviceInfo(builder);
+        if (coordinator.supportsDeviceInfoProfile()) {
+            deviceInfoProfile.requestDeviceInfo(builder);
+        }
         setTime(builder);
         setMeasurementSystem(builder);
         sendSetting(builder, getSetting("USER_INFO"), new ActivityUser()); // these settings are write-only, so write them just in case because there is no way to know if they desynced somehow
@@ -1501,6 +1504,7 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
             int steps = buffer.getInt();
             int distance = buffer.getInt();
             int calories;
+            float maxSpeed = 0;
             if (protocolVersion == 1) {
                 calories = buffer.getShort();
             } else if (protocolVersion == 2) {
@@ -1509,9 +1513,9 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
                 calories = buffer.getShort();
                 avgHR = buffer.get();
                 buffer.get(); // 0?
-                // todo last 4 bytes?
+                maxSpeed = buffer.getFloat();
             }
-            LOG.info("Training data: start={} end={} totalTimeWithoutPause={} num={} type={} steps={} avgHR={} distance={} calories={}", startTime, endTime, validTime, num, type, steps, avgHR, distance, calories);
+            LOG.info("Training data: start={} end={} totalTimeWithoutPause={} num={} type={} steps={} avgHR={} distance={} calories={} maxSpeed={}", startTime, endTime, validTime, num, type, steps, avgHR, distance, calories, maxSpeed);
 
             // NOTE: We are ignoring the step/distance/calories data here
             // If we had the phone connected, the realtime data is already stored anyway, and I'm
@@ -1645,9 +1649,9 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends MoyoungSetting> T getSetting(String id) {
+    private <T extends MoyoungSetting<?>> T getSetting(String id) {
         AbstractMoyoungDeviceCoordinator coordinator = (AbstractMoyoungDeviceCoordinator) getDevice().getDeviceCoordinator();
-        for (MoyoungSetting setting : coordinator.getSupportedSettings()) {
+        for (MoyoungSetting<?> setting : coordinator.getSupportedSettings()) {
             if (setting.name.equals(id))
                 return (T) setting;
         }

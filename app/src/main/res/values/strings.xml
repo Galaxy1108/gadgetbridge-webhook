@@ -431,6 +431,7 @@
     <string name="pref_title_location_keep_uptodate">Keep location updated</string>
     <string name="pref_summary_location_keep_uptodate">Try to get the current location at runtime, use the stored location as fallback</string>
     <string name="toast_enable_networklocationprovider">Please enable network location</string>
+    <string name="location_permission_required">Location permission is required for this feature. To allow updates while Gadgetbridge is running in the background, open Permissions > Location on the next screen and select \"Allow all the time\".</string>
     <string name="toast_aqurired_networklocation">location acquired</string>
     <string name="pref_title_pebble_forceprotocol">Force notification protocol</string>
     <string name="pref_summary_pebble_forceprotocol">This option forces using the latest notification protocol depending on the firmware version. KNOW WHAT YOU ARE DOING!</string>
@@ -2030,15 +2031,19 @@
     <string name="devicetype_amazfit_helio_strap" translatable="false">Amazfit Helio Strap</string>
     <string name="devicetype_amazfit_helio_ring" translatable="false">Amazfit Helio Ring</string>
     <string name="devicetype_zepp_e" translatable="false">Zepp E</string>
+    <string name="devicetype_garmin_lily" translatable="false">Garmin Lily</string>
     <string name="devicetype_garmin_lily_2" translatable="false">Garmin Lily 2</string>
     <string name="devicetype_garmin_lily_2_active" translatable="false">Garmin Lily 2 Active</string>
     <string name="devicetype_garmin_vivomove_hr" translatable="false">Garmin Vívomove HR</string>
     <string name="devicetype_garmin_vivomove_style" translatable="false">Garmin Vívomove Style</string>
+    <string name="devicetype_garmin_vivomove" translatable="false">Garmin Vívomove</string>
     <string name="devicetype_garmin_vivomove_sport" translatable="false">Garmin Vívomove Sport</string>
     <string name="devicetype_garmin_vivomove_trend" translatable="false">Garmin Vívomove Trend</string>
     <string name="devicetype_garmin_venu" translatable="false">Garmin Venu</string>
     <string name="devicetype_garmin_venu_sq" translatable="false">Garmin Venu Sq</string>
+    <string name="devicetype_garmin_venu_sq_music" translatable="false">Garmin Venu Sq Music</string>
     <string name="devicetype_garmin_venu_sq_2" translatable="false">Garmin Venu Sq 2</string>
+    <string name="devicetype_garmin_venu_sq_2_music" translatable="false">Garmin Venu Sq 2 Music</string>
     <string name="devicetype_garmin_venu_2" translatable="false">Garmin Venu 2</string>
     <string name="devicetype_garmin_venu_2_plus" translatable="false">Garmin Venu 2 Plus</string>
     <string name="devicetype_garmin_venu_2s" translatable="false">Garmin Venu 2S</string>
@@ -2048,6 +2053,21 @@
     <string name="devicetype_garmin_venu_x1" translatable="false">Garmin Venu X1</string>
     <string name="devicetype_garmin_cirqa" translatable="false">Garmin CIRQA</string>
     <string name="devicetype_garmin_edge_25" translatable="false">Garmin Edge 25</string>
+    <string name="devicetype_garmin_edge_510" translatable="false">Garmin Edge 510</string>
+    <string name="devicetype_garmin_edge_520" translatable="false">Garmin Edge 520</string>
+    <string name="devicetype_garmin_edge_520_plus" translatable="false">Garmin Edge 520 Plus</string>
+    <string name="devicetype_garmin_edge_530" translatable="false">Garmin Edge 530</string>
+    <string name="devicetype_garmin_edge_550" translatable="false">Garmin Edge 550</string>
+    <string name="devicetype_garmin_edge_810" translatable="false">Garmin Edge 810</string>
+    <string name="devicetype_garmin_edge_820" translatable="false">Garmin Edge 820</string>
+    <string name="devicetype_garmin_edge_830" translatable="false">Garmin Edge 830</string>
+    <string name="devicetype_garmin_edge_850" translatable="false">Garmin Edge 850</string>
+    <string name="devicetype_garmin_edge_1000" translatable="false">Garmin Edge 1000</string>
+    <string name="devicetype_garmin_edge_1030" translatable="false">Garmin Edge 1030</string>
+    <string name="devicetype_garmin_edge_1030_plus" translatable="false">Garmin Edge 1030 Plus</string>
+    <string name="devicetype_garmin_edge_explore_1000" translatable="false">Garmin Edge Explore 1000</string>
+    <string name="devicetype_garmin_edge_explore_820" translatable="false">Garmin Edge Explore 820</string>
+    <string name="devicetype_garmin_edge_mtb" translatable="false">Garmin Edge MTB</string>
     <string name="devicetype_garmin_edge_130" translatable="false">Garmin Edge 130</string>
     <string name="devicetype_garmin_edge_130_plus" translatable="false">Garmin Edge 130 Plus</string>
     <string name="devicetype_garmin_edge_540" translatable="false">Garmin Edge 540</string>
@@ -2060,37 +2080,57 @@
     <string name="devicetype_garmin_gpsmap_h1" translatable="false">Garmin GPSMAP H1</string>
     <string name="devicetype_garmin_etrex_se" translatable="false">Garmin eTrex SE</string>
     <string name="devicetype_garmin_enduro" translatable="false">Garmin Enduro</string>
+    <string name="devicetype_garmin_enduro_2" translatable="false">Garmin Enduro 2</string>
     <string name="devicetype_garmin_enduro_3" translatable="false">Garmin Enduro 3</string>
     <string name="devicetype_garmin_epix" translatable="false">Garmin Epix</string>
+    <string name="devicetype_garmin_epix_gen2" translatable="false">Garmin Epix (Gen 2)</string>
     <string name="devicetype_garmin_epix_pro" translatable="false">Garmin Epix Pro</string>
+    <string name="devicetype_garmin_fenix_2" translatable="false">Garmin Fenix 2</string>
     <string name="devicetype_garmin_fenix_3" translatable="false">Garmin Fenix 3</string>
+    <string name="devicetype_garmin_fenix_3_chronos" translatable="false">Garmin Fenix 3 Chronos</string>
     <string name="devicetype_garmin_fenix_3_hr" translatable="false">Garmin Fenix 3 HR</string>
     <string name="devicetype_garmin_fenix_5" translatable="false">Garmin Fenix 5</string>
     <string name="devicetype_garmin_fenix_5s" translatable="false">Garmin Fenix 5S</string>
     <string name="devicetype_garmin_fenix_5_plus" translatable="false">Garmin Fenix 5 Plus</string>
     <string name="devicetype_garmin_fenix_5s_plus" translatable="false">Garmin Fenix 5S Plus</string>
+    <string name="devicetype_garmin_fenix_5x" translatable="false">Garmin Fenix 5X</string>
     <string name="devicetype_garmin_fenix_5x_plus" translatable="false">Garmin Fenix 5X Plus</string>
+    <string name="devicetype_garmin_fenix_e" translatable="false">Garmin Fenix E</string>
     <string name="devicetype_garmin_fenix_6" translatable="false">Garmin Fenix 6</string>
+    <string name="devicetype_garmin_fenix_6_sport" translatable="false">Garmin Fenix 6 Sport</string>
     <string name="devicetype_garmin_fenix_6_pro" translatable="false">Garmin Fenix 6 Pro</string>
     <string name="devicetype_garmin_fenix_6_sapphire" translatable="false">Garmin Fenix 6 Sapphire</string>
     <string name="devicetype_garmin_fenix_6s" translatable="false">Garmin Fenix 6S</string>
+    <string name="devicetype_garmin_fenix_6s_sport" translatable="false">Garmin Fenix 6S Sport</string>
     <string name="devicetype_garmin_fenix_6s_pro" translatable="false">Garmin Fenix 6S Pro</string>
     <string name="devicetype_garmin_fenix_6s_pro_solar" translatable="false">Garmin Fenix 6S Pro Solar</string>
     <string name="devicetype_garmin_fenix_6s_sapphire" translatable="false">Garmin Fenix 6S Sapphire</string>
+    <string name="devicetype_garmin_fenix_6x" translatable="false">Garmin Fenix 6X</string>
     <string name="devicetype_garmin_fenix_6x_pro" translatable="false">Garmin Fenix 6X Pro</string>
     <string name="devicetype_garmin_fenix_6x_pro_solar" translatable="false">Garmin Fenix 6X Pro Solar</string>
     <string name="devicetype_garmin_fenix_6x_sapphire" translatable="false">Garmin Fenix 6X Sapphire</string>
     <string name="devicetype_garmin_fenix_7" translatable="false">Garmin Fenix 7</string>
     <string name="devicetype_garmin_fenix_7s" translatable="false">Garmin Fenix 7S</string>
     <string name="devicetype_garmin_fenix_7s_pro" translatable="false">Garmin Fenix 7S Pro</string>
+    <string name="devicetype_garmin_fenix_7s_pro_solar" translatable="false">Garmin Fenix 7S Pro Solar</string>
     <string name="devicetype_garmin_fenix_7x" translatable="false">Garmin Fenix 7X</string>
     <string name="devicetype_garmin_fenix_7_pro" translatable="false">Garmin Fenix 7 Pro</string>
+    <string name="devicetype_garmin_fenix_7_pro_solar" translatable="false">Garmin Fenix 7 Pro Solar</string>
     <string name="devicetype_garmin_fenix_7x_pro" translatable="false">Garmin Fenix 7X Pro</string>
+    <string name="devicetype_garmin_fenix_7x_pro_solar" translatable="false">Garmin Fenix 7X Pro Solar</string>
     <string name="devicetype_garmin_fenix_8" translatable="false">Garmin Fenix 8</string>
+    <string name="devicetype_garmin_fenix_8s" translatable="false">Garmin Fenix 8S</string>
+    <string name="devicetype_garmin_fenix_8_solar" translatable="false">Garmin Fenix 8 Solar</string>
+    <string name="devicetype_garmin_fenix_8_pro" translatable="false">Garmin Fenix 8 Pro</string>
+    <string name="devicetype_garmin_fenix_9" translatable="false">Garmin Fenix 9</string>
+    <string name="devicetype_garmin_fenix_9_pro" translatable="false">Garmin Fenix 9 Pro</string>
+    <string name="devicetype_garmin_fenix_9_pro_solar" translatable="false">Garmin Fenix 9 Pro Solar</string>
     <string name="devicetype_garmin_quatix_8" translatable="false">Garmin Quatix 8</string>
     <string name="devicetype_garmin_tactix_7" translatable="false">Garmin Tactix 7</string>
     <string name="devicetype_garmin_tactix_8" translatable="false">Garmin Tactix 8</string>
+    <string name="devicetype_garmin_tactix_8_solar" translatable="false">Garmin Tactix 8 Solar</string>
     <string name="devicetype_garmin_descent_mk3" translatable="false">Garmin Descent Mk3</string>
+    <string name="devicetype_garmin_descent_mk3i" translatable="false">Garmin Descent Mk3i</string>
     <string name="devicetype_garmin_descent_g1" translatable="false">Garmin Descent G1</string>
     <string name="devicetype_garmin_descent_g2" translatable="false">Garmin Descent G2</string>
     <string name="devicetype_garmin_inReach_mini_2" translatable="false">Garmin inReach Mini 2</string>
@@ -2101,6 +2141,7 @@
     <string name="devicetype_garmin_instinct_2s" translatable="false">Garmin Instinct 2S</string>
     <string name="devicetype_garmin_instinct_2s_surf" translatable="false">Garmin Instinct 2S Surf</string>
     <string name="devicetype_garmin_instinct_2s_solar" translatable="false">Garmin Instinct 2S Solar</string>
+    <string name="devicetype_garmin_instinct_2x" translatable="false">Garmin Instinct 2X</string>
     <string name="devicetype_garmin_instinct_2x_solar" translatable="false">Garmin Instinct 2X Solar</string>
     <string name="devicetype_garmin_instinct_2x_tactical" translatable="false">Garmin Instinct 2X Tactical</string>
     <string name="devicetype_garmin_instinct_2_solar" translatable="false">Garmin Instinct 2 Solar</string>
@@ -2109,7 +2150,11 @@
     <string name="devicetype_garmin_instinct_tactical" translatable="false">Garmin Instinct Tactical</string>
     <string name="devicetype_garmin_instinct_e" translatable="false">Garmin Instinct E</string>
     <string name="devicetype_garmin_instinct_3" translatable="false">Garmin Instinct 3</string>
+    <string name="devicetype_garmin_instinct_3_solar" translatable="false">Garmin Instinct 3 Solar</string>
+    <string name="devicetype_garmin_instinct_3_solar_tactical" translatable="false">Garmin Instinct 3 Solar Tactical</string>
     <string name="devicetype_garmin_instinct_3_tactical" translatable="false">Garmin Instinct 3 Tactical</string>
+    <string name="devicetype_garmin_forerunner_25" translatable="false">Garmin Forerunner 25</string>
+    <string name="devicetype_garmin_forerunner_30" translatable="false">Garmin Forerunner 30</string>
     <string name="devicetype_garmin_forerunner_35" translatable="false">Garmin Forerunner 35</string>
     <string name="devicetype_garmin_forerunner_45" translatable="false">Garmin Forerunner 45</string>
     <string name="devicetype_garmin_forerunner_55" translatable="false">Garmin Forerunner 55</string>
@@ -2117,6 +2162,8 @@
     <string name="devicetype_garmin_forerunner_165_music" translatable="false">Garmin Forerunner 165 Music</string>
     <string name="devicetype_garmin_forerunner_170" translatable="false">Garmin Forerunner 170</string>
     <string name="devicetype_garmin_forerunner_170_music" translatable="false">Garmin Forerunner 170 Music</string>
+    <string name="devicetype_garmin_forerunner_220" translatable="false">Garmin Forerunner 220</string>
+    <string name="devicetype_garmin_forerunner_225" translatable="false">Garmin Forerunner 225</string>
     <string name="devicetype_garmin_forerunner_230" translatable="false">Garmin Forerunner 230</string>
     <string name="devicetype_garmin_forerunner_235" translatable="false">Garmin Forerunner 235</string>
     <string name="devicetype_garmin_forerunner_245" translatable="false">Garmin Forerunner 245</string>
@@ -2130,23 +2177,32 @@
     <string name="devicetype_garmin_forerunner_570" translatable="false">Garmin Forerunner 570</string>
     <string name="devicetype_garmin_forerunner_620" translatable="false">Garmin Forerunner 620</string>
     <string name="devicetype_garmin_forerunner_630" translatable="false">Garmin Forerunner 630</string>
+    <string name="devicetype_garmin_forerunner_645" translatable="false">Garmin Forerunner 645</string>
     <string name="devicetype_garmin_forerunner_645_music" translatable="false">Garmin Forerunner 645 Music</string>
+    <string name="devicetype_garmin_forerunner_70" translatable="false">Garmin Forerunner 70</string>
     <string name="devicetype_garmin_forerunner_735xt" translatable="false">Garmin Forerunner 735XT</string>
     <string name="devicetype_garmin_forerunner_745" translatable="false">Garmin Forerunner 745</string>
     <string name="devicetype_garmin_forerunner_920" translatable="false">Garmin Forerunner 920</string>
+    <string name="devicetype_garmin_forerunner_920xt" translatable="false">Garmin Forerunner 920XT</string>
     <string name="devicetype_garmin_forerunner_935" translatable="false">Garmin Forerunner 935</string>
     <string name="devicetype_garmin_forerunner_945" translatable="false">Garmin Forerunner 945</string>
+    <string name="devicetype_garmin_forerunner_945_lte" translatable="false">Garmin Forerunner 945 LTE</string>
     <string name="devicetype_garmin_forerunner_955" translatable="false">Garmin Forerunner 955</string>
     <string name="devicetype_garmin_forerunner_965" translatable="false">Garmin Forerunner 965</string>
     <string name="devicetype_garmin_forerunner_970" translatable="false">Garmin Forerunner 970</string>
     <string name="devicetype_garmin_swim_2" translatable="false">Garmin Swim 2</string>
     <string name="devicetype_garmin_vivoactive_3" translatable="false">Garmin Vívoactive 3</string>
     <string name="devicetype_garmin_vivoactive_3_music" translatable="false">Garmin Vívoactive 3 Music</string>
+    <string name="devicetype_garmin_vivoactive_3t" translatable="false">Garmin Vívoactive 3T</string>
     <string name="devicetype_garmin_vivoactive_4" translatable="false">Garmin Vívoactive 4</string>
     <string name="devicetype_garmin_vivoactive_4s" translatable="false">Garmin Vívoactive 4S</string>
     <string name="devicetype_garmin_vivoactive_5" translatable="false">Garmin Vívoactive 5</string>
+    <string name="devicetype_garmin_vivoactive" translatable="false">Garmin Vívoactive</string>
     <string name="devicetype_garmin_vivoactive_6" translatable="false">Garmin Vívoactive 6</string>
     <string name="devicetype_garmin_vivoactive_hr" translatable="false">Garmin Vívoactive HR</string>
+    <string name="devicetype_garmin_vivosmart" translatable="false">Garmin Vívosmart</string>
+    <string name="devicetype_garmin_vivosmart_hr" translatable="false">Garmin Vívosmart HR</string>
+    <string name="devicetype_garmin_vivosmart_hr_plus" translatable="false">Garmin Vívosmart HR+</string>
     <string name="devicetype_garmin_vivosmart_3" translatable="false">Garmin Vívosmart 3</string>
     <string name="devicetype_garmin_vivosmart_4" translatable="false">Garmin Vívosmart 4</string>
     <string name="devicetype_garmin_vivosmart_5" translatable="false">Garmin Vívosmart 5</string>
@@ -2340,6 +2396,7 @@
     <string name="devicetype_blackview_r60" translatable="false">Blackview R60</string>
     <string name="devicetype_misirun_c17" translatable="false">Misirun C17</string>
     <string name="devicetype_c20" translatable="false">C20</string>
+    <string name="devicetype_alt_vibe" translatable="false">Alt Vibe</string>
     <string name="devicetype_l70" translatable="false">L 70</string>
     <string name="devicetype_kt80" translatable="false">KT80</string>
     <string name="devicetype_hc96" translatable="false">HC96</string>
@@ -2597,6 +2654,7 @@
     <string name="weather_condition_light_shower_snow">light shower snow</string>
     <string name="weather_condition_heavy_snow">heavy snow</string>
     <string name="weather_condition_sleet">sleet</string>
+    <string name="weather_condition_light_shower_sleet">light shower sleet</string>
     <string name="weather_condition_shower_sleet">shower sleet</string>
     <string name="weather_condition_shower_snow">shower snow</string>
     <string name="weather_condition_heavy_shower_snow">heavy shower snow</string>
@@ -3798,6 +3856,7 @@
     <string name="qhybrid_summary_on_device_confirmation">On-device pairing confirmations can get annoying. Disabling them might lose you functionality.</string>
     <string name="devicetype_vesc" translatable="false">VESC</string>
     <string name="devicetype_bose_qc35" translatable="false">Bose QC35</string>
+    <string name="devicetype_bose_nc700" translatable="false">Bose NC 700</string>
     <string name="devicetype_onemore_sonoflow" translatable="false">1MORE SonoFlow</string>
     <string name="devicetype_sony_wena3" translatable="false">Sony Wena 3</string>
     <string name="devicetype_withings_steel_hr" translatable="false">Withings Steel HR</string>
@@ -4857,6 +4916,7 @@
     <string name="devicetype_imiki_frame_2" translatable="false">IMIKI Frame 2</string>
     <string name="devicetype_ollee_watch_one" translatable="false">Ollee Watch One</string>
     <string name="devicetype_oukitel_bt103" translatable="false">Oukitel BT103</string>
+    <string name="devicetype_swiss_peak" translatable="false">Swiss Peak</string>
     <string name="devicetype_una_watch" translatable="false">UNA Watch</string>
     <string name="devicetype_dm58" translatable="false">DM58</string>
     <string name="devicetype_y6" translatable="false">Y6</string>
