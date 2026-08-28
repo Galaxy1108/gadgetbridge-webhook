@@ -3137,4 +3137,15 @@
     <string name="idasen_pref_stand_height">站立高度(公分)</string>
     <string name="unit_millimeter">公釐</string>
     <string name="centimeters_second">公分/秒</string>
+    <string name="phone_gps_not_available">手機 GPS 不可用</string>
+    <string name="appmanager_app_store">應用商店</string>
+    <string name="refresh">重新整理</string>
+    <string name="pref_header_sync">同步</string>
+    <string name="pref_header_dashboard">儀表版</string>
+    <string name="pref_title_general_prefs_key_sort_by_last_connected_ts">使用最後連線日期來排序</string>
+    <string name="casio_interval_timer_skip">跳過</string>
+    <string name="casio_interval_timer_default_label">計時器%1$d</string>
+    <string name="casio_interval_timer_total">總計︰ %1$s × %2$d = %3$s</string>
+    <string name="pref_title_unit_weight">重量單位</string>
+    <string name="pref_title_xiaomi_device_id">裝置 ID</string>
 </resources>
