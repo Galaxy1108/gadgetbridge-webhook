@@ -1,3 +1,19 @@
+/*  Copyright (C) 2025-2026 José Rebelo, Thomas Kuehne
+
+    This file is part of Gadgetbridge.
+
+    Gadgetbridge is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Gadgetbridge is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin
 
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService
@@ -15,10 +31,28 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
             fileSyncService.hasNewFileNotification() -> handleNewFileNotification(fileSyncService.newFileNotification)
             fileSyncService.hasFileListResponse() -> handleFileListResponse(fileSyncService.fileListResponse)
             fileSyncService.hasFileResponse() -> handleFileResponse(fileSyncService.fileResponse)
+            fileSyncService.hasFileModifiedFlags() -> handleFileModifiedFlags(fileSyncService.fileModifiedFlags)
+            fileSyncService.hasTransferStatusRequest() -> handleTransferStatusRequest(fileSyncService.transferStatusRequest)
             else -> {
                 LOG.warn("Unhandled file sync service: {}", fileSyncService)
                 return null
             }
+        }
+    }
+
+    private fun handleFileModifiedFlags(fileModifiedFlags: GdiFileSyncService.FileModifiedFlags): GdiFileSyncService.FileSyncService? {
+        LOG.debug("Got file modified flags: {}", fileModifiedFlags)
+        // no action required
+        return null
+    }
+
+    private fun handleTransferStatusRequest(transferStatusRequest: GdiFileSyncService.TransferStatusRequest): GdiFileSyncService.FileSyncService? {
+        LOG.debug("Got transfer status request: {}", transferStatusRequest)
+        val response = GdiFileSyncService.TransferStatusResponse.newBuilder().buildWith {
+            unk1 = 1
+        }
+        return GdiFileSyncService.FileSyncService.newBuilder().buildWith {
+            transferStatusResponse = response
         }
     }
 
