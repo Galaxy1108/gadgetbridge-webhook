@@ -121,10 +121,12 @@ object ZeppOsWeatherHandlerV5 {
     }
 
     private fun createHourlyWeather(weatherSpec: WeatherSpec): HourlyWeather {
+        // Round down to the hour, so that the entry covering the current hour is kept
+        val cutoff = weatherSpec.timestamp - Math.floorMod(weatherSpec.timestamp, 3600)
         return HourlyWeather(
             metadata = createMetadata(weatherSpec),
             hours = weatherSpec.hourly
-                .filter { it.timestamp != 0 && it.timestamp >= weatherSpec.timestamp}
+                .filter { it.timestamp != 0 && it.timestamp >= cutoff }
                 .take(72)
                 .map {
                     HourlyWeatherHour(
