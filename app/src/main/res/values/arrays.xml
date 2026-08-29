@@ -4,6 +4,16 @@
         <!-- empty array -->
     </string-array>
 
+    <string-array name="http_methods">
+        <item>GET</item>
+        <item>POST</item>
+        <item>HEAD</item>
+        <item>PUT</item>
+        <item>PATCH</item>
+        <item>DELETE</item>
+        <item>OPTIONS</item>
+    </string-array>
+
     <string-array name="pref_theme_options">
         <item>@string/pref_theme_system</item>
         <item>@string/pref_theme_light</item>
