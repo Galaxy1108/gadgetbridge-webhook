@@ -473,4 +473,5 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
         // Not all devices support it
         return true;
     }
+
 }
