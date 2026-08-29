@@ -81,4 +81,9 @@ public class GarminVivosmartHrCoordinator extends GarminWatchCoordinator {
     public boolean supportsCalendarEvents(@NonNull final GBDevice device) {
         return false;
     }
+
+    @Override
+    public boolean supportsRacePrediction(@NonNull final GBDevice device) {
+        return false;
+    }
 }
