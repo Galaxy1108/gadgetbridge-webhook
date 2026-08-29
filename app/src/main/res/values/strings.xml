@@ -2079,7 +2079,9 @@
     <string name="devicetype_garmin_edge_1050" translatable="false">Garmin Edge 1050</string>
     <string name="devicetype_garmin_edge_explore" translatable="false">Garmin Edge Explore</string>
     <string name="devicetype_garmin_edge_explore_2" translatable="false">Garmin Edge Explore 2</string>
+    <string name="devicetype_garmin_gpsmap_66i" translatable="false">Garmin GPSMAP 66i</string>
     <string name="devicetype_garmin_gpsmap_66s" translatable="false">Garmin GPSMAP 66s</string>
+    <string name="devicetype_garmin_gpsmap_66sr" translatable="false">Garmin GPSMAP 66sr</string>
     <string name="devicetype_garmin_gpsmap_h1" translatable="false">Garmin GPSMAP H1</string>
     <string name="devicetype_garmin_etrex_se" translatable="false">Garmin eTrex SE</string>
     <string name="devicetype_garmin_enduro" translatable="false">Garmin Enduro</string>
@@ -2128,6 +2130,8 @@
     <string name="devicetype_garmin_fenix_9" translatable="false">Garmin Fenix 9</string>
     <string name="devicetype_garmin_fenix_9_pro" translatable="false">Garmin Fenix 9 Pro</string>
     <string name="devicetype_garmin_fenix_9_pro_solar" translatable="false">Garmin Fenix 9 Pro Solar</string>
+    <string name="devicetype_garmin_quatix_6" translatable="false">Garmin Quatix 6</string>
+    <string name="devicetype_garmin_quatix_6x" translatable="false">Garmin Quatix 6X</string>
     <string name="devicetype_garmin_quatix_8" translatable="false">Garmin Quatix 8</string>
     <string name="devicetype_garmin_tactix_7" translatable="false">Garmin Tactix 7</string>
     <string name="devicetype_garmin_tactix_8" translatable="false">Garmin Tactix 8</string>
@@ -2160,6 +2164,7 @@
     <string name="devicetype_garmin_forerunner_30" translatable="false">Garmin Forerunner 30</string>
     <string name="devicetype_garmin_forerunner_35" translatable="false">Garmin Forerunner 35</string>
     <string name="devicetype_garmin_forerunner_45" translatable="false">Garmin Forerunner 45</string>
+    <string name="devicetype_garmin_forerunner_45_plus" translatable="false">Garmin Forerunner 45 Plus</string>
     <string name="devicetype_garmin_forerunner_55" translatable="false">Garmin Forerunner 55</string>
     <string name="devicetype_garmin_forerunner_165" translatable="false">Garmin Forerunner 165</string>
     <string name="devicetype_garmin_forerunner_165_music" translatable="false">Garmin Forerunner 165 Music</string>

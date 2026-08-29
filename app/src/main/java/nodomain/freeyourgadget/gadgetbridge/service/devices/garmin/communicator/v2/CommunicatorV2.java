@@ -425,7 +425,7 @@ public class CommunicatorV2 implements ICommunicator {
                 break;
             }
             case CLOSE_ALL_RESP:
-                LOG.debug("Received close all handles response. Message: {}", message.array());
+                LOG.debug("Received close all handles response. Message: {}", GB.lazyHexdump(message.array()));
                 closingAll = false;
                 serviceByHandle.clear();
                 handleByService.clear();

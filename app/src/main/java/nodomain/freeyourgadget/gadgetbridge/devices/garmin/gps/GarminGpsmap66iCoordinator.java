@@ -1,4 +1,4 @@
-/*  Copyright (C) 2025-2026 Thomas Kuehne
+/*  Copyright (C) 2026 Thomas Kuehne
 
     This file is part of Gadgetbridge.
 
@@ -21,41 +21,24 @@ import androidx.annotation.NonNull;
 import java.util.regex.Pattern;
 
 import nodomain.freeyourgadget.gadgetbridge.R;
-import nodomain.freeyourgadget.gadgetbridge.devices.garmin.GarminCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
-public class GarminInReachMini2 extends GarminCoordinator {
+public class GarminGpsmap66iCoordinator extends GarminGpsmap66sCoordinator {
     @Override
-    public int getDeviceNameResource() {
-        return R.string.devicetype_garmin_inReach_mini_2;
+    public boolean isExperimental() {
+        // Not tested, and the supported device name below is unconfirmed
+        return true;
     }
 
     @Override
     protected Pattern getSupportedDeviceName() {
-        return Pattern.compile("^inReach Mini 2$");
+        // TODO: unconfirmed device name
+        return Pattern.compile("^GPSMAP 66I( #\\d+)?");
     }
 
     @Override
-    public boolean supportsDataFetching(@NonNull final GBDevice device) {
-        // for gps tracks
-        return true;
+    public int getDeviceNameResource() {
+        return R.string.devicetype_garmin_gpsmap_66i;
     }
 
-    @Override
-    public boolean supportsRecordedActivities(@NonNull final GBDevice device) {
-        return true;
-    }
-
-    @Override
-    public boolean supportsOSBatteryLevel(@NonNull GBDevice device){
-        // uses standard Bluetooth battery level updates
-        // Garmin's RemoteDeviceBatteryStatusRequest isn't supported
-        return true;
-    }
-
-    @Override
-    public DeviceKind getDeviceKind(@NonNull GBDevice device) {
-        // sattelite messenger with GPS support
-        return DeviceKind.PHONE;
-    }
 }

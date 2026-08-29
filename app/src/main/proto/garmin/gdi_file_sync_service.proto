@@ -7,11 +7,40 @@ option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 message FileSyncService {
   optional FileRequest file_request = 1;
   optional FileResponse file_response = 2;
+  optional TransferStatusRequest transfer_status_request = 5;
   optional FileListRequest file_list_request = 9;
   optional FileListResponse file_list_response = 10;
   optional NewFileNotification new_file_notification = 12;
   optional FileSetFlags file_set_flags = 15;
+  optional FileModifiedFlags file_modified_flags = 16;
   optional FileUpdateNotification file_update_notification = 17;
+  optional Notification20 notification20 = 20;
+  optional TransferStatusResponse transfer_status_response = 21;
+  optional StartSyncNotification start_sync_notification = 22;
+}
+
+message Notification20 {
+  optional uint32 unk1 = 1;
+  optional uint32 unk2 = 2;
+}
+
+message FileModifiedFlags {
+  optional uint32 unk1 = 1;
+  optional uint32 unk2 = 2;
+  optional uint32 unk3 = 3;
+}
+
+message TransferStatusRequest {
+  optional FileId uid = 1;
+  optional uint32 unk2 = 2;
+}
+
+message TransferStatusResponse {
+  optional uint32 unk1 = 1;
+}
+
+message StartSyncNotification {
+  // user pressed button on device to start syncing files
 }
 
 message NewFileNotification {
@@ -73,7 +102,7 @@ message FileListResponse {
 message File {
   optional FileId id = 1;
   optional FileType type = 2;
-  optional uint32 size = 3;
+  optional uint64 size = 3;
   optional uint32 page_id = 5; // 33652, 33653, ... incrementing
   optional uint32 unk4 = 4; // 0 on venu 4
   optional uint32 unk6 = 6; // 2 on venu 4
@@ -85,7 +114,7 @@ message FileId {
 }
 
 message FileType {
-  optional uint32 unk1 = 1; // 0
+  optional uint32 unk1 = 1; // 0 fit, 3 binary
   optional string name = 2;
   optional uint32 code = 3; // 8 monitor 9 sports
 }
