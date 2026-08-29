@@ -4835,6 +4835,9 @@
     <string name="maps_download_title">Download Maps</string>
     <string name="maps_download_summary">Click here to download map files. They should be saved to the folder selected in the preference below.</string>
     <string name="maps_track_color_title">Track color</string>
+    <string name="maps_files">Map files</string>
+    <string name="maps_folder_empty">No files found in the selected folder</string>
+    <string name="maps_file_invalid">Invalid map: %1$s</string>
     <string name="pref_display_enabled_title">Display enabled</string>
     <string name="pref_display_enabled_summary">Enable the display on the ring</string>
     <string name="pref_display_enabled_all_day_title">Enabled all day</string>
