@@ -2,53 +2,70 @@
 
 #### Next version (WIP)
 
+* Initial support for Bose NC 700
 * Initial support for Redmi Watch 6
 * Initial support for Garmin Edge 1050, Forerunner 230, Vívoactive 3 Music
 * Initial support for GRV FC1, Swiss Peak (GloryFit)
+* Initial support for Jabra Evolve2 55
 * Initial support for Alt Vibe (MoYoung / Da Fit)
 * Initial support for Xiaomi Watch 5
-* Experimental support for 54 new Garmin devices
+* Experimental support for 59 new Garmin devices
+* 1MORE SonoFlow: Add quick settings
 * Accessibility: Label image controls for screen readers
 * Activity list: Fix occasional crash
 * Allow notifications from other users
+* Amazfit GTS2 / GTR2: Fix title and sender on some notifications
+* Anker Soundcore Sport X20: Add multipoint pairing
+* BLE Intent API: Allow multiple target packages
+* BLE Intent API: Prevent abortion of device init
+* Bose: Add quick settings
+* Charts: Add optimal training load baseline
 * Charts: Add VO2 Max 6-month and year views
+* Charts: Fix crash when exiting live activity
 * CMF Watch 2+: Fixed watchface upload
+* Discovery Activity: Improve list refresh timing
+* Endurain: Map some missing activity types
+* Fix crash on some Android 13 ROMs
 * Fix crash when unable to decrypt shared preferences for wanderer/endurain
+* Garmin Vivoactive 6: Enable new sync protocol by default
+* Garmin: Add charts for race time prediction
 * Garmin: Add new oauth token urls
 * Garmin: Add time sync device setting
+* Garmin: Allow upload of gpx with navigation instructions
 * Garmin: Allow waypoint upload on all devices
-* Garmin: Fix crash on some older devices
-* Garmin: Fix some crashes on disconnection
-* Garmin: Make activity sync progress unit explicit
-* Garmin: Fix COBS decoder wedging on truncated frames
-* GloryFit: Fix crash on health settings screen
-* Garmin: Fix occasional crash on reconnection
-* Garmin: Fix dismiss of old notifications
-* Garmin: Fix stuck connection when a frame is dropped
 * Garmin: Do not send stale GPS location to watch
+* Garmin: Fix COBS decoder wedging on truncated frames
+* Garmin: Fix crash on some older devices
+* Garmin: Fix dismiss of old notifications
+* Garmin: Fix occasional crash on reconnection
+* Garmin: Fix realtime settings crash in some pages
+* Garmin: Fix some crashes on disconnection
+* Garmin: Fix stuck connection when a frame is dropped
+* Garmin: Make activity sync progress unit explicit
 * Garmin: Send phone info to watch
-* Discovery Activity: Improve list refresh timing
+* GloryFit: Add weather
+* GloryFit: Fix crash on health settings screen
+* GPX export: Give tracks a real name
+* Maps: Display map files in selected folder
+* Mi Body Composition Scale 2: Do not persist implausible weight samples
+* MoYoung: Add more workout types and parse max speed
 * Nothing Ear (a): Fix bluetooth name
 * Optionally order disconnected devices by their most recent connection instead of by name
+* Pebble: Initial support for new weather v4
 * Rate limit the serialization of incoming CoMaps navigation messages
 * UNA Watch: Connection improvements
 * UNA Watch: Faster workout and health sync
 * UNA Watch: Import workouts as soon as they are saved on the watch
 * UNA Watch: Per-minute heart rate and honest daily totals
 * WeatherSpec: Add atmospheric pressure, cloud cover and dew point forecasts
-* MoYoung: Add more workout types and parse max speed
-* Pebble: Initial support for new weather v4
-* Charts: Fix crash when exiting live activity
-* Zepp OS: Add some missing display items and shortcut cards
-* Zepp OS: Fix download of long voice notes
+* Xiaomi-protobuf: Fix crash on resting heart rate query
+* Xiaomi-protobuf: Fix crash when dismissing some notifications
 * Xiaomi-protobuf: Fix notification "open on phone"
 * Xiaomi-protobuf: Improve workout and activity parsing
-* Xiaomi-protobuf: Fix crash when dismissing some notifications
-* BLE Intent API: Allow multiple target packages
-* BLE Intent API: Prevent abortion of device init
-* GPX export: Give tracks a real name
-* Garmin: Allow upload of gpx with navigation instructions
-* Xiaomi-protobuf: Fix crash on resting heart rate query
+* Zepp OS: Add some missing display items and shortcut cards
+* Zepp OS: Fix download of long voice notes
+* Zepp OS: Fix setting unknown languages
+* Zepp OS: Improve weather support
 
 #### 0.93.0
 
