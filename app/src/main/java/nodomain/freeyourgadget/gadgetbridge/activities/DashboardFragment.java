@@ -161,11 +161,8 @@ public class DashboardFragment extends Fragment implements MenuProvider {
         });
 
         // Webhook fork: dashboard_data is no longer persisted in the saved state
-        // (it used to hold a whole day of per-device data, which could exceed the
-        // Binder transaction limit and crash with TransactionTooLargeException).
-        if (dashboardData.isEmpty()) {
-            reloadPreferences();
-        }
+        // (upstream has since slimmed DashboardData down to small config fields,
+        // so the TransactionTooLarge issue is gone; we keep the fork behavior).
         if (savedInstanceState != null && savedInstanceState.containsKey("dashboard_day")) {
             day.setTimeInMillis(savedInstanceState.getLong("dashboard_day"));
         }
