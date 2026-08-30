@@ -289,12 +289,7 @@ public class GBDeviceService implements DeviceService {
     public void onSetMusicInfo(@NonNull MusicSpec musicSpec) {
         final MusicSpec withRtlFix = musicSpec.withRtlFix();
         Intent intent = createIntent().setAction(ACTION_SETMUSICINFO)
-                .putExtra(EXTRA_MUSIC_ARTIST, withRtlFix.getArtist())
-                .putExtra(EXTRA_MUSIC_ALBUM, withRtlFix.getAlbum())
-                .putExtra(EXTRA_MUSIC_TRACK, withRtlFix.getTrack())
-                .putExtra(EXTRA_MUSIC_DURATION, withRtlFix.getDuration())
-                .putExtra(EXTRA_MUSIC_TRACKCOUNT, withRtlFix.getTrackCount())
-                .putExtra(EXTRA_MUSIC_TRACKNR, withRtlFix.getTrackNr());
+                .putExtra(EXTRA_MUSIC_SPEC, withRtlFix);
         invokeService(intent);
     }
 

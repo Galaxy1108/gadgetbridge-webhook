@@ -1,48 +1,5 @@
 package nodomain.freeyourgadget.gadgetbridge.service;
 
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.*;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_CAMERA_STATUS_CHANGE;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_ENABLE_HEARTRATE_SLEEP_SUPPORT;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_ENABLE_REALTIME_HEARTRATE_MEASUREMENT;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_ENABLE_REALTIME_STEPS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_POWER_OFF;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_READ_CONFIGURATION;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_REQUEST_MUSIC_LIST;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_REQUEST_MUSIC_OPERATION;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SEND_CONFIGURATION;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SEND_WEATHER;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_ALARMS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_CONTACTS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_FM_FREQUENCY;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_GPS_LOCATION;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_HEARTRATE_MEASUREMENT_INTERVAL;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_LED_COLOR;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_LOYALTY_CARDS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_REMINDERS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_WORLD_CLOCKS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SLEEP_AS_ANDROID;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_TEST_NEW_FUNCTION;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_ALARMS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_BOOLEAN_ENABLE;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_CAMERA_EVENT;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_CAMERA_FILENAME;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_CONFIG;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_CONTACTS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_FM_FREQUENCY;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_GPS_LOCATION;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_INTERVAL_SECONDS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_LED_COLOR;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_LOYALTY_CARDS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_OPTIONS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_REMINDERS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_REQUEST_MUSIC_MUSIC_IDS;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_REQUEST_MUSIC_OPERATION;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_REQUEST_MUSIC_PLAY_LIST_INDEX;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_REQUEST_MUSIC_PLAY_LIST_NAME;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_SLEEP_AS_ANDROID_ACTION;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_URI;
-import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_WORLD_CLOCKS;
-
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -76,6 +33,8 @@ import nodomain.freeyourgadget.gadgetbridge.model.WorldClock;
 import nodomain.freeyourgadget.gadgetbridge.util.language.LanguageUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs;
+
+import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.*;
 
 /**
  * Translates the Intent sent by {GBDeviceService} and calls the corresponding method in the device support class.
@@ -237,14 +196,12 @@ public class DeviceActionHandler {
                 deviceSupport.onSetTime();
                 break;
             case ACTION_SETMUSICINFO:
-                final MusicSpec musicSpec = new MusicSpec();
-                musicSpec.setArtist(intentCopy.getStringExtra(EXTRA_MUSIC_ARTIST));
-                musicSpec.setAlbum(intentCopy.getStringExtra(EXTRA_MUSIC_ALBUM));
-                musicSpec.setTrack(intentCopy.getStringExtra(EXTRA_MUSIC_TRACK));
-                musicSpec.setDuration(intentCopy.getIntExtra(EXTRA_MUSIC_DURATION, 0));
-                musicSpec.setTrackCount(intentCopy.getIntExtra(EXTRA_MUSIC_TRACKCOUNT, 0));
-                musicSpec.setTrackNr(intentCopy.getIntExtra(EXTRA_MUSIC_TRACKNR, 0));
-                deviceSupport.onSetMusicInfo(musicSpec.transliterated(deviceSupport, transliterator));
+                final MusicSpec musicSpec = intentCopy.getParcelableExtra(EXTRA_MUSIC_SPEC);
+                if (musicSpec != null) {
+                    deviceSupport.onSetMusicInfo(musicSpec.transliterated(deviceSupport, transliterator));
+                } else {
+                    deviceSupport.onSetMusicInfo(musicSpec);
+                }
                 break;
             case ACTION_SET_PHONE_VOLUME:
                 final float phoneVolume = intentCopy.getFloatExtra(EXTRA_PHONE_VOLUME, 0);

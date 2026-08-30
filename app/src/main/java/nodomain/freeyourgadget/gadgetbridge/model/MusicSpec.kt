@@ -17,10 +17,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
 
+@Parcelize
 data class MusicSpec(
     var artist: String? = null,
     var album: String? = null,
@@ -28,7 +31,7 @@ data class MusicSpec(
     var duration: Int = MUSIC_UNKNOWN,
     var trackCount: Int = MUSIC_UNKNOWN,
     var trackNr: Int = MUSIC_UNKNOWN
-) : DeviceTextAdaptable<MusicSpec> {
+) : DeviceTextAdaptable<MusicSpec>, Parcelable {
 
     fun copyOf(): MusicSpec = copy() // data class .copy() method is not available from Java code
 
