@@ -64,36 +64,8 @@ public class DeviceActionHandler {
                 device.sendDeviceUpdateIntent(context, GBDevice.DeviceUpdateSubject.NOTHING);
                 break;
             case ACTION_NOTIFICATION: {
-                final int desiredId = intentCopy.getIntExtra(EXTRA_NOTIFICATION_ID, -1);
-                final NotificationSpec notificationSpec = new NotificationSpec(desiredId);
-                notificationSpec.setPhoneNumber(intentCopy.getStringExtra(EXTRA_NOTIFICATION_PHONENUMBER));
-                notificationSpec.setSender(intentCopy.getStringExtra(EXTRA_NOTIFICATION_SENDER));
-                notificationSpec.setSubject(intentCopy.getStringExtra(EXTRA_NOTIFICATION_SUBJECT));
-                notificationSpec.setTitle(intentCopy.getStringExtra(EXTRA_NOTIFICATION_TITLE));
-                if (notificationSpec.getTitle() == null) {
-                    notificationSpec.setTitle("");
-                }
-                notificationSpec.setKey(intentCopy.getStringExtra(EXTRA_NOTIFICATION_KEY));
-                notificationSpec.setBody(intentCopy.getStringExtra(EXTRA_NOTIFICATION_BODY));
-                if (notificationSpec.getBody() == null) {
-                    notificationSpec.setBody("");
-                }
-                notificationSpec.setSourceName(intentCopy.getStringExtra(EXTRA_NOTIFICATION_SOURCENAME));
-                notificationSpec.setType((NotificationType) intentCopy.getSerializableExtra(EXTRA_NOTIFICATION_TYPE));
-                notificationSpec.setAttachedActions((ArrayList<NotificationSpec.Action>) intentCopy.getSerializableExtra(EXTRA_NOTIFICATION_ACTIONS));
-                notificationSpec.setFlags(intentCopy.getIntExtra(EXTRA_NOTIFICATION_FLAGS, 0));
-                notificationSpec.setSourceAppId(intentCopy.getStringExtra(EXTRA_NOTIFICATION_SOURCEAPPID));
-                notificationSpec.setIconId(intentCopy.getIntExtra(EXTRA_NOTIFICATION_ICONID, 0));
-                notificationSpec.setIconPackageId(intentCopy.getStringExtra(EXTRA_NOTIFICATION_ICONPACKAGEID));
-                notificationSpec.setPicturePath(intent.getStringExtra(NOTIFICATION_PICTURE_PATH));
-                notificationSpec.setDndSuppressed(intentCopy.getIntExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, 0));
-                notificationSpec.setChannelId(intentCopy.getStringExtra(EXTRA_NOTIFICATION_CHANNEL_ID));
-                notificationSpec.setCategory(intentCopy.getStringExtra(EXTRA_NOTIFICATION_CATEGORY));
-
-                if (notificationSpec.getType() == NotificationType.GENERIC_SMS && notificationSpec.getPhoneNumber() != null) {
-                    GBApplication.getIDSenderLookup().add(notificationSpec.getId(), notificationSpec.getPhoneNumber());
-                }
-
+                final NotificationSpec notificationSpec = intentCopy.getParcelableExtra(EXTRA_NOTIFICATION_SPEC);
+                if (notificationSpec != null) {
                 //TODO: check if at least one of the attached actions is a reply action instead?
                 if ((notificationSpec.getAttachedActions() != null && !notificationSpec.getAttachedActions().isEmpty())
                         || (notificationSpec.getType() == NotificationType.GENERIC_SMS && notificationSpec.getPhoneNumber() != null)) {
@@ -109,8 +81,10 @@ public class DeviceActionHandler {
                     }
                     notificationSpec.setCannedReplies(replies.toArray(new String[0]));
                 }
-
-                deviceSupport.onNotification(notificationSpec.transliterated(deviceSupport, transliterator));
+                    deviceSupport.onNotification(notificationSpec.transliterated(deviceSupport, transliterator));
+                } else {
+                    LOG.warn("Received a null ParcelableExtra, expected a NotificationSpec.");
+                }
                 break;
             }
             case ACTION_DELETE_NOTIFICATION: {

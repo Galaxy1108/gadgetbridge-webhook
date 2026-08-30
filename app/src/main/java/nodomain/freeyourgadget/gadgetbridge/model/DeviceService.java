@@ -94,24 +94,8 @@ public interface DeviceService extends EventHandler {
 
     String ACTION_SLEEP_AS_ANDROID = ".action.sleep_as_android";
     String EXTRA_SLEEP_AS_ANDROID_ACTION = "sleepasandroid_action";
-    String EXTRA_NOTIFICATION_BODY = "notification_body";
-    String EXTRA_NOTIFICATION_FLAGS = "notification_flags";
+    String EXTRA_NOTIFICATION_SPEC = "notification_spec";
     String EXTRA_NOTIFICATION_ID = "notification_id";
-    String EXTRA_NOTIFICATION_KEY = "notification_key";
-    String EXTRA_NOTIFICATION_PHONENUMBER = "notification_phonenumber";
-    String EXTRA_NOTIFICATION_SENDER = "notification_sender";
-    String EXTRA_NOTIFICATION_SOURCENAME = "notification_sourcename";
-    String EXTRA_NOTIFICATION_SOURCEAPPID = "notification_sourceappid";
-    String EXTRA_NOTIFICATION_SUBJECT = "notification_subject";
-    String EXTRA_NOTIFICATION_TITLE = "notification_title";
-    String EXTRA_NOTIFICATION_TYPE = "notification_type";
-    String EXTRA_NOTIFICATION_ACTIONS = "notification_actions";
-    String EXTRA_NOTIFICATION_ICONID = "notification_iconid";
-    String EXTRA_NOTIFICATION_ICONPACKAGEID = "notification_iconpackageid";
-    String NOTIFICATION_PICTURE_PATH = "notification_picture_path";
-    String EXTRA_NOTIFICATION_DNDSUPPRESSED = "notification_dndsuppressed";
-    String EXTRA_NOTIFICATION_CHANNEL_ID = "notification_channel_id";
-    String EXTRA_NOTIFICATION_CATEGORY = "notification_category";
     String EXTRA_FIND_START = "find_start";
     String EXTRA_VIBRATION_INTENSITY = "vibration_intensity";
     String EXTRA_CALL_SPEC = "call_spec";

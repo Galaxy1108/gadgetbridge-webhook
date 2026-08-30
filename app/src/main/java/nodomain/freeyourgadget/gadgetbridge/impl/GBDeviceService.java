@@ -155,27 +155,18 @@ public class GBDeviceService implements DeviceService {
         boolean hideMessageDetails = messagePrivacyMode.equals(GBApplication.getContext().getString(R.string.p_message_privacy_mode_complete));
         boolean hideMessageBodyOnly = messagePrivacyMode.equals(GBApplication.getContext().getString(R.string.p_message_privacy_mode_bodyonly));
 
-        final NotificationSpec withRtlFix = notificationSpec.withRtlFix();
+        NotificationSpec privacyCleared = notificationSpec.copyOf();
+
+        privacyCleared.withSender(coalesce(privacyCleared.getSender(), getContactDisplayNameByNumber(privacyCleared.getPhoneNumber())));
+
+        if (hideMessageDetails) {
+            privacyCleared = privacyCleared.withMessageDetailsCleared();
+        } else if (hideMessageBodyOnly) {
+            privacyCleared = privacyCleared.withMessageBodyCleared();
+        }
 
         Intent intent = createIntent().setAction(ACTION_NOTIFICATION)
-                .putExtra(EXTRA_NOTIFICATION_FLAGS, withRtlFix.getFlags())
-                .putExtra(EXTRA_NOTIFICATION_PHONENUMBER, hideMessageDetails ? null : withRtlFix.getPhoneNumber())
-                .putExtra(EXTRA_NOTIFICATION_SENDER, hideMessageDetails ? null : coalesce(withRtlFix.getSender(), getContactDisplayNameByNumber(withRtlFix.getPhoneNumber())))
-                .putExtra(EXTRA_NOTIFICATION_SUBJECT, hideMessageDetails ? null : withRtlFix.getSubject())
-                .putExtra(EXTRA_NOTIFICATION_TITLE, hideMessageDetails ? null : withRtlFix.getTitle())
-                .putExtra(EXTRA_NOTIFICATION_BODY, hideMessageDetails || hideMessageBodyOnly ? null : withRtlFix.getBody())
-                .putExtra(EXTRA_NOTIFICATION_ID, withRtlFix.getId())
-                .putExtra(EXTRA_NOTIFICATION_KEY, withRtlFix.getKey())
-                .putExtra(EXTRA_NOTIFICATION_TYPE, withRtlFix.getType())
-                .putExtra(EXTRA_NOTIFICATION_ACTIONS, withRtlFix.getAttachedActions())
-                .putExtra(EXTRA_NOTIFICATION_SOURCENAME, withRtlFix.getSourceName())
-                .putExtra(EXTRA_NOTIFICATION_SOURCEAPPID, withRtlFix.getSourceAppId())
-                .putExtra(EXTRA_NOTIFICATION_ICONID, withRtlFix.getIconId())
-                .putExtra(EXTRA_NOTIFICATION_ICONPACKAGEID, withRtlFix.getIconPackageId())
-                .putExtra(NOTIFICATION_PICTURE_PATH, withRtlFix.getPicturePath())
-                .putExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, withRtlFix.getDndSuppressed())
-                .putExtra(EXTRA_NOTIFICATION_CHANNEL_ID, withRtlFix.getChannelId())
-                .putExtra(EXTRA_NOTIFICATION_CATEGORY, withRtlFix.getCategory());
+                .putExtra(EXTRA_NOTIFICATION_SPEC, privacyCleared.withRtlFix());
         invokeService(intent);
     }
 

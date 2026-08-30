@@ -17,6 +17,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
@@ -24,6 +26,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 
+@Parcelize
 data class NotificationSpec @JvmOverloads constructor(
     private val requestedId: Int = -1,
     val `when`: Long = System.currentTimeMillis(),
@@ -45,7 +48,7 @@ data class NotificationSpec @JvmOverloads constructor(
     var iconPackageId: String? = null,
     var picturePath: String? = null,
     var dndSuppressed: Int = 0
-) : DeviceTextAdaptable<NotificationSpec> {
+) : DeviceTextAdaptable<NotificationSpec>, Parcelable {
     val id: Int = if (requestedId != -1) requestedId else c.incrementAndGet()
 
     override fun withRtlFix(): NotificationSpec {
@@ -70,15 +73,32 @@ data class NotificationSpec @JvmOverloads constructor(
             sourceName = transform(sourceName, deviceSupport, transliterator)
         )
 
+    fun copyOf(): NotificationSpec = copy() // data class .copy() method is not available from Java code
+
+    fun withSender(sender: String?): NotificationSpec = copy(sender = sender)
+
+    fun withMessageDetailsCleared(): NotificationSpec = copy(
+        phoneNumber = null,
+        sender = null,
+        subject = null,
+        title = null,
+        body = null
+    )
+
+    fun withMessageBodyCleared(): NotificationSpec = copy(
+        body = null
+    )
+
     companion object {
         private val c = AtomicInteger((System.currentTimeMillis() / 1000).toInt())
     }
 
-    class Action : Serializable {
-        var type: Int = TYPE_UNDEFINED
-        var handle: Long = 0
+    @Parcelize
+    data class Action @JvmOverloads constructor(
+        var type: Int = TYPE_UNDEFINED,
+        var handle: Long = 0,
         var title: String? = null
-
+    ) : Parcelable {
         val isReply: Boolean
             get() = type == TYPE_WEARABLE_REPLY || type == TYPE_SYNTHETIC_REPLY_PHONENR || type == TYPE_CUSTOM_REPLY
 
