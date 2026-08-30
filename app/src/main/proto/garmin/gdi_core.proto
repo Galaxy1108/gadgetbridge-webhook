@@ -12,6 +12,10 @@ message CoreService {
     optional LocationUpdatedSetEnabledRequest location_updated_set_enabled_request = 5;
     optional LocationUpdatedSetEnabledResponse location_updated_set_enabled_response = 6;
     optional LocationUpdatedNotification location_updated_notification = 7;
+    optional ConnectedNotification connected_notification = 14;
+
+    message ConnectedNotification {
+    }
 
     message SyncRequest {
     }

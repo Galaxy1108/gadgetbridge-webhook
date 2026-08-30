@@ -40,4 +40,9 @@ public class GarminLilyCoordinator extends GarminWatchCoordinator {
     public boolean supportsSleepScore(@NonNull final GBDevice device) {
         return false;
     }
+
+    @Override
+    public boolean supportsRacePrediction(@NonNull final GBDevice device) {
+        return false;
+    }
 }

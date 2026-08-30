@@ -1911,6 +1911,7 @@
     <string name="hrv_status_daily_range_legend">Daily range</string>
     <string name="training_acute_load">Acute Load</string>
     <string name="training_chronic_load">Chronic Load</string>
+    <string name="training_optimal_load">Optimal Load</string>
     <string name="this_week_total">This week total</string>
     <string name="last_week_total">Last week total</string>
     <string name="low">Low</string>
@@ -2078,7 +2079,9 @@
     <string name="devicetype_garmin_edge_1050" translatable="false">Garmin Edge 1050</string>
     <string name="devicetype_garmin_edge_explore" translatable="false">Garmin Edge Explore</string>
     <string name="devicetype_garmin_edge_explore_2" translatable="false">Garmin Edge Explore 2</string>
+    <string name="devicetype_garmin_gpsmap_66i" translatable="false">Garmin GPSMAP 66i</string>
     <string name="devicetype_garmin_gpsmap_66s" translatable="false">Garmin GPSMAP 66s</string>
+    <string name="devicetype_garmin_gpsmap_66sr" translatable="false">Garmin GPSMAP 66sr</string>
     <string name="devicetype_garmin_gpsmap_h1" translatable="false">Garmin GPSMAP H1</string>
     <string name="devicetype_garmin_etrex_se" translatable="false">Garmin eTrex SE</string>
     <string name="devicetype_garmin_enduro" translatable="false">Garmin Enduro</string>
@@ -2127,6 +2130,8 @@
     <string name="devicetype_garmin_fenix_9" translatable="false">Garmin Fenix 9</string>
     <string name="devicetype_garmin_fenix_9_pro" translatable="false">Garmin Fenix 9 Pro</string>
     <string name="devicetype_garmin_fenix_9_pro_solar" translatable="false">Garmin Fenix 9 Pro Solar</string>
+    <string name="devicetype_garmin_quatix_6" translatable="false">Garmin Quatix 6</string>
+    <string name="devicetype_garmin_quatix_6x" translatable="false">Garmin Quatix 6X</string>
     <string name="devicetype_garmin_quatix_8" translatable="false">Garmin Quatix 8</string>
     <string name="devicetype_garmin_tactix_7" translatable="false">Garmin Tactix 7</string>
     <string name="devicetype_garmin_tactix_8" translatable="false">Garmin Tactix 8</string>
@@ -2159,6 +2164,7 @@
     <string name="devicetype_garmin_forerunner_30" translatable="false">Garmin Forerunner 30</string>
     <string name="devicetype_garmin_forerunner_35" translatable="false">Garmin Forerunner 35</string>
     <string name="devicetype_garmin_forerunner_45" translatable="false">Garmin Forerunner 45</string>
+    <string name="devicetype_garmin_forerunner_45_plus" translatable="false">Garmin Forerunner 45 Plus</string>
     <string name="devicetype_garmin_forerunner_55" translatable="false">Garmin Forerunner 55</string>
     <string name="devicetype_garmin_forerunner_165" translatable="false">Garmin Forerunner 165</string>
     <string name="devicetype_garmin_forerunner_165_music" translatable="false">Garmin Forerunner 165 Music</string>
@@ -2480,6 +2486,12 @@
     <string name="metric_garmin_met_max_vo2">MET Max VO₂</string>
     <string name="metric_garmin_running_lactate_threshold_power">Running Lactate Threshold Power</string>
     <string name="metric_garmin_training_readiness">Training Readiness</string>
+    <string name="menuitem_race_predictor">Race Predictor</string>
+    <string name="p_raceprediction" translatable="false">raceprediction</string>
+    <string name="metric_generic_race_predictor_5k">5K</string>
+    <string name="metric_generic_race_predictor_10k">10K</string>
+    <string name="metric_generic_race_predictor_half_marathon">Half Marathon</string>
+    <string name="metric_generic_race_predictor_full_marathon">Marathon</string>
     <string name="metric_generic_resting_metabolic_rate">Resting Metabolic Rate</string>
     <string name="menuitem_recommendation">Recommendation</string>
     <string name="menuitem_zepp_coach">Zepp Coach</string>
@@ -4835,6 +4847,9 @@
     <string name="maps_download_title">Download Maps</string>
     <string name="maps_download_summary">Click here to download map files. They should be saved to the folder selected in the preference below.</string>
     <string name="maps_track_color_title">Track color</string>
+    <string name="maps_files">Map files</string>
+    <string name="maps_folder_empty">No files found in the selected folder</string>
+    <string name="maps_file_invalid">Invalid map: %1$s</string>
     <string name="pref_display_enabled_title">Display enabled</string>
     <string name="pref_display_enabled_summary">Enable the display on the ring</string>
     <string name="pref_display_enabled_all_day_title">Enabled all day</string>

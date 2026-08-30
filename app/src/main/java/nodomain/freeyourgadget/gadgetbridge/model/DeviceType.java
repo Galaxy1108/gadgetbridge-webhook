@@ -100,7 +100,9 @@ import nodomain.freeyourgadget.gadgetbridge.devices.garmin.bike.GarminEdgeExplor
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.bike.GarminEdgeExploreCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.bike.GarminEdgeMtbCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminETrexSeCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminGpsmap66iCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminGpsmap66sCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminGpsmap66srCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminGpsmapH1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminInReachMini2;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.hrm.GarminHrm200Coordinator;
@@ -176,6 +178,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.Ga
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner30Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner35Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner45Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner45PlusCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner55Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner570Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner620Coordinator;
@@ -215,6 +218,8 @@ import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.instinct.Garm
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.lily.GarminLily2ActiveCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.lily.GarminLily2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.lily.GarminLilyCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix6Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix6XCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix8Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.swim.GarminSwim2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.tactix.GarminTactix7Coordinator;
@@ -811,7 +816,9 @@ public enum DeviceType {
     GARMIN_EDGE_EXPLORE_820(GarminEdgeExplore820Coordinator.class),
     GARMIN_EDGE_EXPLORE_1000(GarminEdgeExplore1000Coordinator.class),
     GARMIN_EDGE_MTB(GarminEdgeMtbCoordinator.class),
+    GARMIN_GPSMAP_66I(GarminGpsmap66iCoordinator.class),
     GARMIN_GPSMAP_66S(GarminGpsmap66sCoordinator.class),
+    GARMIN_GPSMAP_66SR(GarminGpsmap66srCoordinator.class),
     GARMIN_GPSMAP_H1(GarminGpsmapH1Coordinator.class),
     GARMIN_ETREX_SE(GarminETrexSeCoordinator.class),
     GARMIN_ENDURO(GarminEnduroCoordinator.class),
@@ -867,6 +874,7 @@ public enum DeviceType {
     GARMIN_FORERUNNER_30(GarminForerunner30Coordinator.class),
     GARMIN_FORERUNNER_35(GarminForerunner35Coordinator.class),
     GARMIN_FORERUNNER_45(GarminForerunner45Coordinator.class),
+    GARMIN_FORERUNNER_45_PLUS(GarminForerunner45PlusCoordinator.class),
     GARMIN_FORERUNNER_55(GarminForerunner55Coordinator.class),
     GARMIN_FORERUNNER_165(GarminForerunner165Coordinator.class),
     GARMIN_FORERUNNER_165_MUSIC(GarminForerunner165MusicCoordinator.class),
@@ -900,6 +908,8 @@ public enum DeviceType {
     GARMIN_FORERUNNER_955(GarminForerunner955Coordinator.class),
     GARMIN_FORERUNNER_965(GarminForerunner965Coordinator.class),
     GARMIN_FORERUNNER_970(GarminForerunner970Coordinator.class),
+    GARMIN_QUATIX_6(GarminQuatix6Coordinator.class),
+    GARMIN_QUATIX_6X(GarminQuatix6XCoordinator.class),
     GARMIN_QUATIX_8(GarminQuatix8Coordinator.class),
     GARMIN_TACTIX_7(GarminTactix7Coordinator.class),
     GARMIN_TACTIX_8(GarminTactix8Coordinator.class),

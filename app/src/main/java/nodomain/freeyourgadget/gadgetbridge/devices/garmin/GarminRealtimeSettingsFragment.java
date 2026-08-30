@@ -1,4 +1,4 @@
-/*  Copyright (C) 2024 José Rebelo
+/*  Copyright (C) 2024-2026 José Rebelo, Johannes Krude, Thomas Kuehne
 
     This file is part of Gadgetbridge.
 
@@ -27,6 +27,8 @@ import android.text.InputType;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.DialogPreference;
@@ -298,18 +300,30 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                         break;
                     case 1: // list preference
                         pref = new ListPreference(activity);
-                        final CharSequence[] entries = new String[entry.getTarget().getOptions().getOptionList().size()];
                         final CharSequence[] values = new String[entry.getTarget().getOptions().getOptionList().size()];
                         int optionIndex = 0;
                         for (final GdiSettingsService.TargetOptionEntry option : entry.getTarget().getOptions().getOptionList()) {
-                            entries[optionIndex] = option.getTitle().getText().replace("%", "%%");
                             values[optionIndex] = option.getTitle().getText();
                             optionIndex++;
                         }
                         final ListPreference listPreference = (ListPreference) pref;
-                        listPreference.setEntries(entries);
+                        listPreference.setEntries(values); // replacing % -> %% will display "%%" and not "%"
                         listPreference.setEntryValues(values);
-                        listPreference.setValue(values[Objects.requireNonNull(state).getSummary().getValueList().getIndex()].toString());
+
+                        GdiSettingsService.Summary summary = Objects.requireNonNull(state).getSummary();
+                        if (summary.hasValueList()) {
+                            // max+1 is used to encode that no list value has yet been set
+                            GdiSettingsService.ValueList summaryList = summary.getValueList();
+                            if (summaryList.hasIndex()) {
+                                int index = summaryList.getIndex();
+                                if (0 <= index && index < values.length) {
+                                    CharSequence value = values[index];
+                                    if (value != null) {
+                                        listPreference.setValue(value.toString());
+                                    }
+                                }
+                            }
+                        }
                         listPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                             int newValueIdx = -1;
                             for (int i = 0; i < values.length; i++) {
@@ -734,7 +748,10 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                     }
                 }
 
-                pref.setSummary(sb.toString());
+                // when using pref.setSummary(value), values containing percent signs (%) can
+                // cause UnknownFormatConversionException in java.util.Formatter. For example:
+                // setting System / Backlight / Brightness with values like "50%" and "75%"
+                pref.setSummaryProvider(new PlainFormatter(sb.toString()));
             }
 
             pref.setPersistent(false);
@@ -823,15 +840,21 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                     return R.drawable.ic_battery;
                 case 19: // System
                     return R.drawable.ic_settings;
+                case 22: // Solar
+                    return R.drawable.ic_wb_sunny;
                 case 26: // Appearance
                     return R.drawable.ic_paint;
                 case 44: // Health & wellness
                     return R.drawable.ic_health;
+                case 63: // Accessibility
+                    return R.drawable.ic_accessibility_new;
 
                 //
                 // Sortable screens (glances, apps, etc)
                 case 33:
                     return R.drawable.ic_add_gray;
+                case 34:
+                    return R.drawable.ic_remove;
                 case 35: // inReach tracking
                     return R.drawable.ic_share_location;
                 case 36: // inReach remote
@@ -899,5 +922,13 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                         .setChangeRequest(changeRequest)
                 ).build();
         GBApplication.deviceService(device).onSendConfiguration("protobuf:" + GB.hexdump(smart.toByteArray()));
+    }
+
+    private static record PlainFormatter(CharSequence value) implements Preference.SummaryProvider {
+        @Nullable
+        @Override
+        public CharSequence provideSummary(@NonNull Preference preference) {
+            return value;
+        }
     }
 }

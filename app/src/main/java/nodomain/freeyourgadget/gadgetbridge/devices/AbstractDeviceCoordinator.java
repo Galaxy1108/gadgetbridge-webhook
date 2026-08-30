@@ -739,6 +739,16 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     }
 
     @Override
+    public boolean supportsTrainingLoadChronic(@NonNull GBDevice device) {
+        return supportsTrainingLoad(device);
+    }
+
+    @Override
+    public boolean supportsRacePrediction(@NonNull GBDevice device) {
+        return false;
+    }
+
+    @Override
     public boolean supportsCharts(@NonNull GBDevice device) {
         // All the default charts (see DefaultChartsProvider)
         return supportsActivityTracking(device) ||
@@ -759,7 +769,8 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
                 supportsActiveCalories(device) ||
                 supportsCyclingData(device) ||
                 supportsRespiratoryRate(device) ||
-                supportsBloodPressureMeasurement(device);
+                supportsBloodPressureMeasurement(device) ||
+                supportsRacePrediction(device);
     }
 
     @Override
