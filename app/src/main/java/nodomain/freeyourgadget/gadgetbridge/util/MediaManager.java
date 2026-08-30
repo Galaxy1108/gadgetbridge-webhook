@@ -78,8 +78,8 @@ public class MediaManager {
         if (musicSpec != null && !musicSpec.equals(bufferMusicSpec)) {
             bufferMusicSpec = musicSpec;
             if (bufferMusicStateSpec != null) {
-                bufferMusicStateSpec.state = 0;
-                bufferMusicStateSpec.position = 0;
+                bufferMusicStateSpec.setState((byte) 0);
+                bufferMusicStateSpec.setPosition(0);
             }
             return true;
         }
@@ -166,22 +166,22 @@ public class MediaManager {
         final MusicStateSpec stateSpec = new MusicStateSpec();
 
         try {
-            stateSpec.position = (int) (s.getPosition() / 1000);
-            stateSpec.playRate = Math.round(100 * s.getPlaybackSpeed());
-            stateSpec.repeat = MusicStateSpec.STATE_UNKNOWN;
-            stateSpec.shuffle = MusicStateSpec.STATE_UNKNOWN;
+            stateSpec.setPosition((int) (s.getPosition() / 1000));
+            stateSpec.setPlayRate(Math.round(100 * s.getPlaybackSpeed()));
+            stateSpec.setRepeat((byte) MusicStateSpec.STATE_UNKNOWN);
+            stateSpec.setShuffle((byte) MusicStateSpec.STATE_UNKNOWN);
             switch (s.getState()) {
                 case PlaybackState.STATE_PLAYING:
-                    stateSpec.state = MusicStateSpec.STATE_PLAYING;
+                    stateSpec.setState((byte) MusicStateSpec.STATE_PLAYING);
                     break;
                 case PlaybackState.STATE_STOPPED:
-                    stateSpec.state = MusicStateSpec.STATE_STOPPED;
+                    stateSpec.setState((byte) MusicStateSpec.STATE_STOPPED);
                     break;
                 case PlaybackState.STATE_PAUSED:
-                    stateSpec.state = MusicStateSpec.STATE_PAUSED;
+                    stateSpec.setState((byte) MusicStateSpec.STATE_PAUSED);
                     break;
                 default:
-                    stateSpec.state = MusicStateSpec.STATE_UNKNOWN;
+                    stateSpec.setState((byte) MusicStateSpec.STATE_UNKNOWN);
                     break;
             }
         } catch (final Exception e) {

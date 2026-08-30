@@ -484,7 +484,7 @@ public class ZeTimeDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetMusicState(MusicStateSpec stateSpec) {
-        musicState = stateSpec.state;
+        musicState = stateSpec.getState();
         if (songtitle != null) {
             music = new byte[songtitle.getBytes(StandardCharsets.UTF_8).length + 7]; // 7 bytes for status and overhead
             music[0] = ZeTimeConstants.CMD_PREAMBLE;
@@ -492,7 +492,7 @@ public class ZeTimeDeviceSupport extends AbstractBTLESingleDeviceSupport {
             music[2] = ZeTimeConstants.CMD_REQUEST_RESPOND;
             music[3] = (byte) ((songtitle.getBytes(StandardCharsets.UTF_8).length + 1) & 0xff);
             music[4] = (byte) ((songtitle.getBytes(StandardCharsets.UTF_8).length + 1) >> 8);
-            if (stateSpec.state == MusicStateSpec.STATE_PLAYING) {
+            if (stateSpec.getState() == MusicStateSpec.STATE_PLAYING) {
                 music[5] = 0;
             } else {
                 music[5] = 1;

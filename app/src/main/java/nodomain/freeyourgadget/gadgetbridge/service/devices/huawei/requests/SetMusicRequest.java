@@ -69,7 +69,7 @@ public class SetMusicRequest extends Request {
             songName = this.musicSpec.getTrack();
         }
         if (this.musicStateSpec != null)
-            playState = convertMusicState(this.musicStateSpec.state);
+            playState = convertMusicState(this.musicStateSpec.getState());
         AudioManager audioManager = (AudioManager) this.supportProvider.getContext().getSystemService(Context.AUDIO_SERVICE);
         byte maxVolume = (byte) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         byte currentVolume = (byte) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);

@@ -264,11 +264,11 @@ public class DeviceActionHandler {
                 break;
             case ACTION_SETMUSICSTATE:
                 final MusicStateSpec stateSpec = new MusicStateSpec();
-                stateSpec.shuffle = intentCopy.getByteExtra(EXTRA_MUSIC_SHUFFLE, (byte) 0);
-                stateSpec.repeat = intentCopy.getByteExtra(EXTRA_MUSIC_REPEAT, (byte) 0);
-                stateSpec.position = intentCopy.getIntExtra(EXTRA_MUSIC_POSITION, 0);
-                stateSpec.playRate = intentCopy.getIntExtra(EXTRA_MUSIC_RATE, 0);
-                stateSpec.state = intentCopy.getByteExtra(EXTRA_MUSIC_STATE, (byte) 0);
+                stateSpec.setShuffle(intentCopy.getByteExtra(EXTRA_MUSIC_SHUFFLE, (byte) 0));
+                stateSpec.setRepeat(intentCopy.getByteExtra(EXTRA_MUSIC_REPEAT, (byte) 0));
+                stateSpec.setPosition(intentCopy.getIntExtra(EXTRA_MUSIC_POSITION, 0));
+                stateSpec.setPlayRate(intentCopy.getIntExtra(EXTRA_MUSIC_RATE, 0));
+                stateSpec.setState(intentCopy.getByteExtra(EXTRA_MUSIC_STATE, (byte) 0));
                 deviceSupport.onSetMusicState(stateSpec);
                 break;
             case ACTION_SETNAVIGATIONINFO:

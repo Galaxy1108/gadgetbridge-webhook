@@ -625,28 +625,28 @@ public class PineTimeJFSupport extends AbstractBTLESingleDeviceSupport implement
         try {
             TransactionBuilder builder = performInitialized("send playback state");
 
-            if (stateSpec.state != MusicStateSpec.STATE_UNKNOWN) {
+            if (stateSpec.getState() != MusicStateSpec.STATE_UNKNOWN) {
                 byte[] state = new byte[1];
-                if (stateSpec.state == MusicStateSpec.STATE_PLAYING) {
+                if (stateSpec.getState() == MusicStateSpec.STATE_PLAYING) {
                     state[0] = 0x01;
                 }
                 safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_STATUS, state);
             }
 
-            if (stateSpec.playRate != MusicStateSpec.STATE_UNKNOWN) {
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_PLAYBACK_SPEED, intToBytes(stateSpec.playRate));
+            if (stateSpec.getPlayRate() != MusicStateSpec.STATE_UNKNOWN) {
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_PLAYBACK_SPEED, intToBytes(stateSpec.getPlayRate()));
             }
 
-            if (stateSpec.position != MusicStateSpec.STATE_UNKNOWN) {
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_POSITION, intToBytes(stateSpec.position));
+            if (stateSpec.getPosition() != MusicStateSpec.STATE_UNKNOWN) {
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_POSITION, intToBytes(stateSpec.getPosition()));
             }
 
-            if (stateSpec.repeat != MusicStateSpec.STATE_UNKNOWN) {
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_REPEAT, intToBytes(stateSpec.repeat));
+            if (stateSpec.getRepeat() != MusicStateSpec.STATE_UNKNOWN) {
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_REPEAT, intToBytes(stateSpec.getRepeat()));
             }
 
-            if (stateSpec.shuffle != MusicStateSpec.STATE_UNKNOWN) {
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_SHUFFLE, intToBytes(stateSpec.repeat));
+            if (stateSpec.getShuffle() != MusicStateSpec.STATE_UNKNOWN) {
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_SHUFFLE, intToBytes(stateSpec.getRepeat()));
             }
 
             builder.queue();

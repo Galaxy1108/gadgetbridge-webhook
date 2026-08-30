@@ -962,7 +962,7 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
     public void onSetMusicState(MusicStateSpec stateSpec) {
         try {
             TransactionBuilder builder = performInitialized("sendMusicState");
-            byte[] payload = new byte[]{(byte) (stateSpec.state == MusicStateSpec.STATE_PLAYING ? 0x01 : 0x00)};
+            byte[] payload = new byte[]{(byte) (stateSpec.getState() == MusicStateSpec.STATE_PLAYING ? 0x01 : 0x00)};
             sendPacket(builder, MoyoungPacketOut.buildPacket(getMtu(), MoyoungConstants.CMD_SET_MUSIC_STATE, payload));
             builder.queue();
         } catch (IOException e) {

@@ -178,7 +178,7 @@ public abstract class AbstractSerialDeviceSupport extends AbstractBluetoothDevic
 
     @Override
     public void onSetMusicState(MusicStateSpec stateSpec) {
-        byte[] bytes = gbDeviceProtocol.encodeSetMusicState(stateSpec.state, stateSpec.position, stateSpec.playRate, stateSpec.shuffle, stateSpec.repeat);
+        byte[] bytes = gbDeviceProtocol.encodeSetMusicState(stateSpec.getState(), stateSpec.getPosition(), stateSpec.getPlayRate(), stateSpec.getShuffle(), stateSpec.getRepeat());
         sendToDevice(bytes);
     }
 

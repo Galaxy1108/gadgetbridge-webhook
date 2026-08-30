@@ -324,10 +324,10 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             JSONObject o = new JSONObject();
             o.put("t", "musicstate");
             String[] musicStates = {"play", "pause", "stop", ""};
-            o.put("state", musicStates[stateSpec.state]);
-            o.put("position", stateSpec.position);
-            o.put("shuffle", stateSpec.shuffle);
-            o.put("repeat", stateSpec.repeat);
+            o.put("state", musicStates[stateSpec.getState()]);
+            o.put("position", stateSpec.getPosition());
+            o.put("shuffle", stateSpec.getShuffle());
+            o.put("repeat", stateSpec.getRepeat());
             uartTxJSON("onSetMusicState", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());

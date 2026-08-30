@@ -161,7 +161,7 @@ public abstract class AbstractSerialDeviceSupportV2<T extends GBDeviceProtocol> 
 
     @Override
     public void onSetMusicState(final MusicStateSpec stateSpec) {
-        byte[] bytes = mDeviceProtocol.encodeSetMusicState(stateSpec.state, stateSpec.position, stateSpec.playRate, stateSpec.shuffle, stateSpec.repeat);
+        byte[] bytes = mDeviceProtocol.encodeSetMusicState(stateSpec.getState(), stateSpec.getPosition(), stateSpec.getPlayRate(), stateSpec.getShuffle(), stateSpec.getRepeat());
         sendToDevice(bytes);
     }
 

@@ -734,7 +734,7 @@ public class CmfWatchProSupport extends AbstractBTLESingleDeviceSupport implemen
         final byte stateByte;
         if (musicSpec == null || musicStateSpec == null) {
             stateByte = 0x00;
-        } else if (musicStateSpec.state == MusicStateSpec.STATE_PLAYING) {
+        } else if (musicStateSpec.getState() == MusicStateSpec.STATE_PLAYING) {
             stateByte = 0x02;
         } else {
             stateByte = 0x01;

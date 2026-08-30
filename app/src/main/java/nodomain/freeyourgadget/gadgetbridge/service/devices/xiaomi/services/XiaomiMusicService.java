@@ -134,7 +134,7 @@ public class XiaomiMusicService extends AbstractXiaomiService {
         if (musicSpec == null || musicStateSpec == null) {
             musicInfo.setState(STATE_NOTHING);
         } else {
-            if (musicStateSpec.state == MusicStateSpec.STATE_PLAYING) {
+            if (musicStateSpec.getState() == MusicStateSpec.STATE_PLAYING) {
                 musicInfo.setState(STATE_PLAYING);
             } else {
                 musicInfo.setState(STATE_PAUSED);
@@ -143,7 +143,7 @@ public class XiaomiMusicService extends AbstractXiaomiService {
             musicInfo.setVolume(mediaManager.getPhoneVolume())
                     .setTrack(musicSpec.getTrack() != null ? musicSpec.getTrack() : "")
                     .setArtist(musicSpec.getArtist() != null ? musicSpec.getArtist() : "")
-                    .setPosition(musicStateSpec.position)
+                    .setPosition(musicStateSpec.getPosition())
                     .setDuration(musicSpec.getDuration());
         }
 

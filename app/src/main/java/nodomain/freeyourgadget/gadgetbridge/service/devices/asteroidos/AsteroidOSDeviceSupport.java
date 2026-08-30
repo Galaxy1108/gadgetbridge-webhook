@@ -175,7 +175,7 @@ public class AsteroidOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
     @Override
     public void onSetMusicState(MusicStateSpec stateSpec) {
         TransactionBuilder builder = createTransactionBuilder("set music state");
-        if (stateSpec.state == MusicStateSpec.STATE_PLAYING) {
+        if (stateSpec.getState() == MusicStateSpec.STATE_PLAYING) {
             safeWriteToCharacteristic(builder, AsteroidOSConstants.MEDIA_PLAYING_CHAR, new byte[]{1});
         } else {
             safeWriteToCharacteristic(builder, AsteroidOSConstants.MEDIA_PLAYING_CHAR, new byte[]{0});

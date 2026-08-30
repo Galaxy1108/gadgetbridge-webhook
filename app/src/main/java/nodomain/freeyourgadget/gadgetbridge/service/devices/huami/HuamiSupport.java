@@ -1465,7 +1465,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
 
         if (musicStateSpec != null) {
             byte state;
-            switch (musicStateSpec.state) {
+            switch (musicStateSpec.getState()) {
                 case MusicStateSpec.STATE_PLAYING:
                     state = 1;
                     break;
@@ -1475,7 +1475,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
 
             buf.put(state);
             buf.put((byte) 0);
-            buf.putShort((short) musicStateSpec.position);
+            buf.putShort((short) musicStateSpec.getPosition());
         }
 
         if (musicSpec != null) {

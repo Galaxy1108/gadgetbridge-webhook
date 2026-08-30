@@ -1174,9 +1174,9 @@ public class Ak102DeviceSupport extends AbstractBTLESingleDeviceSupport {
             return;
         }
         // FitCloud states: 0 stop, 1 playing, 2 pause.
-        final int state = stateSpec.state == MusicStateSpec.STATE_PLAYING ? 1
-                : stateSpec.state == MusicStateSpec.STATE_PAUSED ? 2 : 0;
-        final int position = Math.max(stateSpec.position, 0);
+        final int state = stateSpec.getState() == MusicStateSpec.STATE_PLAYING ? 1
+                : stateSpec.getState() == MusicStateSpec.STATE_PAUSED ? 2 : 0;
+        final int position = Math.max(stateSpec.getPosition(), 0);
         final int speed = 100;
 
         final byte[] payload = new byte[7];

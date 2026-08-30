@@ -1325,7 +1325,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         // Update the music state spec as well
         final MusicStateSpec bufferMusicStateSpec = mediaManager.getBufferMusicStateSpec();
         if (bufferMusicStateSpec != null) {
-            sendMusicState(bufferMusicStateSpec, bufferMusicStateSpec.position);
+            sendMusicState(bufferMusicStateSpec, bufferMusicStateSpec.getPosition());
         }
     }
 
@@ -1337,15 +1337,15 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         LOG.debug("onSetMusicState: {}", stateSpec.toString());
 
-        sendMusicState(stateSpec, stateSpec.position);
+        sendMusicState(stateSpec, stateSpec.getPosition());
     }
 
     private void sendMusicState(final MusicStateSpec stateSpec, final int progress) {
         final int playing;
         final float playRate;
-        if (stateSpec.state == MusicStateSpec.STATE_PLAYING) {
+        if (stateSpec.getState() == MusicStateSpec.STATE_PLAYING) {
             playing = 1;
-            playRate = stateSpec.playRate > 0 ? stateSpec.playRate / 100f : 1.0f;
+            playRate = stateSpec.getPlayRate() > 0 ? stateSpec.getPlayRate() / 100f : 1.0f;
         } else {
             playing = 0;
             playRate = 0;

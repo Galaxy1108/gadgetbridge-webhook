@@ -1247,7 +1247,7 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
         super.setMusicState(stateSpec);
 
         queueWrite(new MusicControlRequest(
-                stateSpec.state == MusicStateSpec.STATE_PLAYING ? MUSIC_PHONE_REQUEST.MUSIC_REQUEST_SET_PLAYING : MUSIC_PHONE_REQUEST.MUSIC_REQUEST_SET_PAUSED
+                stateSpec.getState() == MusicStateSpec.STATE_PLAYING ? MUSIC_PHONE_REQUEST.MUSIC_REQUEST_SET_PLAYING : MUSIC_PHONE_REQUEST.MUSIC_REQUEST_SET_PAUSED
         ));
     }
 

@@ -207,7 +207,7 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
             NotificationServiceStatusRequest request = new NotificationServiceStatusRequest(value);
             if(request.requestType == StatusRequestType.MUSIC_INFO_FETCH.value) {
                 LOG.debug("Request for music info received");
-                if(lastMusicState != null && lastMusicState.state == MusicStateSpec.STATE_PLAYING && lastMusicInfo != null) {
+                if(lastMusicState != null && lastMusicState.getState() == MusicStateSpec.STATE_PLAYING && lastMusicInfo != null) {
                     sendMusicInfo(lastMusicInfo);
                 }
                 return true;
@@ -427,9 +427,9 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetMusicState(MusicStateSpec stateSpec) {
-        if(stateSpec.state == MusicStateSpec.STATE_PLAYING && lastMusicInfo != null) {
+        if(stateSpec.getState() == MusicStateSpec.STATE_PLAYING && lastMusicInfo != null) {
             sendMusicInfo(lastMusicInfo);
-        } else if (stateSpec.state == MusicStateSpec.STATE_STOPPED || stateSpec.state == MusicStateSpec.STATE_PAUSED) {
+        } else if (stateSpec.getState() == MusicStateSpec.STATE_STOPPED || stateSpec.getState() == MusicStateSpec.STATE_PAUSED) {
             sendMusicInfo("");
         }
         lastMusicState = stateSpec;

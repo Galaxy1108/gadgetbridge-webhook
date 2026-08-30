@@ -770,9 +770,9 @@ public class IGPSportDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
         final MusicStateSpec bufferMusicStateSpec = mediaManager.getBufferMusicStateSpec();
         if (bufferMusicStateSpec != null) {
-            player_message.setPlayerState(getPlayerState(bufferMusicStateSpec.state))
-                    .setPlayerRate(bufferMusicStateSpec.playRate)
-                    .setElapsedTime(bufferMusicStateSpec.position)
+            player_message.setPlayerState(getPlayerState(bufferMusicStateSpec.getState()))
+                    .setPlayerRate(bufferMusicStateSpec.getPlayRate())
+                    .setElapsedTime(bufferMusicStateSpec.getPosition())
                     .setVolumeCur(mediaManager.getPhoneVolume())
                     .setVolumeMax(100);
         }
@@ -802,9 +802,9 @@ public class IGPSportDeviceSupport extends AbstractBTLESingleDeviceSupport {
         Media.player_message.Builder player_message = Media.player_message.newBuilder();
         final MusicStateSpec bufferMusicStateSpec = mediaManager.getBufferMusicStateSpec();
         if (bufferMusicStateSpec != null) {
-            player_message.setPlayerState(getPlayerState(bufferMusicStateSpec.state))
-                    .setPlayerRate(bufferMusicStateSpec.playRate)
-                    .setElapsedTime(bufferMusicStateSpec.position);
+            player_message.setPlayerState(getPlayerState(bufferMusicStateSpec.getState()))
+                    .setPlayerRate(bufferMusicStateSpec.getPlayRate())
+                    .setElapsedTime(bufferMusicStateSpec.getPosition());
         }
 
         Media.media_message.Builder media_message = Media.media_message.newBuilder()

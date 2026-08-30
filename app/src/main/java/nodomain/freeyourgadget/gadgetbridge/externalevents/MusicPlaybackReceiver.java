@@ -82,12 +82,12 @@ public class MusicPlaybackReceiver extends BroadcastReceiver {
             } else if (incoming instanceof Long && "duration".equals(key)) {
                 musicSpec.setDuration(((Long) incoming).intValue() / 1000);
             } else if (incoming instanceof Integer && "position".equals(key)) {
-                stateSpec.position = (Integer) incoming / 1000;
+                stateSpec.setPosition((Integer) incoming / 1000);
             } else if (incoming instanceof Long && "position".equals(key)) {
-                stateSpec.position = ((Long) incoming).intValue() / 1000;
+                stateSpec.setPosition(((Long) incoming).intValue() / 1000);
             } else if (incoming instanceof Boolean && "playing".equals(key)) {
-                stateSpec.state = (byte) (((Boolean) incoming) ? MusicStateSpec.STATE_PLAYING : MusicStateSpec.STATE_PAUSED);
-                stateSpec.playRate = (byte) (((Boolean) incoming) ? 100 : 0);
+                stateSpec.setState((byte) (((Boolean) incoming) ? MusicStateSpec.STATE_PLAYING : MusicStateSpec.STATE_PAUSED));
+                stateSpec.setPlayRate((byte) (((Boolean) incoming) ? 100 : 0));
             } else if (incoming instanceof String && "duration".equals(key)) {
                 musicSpec.setDuration(parseTime((String) incoming));
             } else if (incoming instanceof String && "trackno".equals(key)) {
@@ -95,18 +95,18 @@ public class MusicPlaybackReceiver extends BroadcastReceiver {
             } else if (incoming instanceof String && "totaltrack".equals(key)) {
                 musicSpec.setTrackCount(Integer.parseInt((String) incoming));
             } else if (incoming instanceof Integer && "pos".equals(key)) {
-                stateSpec.position = (Integer) incoming;
+                stateSpec.setPosition((Integer) incoming);
             } else if (incoming instanceof Integer && "repeat".equals(key)) {
                 if ((Integer) incoming > 0) {
-                    stateSpec.repeat = 1;
+                    stateSpec.setRepeat((byte) 1);
                 } else {
-                    stateSpec.repeat = 0;
+                    stateSpec.setRepeat((byte) 0);
                 }
             } else if (incoming instanceof Integer && "shuffle".equals(key)) {
                 if ((Integer) incoming > 0) {
-                    stateSpec.shuffle = 1;
+                    stateSpec.setShuffle((byte) 1);
                 } else {
-                    stateSpec.shuffle = 0;
+                    stateSpec.setShuffle((byte) 0);
                 }
             }
         }
@@ -121,7 +121,7 @@ public class MusicPlaybackReceiver extends BroadcastReceiver {
 
         if (!lastStateSpec.equals(stateSpec)) {
             lastStateSpec = stateSpec;
-            LOG.info("Update Music State: state=" + stateSpec.state + ", position= " + stateSpec.position);
+            LOG.info("Update Music State: state=" + stateSpec.getState() + ", position= " + stateSpec.getPosition());
             GBApplication.deviceService().onSetMusicState(stateSpec);
         } else {
             LOG.info("Got state changed intent, but not enough has changed, ignoring.");

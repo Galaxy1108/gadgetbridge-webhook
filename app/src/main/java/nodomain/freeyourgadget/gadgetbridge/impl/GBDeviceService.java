@@ -244,11 +244,11 @@ public class GBDeviceService implements DeviceService {
     @Override
     public void onSetMusicState(@NonNull MusicStateSpec stateSpec) {
         Intent intent = createIntent().setAction(ACTION_SETMUSICSTATE)
-                .putExtra(EXTRA_MUSIC_REPEAT, stateSpec.repeat)
-                .putExtra(EXTRA_MUSIC_RATE, stateSpec.playRate)
-                .putExtra(EXTRA_MUSIC_STATE, stateSpec.state)
-                .putExtra(EXTRA_MUSIC_SHUFFLE, stateSpec.shuffle)
-                .putExtra(EXTRA_MUSIC_POSITION, stateSpec.position);
+                .putExtra(EXTRA_MUSIC_REPEAT, stateSpec.getRepeat())
+                .putExtra(EXTRA_MUSIC_RATE, stateSpec.getPlayRate())
+                .putExtra(EXTRA_MUSIC_STATE, stateSpec.getState())
+                .putExtra(EXTRA_MUSIC_SHUFFLE, stateSpec.getShuffle())
+                .putExtra(EXTRA_MUSIC_POSITION, stateSpec.getPosition());
         invokeService(intent);
     }
 
