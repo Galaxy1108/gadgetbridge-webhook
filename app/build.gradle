@@ -6,7 +6,6 @@ import java.nio.file.Files
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.kaitai)
 }
 
@@ -357,6 +356,9 @@ dependencies {
 
     // Android Health Connect
     implementation libs.androidx.health.connect.client
+
+    // Protocol Buffer specifications
+    implementation project(':GBProtobufGenerator')
 }
 
 preBuild.dependsOn(":GBDaoGenerator:genSources")
@@ -379,21 +381,6 @@ tasks.register('cleanGenerated', Delete) {
 }
 
 tasks.clean.dependsOn(tasks.cleanGenerated)
-
-protobuf {
-    protoc {
-        artifact = libs.protoc.get()
-    }
-    generateProtoTasks {
-        all().each { final task ->
-            task.builtins {
-                java {
-                    option 'lite'
-                }
-            }
-        }
-    }
-}
 
 kaitai {
     javaPackage = "nodomain.freeyourgadget.gadgetbridge.kaitai"
