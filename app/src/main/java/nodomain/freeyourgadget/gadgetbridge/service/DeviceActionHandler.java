@@ -217,18 +217,12 @@ public class DeviceActionHandler {
                 break;
             }
             case ACTION_CALLSTATE:
-                final CallSpec callSpec = new CallSpec();
-                callSpec.setCommand(intentCopy.getIntExtra(EXTRA_CALL_COMMAND, CallSpec.CALL_UNDEFINED));
-                callSpec.setNumber(intentCopy.getStringExtra(EXTRA_CALL_PHONENUMBER));
-                callSpec.setName(intentCopy.getStringExtra(EXTRA_CALL_DISPLAYNAME));
-                callSpec.setSourceName(intentCopy.getStringExtra(EXTRA_CALL_SOURCENAME));
-                callSpec.setSourceAppId(intentCopy.getStringExtra(EXTRA_CALL_SOURCEAPPID));
-                callSpec.setKey(intentCopy.getStringExtra(EXTRA_CALL_KEY));
-                callSpec.setChannelId(intentCopy.getStringExtra(EXTRA_CALL_CHANNELID));
-                callSpec.setCategory(intentCopy.getStringExtra(EXTRA_CALL_CATEGORY));
-                callSpec.setVoip(intentCopy.getBooleanExtra(EXTRA_CALL_ISVOIP, false));
-                callSpec.setDndSuppressed(intentCopy.getIntExtra(EXTRA_CALL_DNDSUPPRESSED, 0));
-                deviceSupport.onSetCallState(callSpec.transliterated(deviceSupport, transliterator));
+                final CallSpec callSpec = intentCopy.getParcelableExtra(EXTRA_CALL_SPEC);
+                if (callSpec != null) {
+                    deviceSupport.onSetCallState(callSpec.transliterated(deviceSupport, transliterator));
+                } else {
+                    deviceSupport.onSetCallState(callSpec);
+                }
                 break;
             case ACTION_SETCANNEDMESSAGES:
                 final int type = intentCopy.getIntExtra(EXTRA_CANNEDMESSAGES_TYPE, -1);

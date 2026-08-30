@@ -17,11 +17,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.util.GBToStringBuilder
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
 
+@Parcelize
 data class CallSpec(
     var number: String? = null,
     var name: String? = null,
@@ -33,7 +36,7 @@ data class CallSpec(
     var isVoip: Boolean = false,
     var command: Int = CALL_UNDEFINED,
     var dndSuppressed: Int = 0
-) : DeviceTextAdaptable<CallSpec> {
+) : DeviceTextAdaptable<CallSpec>, Parcelable {
     companion object {
         // TODO: Migrate all usages to the enum..
         const val CALL_UNDEFINED: Int = 0

@@ -217,19 +217,10 @@ public class GBDeviceService implements DeviceService {
         } else {
             callSpec.setName(coalesce(callSpec.getName(), getContactDisplayNameByNumber(callSpec.getNumber())));
         }
-        final CallSpec withRtlFix = callSpec.withRtlFix();
 
         Intent intent = createIntent().setAction(ACTION_CALLSTATE)
-                .putExtra(EXTRA_CALL_PHONENUMBER, withRtlFix.getNumber())
-                .putExtra(EXTRA_CALL_DISPLAYNAME, withRtlFix.getName())
-                .putExtra(EXTRA_CALL_SOURCENAME, withRtlFix.getSourceName())
-                .putExtra(EXTRA_CALL_SOURCEAPPID, withRtlFix.getSourceAppId())
-                .putExtra(EXTRA_CALL_KEY, withRtlFix.getKey())
-                .putExtra(EXTRA_CALL_CHANNELID, withRtlFix.getChannelId())
-                .putExtra(EXTRA_CALL_CATEGORY, withRtlFix.getCategory())
-                .putExtra(EXTRA_CALL_ISVOIP, withRtlFix.isVoip())
-                .putExtra(EXTRA_CALL_COMMAND, withRtlFix.getCommand())
-                .putExtra(EXTRA_CALL_DNDSUPPRESSED, withRtlFix.getDndSuppressed());
+                .putExtra(EXTRA_CALL_SPEC, callSpec.withRtlFix());
+
         invokeService(intent);
     }
 

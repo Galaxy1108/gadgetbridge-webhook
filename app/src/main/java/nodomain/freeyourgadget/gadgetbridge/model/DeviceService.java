@@ -114,16 +114,7 @@ public interface DeviceService extends EventHandler {
     String EXTRA_NOTIFICATION_CATEGORY = "notification_category";
     String EXTRA_FIND_START = "find_start";
     String EXTRA_VIBRATION_INTENSITY = "vibration_intensity";
-    String EXTRA_CALL_COMMAND = "call_command";
-    String EXTRA_CALL_PHONENUMBER = "call_phonenumber";
-    String EXTRA_CALL_DISPLAYNAME = "call_displayname";
-    String EXTRA_CALL_SOURCENAME = "call_sourcename";
-    String EXTRA_CALL_SOURCEAPPID = "call_sourceappid";
-    String EXTRA_CALL_KEY = "call_key";
-    String EXTRA_CALL_CHANNELID = "call_channel_id";
-    String EXTRA_CALL_CATEGORY = "call_category";
-    String EXTRA_CALL_ISVOIP = "call_is_voip";
-    String EXTRA_CALL_DNDSUPPRESSED = "call_dndsuppressed";
+    String EXTRA_CALL_SPEC = "call_spec";
     String EXTRA_CANNEDMESSAGES = "cannedmessages";
     String EXTRA_CANNEDMESSAGES_TYPE = "cannedmessages_type";
     String EXTRA_MUSIC_ARTIST = "music_artist";
