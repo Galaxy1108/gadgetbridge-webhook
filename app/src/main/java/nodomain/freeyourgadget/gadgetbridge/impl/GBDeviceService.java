@@ -72,9 +72,6 @@ public class GBDeviceService implements DeviceService {
     private final GBDevice mDevice;
     private final Class<? extends Service> mServiceClass;
     public static final String[] transliterationExtras = new String[]{
-            EXTRA_MUSIC_ARTIST,
-            EXTRA_MUSIC_ALBUM,
-            EXTRA_MUSIC_TRACK,
             EXTRA_CALENDAREVENT_TITLE,
             EXTRA_CALENDAREVENT_DESCRIPTION,
             EXTRA_CALENDAREVENT_LOCATION,
@@ -313,13 +310,14 @@ public class GBDeviceService implements DeviceService {
 
     @Override
     public void onSetMusicInfo(@NonNull MusicSpec musicSpec) {
+        final MusicSpec withRtlFix = musicSpec.withRtlFix();
         Intent intent = createIntent().setAction(ACTION_SETMUSICINFO)
-                .putExtra(EXTRA_MUSIC_ARTIST, musicSpec.getArtist())
-                .putExtra(EXTRA_MUSIC_ALBUM, musicSpec.getAlbum())
-                .putExtra(EXTRA_MUSIC_TRACK, musicSpec.getTrack())
-                .putExtra(EXTRA_MUSIC_DURATION, musicSpec.getDuration())
-                .putExtra(EXTRA_MUSIC_TRACKCOUNT, musicSpec.getTrackCount())
-                .putExtra(EXTRA_MUSIC_TRACKNR, musicSpec.getTrackNr());
+                .putExtra(EXTRA_MUSIC_ARTIST, withRtlFix.getArtist())
+                .putExtra(EXTRA_MUSIC_ALBUM, withRtlFix.getAlbum())
+                .putExtra(EXTRA_MUSIC_TRACK, withRtlFix.getTrack())
+                .putExtra(EXTRA_MUSIC_DURATION, withRtlFix.getDuration())
+                .putExtra(EXTRA_MUSIC_TRACKCOUNT, withRtlFix.getTrackCount())
+                .putExtra(EXTRA_MUSIC_TRACKNR, withRtlFix.getTrackNr());
         invokeService(intent);
     }
 

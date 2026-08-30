@@ -264,7 +264,7 @@ public class DeviceActionHandler {
                 musicSpec.setDuration(intentCopy.getIntExtra(EXTRA_MUSIC_DURATION, 0));
                 musicSpec.setTrackCount(intentCopy.getIntExtra(EXTRA_MUSIC_TRACKCOUNT, 0));
                 musicSpec.setTrackNr(intentCopy.getIntExtra(EXTRA_MUSIC_TRACKNR, 0));
-                deviceSupport.onSetMusicInfo(musicSpec);
+                deviceSupport.onSetMusicInfo(musicSpec.transliterated(deviceSupport, device.getDeviceCoordinator(), device, transliterator));
                 break;
             case ACTION_SET_PHONE_VOLUME:
                 final float phoneVolume = intentCopy.getFloatExtra(EXTRA_PHONE_VOLUME, 0);

@@ -17,15 +17,49 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
-data class MusicSpec @JvmOverloads constructor(
+import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
+import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
+import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
+import nodomain.freeyourgadget.gadgetbridge.util.sanitizeText
+
+data class MusicSpec(
     var artist: String? = null,
     var album: String? = null,
     var track: String? = null,
     var duration: Int = MUSIC_UNKNOWN,
     var trackCount: Int = MUSIC_UNKNOWN,
     var trackNr: Int = MUSIC_UNKNOWN
-) {
+) : DeviceTextAdaptable<MusicSpec> {
+
     fun copyOf(): MusicSpec = copy() // data class .copy() method is not available from Java code
+
+    override fun transliterated(
+        deviceSupport: DeviceSupport,
+        deviceCoordinator: DeviceCoordinator,
+        device: GBDevice,
+        transliterator: Transliterator?
+    ): MusicSpec {
+        fun transform(text: String?): String? {
+            val sanitized = sanitizeText(deviceSupport, deviceCoordinator, device, text)
+            return transliterator?.let { sanitized?.let(it::transliterate) } ?: sanitized
+        }
+        return copy(
+            artist = transform(artist),
+            album = transform(album),
+            track = transform(track)
+        )
+    }
+
+    override fun withRtlFix(): MusicSpec {
+        if (!RtlUtils.rtlSupport()) return this
+        return copy(
+            artist = artist?.let(RtlUtils::fixRtl),
+            album = album?.let(RtlUtils::fixRtl),
+            track = track?.let(RtlUtils::fixRtl)
+        )
+    }
 
     companion object {
         const val MUSIC_UNKNOWN: Int = -1
