@@ -190,7 +190,7 @@ public class MakibesHR3DeviceSupport extends AbstractBTLESingleDeviceSupport imp
 
         byte sender;
 
-        switch (notificationSpec.type) {
+        switch (notificationSpec.getType()) {
             case FACEBOOK:
             case FACEBOOK_MESSENGER:
                 sender = MakibesHR3Constants.ARG_SEND_NOTIFICATION_SOURCE_FACEBOOK;
@@ -221,11 +221,11 @@ public class MakibesHR3DeviceSupport extends AbstractBTLESingleDeviceSupport imp
 
         String message = "";
 
-        if (notificationSpec.title != null) {
-            message += (notificationSpec.title + ": ");
+        if (notificationSpec.getTitle() != null) {
+            message += (notificationSpec.getTitle() + ": ");
         }
 
-        message += notificationSpec.body;
+        message += notificationSpec.getBody();
 
         this.sendNotification(transactionBuilder,
                 sender, message);

@@ -817,21 +817,21 @@ public class Ak102DeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(final NotificationSpec notificationSpec) {
-        final String name = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        final String name = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
         final StringBuilder content = new StringBuilder();
-        if (!StringUtils.isEmpty(notificationSpec.title) && !notificationSpec.title.equals(name)) {
-            content.append(notificationSpec.title).append(": ");
+        if (!StringUtils.isEmpty(notificationSpec.getTitle()) && !notificationSpec.getTitle().equals(name)) {
+            content.append(notificationSpec.getTitle()).append(": ");
         }
-        if (!StringUtils.isEmpty(notificationSpec.body)) {
-            content.append(notificationSpec.body);
-        } else if (!StringUtils.isEmpty(notificationSpec.subject)) {
-            content.append(notificationSpec.subject);
+        if (!StringUtils.isEmpty(notificationSpec.getBody())) {
+            content.append(notificationSpec.getBody());
+        } else if (!StringUtils.isEmpty(notificationSpec.getSubject())) {
+            content.append(notificationSpec.getSubject());
         }
         sendNotification(mapNotificationType(notificationSpec), name, content.toString());
     }
 
     private byte mapNotificationType(final NotificationSpec notificationSpec) {
-        switch (notificationSpec.type) {
+        switch (notificationSpec.getType()) {
             case GENERIC_SMS:
                 return Ak102Constants.NOTIFICATION_SMS;
             case QQ:

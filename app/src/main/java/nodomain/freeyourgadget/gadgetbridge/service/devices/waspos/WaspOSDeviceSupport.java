@@ -244,12 +244,12 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             JSONObject o = new JSONObject();
             o.put("t", "notify");
             o.put("id", notificationSpec.getId());
-            o.put("src", notificationSpec.sourceName);
-            o.put("title", notificationSpec.title);
-            o.put("subject", notificationSpec.subject);
-            o.put("body", notificationSpec.body);
-            o.put("sender", notificationSpec.sender);
-            o.put("tel", notificationSpec.phoneNumber);
+            o.put("src", notificationSpec.getSourceName());
+            o.put("title", notificationSpec.getTitle());
+            o.put("subject", notificationSpec.getSubject());
+            o.put("body", notificationSpec.getBody());
+            o.put("sender", notificationSpec.getSender());
+            o.put("tel", notificationSpec.getPhoneNumber());
             uartTxJSON("onNotification", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());

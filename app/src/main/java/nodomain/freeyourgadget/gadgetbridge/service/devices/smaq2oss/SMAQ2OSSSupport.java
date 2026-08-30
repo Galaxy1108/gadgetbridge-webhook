@@ -161,10 +161,10 @@ public class SMAQ2OSSSupport extends AbstractBTLESingleDeviceSupport {
 
 
         notification.setTimestamp(getTimestamp());
-        String sender = StringUtils.getFirstOf(StringUtils.getFirstOf(notificationSpec.sender,notificationSpec.phoneNumber),notificationSpec.title);
+        String sender = StringUtils.getFirstOf(StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getPhoneNumber()), notificationSpec.getTitle());
         notification.setSender(truncateUTF8(sender,SMAQ2OSSConstants.NOTIFICATION_SENDER_MAX_LEN));
 //        notification.setSubject(truncateUTF8(notificationSpec.subject,SMAQ2OSSConstants.NOTIFICATION_SUBJECT_MAX_LEN));
-        notification.setBody(truncateUTF8(notificationSpec.body,SMAQ2OSSConstants.NOTIFICATION_BODY_MAX_LEN));
+        notification.setBody(truncateUTF8(notificationSpec.getBody(),SMAQ2OSSConstants.NOTIFICATION_BODY_MAX_LEN));
 
 
         try {

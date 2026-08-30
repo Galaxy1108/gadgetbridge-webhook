@@ -495,38 +495,38 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
 
             StringBuilder bodyBuilder = new StringBuilder();
 
-            if(notificationSpec.sender != null && notificationSpec.sender.length() > 0) {
-                bodyBuilder.append(notificationSpec.sender);
+            if(notificationSpec.getSender() != null && notificationSpec.getSender().length() > 0) {
+                bodyBuilder.append(notificationSpec.getSender());
                 bodyBuilder.append(":");
             }
 
-            if(notificationSpec.title != null && notificationSpec.title.length() > 0) {
+            if(notificationSpec.getTitle() != null && notificationSpec.getTitle().length() > 0) {
                 if(bodyBuilder.length() > 0) {
                     bodyBuilder.append("\n");
                 }
-                bodyBuilder.append(notificationSpec.title);
+                bodyBuilder.append(notificationSpec.getTitle());
                 bodyBuilder.append(":");
             }
 
-            if(notificationSpec.subject != null && notificationSpec.subject.length() > 0) {
+            if(notificationSpec.getSubject() != null && notificationSpec.getSubject().length() > 0) {
                 if(bodyBuilder.length() > 0) {
                     bodyBuilder.append("\n");
                 }
                 bodyBuilder.append("- ");
-                bodyBuilder.append(notificationSpec.subject);
+                bodyBuilder.append(notificationSpec.getSubject());
             }
 
-            if(notificationSpec.body != null) {
+            if(notificationSpec.getBody() != null) {
                 if(bodyBuilder.length() > 0) {
                     bodyBuilder.append("\n");
                 }
-                bodyBuilder.append(notificationSpec.body);
+                bodyBuilder.append(notificationSpec.getBody());
             }
 
-            String actionLabel = notificationSpec.attachedActions.isEmpty() ? "" :
-                    notificationSpec.attachedActions.get(0).title;
+            String actionLabel = notificationSpec.getAttachedActions().isEmpty() ? "" :
+                    notificationSpec.getAttachedActions().get(0).getTitle();
 
-            boolean hasAction = !notificationSpec.attachedActions.isEmpty();
+            boolean hasAction = !notificationSpec.getAttachedActions().isEmpty();
 
             NotificationFlags flags = NotificationFlags.NONE;
             // TODO: Figure out how actions work
@@ -536,8 +536,8 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
             boolean vibraContinuous = false;
             int vibraRepeats = prefs.getInt(SonyWena3SettingKeys.DEFAULT_VIBRATION_REPETITION, 1);
 
-            if(notificationSpec.sourceAppId != null) {
-                AppSpecificNotificationSetting appSpecificSetting = perAppNotificationSettingsRepository.getSettingsForAppId(notificationSpec.sourceAppId);
+            if(notificationSpec.getSourceAppId() != null) {
+                AppSpecificNotificationSetting appSpecificSetting = perAppNotificationSettingsRepository.getSettingsForAppId(notificationSpec.getSourceAppId());
                 if(appSpecificSetting != null) {
                     if(appSpecificSetting.getLedPattern() != null) {
                         led = LedColor.valueOf(appSpecificSetting.getLedPattern().toUpperCase());
@@ -562,10 +562,10 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
                     new NotificationArrival(
                             NotificationKind.APP,
                             notificationSpec.getId(),
-                            notificationSpec.sourceName,
+                            notificationSpec.getSourceName(),
                             bodyBuilder.toString(),
                             actionLabel,
-                            new Date(notificationSpec.when),
+                            new Date(notificationSpec.getWhen()),
                             new VibrationOptions(vibra, vibraRepeats, vibraContinuous),
                             led,
                             flags

@@ -59,22 +59,22 @@ public class SendNotificationRequest extends Request {
     
     public void buildNotificationTLVFromNotificationSpec(NotificationSpec notificationSpec) {
         String title;
-        if (notificationSpec.title != null)
-            title = notificationSpec.title;
+        if (notificationSpec.getTitle() != null)
+            title = notificationSpec.getTitle();
         else
-            title = notificationSpec.sourceName;
+            title = notificationSpec.getSourceName();
 
-        String body = notificationSpec.body;
+        String body = notificationSpec.getBody();
         if (body != null && body.length() > supportProvider.getDeviceState().getContentLength()) {
-            body = notificationSpec.body.substring(0x0, supportProvider.getDeviceState().getContentLength() - 0xD);
+            body = notificationSpec.getBody().substring(0x0, supportProvider.getDeviceState().getContentLength() - 0xD);
             body += "...";
         }
 
         String replyKey = "";
-        final boolean hasActions = (null != notificationSpec.attachedActions && !notificationSpec.attachedActions.isEmpty());
+        final boolean hasActions = (null != notificationSpec.getAttachedActions() && !notificationSpec.getAttachedActions().isEmpty());
         if (hasActions) {
-            for (int i = 0; i < notificationSpec.attachedActions.size(); i++) {
-                final NotificationSpec.Action action = notificationSpec.attachedActions.get(i);
+            for (int i = 0; i < notificationSpec.getAttachedActions().size(); i++) {
+                final NotificationSpec.Action action = notificationSpec.getAttachedActions().get(i);
                 if (action.isReply()) {
                     //NOTE: store notification key instead action key. The watch returns this key so it is more easier to find action by notification key
                     replyKey = getNotificationKey(notificationSpec);
@@ -94,16 +94,16 @@ public class SendNotificationRequest extends Request {
         params.notificationId = notificationSpec.getId();
         params.notificationKey = getNotificationKey(notificationSpec);
         params.replyKey = replyKey;
-        params.channelId = notificationSpec.channelId;
-        params.category = notificationSpec.category;
-        params.address = notificationSpec.phoneNumber;
-        params.when = notificationSpec.when;
+        params.channelId = notificationSpec.getChannelId();
+        params.category = notificationSpec.getCategory();
+        params.address = notificationSpec.getPhoneNumber();
+        params.when = notificationSpec.getWhen();
 
         boolean pictureEnabled = GBApplication
                 .getDeviceSpecificSharedPrefs(supportProvider.getDevice().getAddress())
                 .getBoolean(DeviceSettingsPreferenceConst.PREF_NOTIFICATION_PICTURES_ENABLE, true);
-        if(supportProvider.getDeviceState().supportsNotificationPicture() && !TextUtils.isEmpty(notificationSpec.picturePath) && pictureEnabled) {
-            params.pictureName = supportProvider.getHuaweiDataSyncNotificationPictures().getNameForPath(notificationSpec.picturePath);
+        if(supportProvider.getDeviceState().supportsNotificationPicture() && !TextUtils.isEmpty(notificationSpec.getPicturePath()) && pictureEnabled) {
+            params.pictureName = supportProvider.getHuaweiDataSyncNotificationPictures().getNameForPath(notificationSpec.getPicturePath());
         }
 
         ArrayList<Notifications.NotificationActionRequest.TextElement> content = new ArrayList<>();
@@ -117,7 +117,7 @@ public class SendNotificationRequest extends Request {
                 new Notifications.NotificationActionRequest.TextElement(
                         (byte) Notifications.TextType.sender,
                         (byte)supportProvider.getDeviceState().getContentFormat(),
-                        notificationSpec.sender)
+                        notificationSpec.getSender())
         );
         content.add(
                 new Notifications.NotificationActionRequest.TextElement(
@@ -129,9 +129,9 @@ public class SendNotificationRequest extends Request {
         this.packet = new Notifications.NotificationActionRequest(
                 paramsProvider,
                 supportProvider.getNotificationId(),
-                getNotificationType(notificationSpec.type),
+                getNotificationType(notificationSpec.getType()),
                 content,
-                notificationSpec.sourceAppId,
+                notificationSpec.getSourceAppId(),
                 params
         );
     }

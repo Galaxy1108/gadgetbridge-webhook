@@ -65,7 +65,7 @@ public class XiaomiNotificationDismissTest {
     @Test
     public void dismissesNotificationWithoutKey() {
         final NotificationSpec spec = new NotificationSpec();
-        spec.sourceAppId = ALARM_PACKAGE;
+        spec.setSourceAppId(ALARM_PACKAGE);
 
         final XiaomiProto.NotificationId notificationId = postAndDismiss(spec);
 
@@ -77,13 +77,13 @@ public class XiaomiNotificationDismissTest {
     @Test
     public void dismissesNotificationWithKey() {
         final NotificationSpec spec = new NotificationSpec();
-        spec.sourceAppId = ALARM_PACKAGE;
-        spec.key = "0|" + ALARM_PACKAGE + "|42|null|12345";
+        spec.setSourceAppId(ALARM_PACKAGE);
+        spec.setKey("0|" + ALARM_PACKAGE + "|42|null|12345");
 
         final XiaomiProto.NotificationId notificationId = postAndDismiss(spec);
 
         Assert.assertEquals(spec.getId(), notificationId.getId());
         Assert.assertEquals(ALARM_PACKAGE, notificationId.getPackage());
-        Assert.assertEquals(spec.key, notificationId.getKey());
+        Assert.assertEquals(spec.getKey(), notificationId.getKey());
     }
 }

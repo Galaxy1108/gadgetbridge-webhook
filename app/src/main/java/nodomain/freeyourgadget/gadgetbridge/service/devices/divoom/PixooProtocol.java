@@ -231,7 +231,7 @@ public class PixooProtocol extends GBDeviceProtocol {
         }
 
         byte iconID;
-        switch (notificationSpec.type) {
+        switch (notificationSpec.getType()) {
             case KAKAO_TALK:
                 iconID = 0;
                 break;

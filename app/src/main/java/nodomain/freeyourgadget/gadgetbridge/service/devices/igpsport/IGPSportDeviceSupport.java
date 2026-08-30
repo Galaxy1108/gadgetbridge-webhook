@@ -528,7 +528,7 @@ public class IGPSportDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        LOG.debug("iGPSport notification: " + notificationSpec.type);
+        LOG.debug("iGPSport notification: " + notificationSpec.getType());
         TransactionBuilder builder = createTransactionBuilder("notification");
 
         Ins.ins_msg.Builder insMsgBuilder = Ins.ins_msg.newBuilder();
@@ -536,19 +536,19 @@ public class IGPSportDeviceSupport extends AbstractBTLESingleDeviceSupport {
         insMsgBuilder.setInsServiceType(Ins.INS_SERVICE_TYPE.enum_INS_SERVICE_TYPE_NOTE);
         insMsgBuilder.setInsOperateType(Ins.INS_OPERATE_TYPE.enum_INS_OPERATE_TYPE_INCOMING_NOTE);
         Ins.ins_data_message.Builder insDataMsgBuilder = Ins.ins_data_message.newBuilder();
-        if (notificationSpec.type == NotificationType.GENERIC_SMS) {
+        if (notificationSpec.getType() == NotificationType.GENERIC_SMS) {
             insDataMsgBuilder.setIsApp(0);
         } else {
             insDataMsgBuilder.setIsApp(1);
-            insDataMsgBuilder.setAppName(notificationSpec.sourceName);
+            insDataMsgBuilder.setAppName(notificationSpec.getSourceName());
         }
 
-        if (notificationSpec.phoneNumber != null)
-            insDataMsgBuilder.setTelNum(ByteString.copyFromUtf8(notificationSpec.phoneNumber));
-        if (notificationSpec.title != null)
-            insDataMsgBuilder.setName(notificationSpec.title);
-        if (notificationSpec.body != null)
-            insDataMsgBuilder.setContent(notificationSpec.body);
+        if (notificationSpec.getPhoneNumber() != null)
+            insDataMsgBuilder.setTelNum(ByteString.copyFromUtf8(notificationSpec.getPhoneNumber()));
+        if (notificationSpec.getTitle() != null)
+            insDataMsgBuilder.setName(notificationSpec.getTitle());
+        if (notificationSpec.getBody() != null)
+            insDataMsgBuilder.setContent(notificationSpec.getBody());
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
         insDataMsgBuilder.setTime(timeStamp);
         insMsgBuilder.setInsDataMsg(insDataMsgBuilder);

@@ -618,11 +618,11 @@ public class CmfWatchProSupport extends AbstractBTLESingleDeviceSupport implemen
         }
 
         final String senderOrTitle = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.getFirstOf(
-                notificationSpec.sender,
-                notificationSpec.title
+                notificationSpec.getSender(),
+                notificationSpec.getTitle()
         );
 
-        final String body = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.getFirstOf(notificationSpec.body, "");
+        final String body = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.getFirstOf(notificationSpec.getBody(), "");
 
         final byte[] senderOrTitleBytes = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncateToBytes(senderOrTitle, 20); // TODO confirm max
         final byte[] bodyBytes = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncateToBytes(body, 128); // TODO confirm max
@@ -632,7 +632,7 @@ public class CmfWatchProSupport extends AbstractBTLESingleDeviceSupport implemen
 
         buf.put(CmfNotificationIcon.forNotification(notificationSpec).getCode());
         buf.put((byte) 0x00); // ?
-        buf.putInt((int) (notificationSpec.when / 1000));
+        buf.putInt((int) (notificationSpec.getWhen() / 1000));
         buf.put((byte) senderOrTitleBytes.length);
         buf.put(senderOrTitleBytes);
         buf.put(bodyBytes);

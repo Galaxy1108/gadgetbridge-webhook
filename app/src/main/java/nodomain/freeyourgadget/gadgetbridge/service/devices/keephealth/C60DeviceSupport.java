@@ -584,9 +584,9 @@ public class C60DeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        String titleStr = notificationSpec.title;
-        String bodyStr = notificationSpec.body;
-        KeepHealthNotificationType type = KeepHealthNotificationType.fromNotificationType(notificationSpec.type);
+        String titleStr = notificationSpec.getTitle();
+        String bodyStr = notificationSpec.getBody();
+        KeepHealthNotificationType type = KeepHealthNotificationType.fromNotificationType(notificationSpec.getType());
         notificationQueue.addToQueue(new NotificationItem(titleStr, bodyStr, type));
         LOG.debug("notificationQueue: {}", notificationQueue);
         sendNotification();

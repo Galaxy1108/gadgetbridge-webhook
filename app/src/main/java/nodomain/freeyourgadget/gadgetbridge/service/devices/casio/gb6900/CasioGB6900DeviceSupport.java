@@ -472,9 +472,9 @@ public class CasioGB6900DeviceSupport extends CasioSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        String notificationTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        String notificationTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
         byte icon;
-        switch (notificationSpec.type.getGenericType()) {
+        switch (notificationSpec.getType().getGenericType()) {
             case "generic_sms":
                 icon = CasioConstants.SMS_NOTIFICATION_ID;
                 break;
@@ -488,7 +488,7 @@ public class CasioGB6900DeviceSupport extends CasioSupport {
                 icon = CasioConstants.SNS_NOTIFICATION_ID;
                 break;
         }
-        showNotification(icon, notificationTitle, notificationSpec.body);
+        showNotification(icon, notificationTitle, notificationSpec.getBody());
     }
 
     @Override

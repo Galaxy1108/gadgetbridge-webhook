@@ -1362,17 +1362,17 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
     }
 
     public boolean playRawNotification(NotificationSpec notificationSpec) {
-        String sourceAppId = notificationSpec.sourceAppId;
-        String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        String sourceAppId = notificationSpec.getSourceAppId();
+        String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
 
         // Retrieve and store notification or app icon
         if (sourceAppId != null) {
             if (appIconCache.get(sourceAppId) == null) {
                 try {
                     Drawable icon = null;
-                    if (notificationSpec.iconId != 0) {
-                        Context sourcePackageContext = getContext().createPackageContext(notificationSpec.iconPackageId, 0);
-                        icon = ResourcesCompat.getDrawable(sourcePackageContext.getResources(), notificationSpec.iconId, null);
+                    if (notificationSpec.getIconId() != 0) {
+                        Context sourcePackageContext = getContext().createPackageContext(notificationSpec.getIconPackageId(), 0);
+                        icon = ResourcesCompat.getDrawable(sourcePackageContext.getResources(), notificationSpec.getIconId(), null);
                     }
                     if (icon == null) {
                         icon = NotificationUtils.getAppIcon(getContext(), sourceAppId);

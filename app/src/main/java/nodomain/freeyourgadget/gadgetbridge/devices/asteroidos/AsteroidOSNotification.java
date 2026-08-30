@@ -62,12 +62,12 @@ public class AsteroidOSNotification {
      * @param spec The NotificationSpec to create the notification from
      */
     public AsteroidOSNotification(NotificationSpec spec) {
-        this.body = spec.body;
-        this.applicationName = spec.sourceName;
-        this.summary = StringUtils.firstNonBlank(spec.sender, spec.title, spec.subject);
+        this.body = spec.getBody();
+        this.applicationName = spec.getSourceName();
+        this.summary = StringUtils.firstNonBlank(spec.getSender(), spec.getTitle(), spec.getSubject());
         this.id = spec.getId();
-        this.packageName = spec.sourceAppId;
-        this.icon = this.gbNotificationTypeToIcon(spec.type);
+        this.packageName = spec.getSourceAppId();
+        this.icon = this.gbNotificationTypeToIcon(spec.getType());
     }
 
     /**

@@ -331,11 +331,11 @@ public class PineTimeJFSupport extends AbstractBTLESingleDeviceSupport implement
 
         String message;
         String source = null;
-        String bodyOrSubject = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.getFirstOf(notificationSpec.body, notificationSpec.subject);
-        String senderOrTitle = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
-        if (!nodomain.freeyourgadget.gadgetbridge.util.StringUtils.isNullOrEmpty(notificationSpec.sourceName)) {
-            source = notificationSpec.sourceName;
-        } else if (notificationSpec.type == NotificationType.GENERIC_SMS) {
+        String bodyOrSubject = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.getFirstOf(notificationSpec.getBody(), notificationSpec.getSubject());
+        String senderOrTitle = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
+        if (!nodomain.freeyourgadget.gadgetbridge.util.StringUtils.isNullOrEmpty(notificationSpec.getSourceName())) {
+            source = notificationSpec.getSourceName();
+        } else if (notificationSpec.getType() == NotificationType.GENERIC_SMS) {
             source = getContext().getString(R.string.pref_title_notifications_sms);
         }
 

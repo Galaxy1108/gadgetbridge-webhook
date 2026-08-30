@@ -916,7 +916,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
      */
     public String getNotificationBody(NotificationSpec notificationSpec) {
         final StringBuilder sb = new StringBuilder();
-        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
         if (!senderOrTitle.isEmpty()) {
             sb.append(StringUtils.truncate(senderOrTitle, 32));
         } else {
@@ -924,13 +924,13 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
             sb.append(" ");
         }
         sb.append("\0");
-        if (!StringUtils.isNullOrEmpty(notificationSpec.subject)) {
-            sb.append(StringUtils.truncate(notificationSpec.subject, 128)).append("\n\n");
+        if (!StringUtils.isNullOrEmpty(notificationSpec.getSubject())) {
+            sb.append(StringUtils.truncate(notificationSpec.getSubject(), 128)).append("\n\n");
         }
-        if (!StringUtils.isNullOrEmpty(notificationSpec.body)) {
-            sb.append(StringUtils.truncate(notificationSpec.body, 512)).append("\n\n");
+        if (!StringUtils.isNullOrEmpty(notificationSpec.getBody())) {
+            sb.append(StringUtils.truncate(notificationSpec.getBody(), 512)).append("\n\n");
         }
-        if (StringUtils.isNullOrEmpty(notificationSpec.subject) && StringUtils.isNullOrEmpty(notificationSpec.body)) {
+        if (StringUtils.isNullOrEmpty(notificationSpec.getSubject()) && StringUtils.isNullOrEmpty(notificationSpec.getBody())) {
             // if we have no body we have to send at least something on some devices, else they reboot (Bip S)
             sb.append(" ");
         }
@@ -942,8 +942,8 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
      * #2987 / #4419 - Some devices do not show the sender / title for certain notification types
      */
     public String getNotificationBodyCheckAcceptsSender(NotificationSpec notificationSpec) {
-        String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
-        byte customIconId = HuamiIcon.mapToIconId(notificationSpec.type);
+        String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
+        byte customIconId = HuamiIcon.mapToIconId(notificationSpec.getType());
         boolean acceptsSender = HuamiIcon.acceptsSender(customIconId);
         String message;
 
@@ -952,22 +952,22 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
            we will repeat the subject as part of the notification body, but only if the app name
            is different from the subject. That way it's aesthetically pleasing.
          */
-        if (!acceptsSender && !senderOrTitle.equals(notificationSpec.sourceName)) {
+        if (!acceptsSender && !senderOrTitle.equals(notificationSpec.getSourceName())) {
             message = "-\0"; //if the sender is not accepted, whatever goes in this field is ignored
             message += senderOrTitle + "\n";
         } else {
             message = senderOrTitle + "\0";
         }
 
-        if (notificationSpec.subject != null) {
-            message += StringUtils.truncate(notificationSpec.subject, 128) + "\n\n";
+        if (notificationSpec.getSubject() != null) {
+            message += StringUtils.truncate(notificationSpec.getSubject(), 128) + "\n\n";
         }
 
-        if (notificationSpec.body != null) {
-            message += StringUtils.truncate(notificationSpec.body, 512);
+        if (notificationSpec.getBody() != null) {
+            message += StringUtils.truncate(notificationSpec.getBody(), 512);
         }
 
-        if (notificationSpec.body == null && notificationSpec.subject == null) {
+        if (notificationSpec.getBody() == null && notificationSpec.getSubject() == null) {
             message += " ";
         }
 
@@ -984,11 +984,11 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
         try {
             TransactionBuilder builder = performInitialized("new notification");
 
-            byte customIconId = HuamiIcon.mapToIconId(notificationSpec.type);
+            byte customIconId = HuamiIcon.mapToIconId(notificationSpec.getType());
             AlertCategory alertCategory = AlertCategory.CustomHuami;
 
             // The SMS icon for AlertCategory.SMS is unique and not available as iconId
-            if (notificationSpec.type == NotificationType.GENERIC_SMS) {
+            if (notificationSpec.getType() == NotificationType.GENERIC_SMS) {
                 alertCategory = AlertCategory.SMS;
             }
             // EMAIL icon does not work in FW 0.0.8.74, it did in 0.0.7.90
@@ -1004,7 +1004,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
                 int suffixlength = appSuffix.length;
 
                 if (alertCategory == AlertCategory.CustomHuami) {
-                    String appName = "\0" + StringUtils.getFirstOf(notificationSpec.sourceName, "UNKNOWN") + "\0";
+                    String appName = "\0" + StringUtils.getFirstOf(notificationSpec.getSourceName(), "UNKNOWN") + "\0";
                     prefixlength = 3;
 
                     appSuffix = appName.getBytes();
@@ -4170,8 +4170,8 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
                 break;
             case SleepAsAndroidAction.SHOW_NOTIFICATION: {
                 NotificationSpec spec = new NotificationSpec();
-                spec.title = extras.getString("TITLE");
-                spec.body = extras.getString("TEXT");
+                spec.setTitle(extras.getString("TITLE"));
+                spec.setBody(extras.getString("TEXT"));
                 onNotification(spec);
                 break;
             }

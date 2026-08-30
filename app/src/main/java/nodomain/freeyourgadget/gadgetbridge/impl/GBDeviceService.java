@@ -180,24 +180,24 @@ public class GBDeviceService implements DeviceService {
         boolean hideMessageBodyOnly = messagePrivacyMode.equals(GBApplication.getContext().getString(R.string.p_message_privacy_mode_bodyonly));
 
         Intent intent = createIntent().setAction(ACTION_NOTIFICATION)
-                .putExtra(EXTRA_NOTIFICATION_FLAGS, notificationSpec.flags)
-                .putExtra(EXTRA_NOTIFICATION_PHONENUMBER, hideMessageDetails ? null : notificationSpec.phoneNumber)
-                .putExtra(EXTRA_NOTIFICATION_SENDER, hideMessageDetails ? null : coalesce(notificationSpec.sender, getContactDisplayNameByNumber(notificationSpec.phoneNumber)))
-                .putExtra(EXTRA_NOTIFICATION_SUBJECT, hideMessageDetails ? null : notificationSpec.subject)
-                .putExtra(EXTRA_NOTIFICATION_TITLE, hideMessageDetails ? null : notificationSpec.title)
-                .putExtra(EXTRA_NOTIFICATION_BODY, hideMessageDetails || hideMessageBodyOnly ? null : notificationSpec.body)
+                .putExtra(EXTRA_NOTIFICATION_FLAGS, notificationSpec.getFlags())
+                .putExtra(EXTRA_NOTIFICATION_PHONENUMBER, hideMessageDetails ? null : notificationSpec.getPhoneNumber())
+                .putExtra(EXTRA_NOTIFICATION_SENDER, hideMessageDetails ? null : coalesce(notificationSpec.getSender(), getContactDisplayNameByNumber(notificationSpec.getPhoneNumber())))
+                .putExtra(EXTRA_NOTIFICATION_SUBJECT, hideMessageDetails ? null : notificationSpec.getSubject())
+                .putExtra(EXTRA_NOTIFICATION_TITLE, hideMessageDetails ? null : notificationSpec.getTitle())
+                .putExtra(EXTRA_NOTIFICATION_BODY, hideMessageDetails || hideMessageBodyOnly ? null : notificationSpec.getBody())
                 .putExtra(EXTRA_NOTIFICATION_ID, notificationSpec.getId())
-                .putExtra(EXTRA_NOTIFICATION_KEY, notificationSpec.key)
-                .putExtra(EXTRA_NOTIFICATION_TYPE, notificationSpec.type)
-                .putExtra(EXTRA_NOTIFICATION_ACTIONS, notificationSpec.attachedActions)
-                .putExtra(EXTRA_NOTIFICATION_SOURCENAME, notificationSpec.sourceName)
-                .putExtra(EXTRA_NOTIFICATION_SOURCEAPPID, notificationSpec.sourceAppId)
-                .putExtra(EXTRA_NOTIFICATION_ICONID, notificationSpec.iconId)
-                .putExtra(EXTRA_NOTIFICATION_ICONPACKAGEID, notificationSpec.iconPackageId)
-                .putExtra(NOTIFICATION_PICTURE_PATH, notificationSpec.picturePath)
-                .putExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, notificationSpec.dndSuppressed)
-                .putExtra(EXTRA_NOTIFICATION_CHANNEL_ID, notificationSpec.channelId)
-                .putExtra(EXTRA_NOTIFICATION_CATEGORY, notificationSpec.category);
+                .putExtra(EXTRA_NOTIFICATION_KEY, notificationSpec.getKey())
+                .putExtra(EXTRA_NOTIFICATION_TYPE, notificationSpec.getType())
+                .putExtra(EXTRA_NOTIFICATION_ACTIONS, notificationSpec.getAttachedActions())
+                .putExtra(EXTRA_NOTIFICATION_SOURCENAME, notificationSpec.getSourceName())
+                .putExtra(EXTRA_NOTIFICATION_SOURCEAPPID, notificationSpec.getSourceAppId())
+                .putExtra(EXTRA_NOTIFICATION_ICONID, notificationSpec.getIconId())
+                .putExtra(EXTRA_NOTIFICATION_ICONPACKAGEID, notificationSpec.getIconPackageId())
+                .putExtra(NOTIFICATION_PICTURE_PATH, notificationSpec.getPicturePath())
+                .putExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, notificationSpec.getDndSuppressed())
+                .putExtra(EXTRA_NOTIFICATION_CHANNEL_ID, notificationSpec.getChannelId())
+                .putExtra(EXTRA_NOTIFICATION_CATEGORY, notificationSpec.getCategory());
         invokeService(intent);
     }
 

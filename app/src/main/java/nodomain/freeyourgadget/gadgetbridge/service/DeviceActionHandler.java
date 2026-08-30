@@ -122,37 +122,37 @@ public class DeviceActionHandler {
             case ACTION_NOTIFICATION: {
                 final int desiredId = intentCopy.getIntExtra(EXTRA_NOTIFICATION_ID, -1);
                 final NotificationSpec notificationSpec = new NotificationSpec(desiredId);
-                notificationSpec.phoneNumber = intentCopy.getStringExtra(EXTRA_NOTIFICATION_PHONENUMBER);
-                notificationSpec.sender = intentCopy.getStringExtra(EXTRA_NOTIFICATION_SENDER);
-                notificationSpec.subject = intentCopy.getStringExtra(EXTRA_NOTIFICATION_SUBJECT);
-                notificationSpec.title = intentCopy.getStringExtra(EXTRA_NOTIFICATION_TITLE);
-                if (notificationSpec.title == null) {
-                    notificationSpec.title = "";
+                notificationSpec.setPhoneNumber(intentCopy.getStringExtra(EXTRA_NOTIFICATION_PHONENUMBER));
+                notificationSpec.setSender(intentCopy.getStringExtra(EXTRA_NOTIFICATION_SENDER));
+                notificationSpec.setSubject(intentCopy.getStringExtra(EXTRA_NOTIFICATION_SUBJECT));
+                notificationSpec.setTitle(intentCopy.getStringExtra(EXTRA_NOTIFICATION_TITLE));
+                if (notificationSpec.getTitle() == null) {
+                    notificationSpec.setTitle("");
                 }
-                notificationSpec.key = intentCopy.getStringExtra(EXTRA_NOTIFICATION_KEY);
-                notificationSpec.body = intentCopy.getStringExtra(EXTRA_NOTIFICATION_BODY);
-                if (notificationSpec.body == null) {
-                    notificationSpec.body = "";
+                notificationSpec.setKey(intentCopy.getStringExtra(EXTRA_NOTIFICATION_KEY));
+                notificationSpec.setBody(intentCopy.getStringExtra(EXTRA_NOTIFICATION_BODY));
+                if (notificationSpec.getBody() == null) {
+                    notificationSpec.setBody("");
                 }
-                notificationSpec.sourceName = intentCopy.getStringExtra(EXTRA_NOTIFICATION_SOURCENAME);
-                notificationSpec.type = (NotificationType) intentCopy.getSerializableExtra(EXTRA_NOTIFICATION_TYPE);
-                notificationSpec.attachedActions = (ArrayList<NotificationSpec.Action>) intentCopy.getSerializableExtra(EXTRA_NOTIFICATION_ACTIONS);
-                notificationSpec.flags = intentCopy.getIntExtra(EXTRA_NOTIFICATION_FLAGS, 0);
-                notificationSpec.sourceAppId = intentCopy.getStringExtra(EXTRA_NOTIFICATION_SOURCEAPPID);
-                notificationSpec.iconId = intentCopy.getIntExtra(EXTRA_NOTIFICATION_ICONID, 0);
-                notificationSpec.iconPackageId = intentCopy.getStringExtra(EXTRA_NOTIFICATION_ICONPACKAGEID);
-                notificationSpec.picturePath = intent.getStringExtra(NOTIFICATION_PICTURE_PATH);
-                notificationSpec.dndSuppressed = intentCopy.getIntExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, 0);
-                notificationSpec.channelId = intentCopy.getStringExtra(EXTRA_NOTIFICATION_CHANNEL_ID);
-                notificationSpec.category = intentCopy.getStringExtra(EXTRA_NOTIFICATION_CATEGORY);
+                notificationSpec.setSourceName(intentCopy.getStringExtra(EXTRA_NOTIFICATION_SOURCENAME));
+                notificationSpec.setType((NotificationType) intentCopy.getSerializableExtra(EXTRA_NOTIFICATION_TYPE));
+                notificationSpec.setAttachedActions((ArrayList<NotificationSpec.Action>) intentCopy.getSerializableExtra(EXTRA_NOTIFICATION_ACTIONS));
+                notificationSpec.setFlags(intentCopy.getIntExtra(EXTRA_NOTIFICATION_FLAGS, 0));
+                notificationSpec.setSourceAppId(intentCopy.getStringExtra(EXTRA_NOTIFICATION_SOURCEAPPID));
+                notificationSpec.setIconId(intentCopy.getIntExtra(EXTRA_NOTIFICATION_ICONID, 0));
+                notificationSpec.setIconPackageId(intentCopy.getStringExtra(EXTRA_NOTIFICATION_ICONPACKAGEID));
+                notificationSpec.setPicturePath(intent.getStringExtra(NOTIFICATION_PICTURE_PATH));
+                notificationSpec.setDndSuppressed(intentCopy.getIntExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, 0));
+                notificationSpec.setChannelId(intentCopy.getStringExtra(EXTRA_NOTIFICATION_CHANNEL_ID));
+                notificationSpec.setCategory(intentCopy.getStringExtra(EXTRA_NOTIFICATION_CATEGORY));
 
-                if (notificationSpec.type == NotificationType.GENERIC_SMS && notificationSpec.phoneNumber != null) {
-                    GBApplication.getIDSenderLookup().add(notificationSpec.getId(), notificationSpec.phoneNumber);
+                if (notificationSpec.getType() == NotificationType.GENERIC_SMS && notificationSpec.getPhoneNumber() != null) {
+                    GBApplication.getIDSenderLookup().add(notificationSpec.getId(), notificationSpec.getPhoneNumber());
                 }
 
                 //TODO: check if at least one of the attached actions is a reply action instead?
-                if ((notificationSpec.attachedActions != null && !notificationSpec.attachedActions.isEmpty())
-                        || (notificationSpec.type == NotificationType.GENERIC_SMS && notificationSpec.phoneNumber != null)) {
+                if ((notificationSpec.getAttachedActions() != null && !notificationSpec.getAttachedActions().isEmpty())
+                        || (notificationSpec.getType() == NotificationType.GENERIC_SMS && notificationSpec.getPhoneNumber() != null)) {
                     // NOTE: maybe not where it belongs
                     // I would rather like to save that as an array in SharedPreferences
                     // this would work, but I don't know how to do the same in the Settings Activity's xXML
@@ -163,7 +163,7 @@ public class DeviceActionHandler {
                             replies.add(reply);
                         }
                     }
-                    notificationSpec.cannedReplies = replies.toArray(new String[0]);
+                    notificationSpec.setCannedReplies(replies.toArray(new String[0]));
                 }
 
                 deviceSupport.onNotification(notificationSpec);

@@ -557,12 +557,12 @@ public class MiBandSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        if (notificationSpec.type == NotificationType.GENERIC_ALARM_CLOCK) {
+        if (notificationSpec.getType() == NotificationType.GENERIC_ALARM_CLOCK) {
             onAlarmClock(notificationSpec);
             return;
         }
 
-        String origin = notificationSpec.type.getGenericType();
+        String origin = notificationSpec.getType().getGenericType();
         performPreferredNotification(origin + " received", null, origin, null);
     }
 

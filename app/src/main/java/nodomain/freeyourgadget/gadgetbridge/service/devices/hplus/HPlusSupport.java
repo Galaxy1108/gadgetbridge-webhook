@@ -417,7 +417,7 @@ public class HPlusSupport extends AbstractBTLESingleDeviceSupport {
     public void onNotification(NotificationSpec notificationSpec) {
         //TODO: Show different notifications according to source as Band supports this
         //LOG.info("OnNotification: Title: "+notificationSpec.title+" Body: "+notificationSpec.body+" Source: "+notificationSpec.sourceName+" Sender: "+notificationSpec.sender+" Subject: "+notificationSpec.subject);
-        showText(notificationSpec.title, notificationSpec.body);
+        showText(notificationSpec.getTitle(), notificationSpec.getBody());
     }
 
     @Override

@@ -168,14 +168,14 @@ public class WatchXPlusDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
 
         String message = StringUtils.truncate(senderOrTitle, 14) + "\0";
-        if (notificationSpec.subject != null) {
-            message += StringUtils.truncate(notificationSpec.subject, 20) + ": ";
+        if (notificationSpec.getSubject() != null) {
+            message += StringUtils.truncate(notificationSpec.getSubject(), 20) + ": ";
         }
-        if (notificationSpec.body != null) {
-            message += StringUtils.truncate(notificationSpec.body, 64);
+        if (notificationSpec.getBody() != null) {
+            message += StringUtils.truncate(notificationSpec.getBody(), 64);
         }
 
         sendNotification(WatchXPlusConstants.NOTIFICATION_CHANNEL_DEFAULT, message);

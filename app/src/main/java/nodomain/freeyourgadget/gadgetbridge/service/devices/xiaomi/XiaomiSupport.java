@@ -517,8 +517,8 @@ public class XiaomiSupport extends AbstractBluetoothDeviceSupport {
                 break;
             case SleepAsAndroidAction.SHOW_NOTIFICATION: {
                 NotificationSpec spec = new NotificationSpec();
-                spec.title = extras.getString("TITLE");
-                spec.body = extras.getString("TEXT");
+                spec.setTitle(extras.getString("TITLE"));
+                spec.setBody(extras.getString("TEXT"));
                 notificationService.onNotification(spec);
                 break;
             }

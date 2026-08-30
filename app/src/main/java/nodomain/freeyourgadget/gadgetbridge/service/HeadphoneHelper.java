@@ -104,9 +104,9 @@ public class HeadphoneHelper {
 
         if (gbTextToSpeech.isConnected()) {
             String notificationSpeller = new StringBuilder()
-                    .append(notificationSpec.sourceName == null ? "" : notificationSpec.sourceName).append(". ")
-                    .append(notificationSpec.title == null ? "" : notificationSpec.title).append(": ")
-                    .append(notificationSpec.body == null ? "" : notificationSpec.body).toString();
+                    .append(notificationSpec.getSourceName() == null ? "" : notificationSpec.getSourceName()).append(". ")
+                    .append(notificationSpec.getTitle() == null ? "" : notificationSpec.getTitle()).append(": ")
+                    .append(notificationSpec.getBody() == null ? "" : notificationSpec.getBody()).toString();
 
             gbTextToSpeech.speakNotification(notificationSpeller);
         }

@@ -627,7 +627,7 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
 
         val senderOrTitle = notificationSpec.sender.takeIf { !it.isNullOrBlank() } ?: notificationSpec.title
 
-        val payloadString = when {
+        val payloadString: String = when {
             StringUtils.isNotBlank(senderOrTitle) && StringUtils.isNotBlank(notificationSpec.body)
                 -> "${senderOrTitle}: ${notificationSpec.body}"
 
@@ -635,7 +635,7 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
             StringUtils.isNotBlank(notificationSpec.body) -> notificationSpec.body
 
             else -> "?"
-        }
+        }.toString()
 
         val builder = createTransactionBuilder("send notification")
         sendNotification(

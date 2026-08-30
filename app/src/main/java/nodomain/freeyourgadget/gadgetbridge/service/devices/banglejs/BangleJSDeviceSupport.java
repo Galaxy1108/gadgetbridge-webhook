@@ -675,8 +675,8 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             // Received when the app sends a notification
             case SleepAsAndroidAction.SHOW_NOTIFICATION:
                 NotificationSpec notificationSpec = new NotificationSpec();
-                notificationSpec.title = extras.getString("TITLE");
-                notificationSpec.body = extras.getString("TEXT");
+                notificationSpec.setTitle(extras.getString("TITLE"));
+                notificationSpec.setBody(extras.getString("TEXT"));
                 this.onNotification(notificationSpec);
                 break;
             case SleepAsAndroidAction.UPDATE_ALARM:
@@ -1471,29 +1471,29 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
         final ArrayList<Long> actionHandles = new ArrayList<Long>();
         final JSONArray actionsArray = new JSONArray();
         boolean canReply = false;
-        if (notificationSpec.attachedActions!=null) {
-            for (int i=0;i<notificationSpec.attachedActions.size();i++) {
-                NotificationSpec.Action action = notificationSpec.attachedActions.get(i);
-                if (action.type==NotificationSpec.Action.TYPE_WEARABLE_REPLY) {
-                    mNotificationReplyAction.add(notificationSpec.getId(), action.handle);
+        if (notificationSpec.getAttachedActions() !=null) {
+            for (int i = 0; i< notificationSpec.getAttachedActions().size(); i++) {
+                NotificationSpec.Action action = notificationSpec.getAttachedActions().get(i);
+                if (action.getType() ==NotificationSpec.Action.TYPE_WEARABLE_REPLY) {
+                    mNotificationReplyAction.add(notificationSpec.getId(), action.getHandle());
                     canReply = true;
                 }
 
-                if (action.type==NotificationSpec.Action.TYPE_WEARABLE_SIMPLE ||
-                    action.type==NotificationSpec.Action.TYPE_CUSTOM_SIMPLE) {
+                if (action.getType() ==NotificationSpec.Action.TYPE_WEARABLE_SIMPLE ||
+                    action.getType() ==NotificationSpec.Action.TYPE_CUSTOM_SIMPLE) {
                     try {
                         final JSONObject actionJson = new JSONObject();
-                        actionJson.put("title", renderUnicodeAsImage(cropToLength(action.title, 40)));
+                        actionJson.put("title", renderUnicodeAsImage(cropToLength(action.getTitle(), 40)));
                         actionsArray.put(actionJson);
-                        actionHandles.add(action.handle);
+                        actionHandles.add(action.getHandle());
                     } catch (JSONException ignored) {}
                 }
             }
         }
 
         // sourceName isn't set for SMS messages
-        String src = notificationSpec.sourceName;
-        if (notificationSpec.type == NotificationType.GENERIC_SMS)
+        String src = notificationSpec.getSourceName();
+        if (notificationSpec.getType() == NotificationType.GENERIC_SMS)
             src = "SMS Message";
         // Send JSON to Bangle.js
         try {
@@ -1501,11 +1501,11 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             o.put("t", "notify");
             o.put("id", notificationSpec.getId());
             o.put("src", src);
-            o.put("title", renderUnicodeAsImage(cropToLength(notificationSpec.title,80)));
-            o.put("subject", renderUnicodeAsImage(cropToLength(notificationSpec.subject,80)));
-            o.put("body", renderUnicodeAsImage(cropToLength(notificationSpec.body, 400)));
-            o.put("sender", renderUnicodeAsImage(cropToLength(notificationSpec.sender,40)));
-            o.put("tel", notificationSpec.phoneNumber);
+            o.put("title", renderUnicodeAsImage(cropToLength(notificationSpec.getTitle(),80)));
+            o.put("subject", renderUnicodeAsImage(cropToLength(notificationSpec.getSubject(),80)));
+            o.put("body", renderUnicodeAsImage(cropToLength(notificationSpec.getBody(), 400)));
+            o.put("sender", renderUnicodeAsImage(cropToLength(notificationSpec.getSender(),40)));
+            o.put("tel", notificationSpec.getPhoneNumber());
             if (canReply) o.put("reply", true);
             if (!actionHandles.isEmpty()) {
                 mNotificationActions.remove(notificationSpec.getId());
@@ -1609,19 +1609,19 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
                         isMissedCall = false;
                         if (enableMissedCall) {
                             NotificationSpec notificationSpec = new NotificationSpec();
-                            notificationSpec.sourceName = getContext().getString(R.string.banglejs_notification_missed_call_source);
-                            notificationSpec.title =  getContext().getString(R.string.banglejs_notification_missed_call_title);
-                            notificationSpec.subject = getContext().getString(R.string.banglejs_notification_missed_call_title);
+                            notificationSpec.setSourceName(getContext().getString(R.string.banglejs_notification_missed_call_source));
+                            notificationSpec.setTitle(getContext().getString(R.string.banglejs_notification_missed_call_title));
+                            notificationSpec.setSubject(getContext().getString(R.string.banglejs_notification_missed_call_title));
                             if (callSpec.name == null && callSpec.number == null) {
-                                notificationSpec.body = getContext().getString(R.string.banglejs_notification_missed_call_suppressed_caller_id);
+                                notificationSpec.setBody(getContext().getString(R.string.banglejs_notification_missed_call_suppressed_caller_id));
                             }else if (callSpec.name == null) {
-                                notificationSpec.sender = callSpec.number;
-                                notificationSpec.body = callSpec.number;
-                                notificationSpec.phoneNumber = callSpec.number;
+                                notificationSpec.setSender(callSpec.number);
+                                notificationSpec.setBody(callSpec.number);
+                                notificationSpec.setPhoneNumber(callSpec.number);
                             } else {
-                                notificationSpec.sender = callSpec.name;
-                                notificationSpec.body = callSpec.name + "\n" + callSpec.number;
-                                notificationSpec.phoneNumber = callSpec.number;
+                                notificationSpec.setSender(callSpec.name);
+                                notificationSpec.setBody(callSpec.name + "\n" + callSpec.number);
+                                notificationSpec.setPhoneNumber(callSpec.number);
                             }
 
                             handler.postDelayed(() -> {

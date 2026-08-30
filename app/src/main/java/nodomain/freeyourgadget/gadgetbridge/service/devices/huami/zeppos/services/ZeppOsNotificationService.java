@@ -300,14 +300,14 @@ public class ZeppOsNotificationService extends AbstractZeppOsService {
 
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
 
         // TODO Check real limit for notificationMaxLength / respect across all fields
 
         try {
             baos.write(NOTIFICATION_CMD_SEND);
             baos.write(BLETypeConversions.fromUint32(notificationSpec.getId()));
-            if (notificationSpec.type == NotificationType.GENERIC_SMS) {
+            if (notificationSpec.getType() == NotificationType.GENERIC_SMS) {
                 baos.write(NOTIFICATION_TYPE_SMS);
             } else {
                 baos.write(NOTIFICATION_TYPE_NORMAL);
@@ -315,13 +315,13 @@ public class ZeppOsNotificationService extends AbstractZeppOsService {
             baos.write(NOTIFICATION_SUBCMD_SHOW);
 
             // app package
-            if (notificationSpec.sourceAppId != null) {
+            if (notificationSpec.getSourceAppId() != null) {
                 if (FORCE_RELOAD_NOTIFICATION_ICON) {
                     // prefix the package name with a uuid to force an icon reload
                     // it's removed when fetching the package icon
                     baos.write(UUID.randomUUID().toString().getBytes());
                 }
-                baos.write(notificationSpec.sourceAppId.getBytes(StandardCharsets.UTF_8));
+                baos.write(notificationSpec.getSourceAppId().getBytes(StandardCharsets.UTF_8));
             } else {
                 // Send the GB package name, otherwise the last notification icon will
                 // be used wrongly (eg. when receiving an SMS)
@@ -336,26 +336,26 @@ public class ZeppOsNotificationService extends AbstractZeppOsService {
             baos.write(0);
 
             // body
-            if (notificationSpec.body != null) {
-                baos.write(StringUtils.truncate(notificationSpec.body, maxLength()).getBytes(StandardCharsets.UTF_8));
+            if (notificationSpec.getBody() != null) {
+                baos.write(StringUtils.truncate(notificationSpec.getBody(), maxLength()).getBytes(StandardCharsets.UTF_8));
             }
             baos.write(0);
 
             // app name
-            if (notificationSpec.sourceName != null) {
-                baos.write(notificationSpec.sourceName.getBytes(StandardCharsets.UTF_8));
+            if (notificationSpec.getSourceName() != null) {
+                baos.write(notificationSpec.getSourceName().getBytes(StandardCharsets.UTF_8));
             }
             baos.write(0);
 
             // reply
             boolean hasReply = false;
-            if (notificationSpec.attachedActions != null && !notificationSpec.attachedActions.isEmpty()) {
-                for (int i = 0; i < notificationSpec.attachedActions.size(); i++) {
-                    final NotificationSpec.Action action = notificationSpec.attachedActions.get(i);
+            if (notificationSpec.getAttachedActions() != null && !notificationSpec.getAttachedActions().isEmpty()) {
+                for (int i = 0; i < notificationSpec.getAttachedActions().size(); i++) {
+                    final NotificationSpec.Action action = notificationSpec.getAttachedActions().get(i);
 
                     if (action.isReply()) {
                         hasReply = true;
-                        mNotificationReplyAction.add(notificationSpec.getId(), action.handle);
+                        mNotificationReplyAction.add(notificationSpec.getId(), action.getHandle());
                         break;
                     }
                 }
@@ -366,14 +366,14 @@ public class ZeppOsNotificationService extends AbstractZeppOsService {
                 baos.write(0); // 1 for silent
             }
             if (supportsPictures) {
-                baos.write((byte) (notificationSpec.picturePath != null ? 1 : 0));
-                if (notificationSpec.picturePath != null) {
-                    mNotificationPictures.add(notificationSpec.getId(), notificationSpec.picturePath);
+                baos.write((byte) (notificationSpec.getPicturePath() != null ? 1 : 0));
+                if (notificationSpec.getPicturePath() != null) {
+                    mNotificationPictures.add(notificationSpec.getId(), notificationSpec.getPicturePath());
                 }
             }
             if (supportsNotificationKey) {
-                if (notificationSpec.key != null) {
-                    baos.write(notificationSpec.key.getBytes(StandardCharsets.UTF_8));
+                if (notificationSpec.getKey() != null) {
+                    baos.write(notificationSpec.getKey().getBytes(StandardCharsets.UTF_8));
                 }
                 baos.write(0);
             }

@@ -648,23 +648,23 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
 
         // Notifications are sent with both sender/title and message in 1 packet, separated by a ':',
         // so we have to make sure there is no ':' in the sender/title part
         String message = StringUtils.truncate(senderOrTitle, 32).replace(":", ";") + ":";
-        if (notificationSpec.subject != null) {
-            message += StringUtils.truncate(notificationSpec.subject, 128) + "\n\n";
+        if (notificationSpec.getSubject() != null) {
+            message += StringUtils.truncate(notificationSpec.getSubject(), 128) + "\n\n";
         }
-        if (notificationSpec.body != null) {
-            message += StringUtils.truncate(notificationSpec.body, 512);
+        if (notificationSpec.getBody() != null) {
+            message += StringUtils.truncate(notificationSpec.getBody(), 512);
         }
-        if (notificationSpec.body == null && notificationSpec.subject == null) {
+        if (notificationSpec.getBody() == null && notificationSpec.getSubject() == null) {
             message += " ";
         }
 
         // The notification is split at first : into sender and text
-        sendNotification(MoyoungConstants.notificationType(notificationSpec.type), message);
+        sendNotification(MoyoungConstants.notificationType(notificationSpec.getType()), message);
     }
 
     @Override
