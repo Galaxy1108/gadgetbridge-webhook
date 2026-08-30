@@ -99,7 +99,11 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledAppsService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.GdiSettingsService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.InitRequest;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenDefinitionRequest;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenStateRequest;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.SettingsService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto;
 import nodomain.freeyourgadget.gadgetbridge.service.SleepAsAndroidSender;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLESingleDeviceSupport;
@@ -453,9 +457,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 final String localeString = language + "_" + country.toUpperCase();
                 sendProtobufRequest("init realtime settings", GdiSmartProto.Smart.newBuilder()
                         .setSettingsService(
-                                GdiSettingsService.SettingsService.newBuilder()
+                                SettingsService.newBuilder()
                                         .setInitRequest(
-                                                GdiSettingsService.InitRequest.newBuilder()
+                                                InitRequest.newBuilder()
                                                         .setLanguage(localeString.length() == 5 ? localeString : "en_US")
                                                         .setRegion("us") // FIXME choose region
                                         )
@@ -1494,9 +1498,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             sendProtobufRequest("get settings screen " + screenId,
                     GdiSmartProto.Smart.newBuilder()
-                            .setSettingsService(GdiSettingsService.SettingsService.newBuilder()
+                            .setSettingsService(SettingsService.newBuilder()
                                     .setDefinitionRequest(
-                                            GdiSettingsService.ScreenDefinitionRequest.newBuilder()
+                                            ScreenDefinitionRequest.newBuilder()
                                                     .setScreenId(screenId)
                                                     .setUnk2(0)
                                                     .setLanguage(localeString.length() == 5 ? localeString : "en_US")
@@ -1505,9 +1509,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             sendProtobufRequest("get settings state " + screenId,
                     GdiSmartProto.Smart.newBuilder()
-                            .setSettingsService(GdiSettingsService.SettingsService.newBuilder()
+                            .setSettingsService(SettingsService.newBuilder()
                                     .setStateRequest(
-                                            GdiSettingsService.ScreenStateRequest.newBuilder()
+                                            ScreenStateRequest.newBuilder()
                                                     .setScreenId(screenId)
                                     )
                             ).build());

@@ -46,12 +46,12 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttpService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiNotificationsService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledAppsService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmsNotification;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiEcgService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiExploreSyncService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.SettingsService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.DataTransferHandler;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.HttpHandler;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.GFDIMessage;
@@ -603,7 +603,7 @@ public class ProtocolBufferHandler implements MessageHandler {
         LOG.warn("Unknown FindMyWatchService response: {}", findMyWatchService);
     }
 
-    private boolean processProtobufSettingsService(final GdiSettingsService.SettingsService settingsService) {
+    private boolean processProtobufSettingsService(final SettingsService settingsService) {
         boolean processed = false;
 
         if (settingsService.hasDefinitionResponse()) {
