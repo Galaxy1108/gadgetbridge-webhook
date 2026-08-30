@@ -339,10 +339,10 @@ public final class HamaFit6900DeviceSupport extends AbstractBTLESingleDeviceSupp
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        switch (callSpec.command) {
+        switch (callSpec.getCommand()) {
             case CallSpec.CALL_INCOMING: {
                 if (getDevicePrefsNotificationEnabled()) {
-                    final String text = StringUtils.getFirstOf(callSpec.name, callSpec.number);
+                    final String text = StringUtils.getFirstOf(callSpec.getName(), callSpec.getNumber());
                     sendMessage("notification-call-incoming",
                             Message.encodeShowNotification(Message.NotificationType.INCOMING_CALL, text));
                 }

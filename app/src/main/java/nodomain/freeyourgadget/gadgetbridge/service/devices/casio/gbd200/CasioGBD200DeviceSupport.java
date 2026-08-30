@@ -625,10 +625,10 @@ public class CasioGBD200DeviceSupport extends Casio2C2DSupport
 
     @Override
     public void onSetCallState(final CallSpec callSpec) {
-        switch (callSpec.command) {
+        switch (callSpec.getCommand()) {
             case CallSpec.CALL_INCOMING:
                 showNotification(CasioConstants.CATEGORY_INCOMING_CALL,
-                        callSpec.name, callSpec.number, "Phone Call", mLastCallId, false);
+                        callSpec.getName(), callSpec.getNumber(), "Phone Call", mLastCallId, false);
                 SharedPreferences p = GBApplication.getDeviceSpecificSharedPrefs(
                         getDevice().getAddress());
                 if (p.getBoolean(PREF_FAKE_RING_DURATION, false)

@@ -225,8 +225,8 @@ public class JYouSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if(callSpec.command == CallSpec.CALL_INCOMING) {
-            showNotification(JYouConstants.ICON_CALL, callSpec.name, callSpec.number);
+        if(callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+            showNotification(JYouConstants.ICON_CALL, callSpec.getName(), callSpec.getNumber());
         }
     }
 

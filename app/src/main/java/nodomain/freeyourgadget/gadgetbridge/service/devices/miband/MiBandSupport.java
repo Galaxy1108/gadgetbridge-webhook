@@ -627,13 +627,13 @@ public class MiBandSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
             telephoneRinging = true;
             BtLEAction abortAction = new FunctionAction(bluetoothGatt -> isTelephoneRinging());
             String message = NotificationUtils.getPreferredTextFor(callSpec);
             SimpleNotification simpleNotification = new SimpleNotification(message, AlertCategory.IncomingCall, null);
             performPreferredNotification("incoming call", simpleNotification, MiBandConst.ORIGIN_INCOMING_CALL, abortAction);
-        } else if ((callSpec.command == CallSpec.CALL_START) || (callSpec.command == CallSpec.CALL_END)) {
+        } else if ((callSpec.getCommand() == CallSpec.CALL_START) || (callSpec.getCommand() == CallSpec.CALL_END)) {
             telephoneRinging = false;
         }
     }

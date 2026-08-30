@@ -1443,13 +1443,13 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
     public void onSetCallState(CallSpec callSpec) {
         super.onSetCallState(callSpec);
         String[] quickReplies = getQuickReplies();
-        boolean quickRepliesEnabled = quickReplies.length > 0 && callSpec.number != null && callSpec.number.matches("^\\+(?:[0-9] ?){6,14}[0-9]$");
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        boolean quickRepliesEnabled = quickReplies.length > 0 && callSpec.getNumber() != null && callSpec.getNumber().matches("^\\+(?:[0-9] ?){6,14}[0-9]$");
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
             currentCallSpec = callSpec;
-            queueWrite(new PlayCallNotificationRequest(StringUtils.getFirstOf(callSpec.name, callSpec.number), true, quickRepliesEnabled, callSpec.dndSuppressed, this));
+            queueWrite(new PlayCallNotificationRequest(StringUtils.getFirstOf(callSpec.getName(), callSpec.getNumber()), true, quickRepliesEnabled, callSpec.getDndSuppressed(), this));
         } else {
             currentCallSpec = null;
-            queueWrite(new PlayCallNotificationRequest(StringUtils.getFirstOf(callSpec.name, callSpec.number), false, quickRepliesEnabled, callSpec.dndSuppressed, this));
+            queueWrite(new PlayCallNotificationRequest(StringUtils.getFirstOf(callSpec.getName(), callSpec.getNumber()), false, quickRepliesEnabled, callSpec.getDndSuppressed(), this));
         }
     }
 
@@ -2136,7 +2136,7 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
         }
         GBDeviceEventNotificationControl devEvtNotificationControl = new GBDeviceEventNotificationControl();
         devEvtNotificationControl.handle = callId;
-        devEvtNotificationControl.phoneNumber = currentCallSpec.number;
+        devEvtNotificationControl.phoneNumber = currentCallSpec.getNumber();
         devEvtNotificationControl.reply = quickReplies[replyChoice];
         devEvtNotificationControl.event = GBDeviceEventNotificationControl.Event.REPLY;
         getDeviceSupport().evaluateGBDeviceEvent(devEvtNotificationControl);

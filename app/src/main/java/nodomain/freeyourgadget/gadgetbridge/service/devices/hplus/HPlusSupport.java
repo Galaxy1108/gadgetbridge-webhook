@@ -470,9 +470,9 @@ public class HPlusSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        switch (callSpec.command) {
+        switch (callSpec.getCommand()) {
             case CallSpec.CALL_INCOMING: {
-                showIncomingCall(callSpec.name, callSpec.number);
+                showIncomingCall(callSpec.getName(), callSpec.getNumber());
                 break;
             }
         }

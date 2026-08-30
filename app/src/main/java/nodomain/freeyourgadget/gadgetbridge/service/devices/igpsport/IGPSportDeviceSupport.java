@@ -564,19 +564,19 @@ public class IGPSportDeviceSupport extends AbstractBTLESingleDeviceSupport {
         Ins.ins_msg.Builder insMsgBuilder = Ins.ins_msg.newBuilder();
         insMsgBuilder.setServiceType(Common.service_type_index.enum_SERVICE_TYPE_INDEX_INS);
         insMsgBuilder.setInsServiceType(Ins.INS_SERVICE_TYPE.enum_INS_SERVICE_TYPE_CALL);
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
             insMsgBuilder.setInsOperateType(Ins.INS_OPERATE_TYPE.enum_INS_OPERATE_TYPE_INCOMING_CALL);
-        } else if (callSpec.command == CallSpec.CALL_ACCEPT ||
-                callSpec.command == CallSpec.CALL_START ||
-                callSpec.command == CallSpec.CALL_END) {
+        } else if (callSpec.getCommand() == CallSpec.CALL_ACCEPT ||
+                callSpec.getCommand() == CallSpec.CALL_START ||
+                callSpec.getCommand() == CallSpec.CALL_END) {
             insMsgBuilder.setInsOperateType(Ins.INS_OPERATE_TYPE.enum_INS_OPERATE_TYPE_ANSWER_CALL);
-        } else if (callSpec.command == CallSpec.CALL_REJECT) {
+        } else if (callSpec.getCommand() == CallSpec.CALL_REJECT) {
             insMsgBuilder.setInsOperateType(Ins.INS_OPERATE_TYPE.enum_INS_OPERATE_TYPE_REJECT_CALL);
         }
 
         Ins.ins_data_message.Builder insDataMsgBuilder = Ins.ins_data_message.newBuilder();
-        insDataMsgBuilder.setTelNum(ByteString.copyFromUtf8(callSpec.number));
-        insDataMsgBuilder.setName(callSpec.name);
+        insDataMsgBuilder.setTelNum(ByteString.copyFromUtf8(callSpec.getNumber()));
+        insDataMsgBuilder.setName(callSpec.getName());
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
         insDataMsgBuilder.setTime(timeStamp);
         insMsgBuilder.setInsDataMsg(insDataMsgBuilder);

@@ -1929,7 +1929,7 @@ public class HuaweiSupportProvider {
     }
 
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING || (callSpec.command == CallSpec.CALL_OUTGOING && getDeviceState().supportsOutgoingCall())) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING || (callSpec.getCommand() == CallSpec.CALL_OUTGOING && getDeviceState().supportsOutgoingCall())) {
             SendNotificationRequest sendNotificationReq = new SendNotificationRequest(this);
             try {
                 sendNotificationReq.buildNotificationTLVFromCallSpec(callSpec);
@@ -1938,8 +1938,8 @@ public class HuaweiSupportProvider {
                 LOG.error("Failed to send start call notification", e);
             }
         } else if (
-                callSpec.command == CallSpec.CALL_ACCEPT ||
-                        callSpec.command == CallSpec.CALL_START) {
+                callSpec.getCommand() == CallSpec.CALL_ACCEPT ||
+                        callSpec.getCommand() == CallSpec.CALL_START) {
             byte type = getDeviceState().supportsNotificationsStartCall() ? Notifications.NotificationType.startCall : Notifications.NotificationType.stopNotification;
             StopNotificationRequest stopNotificationRequest = new StopNotificationRequest(this, type);
             try {
@@ -1948,8 +1948,8 @@ public class HuaweiSupportProvider {
                 LOG.error("Failed to send stop call notification", e);
             }
         } else if (
-                callSpec.command == CallSpec.CALL_REJECT ||
-                        callSpec.command == CallSpec.CALL_END
+                callSpec.getCommand() == CallSpec.CALL_REJECT ||
+                        callSpec.getCommand() == CallSpec.CALL_END
         ) {
             StopNotificationRequest stopNotificationRequest = new StopNotificationRequest(this, Notifications.NotificationType.stopNotification);
             try {

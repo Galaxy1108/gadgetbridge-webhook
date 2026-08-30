@@ -221,10 +221,10 @@ public class IntentApiReceiver extends BroadcastReceiver {
                     return;
                 }
                 CallSpec callSpec = new CallSpec();
-                callSpec.command = CallSpec.CALL_INCOMING;
-                callSpec.number = intent.getStringExtra("caller");
-                if (callSpec.number == null) {
-                    callSpec.number = "DEBUG_INCOMING_CALL";
+                callSpec.setCommand(CallSpec.CALL_INCOMING);
+                callSpec.setNumber(intent.getStringExtra("caller"));
+                if (callSpec.getNumber() == null) {
+                    callSpec.setNumber("DEBUG_INCOMING_CALL");
                 }
                 DeviceService deviceService = getDeviceService(intent);
                 if (deviceService != null) {
@@ -241,7 +241,7 @@ public class IntentApiReceiver extends BroadcastReceiver {
                     return;
                 }
                 CallSpec callSpecEnd = new CallSpec();
-                callSpecEnd.command = CallSpec.CALL_END;
+                callSpecEnd.setCommand(CallSpec.CALL_END);
 
                 DeviceService deviceService = getDeviceService(intent);
                 if (deviceService != null) {

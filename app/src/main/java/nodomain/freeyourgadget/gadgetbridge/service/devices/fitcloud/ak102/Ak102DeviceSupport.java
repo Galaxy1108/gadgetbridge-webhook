@@ -919,18 +919,18 @@ public class Ak102DeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetCallState(final CallSpec callSpec) {
-        final String name = StringUtils.getFirstOf(callSpec.name, callSpec.number);
-        switch (callSpec.command) {
+        final String name = StringUtils.getFirstOf(callSpec.getName(), callSpec.getNumber());
+        switch (callSpec.getCommand()) {
             case CallSpec.CALL_INCOMING:
-                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_INCOMING, name, callSpec.number);
+                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_INCOMING, name, callSpec.getNumber());
                 break;
             case CallSpec.CALL_REJECT:
-                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_REJECTED, name, callSpec.number);
+                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_REJECTED, name, callSpec.getNumber());
                 break;
             case CallSpec.CALL_ACCEPT:
             case CallSpec.CALL_START:
             case CallSpec.CALL_END:
-                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_ANSWERED, name, callSpec.number);
+                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_ANSWERED, name, callSpec.getNumber());
                 break;
             default:
                 break;

@@ -74,12 +74,12 @@ public class NotificationsHandler implements MessageHandler {
     public NotificationUpdateMessage onSetCallState(CallSpec callSpec) {
         if (!enabled)
             return null;
-        final int id = StringUtils.firstNonBlank(callSpec.number, "Gadgetbridge Call").hashCode();
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
-            final String caller = StringUtils.firstNonBlank(callSpec.name, callSpec.number, GBApplication.getContext().getString(R.string.unknown));
+        final int id = StringUtils.firstNonBlank(callSpec.getNumber(), "Gadgetbridge Call").hashCode();
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+            final String caller = StringUtils.firstNonBlank(callSpec.getName(), callSpec.getNumber(), GBApplication.getContext().getString(R.string.unknown));
             final NotificationSpec callNotificationSpec = new NotificationSpec(id);
-            callNotificationSpec.setPhoneNumber(callSpec.number);
-            callNotificationSpec.setSourceAppId(callSpec.sourceAppId);
+            callNotificationSpec.setPhoneNumber(callSpec.getNumber());
+            callNotificationSpec.setSourceAppId(callSpec.getSourceAppId());
             callNotificationSpec.setTitle(caller);
             callNotificationSpec.setType(NotificationType.GENERIC_PHONE);
             callNotificationSpec.setBody(caller);

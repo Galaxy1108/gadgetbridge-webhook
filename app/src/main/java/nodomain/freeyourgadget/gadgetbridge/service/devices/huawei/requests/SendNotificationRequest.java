@@ -137,7 +137,7 @@ public class SendNotificationRequest extends Request {
     }
 
     public void buildNotificationTLVFromCallSpec(CallSpec callSpec) {
-        byte notificationType = callSpec.command == CallSpec.CALL_OUTGOING?Notifications.NotificationType.outgoingCall:Notifications.NotificationType.call;
+        byte notificationType = callSpec.getCommand() == CallSpec.CALL_OUTGOING?Notifications.NotificationType.outgoingCall:Notifications.NotificationType.call;
 
         Notifications.NotificationActionRequest.AdditionalParams params = null;
         String sourceAppId = null;
@@ -147,11 +147,11 @@ public class SendNotificationRequest extends Request {
                 new Notifications.NotificationActionRequest.TextElement(
                         (byte) Notifications.TextType.text,
                         (byte)supportProvider.getDeviceState().getContentFormat(),
-                        callSpec.name)
+                        callSpec.getName())
         );
 
-        if(callSpec.isVoip && callSpec.command == CallSpec.CALL_INCOMING) {
-            sourceAppId = callSpec.sourceAppId;
+        if(callSpec.isVoip() && callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+            sourceAppId = callSpec.getSourceAppId();
             params = new Notifications.NotificationActionRequest.AdditionalParams();
 
             params.supportsReply = supportProvider.getDeviceState().supportsNotificationsReply();
@@ -162,11 +162,11 @@ public class SendNotificationRequest extends Request {
 
             params.notificationId = new Random().nextInt(Integer.MAX_VALUE - 1);
             params.notificationKey = getCallSpecKey(callSpec, params.notificationId);
-            params.channelId = callSpec.channelId;
+            params.channelId = callSpec.getChannelId();
             if(supportProvider.getDeviceState().supportsVoipType3()) {
                 params.category = "imcall";
             } else {
-                params.category = callSpec.category;
+                params.category = callSpec.getCategory();
             }
             params.address = null;
             if(supportProvider.getDeviceState().supportsVoipType2()) {
@@ -179,13 +179,13 @@ public class SendNotificationRequest extends Request {
                         new Notifications.NotificationActionRequest.TextElement(
                                 (byte) Notifications.TextType.title,
                                 (byte) supportProvider.getDeviceState().getContentFormat(),
-                                callSpec.name)
+                                callSpec.getName())
                 );
                 content.add(
                         new Notifications.NotificationActionRequest.TextElement(
                                 (byte) Notifications.TextType.sender,
                                 (byte) supportProvider.getDeviceState().getContentFormat(),
-                                callSpec.name)
+                                callSpec.getName())
                 );
 // TODO: Reject action, need to be parsed from the notification and added here. Then the watch send it back in the service id: 0x2  Command id: 0x11
 //                content.add(
@@ -202,7 +202,7 @@ public class SendNotificationRequest extends Request {
                     new Notifications.NotificationActionRequest.TextElement(
                             (byte) Notifications.TextType.flight,
                             (byte) supportProvider.getDeviceState().getIncomingNumberFormat(),
-                            callSpec.number)
+                            callSpec.getNumber())
             );
         }
 

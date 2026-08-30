@@ -448,7 +448,7 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
         try {
             TransactionBuilder builder = performInitialized("sendCall");
 
-            if(callSpec.command == CallSpec.CALL_INCOMING) {
+            if(callSpec.getCommand() == CallSpec.CALL_INCOMING) {
                 LedColor led = LedColor.valueOf(prefs.getString(SonyWena3SettingKeys.DEFAULT_CALL_LED_COLOR, LedColor.WHITE.name()).toUpperCase());
                 VibrationKind vibra = VibrationKind.valueOf(prefs.getString(SonyWena3SettingKeys.DEFAULT_CALL_VIBRATION_PATTERN, VibrationKind.CONTINUOUS.name()).toUpperCase());
                 boolean vibraContinuous = false;
@@ -462,8 +462,8 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
                         new NotificationArrival(
                                 NotificationKind.CALL,
                                 INCOMING_CALL_ID,
-                                callSpec.number,
-                                callSpec.name,
+                                callSpec.getNumber(),
+                                callSpec.getName(),
                                 "",
                                 new Date(),
                                 new VibrationOptions(vibra, vibraRepeats, vibraContinuous),

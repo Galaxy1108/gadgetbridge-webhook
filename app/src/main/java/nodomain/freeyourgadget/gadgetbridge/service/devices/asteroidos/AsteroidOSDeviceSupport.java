@@ -227,8 +227,8 @@ public class AsteroidOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
     @Override
     public void onFindDevice(boolean start) {
         final CallSpec callSpec = new CallSpec();
-        callSpec.command = start ? CallSpec.CALL_INCOMING : CallSpec.CALL_END;
-        callSpec.name = "Gadgetbridge";
+        callSpec.setCommand(start ? CallSpec.CALL_INCOMING : CallSpec.CALL_END);
+        callSpec.setName("Gadgetbridge");
         onSetCallState(callSpec);
     }
 

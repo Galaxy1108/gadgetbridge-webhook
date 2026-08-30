@@ -166,7 +166,7 @@ public abstract class AbstractSerialDeviceSupport extends AbstractBluetoothDevic
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        byte[] bytes = gbDeviceProtocol.encodeSetCallState(callSpec.number, callSpec.name, callSpec.command);
+        byte[] bytes = gbDeviceProtocol.encodeSetCallState(callSpec.getNumber(), callSpec.getName(), callSpec.getCommand());
         sendToDevice(bytes);
     }
 

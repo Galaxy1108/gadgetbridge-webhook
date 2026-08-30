@@ -266,9 +266,9 @@ public class BFH16DeviceSupport extends AbstractBTLESingleDeviceSupport {
     //TODO: check
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        switch (callSpec.command) {
+        switch (callSpec.getCommand()) {
             case CallSpec.CALL_INCOMING:
-                showNotification(BFH16Constants.ICON_CALL, callSpec.name, callSpec.number);
+                showNotification(BFH16Constants.ICON_CALL, callSpec.getName(), callSpec.getNumber());
                 break;
         }
     }

@@ -232,16 +232,16 @@ public class DeviceActionHandler {
             }
             case ACTION_CALLSTATE:
                 final CallSpec callSpec = new CallSpec();
-                callSpec.command = intentCopy.getIntExtra(EXTRA_CALL_COMMAND, CallSpec.CALL_UNDEFINED);
-                callSpec.number = intentCopy.getStringExtra(EXTRA_CALL_PHONENUMBER);
-                callSpec.name = intentCopy.getStringExtra(EXTRA_CALL_DISPLAYNAME);
-                callSpec.sourceName = intentCopy.getStringExtra(EXTRA_CALL_SOURCENAME);
-                callSpec.sourceAppId = intentCopy.getStringExtra(EXTRA_CALL_SOURCEAPPID);
-                callSpec.key = intentCopy.getStringExtra(EXTRA_CALL_KEY);
-                callSpec.channelId = intentCopy.getStringExtra(EXTRA_CALL_CHANNELID);
-                callSpec.category = intentCopy.getStringExtra(EXTRA_CALL_CATEGORY);
-                callSpec.isVoip = intentCopy.getBooleanExtra(EXTRA_CALL_ISVOIP, false);
-                callSpec.dndSuppressed = intentCopy.getIntExtra(EXTRA_CALL_DNDSUPPRESSED, 0);
+                callSpec.setCommand(intentCopy.getIntExtra(EXTRA_CALL_COMMAND, CallSpec.CALL_UNDEFINED));
+                callSpec.setNumber(intentCopy.getStringExtra(EXTRA_CALL_PHONENUMBER));
+                callSpec.setName(intentCopy.getStringExtra(EXTRA_CALL_DISPLAYNAME));
+                callSpec.setSourceName(intentCopy.getStringExtra(EXTRA_CALL_SOURCENAME));
+                callSpec.setSourceAppId(intentCopy.getStringExtra(EXTRA_CALL_SOURCEAPPID));
+                callSpec.setKey(intentCopy.getStringExtra(EXTRA_CALL_KEY));
+                callSpec.setChannelId(intentCopy.getStringExtra(EXTRA_CALL_CHANNELID));
+                callSpec.setCategory(intentCopy.getStringExtra(EXTRA_CALL_CATEGORY));
+                callSpec.setVoip(intentCopy.getBooleanExtra(EXTRA_CALL_ISVOIP, false));
+                callSpec.setDndSuppressed(intentCopy.getIntExtra(EXTRA_CALL_DNDSUPPRESSED, 0));
                 deviceSupport.onSetCallState(callSpec);
                 break;
             case ACTION_SETCANNEDMESSAGES:

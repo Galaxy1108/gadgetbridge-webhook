@@ -258,8 +258,8 @@ public class TLW64Support extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
-            showNotification(TLW64Constants.NOTIFICATION_CALL, callSpec.name);
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+            showNotification(TLW64Constants.NOTIFICATION_CALL, callSpec.getName());
             setVibration(1, 30);
         } else {
             stopNotification();

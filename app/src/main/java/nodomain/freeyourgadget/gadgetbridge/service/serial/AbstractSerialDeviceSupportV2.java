@@ -149,7 +149,7 @@ public abstract class AbstractSerialDeviceSupportV2<T extends GBDeviceProtocol> 
 
     @Override
     public void onSetCallState(final CallSpec callSpec) {
-        byte[] bytes = mDeviceProtocol.encodeSetCallState(callSpec.number, callSpec.name, callSpec.command);
+        byte[] bytes = mDeviceProtocol.encodeSetCallState(callSpec.getNumber(), callSpec.getName(), callSpec.getCommand());
         sendToDevice(bytes);
     }
 

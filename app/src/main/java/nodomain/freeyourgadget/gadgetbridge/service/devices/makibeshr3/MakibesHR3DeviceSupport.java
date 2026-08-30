@@ -306,9 +306,9 @@ public class MakibesHR3DeviceSupport extends AbstractBTLESingleDeviceSupport imp
     @Override
     public void onSetCallState(CallSpec callSpec) {
         TransactionBuilder transactionBuilder = this.createTransactionBuilder("callstate");
-        LOG.debug("callSpec " + callSpec.command);
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
-            this.sendNotification(transactionBuilder, MakibesHR3Constants.ARG_SEND_NOTIFICATION_SOURCE_CALL, callSpec.name);
+        LOG.debug("callSpec " + callSpec.getCommand());
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+            this.sendNotification(transactionBuilder, MakibesHR3Constants.ARG_SEND_NOTIFICATION_SOURCE_CALL, callSpec.getName());
         } else {
             this.sendNotification(transactionBuilder, MakibesHR3Constants.ARG_SEND_NOTIFICATION_SOURCE_STOP_CALL, "");
         }

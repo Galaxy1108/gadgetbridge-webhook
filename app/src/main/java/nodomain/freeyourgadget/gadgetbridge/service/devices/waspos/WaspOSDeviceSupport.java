@@ -309,9 +309,9 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             JSONObject o = new JSONObject();
             o.put("t", "call");
             String[] cmdString = {"", "undefined", "accept", "incoming", "outgoing", "reject", "start", "end"};
-            o.put("cmd", cmdString[callSpec.command]);
-            o.put("name", callSpec.name);
-            o.put("number", callSpec.number);
+            o.put("cmd", cmdString[callSpec.getCommand()]);
+            o.put("name", callSpec.getName());
+            o.put("number", callSpec.getNumber());
             uartTxJSON("onSetCallState", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());

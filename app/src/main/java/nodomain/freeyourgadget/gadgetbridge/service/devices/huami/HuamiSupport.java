@@ -1241,7 +1241,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
             telephoneRinging = true;
             StopNotificationAction abortAction = new StopNotificationAction(getCharacteristic(UUID_CHARACTERISTIC_ALERT_LEVEL)) {
                 @Override
@@ -1252,14 +1252,14 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
             String message = NotificationUtils.getPreferredTextFor(callSpec);
             SimpleNotification simpleNotification = new SimpleNotification(message, AlertCategory.IncomingCall, null);
             performPreferredNotification("incoming call", MiBandConst.ORIGIN_INCOMING_CALL, simpleNotification, HuamiService.ALERT_LEVEL_PHONE_CALL, abortAction);
-        } else if ((callSpec.command == CallSpec.CALL_START) || (callSpec.command == CallSpec.CALL_END)) {
+        } else if ((callSpec.getCommand() == CallSpec.CALL_START) || (callSpec.getCommand() == CallSpec.CALL_END)) {
             telephoneRinging = false;
             stopCurrentCallNotification();
         }
     }
 
     public void onSetCallStateNew(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
             byte[] message = NotificationUtils.getPreferredTextFor(callSpec).getBytes();
             int length = 10 + message.length;
             ByteBuffer buf = ByteBuffer.allocate(length);
@@ -1274,7 +1274,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
             } catch (IOException e) {
                 LOG.error("Unable to send incoming call");
             }
-        } else if ((callSpec.command == CallSpec.CALL_START) || (callSpec.command == CallSpec.CALL_END)) {
+        } else if ((callSpec.getCommand() == CallSpec.CALL_START) || (callSpec.getCommand() == CallSpec.CALL_END)) {
             try {
                 TransactionBuilder builder = performInitialized("end call");
                 writeToChunked(builder, 0, new byte[]{3, 3, 0, 0, 0, 0});

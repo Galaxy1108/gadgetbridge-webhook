@@ -97,7 +97,7 @@ public class NotificationUtils {
     }
 
     public static String getPreferredTextFor(CallSpec callSpec) {
-        return StringUtils.getFirstOf(callSpec.name, callSpec.number);
+        return StringUtils.getFirstOf(callSpec.getName(), callSpec.getNumber());
     }
 
     @Nullable

@@ -1598,7 +1598,7 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
     public void onSetCallState(CallSpec callSpec) {
         try {
             final boolean enableMissedCall = GBApplication.getDeviceSpecificSharedPrefs(gbDevice.getAddress()).getBoolean(PREF_BANGLEJS_NOTIFICATION_MISSED_CALL_ENABLE, false);
-            switch (callSpec.command) {
+            switch (callSpec.getCommand()) {
                 case CallSpec.CALL_INCOMING:
                     // possible missed call
                     isMissedCall = true;
@@ -1612,16 +1612,16 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
                             notificationSpec.setSourceName(getContext().getString(R.string.banglejs_notification_missed_call_source));
                             notificationSpec.setTitle(getContext().getString(R.string.banglejs_notification_missed_call_title));
                             notificationSpec.setSubject(getContext().getString(R.string.banglejs_notification_missed_call_title));
-                            if (callSpec.name == null && callSpec.number == null) {
+                            if (callSpec.getName() == null && callSpec.getNumber() == null) {
                                 notificationSpec.setBody(getContext().getString(R.string.banglejs_notification_missed_call_suppressed_caller_id));
-                            }else if (callSpec.name == null) {
-                                notificationSpec.setSender(callSpec.number);
-                                notificationSpec.setBody(callSpec.number);
-                                notificationSpec.setPhoneNumber(callSpec.number);
+                            }else if (callSpec.getName() == null) {
+                                notificationSpec.setSender(callSpec.getNumber());
+                                notificationSpec.setBody(callSpec.getNumber());
+                                notificationSpec.setPhoneNumber(callSpec.getNumber());
                             } else {
-                                notificationSpec.setSender(callSpec.name);
-                                notificationSpec.setBody(callSpec.name + "\n" + callSpec.number);
-                                notificationSpec.setPhoneNumber(callSpec.number);
+                                notificationSpec.setSender(callSpec.getName());
+                                notificationSpec.setBody(callSpec.getName() + "\n" + callSpec.getNumber());
+                                notificationSpec.setPhoneNumber(callSpec.getNumber());
                             }
 
                             handler.postDelayed(() -> {
@@ -1643,12 +1643,12 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             try {
                 Field[] fields = callSpec.getClass().getDeclaredFields();
                 for (Field field : fields)
-                    if (field.getName().startsWith("CALL_") && field.getInt(callSpec) == callSpec.command)
+                    if (field.getName().startsWith("CALL_") && field.getInt(callSpec) == callSpec.getCommand())
                         cmdName = field.getName().substring(5).toLowerCase(Locale.US);
             } catch (IllegalAccessException e) {}
             o.put("cmd", cmdName);
-            o.put("name", renderUnicodeAsImage(callSpec.name));
-            o.put("number", callSpec.number);
+            o.put("name", renderUnicodeAsImage(callSpec.getName()));
+            o.put("number", callSpec.getNumber());
             uartTxJSON("onSetCallState", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());

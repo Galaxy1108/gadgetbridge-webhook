@@ -520,9 +520,9 @@ public class CasioGB6900DeviceSupport extends CasioSupport {
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        switch (callSpec.command) {
+        switch (callSpec.getCommand()) {
             case CallSpec.CALL_INCOMING:
-                showNotification(CasioConstants.CALL_NOTIFICATION_ID, callSpec.name, callSpec.number);
+                showNotification(CasioConstants.CALL_NOTIFICATION_ID, callSpec.getName(), callSpec.getNumber());
                 break;
             default:
                 LOG.info("not sending CallSpec since only CALL_INCOMING is handled");

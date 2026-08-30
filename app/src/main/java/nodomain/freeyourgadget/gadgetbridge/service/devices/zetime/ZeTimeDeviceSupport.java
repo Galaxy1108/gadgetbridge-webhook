@@ -396,18 +396,18 @@ public class ZeTimeDeviceSupport extends AbstractBTLESingleDeviceSupport {
                 (byte) ((time.get(Calendar.SECOND) % 10) + '0'),
         };
 
-        if (callIncoming || (callSpec.command == CallSpec.CALL_INCOMING)) {
-            if (callSpec.command == CallSpec.CALL_INCOMING) {
-                if (callSpec.name != null) {
-                    notification_length += callSpec.name.getBytes(StandardCharsets.UTF_8).length;
-                    subject_length = callSpec.name.getBytes(StandardCharsets.UTF_8).length;
+        if (callIncoming || (callSpec.getCommand() == CallSpec.CALL_INCOMING)) {
+            if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+                if (callSpec.getName() != null) {
+                    notification_length += callSpec.getName().getBytes(StandardCharsets.UTF_8).length;
+                    subject_length = callSpec.getName().getBytes(StandardCharsets.UTF_8).length;
                     subject = new byte[subject_length];
-                    System.arraycopy(callSpec.name.getBytes(StandardCharsets.UTF_8), 0, subject, 0, subject_length);
-                } else if (callSpec.number != null) {
-                    notification_length += callSpec.number.getBytes(StandardCharsets.UTF_8).length;
-                    subject_length = callSpec.number.getBytes(StandardCharsets.UTF_8).length;
+                    System.arraycopy(callSpec.getName().getBytes(StandardCharsets.UTF_8), 0, subject, 0, subject_length);
+                } else if (callSpec.getNumber() != null) {
+                    notification_length += callSpec.getNumber().getBytes(StandardCharsets.UTF_8).length;
+                    subject_length = callSpec.getNumber().getBytes(StandardCharsets.UTF_8).length;
                     subject = new byte[subject_length];
-                    System.arraycopy(callSpec.number.getBytes(StandardCharsets.UTF_8), 0, subject, 0, subject_length);
+                    System.arraycopy(callSpec.getNumber().getBytes(StandardCharsets.UTF_8), 0, subject, 0, subject_length);
                 }
                 notification_length += datetimeBytes.length + 10; // add message overhead
                 notification = new byte[notification_length];

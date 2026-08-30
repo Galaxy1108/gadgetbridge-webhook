@@ -274,11 +274,11 @@ public class XiaomiNotificationService extends AbstractXiaomiService implements 
     }
 
     public void onSetCallState(final CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_OUTGOING) {
+        if (callSpec.getCommand() == CallSpec.CALL_OUTGOING) {
             return;
         }
 
-        if (callSpec.command != CallSpec.CALL_INCOMING) {
+        if (callSpec.getCommand() != CallSpec.CALL_INCOMING) {
             final XiaomiProto.NotificationDismiss.Builder notification4 = XiaomiProto.NotificationDismiss.newBuilder()
                     .addNotificationId(XiaomiProto.NotificationId.newBuilder().setId(0).setPackage("phone"));
 
@@ -307,13 +307,13 @@ public class XiaomiNotificationService extends AbstractXiaomiService implements 
         notification3.setPackage("phone");
         notification3.setAppName("phone");
 
-        if (callSpec.name != null) {
-            notification3.setTitle(callSpec.name);
+        if (callSpec.getName() != null) {
+            notification3.setTitle(callSpec.getName());
         } else {
             notification3.setTitle("?");
         }
-        if (callSpec.number != null) {
-            notification3.setBody(callSpec.number);
+        if (callSpec.getNumber() != null) {
+            notification3.setBody(callSpec.getNumber());
         } else {
             notification3.setBody("?");
         }

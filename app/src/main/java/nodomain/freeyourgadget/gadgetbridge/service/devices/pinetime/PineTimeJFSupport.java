@@ -460,14 +460,14 @@ public class PineTimeJFSupport extends AbstractBTLESingleDeviceSupport implement
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
             TransactionBuilder builder = createTransactionBuilder("incomingcall");
 
             String message;
-            if (isFirmwareAtLeastVersion0_15() && callSpec.sourceName != null) {
-                message = (byte) 0x01 + callSpec.sourceName + "\0" + callSpec.name;
+            if (isFirmwareAtLeastVersion0_15() && callSpec.getSourceName() != null) {
+                message = (byte) 0x01 + callSpec.getSourceName() + "\0" + callSpec.getName();
             } else {
-                message = (byte) 0x01 + callSpec.name;
+                message = (byte) 0x01 + callSpec.getName();
             }
 
             NewAlert alert = new NewAlert(AlertCategory.IncomingCall, 1, message);
@@ -551,8 +551,8 @@ public class PineTimeJFSupport extends AbstractBTLESingleDeviceSupport implement
     @Override
     public void onFindDevice(boolean start) {
         CallSpec callSpec = new CallSpec();
-        callSpec.command = start ? CallSpec.CALL_INCOMING : CallSpec.CALL_END;
-        callSpec.name = "Gadgetbridge";
+        callSpec.setCommand(start ? CallSpec.CALL_INCOMING : CallSpec.CALL_END);
+        callSpec.setName("Gadgetbridge");
         onSetCallState(callSpec);
     }
 

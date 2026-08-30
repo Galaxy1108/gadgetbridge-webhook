@@ -194,9 +194,9 @@ public class SMAQ2OSSSupport extends AbstractBTLESingleDeviceSupport {
 
         SMAQ2OSSProtos.CallNotification.Builder callnotif = SMAQ2OSSProtos.CallNotification.newBuilder();
 
-        callnotif.setName(truncateUTF8(callSpec.name,SMAQ2OSSConstants.CALL_NAME_MAX_LEN));
-        callnotif.setNumber(truncateUTF8(callSpec.number,SMAQ2OSSConstants.CALL_NUMBER_MAX_LEN));
-        callnotif.setCommand(callSpec.command);
+        callnotif.setName(truncateUTF8(callSpec.getName(),SMAQ2OSSConstants.CALL_NAME_MAX_LEN));
+        callnotif.setNumber(truncateUTF8(callSpec.getNumber(),SMAQ2OSSConstants.CALL_NUMBER_MAX_LEN));
+        callnotif.setCommand(callSpec.getCommand());
 
         try {
             TransactionBuilder builder;

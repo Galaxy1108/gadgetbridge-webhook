@@ -73,13 +73,13 @@ public class SendNotificationOperation extends AbstractID115Operation {
         super(support);
 
         String number = "";
-        if (callSpec.number != null) {
-            number = callSpec.number;
+        if (callSpec.getNumber() != null) {
+            number = callSpec.getNumber();
         }
 
         String name = "";
-        if (callSpec.name != null) {
-            name = callSpec.name;
+        if (callSpec.getName() != null) {
+            name = callSpec.getName();
         }
 
         currentNotificationBuffer = encodeCallNotification(name, number);

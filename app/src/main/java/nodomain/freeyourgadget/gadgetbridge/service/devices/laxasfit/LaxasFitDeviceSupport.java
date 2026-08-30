@@ -404,7 +404,7 @@ public class LaxasFitDeviceSupport extends AbstractBTLESingleDeviceSupport {
         LOG.debug("LaxasFit send call notification");
         TransactionBuilder builder = createTransactionBuilder("CALL");
 
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
@@ -412,12 +412,12 @@ public class LaxasFitDeviceSupport extends AbstractBTLESingleDeviceSupport {
                 outputStream.write(0x0);
                 outputStream.write(0x0);
 
-                if (callSpec.name != null) {
-                    outputStream.write(callSpec.name.getBytes(StandardCharsets.UTF_8));
+                if (callSpec.getName() != null) {
+                    outputStream.write(callSpec.getName().getBytes(StandardCharsets.UTF_8));
                     outputStream.write(0x20);
                 }
-                if (callSpec.number != null) {
-                    outputStream.write(callSpec.number.getBytes(StandardCharsets.UTF_8));
+                if (callSpec.getNumber() != null) {
+                    outputStream.write(callSpec.getNumber().getBytes(StandardCharsets.UTF_8));
                     outputStream.write(0x20);
                 }
 

@@ -262,28 +262,28 @@ public class ZeppOsNotificationService extends AbstractZeppOsService {
             baos.write(BLETypeConversions.fromUint32(0));
 
             baos.write(NOTIFICATION_TYPE_CALL);
-            if (callSpec.command == CallSpec.CALL_INCOMING) {
+            if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
                 baos.write(NOTIFICATION_CALL_STATE_START);
-            } else if ((callSpec.command == CallSpec.CALL_START) || (callSpec.command == CallSpec.CALL_END)) {
+            } else if ((callSpec.getCommand() == CallSpec.CALL_START) || (callSpec.getCommand() == CallSpec.CALL_END)) {
                 baos.write(NOTIFICATION_CALL_STATE_END);
             }
 
             baos.write(0x00); // ?
-            if (callSpec.name != null) {
-                baos.write(callSpec.name.getBytes(StandardCharsets.UTF_8));
+            if (callSpec.getName() != null) {
+                baos.write(callSpec.getName().getBytes(StandardCharsets.UTF_8));
             }
             baos.write(0x00);
 
             baos.write(0x00); // ?
             baos.write(0x00); // ?
 
-            if (callSpec.number != null) {
-                baos.write(callSpec.number.getBytes(StandardCharsets.UTF_8));
+            if (callSpec.getNumber() != null) {
+                baos.write(callSpec.getNumber().getBytes(StandardCharsets.UTF_8));
             }
             baos.write(0x00);
 
             // TODO put this behind a setting?
-            baos.write(callSpec.number != null ? 0x01 : 0x00); // reply from watch
+            baos.write(callSpec.getNumber() != null ? 0x01 : 0x00); // reply from watch
         } catch (final Exception e) {
             LOG.error("Failed to send call", e);
             return;

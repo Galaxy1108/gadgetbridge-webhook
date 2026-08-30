@@ -220,8 +220,8 @@ public class No1F1Support extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
-            showNotification(No1F1Constants.NOTIFICATION_CALL, callSpec.name, callSpec.number);
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+            showNotification(No1F1Constants.NOTIFICATION_CALL, callSpec.getName(), callSpec.getNumber());
             setVibration(3, 5);
         } else {
             stopNotification();

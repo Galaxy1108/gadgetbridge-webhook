@@ -68,10 +68,10 @@ public class HuaweiNotificationsManager {
     }
 
     public static String getCallSpecKey(CallSpec callSpec, int id) {
-        if(!TextUtils.isEmpty(callSpec.key)) {
-            return callSpec.key;
+        if(!TextUtils.isEmpty(callSpec.getKey())) {
+            return callSpec.getKey();
         }
-        return "0|" + callSpec.sourceAppId + "|" + id + "||0";
+        return "0|" + callSpec.getSourceAppId() + "|" + id + "||0";
     }
 
     public void onNotification(NotificationSpec notificationSpec) {

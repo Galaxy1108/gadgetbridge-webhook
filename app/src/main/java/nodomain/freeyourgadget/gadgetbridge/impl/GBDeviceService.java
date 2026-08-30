@@ -224,30 +224,30 @@ public class GBDeviceService implements DeviceService {
         Context context = GBApplication.getContext();
         String currentPrivacyMode = GBApplication.getPrefs().getString("pref_call_privacy_mode", GBApplication.getContext().getString(R.string.p_call_privacy_mode_off));
         if (currentPrivacyMode.equals(context.getString(R.string.p_call_privacy_mode_name))) {
-            callSpec.name = callSpec.number;
+            callSpec.setName(callSpec.getNumber());
         } else if (currentPrivacyMode.equals(context.getString(R.string.p_call_privacy_mode_complete))) {
-            callSpec.number = null;
-            callSpec.name = null;
+            callSpec.setNumber(null);
+            callSpec.setName(null);
         } else if (currentPrivacyMode.equals(context.getString(R.string.p_call_privacy_mode_number))) {
-            callSpec.name = coalesce(callSpec.name, getContactDisplayNameByNumber(callSpec.number));
-            if (callSpec.name != null && !callSpec.name.equals(callSpec.number)) {
-                callSpec.number = null;
+            callSpec.setName(coalesce(callSpec.getName(), getContactDisplayNameByNumber(callSpec.getNumber())));
+            if (callSpec.getName() != null && !callSpec.getName().equals(callSpec.getNumber())) {
+                callSpec.setNumber(null);
             }
         } else {
-            callSpec.name = coalesce(callSpec.name, getContactDisplayNameByNumber(callSpec.number));
+            callSpec.setName(coalesce(callSpec.getName(), getContactDisplayNameByNumber(callSpec.getNumber())));
         }
 
         Intent intent = createIntent().setAction(ACTION_CALLSTATE)
-                .putExtra(EXTRA_CALL_PHONENUMBER, callSpec.number)
-                .putExtra(EXTRA_CALL_DISPLAYNAME, callSpec.name)
-                .putExtra(EXTRA_CALL_SOURCENAME, callSpec.sourceName)
-                .putExtra(EXTRA_CALL_SOURCEAPPID, callSpec.sourceAppId)
-                .putExtra(EXTRA_CALL_KEY, callSpec.key)
-                .putExtra(EXTRA_CALL_CHANNELID, callSpec.channelId)
-                .putExtra(EXTRA_CALL_CATEGORY, callSpec.category)
-                .putExtra(EXTRA_CALL_ISVOIP, callSpec.isVoip)
-                .putExtra(EXTRA_CALL_COMMAND, callSpec.command)
-                .putExtra(EXTRA_CALL_DNDSUPPRESSED, callSpec.dndSuppressed);
+                .putExtra(EXTRA_CALL_PHONENUMBER, callSpec.getNumber())
+                .putExtra(EXTRA_CALL_DISPLAYNAME, callSpec.getName())
+                .putExtra(EXTRA_CALL_SOURCENAME, callSpec.getSourceName())
+                .putExtra(EXTRA_CALL_SOURCEAPPID, callSpec.getSourceAppId())
+                .putExtra(EXTRA_CALL_KEY, callSpec.getKey())
+                .putExtra(EXTRA_CALL_CHANNELID, callSpec.getChannelId())
+                .putExtra(EXTRA_CALL_CATEGORY, callSpec.getCategory())
+                .putExtra(EXTRA_CALL_ISVOIP, callSpec.isVoip())
+                .putExtra(EXTRA_CALL_COMMAND, callSpec.getCommand())
+                .putExtra(EXTRA_CALL_DNDSUPPRESSED, callSpec.getDndSuppressed());
         invokeService(intent);
     }
 

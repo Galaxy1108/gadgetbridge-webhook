@@ -697,14 +697,14 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
         }
 
         if (callSpec.command == CallSpec.CALL_INCOMING) {
-            val caller = when {
+            val caller: String = when {
                 StringUtils.isNotBlank(callSpec.name) && StringUtils.isNotBlank(callSpec.number)
                     -> "${callSpec.name}: ${callSpec.number}"
 
                 StringUtils.isNotBlank(callSpec.name) -> callSpec.name
                 StringUtils.isNotBlank(callSpec.name) -> callSpec.number
                 else -> "?"
-            }
+            }.toString()
 
             val builder = createTransactionBuilder("call incoming")
 

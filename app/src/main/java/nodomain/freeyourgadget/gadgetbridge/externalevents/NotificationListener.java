@@ -785,22 +785,22 @@ public class NotificationListener extends NotificationListenerService {
         }
         activeCallPostTime = sbn.getPostTime();
         CallSpec callSpec = new CallSpec();
-        callSpec.number = number;
-        callSpec.sourceAppId = app;
+        callSpec.setNumber(number);
+        callSpec.setSourceAppId(app);
         if (appName != null) {
-            callSpec.sourceName = appName;
+            callSpec.setSourceName(appName);
         }
 
-        callSpec.isVoip = true;
+        callSpec.setVoip(true);
 
-        callSpec.key = sbn.getKey();
+        callSpec.setKey(sbn.getKey());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            callSpec.channelId = noti.getChannelId();
+            callSpec.setChannelId(noti.getChannelId());
         }
-        callSpec.category = noti.category;
+        callSpec.setCategory(noti.category);
 
-        callSpec.command = callStarted ? CallSpec.CALL_START : CallSpec.CALL_INCOMING;
-        mLastCallCommand = callSpec.command;
+        callSpec.setCommand(callStarted ? CallSpec.CALL_START : CallSpec.CALL_INCOMING);
+        mLastCallCommand = callSpec.getCommand();
         GBApplication.deviceService().onSetCallState(callSpec);
     }
 
@@ -1089,8 +1089,8 @@ public class NotificationListener extends NotificationListenerService {
                 && activeCallPostTime == sbn.getPostTime()) {
             activeCallPostTime = 0;
             CallSpec callSpec = new CallSpec();
-            callSpec.command = CallSpec.CALL_END;
-            mLastCallCommand = callSpec.command;
+            callSpec.setCommand(CallSpec.CALL_END);
+            mLastCallCommand = callSpec.getCommand();
             GBApplication.deviceService().onSetCallState(callSpec);
         }
 

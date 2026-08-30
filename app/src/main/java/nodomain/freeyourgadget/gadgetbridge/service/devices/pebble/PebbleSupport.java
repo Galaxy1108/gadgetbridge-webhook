@@ -214,7 +214,7 @@ public class PebbleSupport extends AbstractSerialDeviceSupport {
     @Override
     public void onSetCallState(CallSpec callSpec) {
         if (reconnect()) {
-            if ((callSpec.command != CallSpec.CALL_OUTGOING) || GBApplication.getDevicePrefs(gbDevice).getBoolean("pebble_enable_outgoing_call", true)) {
+            if ((callSpec.getCommand() != CallSpec.CALL_OUTGOING) || GBApplication.getDevicePrefs(gbDevice).getBoolean("pebble_enable_outgoing_call", true)) {
                 super.onSetCallState(callSpec);
             }
         }
