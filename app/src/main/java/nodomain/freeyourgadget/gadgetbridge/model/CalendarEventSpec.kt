@@ -17,10 +17,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
 
+@Parcelize
 data class CalendarEventSpec @JvmOverloads constructor(
     var type: Byte = TYPE_UNKNOWN,
     var id: Long = 0,
@@ -37,7 +40,7 @@ data class CalendarEventSpec @JvmOverloads constructor(
     var reminders: ArrayList<Long>? = null,
     var status: Int = 0,
     var attendingStatus: Int = 0
-) : DeviceTextAdaptable<CalendarEventSpec> {
+) : DeviceTextAdaptable<CalendarEventSpec>, Parcelable {
     override fun transliterated(
         deviceSupport: DeviceSupport,
         transliterator: Transliterator?

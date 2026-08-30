@@ -461,21 +461,7 @@ public class GBDeviceService implements DeviceService {
         final CalendarEventSpec withRtlFix = calendarEventSpec.withRtlFix();
 
         Intent intent = createIntent().setAction(ACTION_ADD_CALENDAREVENT)
-                .putExtra(EXTRA_CALENDAREVENT_ID, withRtlFix.getId())
-                .putExtra(EXTRA_CALENDAREVENT_EVENT_ID, withRtlFix.getEventId())
-                .putExtra(EXTRA_CALENDAREVENT_TYPE, withRtlFix.getType())
-                .putExtra(EXTRA_CALENDAREVENT_TIMESTAMP, withRtlFix.getTimestamp())
-                .putExtra(EXTRA_CALENDAREVENT_DURATION, withRtlFix.getDurationInSeconds())
-                .putExtra(EXTRA_CALENDAREVENT_ALLDAY, withRtlFix.getAllDay())
-                .putExtra(EXTRA_CALENDAREVENT_REMINDERS, withRtlFix.getReminders())
-                .putExtra(EXTRA_CALENDAREVENT_TITLE, withRtlFix.getTitle())
-                .putExtra(EXTRA_CALENDAREVENT_DESCRIPTION, withRtlFix.getDescription())
-                .putExtra(EXTRA_CALENDAREVENT_CALNAME, withRtlFix.getCalName())
-                .putExtra(EXTRA_CALENDAREVENT_CALENDAR_COLOR, withRtlFix.getCalendarColor())
-                .putExtra(EXTRA_CALENDAREVENT_COLOR, withRtlFix.getColor())
-                .putExtra(EXTRA_CALENDAREVENT_LOCATION, withRtlFix.getLocation())
-                .putExtra(EXTRA_CALENDAREVENT_STATUS, withRtlFix.getStatus())
-                .putExtra(EXTRA_CALENDAREVENT_ATTENDING_STATUS, withRtlFix.getAttendingStatus());
+                .putExtra(EXTRA_CALENDAREVENT_SPEC, withRtlFix);
         invokeService(intent);
     }
 

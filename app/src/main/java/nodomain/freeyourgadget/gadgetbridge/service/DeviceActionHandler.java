@@ -92,23 +92,12 @@ public class DeviceActionHandler {
                 break;
             }
             case ACTION_ADD_CALENDAREVENT: {
-                final CalendarEventSpec calendarEventSpec = new CalendarEventSpec();
-                calendarEventSpec.setId(intentCopy.getLongExtra(EXTRA_CALENDAREVENT_ID, -1));
-                calendarEventSpec.setEventId(intentCopy.getLongExtra(EXTRA_CALENDAREVENT_ID, -1));
-                calendarEventSpec.setType(intentCopy.getByteExtra(EXTRA_CALENDAREVENT_TYPE, (byte) -1));
-                calendarEventSpec.setTimestamp(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_TIMESTAMP, -1));
-                calendarEventSpec.setDurationInSeconds(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_DURATION, -1));
-                calendarEventSpec.setAllDay(intentCopy.getBooleanExtra(EXTRA_CALENDAREVENT_ALLDAY, false));
-                calendarEventSpec.setReminders((ArrayList<Long>) intentCopy.getSerializableExtra(EXTRA_CALENDAREVENT_REMINDERS));
-                calendarEventSpec.setTitle(intentCopy.getStringExtra(EXTRA_CALENDAREVENT_TITLE));
-                calendarEventSpec.setDescription(intentCopy.getStringExtra(EXTRA_CALENDAREVENT_DESCRIPTION));
-                calendarEventSpec.setLocation(intentCopy.getStringExtra(EXTRA_CALENDAREVENT_LOCATION));
-                calendarEventSpec.setCalName(intentCopy.getStringExtra(EXTRA_CALENDAREVENT_CALNAME));
-                calendarEventSpec.setCalendarColor(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_CALENDAR_COLOR, 0));
-                calendarEventSpec.setColor(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_COLOR, 0));
-                calendarEventSpec.setStatus(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_STATUS, 0));
-                calendarEventSpec.setAttendingStatus(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_ATTENDING_STATUS, 0));
-                deviceSupport.onAddCalendarEvent(calendarEventSpec.transliterated(deviceSupport, transliterator));
+                final CalendarEventSpec calendarEventSpec = intentCopy.getParcelableExtra(EXTRA_CALENDAREVENT_SPEC);
+                if (calendarEventSpec != null) {
+                    deviceSupport.onAddCalendarEvent(calendarEventSpec.transliterated(deviceSupport, transliterator));
+                } else {
+                    deviceSupport.onAddCalendarEvent(calendarEventSpec);
+                }
                 break;
             }
             case ACTION_DELETE_CALENDAREVENT: {

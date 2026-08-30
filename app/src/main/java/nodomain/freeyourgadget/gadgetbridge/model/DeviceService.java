@@ -146,21 +146,9 @@ public interface DeviceService extends EventHandler {
      */
     @Deprecated
     String EXTRA_HEART_RATE_VALUE = "hr_value";
+    String EXTRA_CALENDAREVENT_SPEC = "calendarevent_spec";
     String EXTRA_CALENDAREVENT_ID = "calendarevent_id";
-    String EXTRA_CALENDAREVENT_EVENT_ID = "calendarevent_event_id";
     String EXTRA_CALENDAREVENT_TYPE = "calendarevent_type";
-    String EXTRA_CALENDAREVENT_TIMESTAMP = "calendarevent_timestamp";
-    String EXTRA_CALENDAREVENT_DURATION = "calendarevent_duration";
-    String EXTRA_CALENDAREVENT_ALLDAY = "calendarevent_allday";
-    String EXTRA_CALENDAREVENT_REMINDERS = "calendarevent_reminders";
-    String EXTRA_CALENDAREVENT_TITLE = "calendarevent_title";
-    String EXTRA_CALENDAREVENT_DESCRIPTION = "calendarevent_description";
-    String EXTRA_CALENDAREVENT_LOCATION = "calendarevent_location";
-    String EXTRA_CALENDAREVENT_CALNAME = "calendarevent_calname";
-    String EXTRA_CALENDAREVENT_CALENDAR_COLOR = "calendarevent_calendar_color";
-    String EXTRA_CALENDAREVENT_COLOR = "calendarevent_color";
-    String EXTRA_CALENDAREVENT_STATUS = "calendarevent_status";
-    String EXTRA_CALENDAREVENT_ATTENDING_STATUS = "calendarevent_attending_status";
 
     void connect();
 
