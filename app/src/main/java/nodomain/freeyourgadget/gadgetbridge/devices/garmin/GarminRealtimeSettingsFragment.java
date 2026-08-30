@@ -72,7 +72,7 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.Sort
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.Summary;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.TargetOptionEntry;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ValueList;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
@@ -928,7 +928,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
     private void sendChangeRequest(final ChangeRequest.Builder changeRequest) {
         screenDefinition = null;
         screenState = null;
-        final GdiSmartProto.Smart smart = GdiSmartProto.Smart.newBuilder()
+        final Smart smart = Smart.newBuilder()
                 .setSettingsService(SettingsService.newBuilder()
                         .setChangeRequest(changeRequest)
                 ).build();

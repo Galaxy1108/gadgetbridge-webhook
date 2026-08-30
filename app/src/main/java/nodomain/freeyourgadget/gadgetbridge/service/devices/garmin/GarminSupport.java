@@ -104,7 +104,7 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.Init
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenDefinitionRequest;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenStateRequest;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.SettingsService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
 import nodomain.freeyourgadget.gadgetbridge.service.SleepAsAndroidSender;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLESingleDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
@@ -273,7 +273,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             if (directoryEntry.getFiletype() == FileType.FILETYPE.DIRECTORY) {
                 LOG.debug("Got directory entry, syncing with new protocol");
                 sendProtobufRequest("request file list",
-                        GdiSmartProto.Smart.newBuilder().setFileSyncService(
+                        Smart.newBuilder().setFileSyncService(
                                 protocolBufferHandler.getFileSyncServiceHandler().requestFileList()
                         ).build());
                 return;
@@ -455,7 +455,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 final String language = Locale.getDefault().getLanguage();
                 final String country = Locale.getDefault().getCountry();
                 final String localeString = language + "_" + country.toUpperCase();
-                sendProtobufRequest("init realtime settings", GdiSmartProto.Smart.newBuilder()
+                sendProtobufRequest("init realtime settings", Smart.newBuilder()
                         .setSettingsService(
                                 SettingsService.newBuilder()
                                         .setInitRequest(
@@ -608,7 +608,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     @Override
     public void onAppInfoReq() {
         sendProtobufRequest("request apps",
-                GdiSmartProto.Smart.newBuilder().setInstalledAppsService(
+                Smart.newBuilder().setInstalledAppsService(
                         GdiInstalledAppsService.InstalledAppsService.newBuilder().setGetInstalledAppsRequest(
                                 GdiInstalledAppsService.InstalledAppsService.GetInstalledAppsRequest.newBuilder()
                                         .setAppType(GdiInstalledAppsService.InstalledAppsService.AppType.ALL)
@@ -638,7 +638,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         }
 
         sendProtobufRequest("delete app",
-                GdiSmartProto.Smart.newBuilder().setInstalledAppsService(
+                Smart.newBuilder().setInstalledAppsService(
                         GdiInstalledAppsService.InstalledAppsService.newBuilder().setDeleteAppRequest(
                                 GdiInstalledAppsService.InstalledAppsService.DeleteAppRequest.newBuilder()
                                         .setStoreAppId(app.getStoreAppId())
@@ -708,7 +708,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     /**
      * Wrap and send a watch-bound Smart RPC.
      */
-    void sendProtobufRequest(final String taskName, final GdiSmartProto.Smart payload) {
+    void sendProtobufRequest(final String taskName, final Smart payload) {
         sendOutgoingMessage(taskName, protocolBufferHandler.prepareProtobufRequest(payload));
     }
 
@@ -887,7 +887,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     public void onSendConfiguration(final String config) {
         if (config.startsWith("protobuf:")) {
             try {
-                final GdiSmartProto.Smart smart = GdiSmartProto.Smart.parseFrom(GB.hexStringToByteArray(config.replaceFirst("protobuf:", "")));
+                final Smart smart = Smart.parseFrom(GB.hexStringToByteArray(config.replaceFirst("protobuf:", "")));
                 sendProtobufRequest("send config", smart);
             } catch (final Exception e) {
                 LOG.error("Failed to send {} as protobuf", config, e);
@@ -966,7 +966,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                     LOG.debug("Will download file: {}/{}", currentlyDownloading.getSyncFile().getId().getId1(), currentlyDownloading.getSyncFile().getId().getId2());
 
                     sendProtobufRequest("request file",
-                            GdiSmartProto.Smart.newBuilder().setFileSyncService(
+                            Smart.newBuilder().setFileSyncService(
                                     protocolBufferHandler.getFileSyncServiceHandler().requestFile(currentlyDownloading.getSyncFile())
                             ).build());
                 } else {
@@ -1050,7 +1050,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     }
 
     private void enableBatteryLevelUpdate() {
-        sendProtobufRequest("enable battery updates", GdiSmartProto.Smart.newBuilder()
+        sendProtobufRequest("enable battery updates", Smart.newBuilder()
                 .setDeviceStatusService(
                         GdiDeviceStatus.DeviceStatusService.newBuilder()
                                 .setRemoteDeviceBatteryStatusRequest(
@@ -1087,7 +1087,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             );
         }
         sendProtobufRequest("find device",
-                GdiSmartProto.Smart.newBuilder().setFindMyWatchService(a).build());
+                Smart.newBuilder().setFindMyWatchService(a).build());
     }
 
     @Override
@@ -1438,7 +1438,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 );
 
         sendProtobufRequest("set gps location",
-                GdiSmartProto.Smart.newBuilder().setCoreService(
+                Smart.newBuilder().setCoreService(
                         GdiCore.CoreService.newBuilder().setLocationUpdatedNotification(locationUpdatedNotification)
                 ).build());
     }
@@ -1497,7 +1497,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             final String localeString = language + "_" + country.toUpperCase();
 
             sendProtobufRequest("get settings screen " + screenId,
-                    GdiSmartProto.Smart.newBuilder()
+                    Smart.newBuilder()
                             .setSettingsService(SettingsService.newBuilder()
                                     .setDefinitionRequest(
                                             ScreenDefinitionRequest.newBuilder()
@@ -1508,7 +1508,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                             ).build());
 
             sendProtobufRequest("get settings state " + screenId,
-                    GdiSmartProto.Smart.newBuilder()
+                    Smart.newBuilder()
                             .setSettingsService(SettingsService.newBuilder()
                                     .setStateRequest(
                                             ScreenStateRequest.newBuilder()
@@ -1664,7 +1664,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                             .markSynced(currentlyDownloading.getSyncFile());
                     if (syncedCommand != null) {
                         sendProtobufRequest("mark file as synced",
-                                GdiSmartProto.Smart.newBuilder().setFileSyncService(syncedCommand).build());
+                                Smart.newBuilder().setFileSyncService(syncedCommand).build());
                     }
                 }
 
