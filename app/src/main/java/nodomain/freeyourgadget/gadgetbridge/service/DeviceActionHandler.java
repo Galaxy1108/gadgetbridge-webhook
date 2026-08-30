@@ -42,6 +42,7 @@ import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_REQ
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_SLEEP_AS_ANDROID_ACTION;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_URI;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_WORLD_CLOCKS;
+import static nodomain.freeyourgadget.gadgetbridge.util.TextSanitizerKt.sanitizeText;
 
 import android.content.Context;
 import android.content.Intent;
@@ -60,7 +61,6 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.activities.appmanager.config.DynamicAppConfig;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.LoyaltyCard;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventCameraRemote;
-import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceService;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
@@ -75,7 +75,6 @@ import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationType;
 import nodomain.freeyourgadget.gadgetbridge.model.Reminder;
 import nodomain.freeyourgadget.gadgetbridge.model.WorldClock;
-import nodomain.freeyourgadget.gadgetbridge.util.EmojiConverter;
 import nodomain.freeyourgadget.gadgetbridge.util.language.LanguageUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs;
@@ -107,7 +106,7 @@ public class DeviceActionHandler {
             if (intentCopy.hasExtra(extra)) {
                 // Ensure the text is sanitized (e.g. emoji converted to ascii) before applying the transliterators
                 // otherwise the emoji are removed before converting them
-                String sanitizedText = sanitizeNotifText(deviceSupport, device.getDeviceCoordinator(), device, intentCopy.getStringExtra(extra));
+                String sanitizedText = sanitizeText(deviceSupport, device.getDeviceCoordinator(), device, intentCopy.getStringExtra(extra));
                 if (transliterator != null) {
                     sanitizedText = transliterator.transliterate(sanitizedText);
                 }
@@ -166,7 +165,7 @@ public class DeviceActionHandler {
                     notificationSpec.setCannedReplies(replies.toArray(new String[0]));
                 }
 
-                deviceSupport.onNotification(notificationSpec);
+                deviceSupport.onNotification(notificationSpec.transliterated(deviceSupport, device.getDeviceCoordinator(), device, transliterator));
                 break;
             }
             case ACTION_DELETE_NOTIFICATION: {
@@ -463,24 +462,4 @@ public class DeviceActionHandler {
         }
     }
 
-    /**
-     * @param text original text
-     * @return 'text' or a new String without non-supported chars like emoticons, etc.
-     */
-    private static String sanitizeNotifText(final DeviceSupport deviceSupport,
-                                            final DeviceCoordinator deviceCoordinator,
-                                            final GBDevice device,
-                                            String text) {
-        if (text == null || text.isEmpty()) {
-            return text;
-        }
-
-        text = deviceSupport.customStringFilter(text);
-
-        if (!deviceCoordinator.supportsUnicodeEmojis(device)) {
-            return EmojiConverter.convertUnicodeEmojiToAscii(text, GBApplication.getContext());
-        }
-
-        return text;
-    }
 }

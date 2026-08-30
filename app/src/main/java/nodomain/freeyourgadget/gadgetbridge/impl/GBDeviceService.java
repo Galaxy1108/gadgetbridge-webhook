@@ -72,11 +72,6 @@ public class GBDeviceService implements DeviceService {
     private final GBDevice mDevice;
     private final Class<? extends Service> mServiceClass;
     public static final String[] transliterationExtras = new String[]{
-            EXTRA_NOTIFICATION_SENDER,
-            EXTRA_NOTIFICATION_SUBJECT,
-            EXTRA_NOTIFICATION_TITLE,
-            EXTRA_NOTIFICATION_BODY,
-            EXTRA_NOTIFICATION_SOURCENAME,
             EXTRA_CALL_DISPLAYNAME,
             EXTRA_CALL_SOURCENAME,
             EXTRA_MUSIC_ARTIST,
@@ -179,25 +174,27 @@ public class GBDeviceService implements DeviceService {
         boolean hideMessageDetails = messagePrivacyMode.equals(GBApplication.getContext().getString(R.string.p_message_privacy_mode_complete));
         boolean hideMessageBodyOnly = messagePrivacyMode.equals(GBApplication.getContext().getString(R.string.p_message_privacy_mode_bodyonly));
 
+        final NotificationSpec withRtlFix = notificationSpec.withRtlFix();
+
         Intent intent = createIntent().setAction(ACTION_NOTIFICATION)
-                .putExtra(EXTRA_NOTIFICATION_FLAGS, notificationSpec.getFlags())
-                .putExtra(EXTRA_NOTIFICATION_PHONENUMBER, hideMessageDetails ? null : notificationSpec.getPhoneNumber())
-                .putExtra(EXTRA_NOTIFICATION_SENDER, hideMessageDetails ? null : coalesce(notificationSpec.getSender(), getContactDisplayNameByNumber(notificationSpec.getPhoneNumber())))
-                .putExtra(EXTRA_NOTIFICATION_SUBJECT, hideMessageDetails ? null : notificationSpec.getSubject())
-                .putExtra(EXTRA_NOTIFICATION_TITLE, hideMessageDetails ? null : notificationSpec.getTitle())
-                .putExtra(EXTRA_NOTIFICATION_BODY, hideMessageDetails || hideMessageBodyOnly ? null : notificationSpec.getBody())
-                .putExtra(EXTRA_NOTIFICATION_ID, notificationSpec.getId())
-                .putExtra(EXTRA_NOTIFICATION_KEY, notificationSpec.getKey())
-                .putExtra(EXTRA_NOTIFICATION_TYPE, notificationSpec.getType())
-                .putExtra(EXTRA_NOTIFICATION_ACTIONS, notificationSpec.getAttachedActions())
-                .putExtra(EXTRA_NOTIFICATION_SOURCENAME, notificationSpec.getSourceName())
-                .putExtra(EXTRA_NOTIFICATION_SOURCEAPPID, notificationSpec.getSourceAppId())
-                .putExtra(EXTRA_NOTIFICATION_ICONID, notificationSpec.getIconId())
-                .putExtra(EXTRA_NOTIFICATION_ICONPACKAGEID, notificationSpec.getIconPackageId())
-                .putExtra(NOTIFICATION_PICTURE_PATH, notificationSpec.getPicturePath())
-                .putExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, notificationSpec.getDndSuppressed())
-                .putExtra(EXTRA_NOTIFICATION_CHANNEL_ID, notificationSpec.getChannelId())
-                .putExtra(EXTRA_NOTIFICATION_CATEGORY, notificationSpec.getCategory());
+                .putExtra(EXTRA_NOTIFICATION_FLAGS, withRtlFix.getFlags())
+                .putExtra(EXTRA_NOTIFICATION_PHONENUMBER, hideMessageDetails ? null : withRtlFix.getPhoneNumber())
+                .putExtra(EXTRA_NOTIFICATION_SENDER, hideMessageDetails ? null : coalesce(withRtlFix.getSender(), getContactDisplayNameByNumber(withRtlFix.getPhoneNumber())))
+                .putExtra(EXTRA_NOTIFICATION_SUBJECT, hideMessageDetails ? null : withRtlFix.getSubject())
+                .putExtra(EXTRA_NOTIFICATION_TITLE, hideMessageDetails ? null : withRtlFix.getTitle())
+                .putExtra(EXTRA_NOTIFICATION_BODY, hideMessageDetails || hideMessageBodyOnly ? null : withRtlFix.getBody())
+                .putExtra(EXTRA_NOTIFICATION_ID, withRtlFix.getId())
+                .putExtra(EXTRA_NOTIFICATION_KEY, withRtlFix.getKey())
+                .putExtra(EXTRA_NOTIFICATION_TYPE, withRtlFix.getType())
+                .putExtra(EXTRA_NOTIFICATION_ACTIONS, withRtlFix.getAttachedActions())
+                .putExtra(EXTRA_NOTIFICATION_SOURCENAME, withRtlFix.getSourceName())
+                .putExtra(EXTRA_NOTIFICATION_SOURCEAPPID, withRtlFix.getSourceAppId())
+                .putExtra(EXTRA_NOTIFICATION_ICONID, withRtlFix.getIconId())
+                .putExtra(EXTRA_NOTIFICATION_ICONPACKAGEID, withRtlFix.getIconPackageId())
+                .putExtra(NOTIFICATION_PICTURE_PATH, withRtlFix.getPicturePath())
+                .putExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, withRtlFix.getDndSuppressed())
+                .putExtra(EXTRA_NOTIFICATION_CHANNEL_ID, withRtlFix.getChannelId())
+                .putExtra(EXTRA_NOTIFICATION_CATEGORY, withRtlFix.getCategory());
         invokeService(intent);
     }
 

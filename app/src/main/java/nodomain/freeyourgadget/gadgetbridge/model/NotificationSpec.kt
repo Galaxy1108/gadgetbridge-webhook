@@ -17,6 +17,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
+import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
+import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
+import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
+import nodomain.freeyourgadget.gadgetbridge.util.sanitizeText
+
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -43,6 +50,36 @@ data class NotificationSpec @JvmOverloads constructor(
     var dndSuppressed: Int = 0
 ) {
     val id: Int = if (requestedId != -1) requestedId else c.incrementAndGet()
+
+    fun withRtlFix(): NotificationSpec {
+        if (!RtlUtils.rtlSupport()) return this
+        return copy(
+            sender = sender?.let(RtlUtils::fixRtl),
+            subject = subject?.let(RtlUtils::fixRtl),
+            title = title?.let(RtlUtils::fixRtl),
+            body = body?.let(RtlUtils::fixRtl),
+            sourceName = sourceName?.let(RtlUtils::fixRtl)
+        )
+    }
+
+    fun transliterated(
+        deviceSupport: DeviceSupport,
+        deviceCoordinator: DeviceCoordinator,
+        device: GBDevice,
+        transliterator: Transliterator?
+    ): NotificationSpec {
+        fun transform(text: String?): String? {
+            val sanitized = sanitizeText(deviceSupport, deviceCoordinator, device, text)
+            return transliterator?.let { sanitized?.let(it::transliterate) } ?: sanitized
+        }
+        return copy(
+            sender = transform(sender),
+            subject = transform(subject),
+            title = transform(title),
+            body = transform(body),
+            sourceName = transform(sourceName)
+        )
+    }
 
     companion object {
         private val c = AtomicInteger((System.currentTimeMillis() / 1000).toInt())
