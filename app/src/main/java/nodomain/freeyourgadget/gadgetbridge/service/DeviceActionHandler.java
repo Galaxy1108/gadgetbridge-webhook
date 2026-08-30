@@ -174,21 +174,21 @@ public class DeviceActionHandler {
             }
             case ACTION_ADD_CALENDAREVENT: {
                 final CalendarEventSpec calendarEventSpec = new CalendarEventSpec();
-                calendarEventSpec.id = intentCopy.getLongExtra(EXTRA_CALENDAREVENT_ID, -1);
-                calendarEventSpec.eventId = intentCopy.getLongExtra(EXTRA_CALENDAREVENT_ID, -1);
-                calendarEventSpec.type = intentCopy.getByteExtra(EXTRA_CALENDAREVENT_TYPE, (byte) -1);
-                calendarEventSpec.timestamp = intentCopy.getIntExtra(EXTRA_CALENDAREVENT_TIMESTAMP, -1);
-                calendarEventSpec.durationInSeconds = intentCopy.getIntExtra(EXTRA_CALENDAREVENT_DURATION, -1);
-                calendarEventSpec.allDay = intentCopy.getBooleanExtra(EXTRA_CALENDAREVENT_ALLDAY, false);
-                calendarEventSpec.reminders = (ArrayList<Long>) intentCopy.getSerializableExtra(EXTRA_CALENDAREVENT_REMINDERS);
-                calendarEventSpec.title = intentCopy.getStringExtra(EXTRA_CALENDAREVENT_TITLE);
-                calendarEventSpec.description = intentCopy.getStringExtra(EXTRA_CALENDAREVENT_DESCRIPTION);
-                calendarEventSpec.location = intentCopy.getStringExtra(EXTRA_CALENDAREVENT_LOCATION);
-                calendarEventSpec.calName = intentCopy.getStringExtra(EXTRA_CALENDAREVENT_CALNAME);
-                calendarEventSpec.calendarColor = intentCopy.getIntExtra(EXTRA_CALENDAREVENT_CALENDAR_COLOR, 0);
-                calendarEventSpec.color = intentCopy.getIntExtra(EXTRA_CALENDAREVENT_COLOR, 0);
-                calendarEventSpec.status = intentCopy.getIntExtra(EXTRA_CALENDAREVENT_STATUS, 0);
-                calendarEventSpec.attendingStatus = intentCopy.getIntExtra(EXTRA_CALENDAREVENT_ATTENDING_STATUS, 0);
+                calendarEventSpec.setId(intentCopy.getLongExtra(EXTRA_CALENDAREVENT_ID, -1));
+                calendarEventSpec.setEventId(intentCopy.getLongExtra(EXTRA_CALENDAREVENT_ID, -1));
+                calendarEventSpec.setType(intentCopy.getByteExtra(EXTRA_CALENDAREVENT_TYPE, (byte) -1));
+                calendarEventSpec.setTimestamp(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_TIMESTAMP, -1));
+                calendarEventSpec.setDurationInSeconds(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_DURATION, -1));
+                calendarEventSpec.setAllDay(intentCopy.getBooleanExtra(EXTRA_CALENDAREVENT_ALLDAY, false));
+                calendarEventSpec.setReminders((ArrayList<Long>) intentCopy.getSerializableExtra(EXTRA_CALENDAREVENT_REMINDERS));
+                calendarEventSpec.setTitle(intentCopy.getStringExtra(EXTRA_CALENDAREVENT_TITLE));
+                calendarEventSpec.setDescription(intentCopy.getStringExtra(EXTRA_CALENDAREVENT_DESCRIPTION));
+                calendarEventSpec.setLocation(intentCopy.getStringExtra(EXTRA_CALENDAREVENT_LOCATION));
+                calendarEventSpec.setCalName(intentCopy.getStringExtra(EXTRA_CALENDAREVENT_CALNAME));
+                calendarEventSpec.setCalendarColor(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_CALENDAR_COLOR, 0));
+                calendarEventSpec.setColor(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_COLOR, 0));
+                calendarEventSpec.setStatus(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_STATUS, 0));
+                calendarEventSpec.setAttendingStatus(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_ATTENDING_STATUS, 0));
                 deviceSupport.onAddCalendarEvent(calendarEventSpec);
                 break;
             }

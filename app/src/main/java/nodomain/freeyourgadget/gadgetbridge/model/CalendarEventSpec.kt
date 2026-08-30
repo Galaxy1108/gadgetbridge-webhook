@@ -15,28 +15,30 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.model;
+package nodomain.freeyourgadget.gadgetbridge.model
 
-import java.util.ArrayList;
+data class CalendarEventSpec @JvmOverloads constructor(
+    var type: Byte = TYPE_UNKNOWN,
+    var id: Long = 0,
+    var eventId: Long = 0,
+    var timestamp: Int = 0,
+    var durationInSeconds: Int = 0,
+    var title: String? = null,
+    var description: String? = null,
+    var location: String? = null,
+    var calName: String? = null,
+    var calendarColor: Int = 0,
+    var color: Int = 0,
+    var allDay: Boolean = false,
+    var reminders: ArrayList<Long>? = null,
+    var status: Int = 0,
+    var attendingStatus: Int = 0
+) {
 
-public class CalendarEventSpec {
-    public static final byte TYPE_UNKNOWN = 0;
-    public static final byte TYPE_SUNRISE = 1;
-    public static final byte TYPE_SUNSET = 2;
+    companion object {
+        const val TYPE_UNKNOWN: Byte = 0
+        const val TYPE_SUNRISE: Byte = 1
+        const val TYPE_SUNSET: Byte = 2
+    }
 
-    public byte type;
-    public long id;
-    public long eventId;
-    public int timestamp;
-    public int durationInSeconds;
-    public String title;
-    public String description;
-    public String location;
-    public String calName;
-    public int calendarColor;
-    public int color;
-    public boolean allDay;
-    public ArrayList<Long> reminders; // unix epoch millis
-    public int status;
-    public int attendingStatus;
 }

@@ -560,11 +560,11 @@ public class PebbleProtocol extends GBDeviceProtocol {
 
     @Override
     public byte[] encodeAddCalendarEvent(CalendarEventSpec calendarEventSpec) {
-        long id = calendarEventSpec.id != -1 ? calendarEventSpec.id : mRandom.nextLong();
+        long id = calendarEventSpec.getId() != -1 ? calendarEventSpec.getId() : mRandom.nextLong();
         int iconId;
         ArrayList<Pair<Integer, Object>> attributes = new ArrayList<>();
-        attributes.add(new Pair<>(1, calendarEventSpec.title));
-        switch (calendarEventSpec.type) {
+        attributes.add(new Pair<>(1, calendarEventSpec.getTitle()));
+        switch (calendarEventSpec.getType()) {
             case CalendarEventSpec.TYPE_SUNRISE:
                 iconId = PebbleIconID.SUNRISE;
                 break;
@@ -573,13 +573,13 @@ public class PebbleProtocol extends GBDeviceProtocol {
                 break;
             default:
                 iconId = PebbleIconID.TIMELINE_CALENDAR;
-                attributes.add(new Pair<>(3, calendarEventSpec.description));
-                attributes.add(new Pair<>(11, calendarEventSpec.location));
+                attributes.add(new Pair<>(3, calendarEventSpec.getDescription()));
+                attributes.add(new Pair<>(11, calendarEventSpec.getLocation()));
         }
 
 
-        int startTimestamp = calendarEventSpec.timestamp;
-        if (calendarEventSpec.allDay) {
+        int startTimestamp = calendarEventSpec.getTimestamp();
+        if (calendarEventSpec.getAllDay()) {
             // For all-day events, Pebble expects the start date to match the midnight boundaries
             // in the user's timezone. However, the calendar event will have them in the UTC timezone,
             // so we need to convert it
@@ -587,7 +587,7 @@ public class PebbleProtocol extends GBDeviceProtocol {
             startTimestamp = (int) (DateTimeUtils.utcDateTimeToLocal(startTimestampMs) / 1000);
         }
 
-        return encodeTimelinePin(new UUID(GB_UUID_MASK | calendarEventSpec.type, id), startTimestamp, (short) (calendarEventSpec.durationInSeconds / 60), iconId, attributes);
+        return encodeTimelinePin(new UUID(GB_UUID_MASK | calendarEventSpec.getType(), id), startTimestamp, (short) (calendarEventSpec.getDurationInSeconds() / 60), iconId, attributes);
     }
 
     @Override

@@ -1895,10 +1895,10 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
     @Override
     public void onAddCalendarEvent(CalendarEventSpec calendarEventSpec) {
         if (!getDevicePrefs().getBoolean("sync_calendar", false)) {
-            LOG.debug("Ignoring add calendar event {}, sync is disabled", calendarEventSpec.id);
+            LOG.debug("Ignoring add calendar event {}, sync is disabled", calendarEventSpec.getId());
             return;
         }
-        String description = calendarEventSpec.description;
+        String description = calendarEventSpec.getDescription();
         if (description != null) {
             // remove any HTML formatting
             if (description.startsWith("<html"))
@@ -1913,16 +1913,16 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
         try {
             JSONObject o = new JSONObject();
             o.put("t", "calendar");
-            o.put("id", calendarEventSpec.id);
-            o.put("type", calendarEventSpec.type); //implement this too? (sunrise and set)
-            o.put("timestamp", calendarEventSpec.timestamp);
-            o.put("durationInSeconds", calendarEventSpec.durationInSeconds);
-            o.put("title", renderUnicodeAsImage(cropToLength(calendarEventSpec.title,40)));
+            o.put("id", calendarEventSpec.getId());
+            o.put("type", calendarEventSpec.getType()); //implement this too? (sunrise and set)
+            o.put("timestamp", calendarEventSpec.getTimestamp());
+            o.put("durationInSeconds", calendarEventSpec.getDurationInSeconds());
+            o.put("title", renderUnicodeAsImage(cropToLength(calendarEventSpec.getTitle(),40)));
             o.put("description", renderUnicodeAsImage(cropToLength(description,200)));
-            o.put("location", renderUnicodeAsImage(cropToLength(calendarEventSpec.location,40)));
-            o.put("calName", cropToLength(calendarEventSpec.calName,20));
-            o.put("color", calendarEventSpec.color);
-            o.put("allDay", calendarEventSpec.allDay);
+            o.put("location", renderUnicodeAsImage(cropToLength(calendarEventSpec.getLocation(),40)));
+            o.put("calName", cropToLength(calendarEventSpec.getCalName(),20));
+            o.put("color", calendarEventSpec.getColor());
+            o.put("allDay", calendarEventSpec.getAllDay());
             uartTxJSON("onAddCalendarEvent", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());

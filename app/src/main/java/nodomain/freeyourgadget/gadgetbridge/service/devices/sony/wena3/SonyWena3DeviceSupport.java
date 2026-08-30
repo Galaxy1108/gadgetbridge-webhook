@@ -955,11 +955,11 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
                     builder.write(
                             SonyWena3Constants.NOTIFICATION_SERVICE_CHARACTERISTIC_UUID,
                             new CalendarEntry(
-                                    new Date(evt.timestamp * 1000L),
-                                    new Date((evt.timestamp * 1000L) + (evt.durationInSeconds * 1000L)),
-                                    evt.allDay,
-                                    (evt.title == null ? "" : evt.title),
-                                    (evt.location == null ? "" : evt.location),
+                                    new Date(evt.getTimestamp() * 1000L),
+                                    new Date((evt.getTimestamp() * 1000L) + (evt.getDurationInSeconds() * 1000L)),
+                                    evt.getAllDay(),
+                                    (evt.getTitle() == null ? "" : evt.getTitle()),
+                                    (evt.getLocation() == null ? "" : evt.getLocation()),
                                     (byte) i,
                                     (byte) total
                             ).toByteArray()
@@ -989,7 +989,7 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
     @Override
     public void onDeleteCalendarEvent(byte type, long id) {
         for(CalendarEventSpec evt : calendarEvents) {
-            if(evt.type == type && evt.id == id) {
+            if(evt.getType() == type && evt.getId() == id) {
                 calendarEvents.remove(evt);
             }
         }

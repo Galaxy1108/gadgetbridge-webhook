@@ -512,7 +512,7 @@ public class ZeTimeDeviceSupport extends AbstractBTLESingleDeviceSupport {
     @Override
     public void onAddCalendarEvent(CalendarEventSpec calendarEventSpec) {
         // This is not used currently since we cannot add and remove calendar event one by one pebble style.
-        byte[] calendarEvent = encodeCalendarEvent(calendarEventSpec.title, calendarEventSpec.timestamp, (byte) (calendarEventSpec.type + 1)); // HACK)
+        byte[] calendarEvent = encodeCalendarEvent(calendarEventSpec.getTitle(), calendarEventSpec.getTimestamp(), (byte) (calendarEventSpec.getType() + 1)); // HACK)
         try {
             TransactionBuilder builder = performInitialized("sendCalendarEvent");
             sendMsgToWatch(builder, calendarEvent);

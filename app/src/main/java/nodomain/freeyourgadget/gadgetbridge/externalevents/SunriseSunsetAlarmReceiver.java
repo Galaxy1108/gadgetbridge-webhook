@@ -90,20 +90,20 @@ public class SunriseSunsetAlarmReceiver extends BroadcastReceiver {
         );
 
         CalendarEventSpec calendarEventSpec = new CalendarEventSpec();
-        calendarEventSpec.durationInSeconds = 0;
-        calendarEventSpec.description = null;
+        calendarEventSpec.setDurationInSeconds(0);
+        calendarEventSpec.setDescription(null);
 
         if (sunriseResultTomorrow instanceof SunriseResult.RegularDay regularDayTomorrow) {
-            calendarEventSpec.type = CalendarEventSpec.TYPE_SUNRISE;
-            calendarEventSpec.title = "Sunrise";
-            calendarEventSpec.id = id_tomorrow;
-            calendarEventSpec.timestamp = (int) (regularDayTomorrow.sunrise().toInstant().getEpochSecond());
+            calendarEventSpec.setType(CalendarEventSpec.TYPE_SUNRISE);
+            calendarEventSpec.setTitle("Sunrise");
+            calendarEventSpec.setId(id_tomorrow);
+            calendarEventSpec.setTimestamp((int) (regularDayTomorrow.sunrise().toInstant().getEpochSecond()));
             GBApplication.deviceService().onAddCalendarEvent(calendarEventSpec);
 
-            calendarEventSpec.type = CalendarEventSpec.TYPE_SUNSET;
-            calendarEventSpec.title = "Sunset";
-            calendarEventSpec.id = id_tomorrow;
-            calendarEventSpec.timestamp = (int) (regularDayTomorrow.sunset().toInstant().getEpochSecond());
+            calendarEventSpec.setType(CalendarEventSpec.TYPE_SUNSET);
+            calendarEventSpec.setTitle("Sunset");
+            calendarEventSpec.setId(id_tomorrow);
+            calendarEventSpec.setTimestamp((int) (regularDayTomorrow.sunset().toInstant().getEpochSecond()));
             GBApplication.deviceService().onAddCalendarEvent(calendarEventSpec);
         }
     }
