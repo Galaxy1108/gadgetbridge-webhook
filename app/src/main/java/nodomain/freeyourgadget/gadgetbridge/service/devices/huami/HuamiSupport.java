@@ -1297,7 +1297,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
 
     @Override
     public void onSetCannedMessages(CannedMessagesSpec cannedMessagesSpec) {
-        if (cannedMessagesSpec.type == CannedMessagesSpec.TYPE_REJECTEDCALLS) {
+        if (cannedMessagesSpec.getType() == CannedMessagesSpec.TYPE_REJECTEDCALLS) {
             try {
                 TransactionBuilder builder = performInitialized("Set canned messages");
                 int handle = 0x12345678;
@@ -1308,7 +1308,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
                     handle++;
                 }
                 handle = 0x12345678;
-                for (String cannedMessage : cannedMessagesSpec.cannedMessages) {
+                for (String cannedMessage : cannedMessagesSpec.getCannedMessages()) {
                     int length = cannedMessage.getBytes().length + 6;
                     ByteBuffer buf = ByteBuffer.allocate(length);
                     buf.order(ByteOrder.LITTLE_ENDIAN);

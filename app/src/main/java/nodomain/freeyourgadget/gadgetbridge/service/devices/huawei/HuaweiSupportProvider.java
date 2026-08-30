@@ -3222,12 +3222,12 @@ public class HuaweiSupportProvider {
     }
 
     public void onSetCannedMessages(final CannedMessagesSpec cannedMessagesSpec) {
-        if (cannedMessagesSpec.type != CannedMessagesSpec.TYPE_GENERIC) {
-            LOG.warn("Got unsupported canned messages type: {}", cannedMessagesSpec.type);
+        if (cannedMessagesSpec.getType() != CannedMessagesSpec.TYPE_GENERIC) {
+            LOG.warn("Got unsupported canned messages type: {}", cannedMessagesSpec.getType());
             return;
         }
 
-        if (cannedMessagesSpec.cannedMessages.length == 0) {
+        if (cannedMessagesSpec.getCannedMessages().length == 0) {
             GB.toast(context, HuaweiSupportProvider.this.getContext().getString(R.string.canned_replies_not_empty), Toast.LENGTH_SHORT, GB.WARN);
             LOG.warn(HuaweiSupportProvider.this.getContext().getString(R.string.canned_replies_not_empty));
         }
@@ -3237,7 +3237,7 @@ public class HuaweiSupportProvider {
             LOG.warn("P2P canned replies service is not registered");
             return;
         }
-        cannedRepliesService.sendReplies(cannedMessagesSpec.cannedMessages);
+        cannedRepliesService.sendReplies(cannedMessagesSpec.getCannedMessages());
     }
 
     public void onFindDevice(boolean start) {

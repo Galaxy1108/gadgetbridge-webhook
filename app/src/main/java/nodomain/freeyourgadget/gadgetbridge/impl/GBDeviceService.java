@@ -236,8 +236,8 @@ public class GBDeviceService implements DeviceService {
     @Override
     public void onSetCannedMessages(@NonNull CannedMessagesSpec cannedMessagesSpec) {
         Intent intent = createIntent().setAction(ACTION_SETCANNEDMESSAGES)
-                .putExtra(EXTRA_CANNEDMESSAGES_TYPE, cannedMessagesSpec.type)
-                .putExtra(EXTRA_CANNEDMESSAGES, cannedMessagesSpec.cannedMessages);
+                .putExtra(EXTRA_CANNEDMESSAGES_TYPE, cannedMessagesSpec.getType())
+                .putExtra(EXTRA_CANNEDMESSAGES, cannedMessagesSpec.getCannedMessages());
         invokeService(intent);
     }
 

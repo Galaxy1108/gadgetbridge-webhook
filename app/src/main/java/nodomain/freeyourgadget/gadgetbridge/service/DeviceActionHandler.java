@@ -237,8 +237,8 @@ public class DeviceActionHandler {
                 final String[] cannedMessages = intentCopy.getStringArrayExtra(EXTRA_CANNEDMESSAGES);
 
                 final CannedMessagesSpec cannedMessagesSpec = new CannedMessagesSpec();
-                cannedMessagesSpec.type = type;
-                cannedMessagesSpec.cannedMessages = cannedMessages;
+                cannedMessagesSpec.setType(type);
+                cannedMessagesSpec.setCannedMessages(cannedMessages);
                 deviceSupport.onSetCannedMessages(cannedMessagesSpec);
                 break;
             case ACTION_SETTIME:

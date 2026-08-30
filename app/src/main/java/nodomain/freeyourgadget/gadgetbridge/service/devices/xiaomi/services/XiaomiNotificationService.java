@@ -354,8 +354,8 @@ public class XiaomiNotificationService extends AbstractXiaomiService implements 
     }
 
     public void onSetCannedMessages(final CannedMessagesSpec cannedMessagesSpec) {
-        if (cannedMessagesSpec.type != CannedMessagesSpec.TYPE_REJECTEDCALLS) {
-            LOG.warn("Got unsupported canned messages type: {}", cannedMessagesSpec.type);
+        if (cannedMessagesSpec.getType() != CannedMessagesSpec.TYPE_REJECTEDCALLS) {
+            LOG.warn("Got unsupported canned messages type: {}", cannedMessagesSpec.getType());
             return;
         }
 
@@ -371,9 +371,9 @@ public class XiaomiNotificationService extends AbstractXiaomiService implements 
                 .setMinReplies(minReplies)
                 .setMaxReplies(maxReplies);
         int i = 0;
-        for (final String cannedMessage : cannedMessagesSpec.cannedMessages) {
+        for (final String cannedMessage : cannedMessagesSpec.getCannedMessages()) {
             if (i >= maxReplies) {
-                LOG.warn("Got too many canned messages ({}), limit is {}", cannedMessagesSpec.cannedMessages.length, maxReplies);
+                LOG.warn("Got too many canned messages ({}), limit is {}", cannedMessagesSpec.getCannedMessages().length, maxReplies);
                 break;
             }
 

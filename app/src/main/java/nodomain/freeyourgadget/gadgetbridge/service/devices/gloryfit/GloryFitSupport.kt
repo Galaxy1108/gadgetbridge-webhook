@@ -760,26 +760,28 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
     override fun onSetCannedMessages(cannedMessagesSpec: CannedMessagesSpec) {
         val builder = createTransactionBuilder("set canned messages")
 
-        for ((i, message) in cannedMessagesSpec.cannedMessages.withIndex()) {
-            if (i >= device.deviceCoordinator.getCannedRepliesSlotCount(device)) {
-                LOG.warn(
-                    "Got {} canned messages, over the limit of {}",
-                    cannedMessagesSpec.cannedMessages.size,
-                    device.deviceCoordinator.getCannedRepliesSlotCount(device)
-                )
-                break
-            }
+        cannedMessagesSpec.cannedMessages?.let {
+            for ((i, message) in it.withIndex()) {
+                if (i >= device.deviceCoordinator.getCannedRepliesSlotCount(device)) {
+                    LOG.warn(
+                        "Got {} canned messages, over the limit of {}",
+                        cannedMessagesSpec.cannedMessages!!.size,
+                        device.deviceCoordinator.getCannedRepliesSlotCount(device)
+                    )
+                    break
+                }
 
-            val messageBytes = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncate(message, 24).toByteArray()
-            val buf = ByteBuffer.allocate(5 + messageBytes.size).order(ByteOrder.BIG_ENDIAN)
-            buf.put(CMD_CANNED_MESSAGES)
-            buf.put(CANNED_MESSAGES_SET)
-            buf.put(cannedMessagesSpec.cannedMessages.size.toByte())
-            buf.put(i.toByte())
-            buf.put(messageBytes.size.toByte())
-            buf.put(messageBytes)
-            builder.write(UUID_CHARACTERISTIC_GLORYFIT_DATA_WRITE, *buf.array())
-            // TODO do we need to throttle?
+                val messageBytes = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncate(message, 24).toByteArray()
+                val buf = ByteBuffer.allocate(5 + messageBytes.size).order(ByteOrder.BIG_ENDIAN)
+                buf.put(CMD_CANNED_MESSAGES)
+                buf.put(CANNED_MESSAGES_SET)
+                buf.put(cannedMessagesSpec.cannedMessages!!.size.toByte())
+                buf.put(i.toByte())
+                buf.put(messageBytes.size.toByte())
+                buf.put(messageBytes)
+                builder.write(UUID_CHARACTERISTIC_GLORYFIT_DATA_WRITE, *buf.array())
+                // TODO do we need to throttle?
+            }
         }
 
         builder.write(

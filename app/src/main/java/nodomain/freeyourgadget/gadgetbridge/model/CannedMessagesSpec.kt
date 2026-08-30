@@ -14,13 +14,15 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.model;
+package nodomain.freeyourgadget.gadgetbridge.model
 
-public class CannedMessagesSpec {
-    public static final int TYPE_GENERIC = 0;
-    public static final int TYPE_REJECTEDCALLS = 1;
-    public static final int TYPE_NEWSMS = 2;
-
-    public int type;
-    public String[] cannedMessages;
+data class CannedMessagesSpec @JvmOverloads constructor(
+    var type: Int = TYPE_GENERIC,
+    var cannedMessages: Array<String>? = null
+) {
+    companion object {
+        const val TYPE_GENERIC: Int = 0
+        const val TYPE_REJECTEDCALLS: Int = 1
+        const val TYPE_NEWSMS: Int = 2
+    }
 }

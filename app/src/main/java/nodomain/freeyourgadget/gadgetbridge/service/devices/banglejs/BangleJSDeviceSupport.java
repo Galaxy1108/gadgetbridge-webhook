@@ -1553,7 +1553,7 @@ public class BangleJSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             JSONArray jsonMessages = new JSONArray();
             o.put("d", jsonMessages);
 
-            for (String message : cannedMessagesSpec.cannedMessages) {
+            for (String message : cannedMessagesSpec.getCannedMessages()) {
                 JSONObject jsonMessage = new JSONObject();
                 jsonMessages.put(jsonMessage);
                 // Render Unicode (emojis etc.) as an image for BangleJS to display

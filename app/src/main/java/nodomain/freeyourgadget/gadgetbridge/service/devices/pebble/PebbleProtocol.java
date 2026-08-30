@@ -1590,12 +1590,12 @@ public class PebbleProtocol extends GBDeviceProtocol {
     @Override
     public byte[] encodeSetCannedMessages(CannedMessagesSpec cannedMessagesSpec) {
 
-        if (cannedMessagesSpec.cannedMessages == null || cannedMessagesSpec.cannedMessages.length == 0) {
+        if (cannedMessagesSpec.getCannedMessages() == null || cannedMessagesSpec.getCannedMessages().length == 0) {
             return null;
         }
 
         String blobDBKey;
-        switch (cannedMessagesSpec.type) {
+        switch (cannedMessagesSpec.getType()) {
             case CannedMessagesSpec.TYPE_REJECTEDCALLS:
                 blobDBKey = "com.pebble.android.phone";
                 break;
@@ -1608,7 +1608,7 @@ public class PebbleProtocol extends GBDeviceProtocol {
 
         int replies_length = -1;
 
-        for (String reply : cannedMessagesSpec.cannedMessages) {
+        for (String reply : cannedMessagesSpec.getCannedMessages()) {
             replies_length += reply.getBytes().length + 1;
         }
 
@@ -1624,12 +1624,12 @@ public class PebbleProtocol extends GBDeviceProtocol {
         buf.put((byte) 0x01); // attributes count
         buf.put((byte) 0x08); // canned messages
         buf.putShort((short) replies_length);
-        for (int i = 0; i < cannedMessagesSpec.cannedMessages.length - 1; i++) {
-            buf.put(cannedMessagesSpec.cannedMessages[i].getBytes());
+        for (int i = 0; i < cannedMessagesSpec.getCannedMessages().length - 1; i++) {
+            buf.put(cannedMessagesSpec.getCannedMessages()[i].getBytes());
             buf.put((byte) 0x00);
         }
         // last one must not be zero terminated, else we get an additional empty reply
-        buf.put(cannedMessagesSpec.cannedMessages[cannedMessagesSpec.cannedMessages.length - 1].getBytes());
+        buf.put(cannedMessagesSpec.getCannedMessages()[cannedMessagesSpec.getCannedMessages().length - 1].getBytes());
 
         return encodeBlobdb(blobDBKey, BLOBDB_INSERT, BLOBDB_CANNED_MESSAGES, buf.array());
     }
