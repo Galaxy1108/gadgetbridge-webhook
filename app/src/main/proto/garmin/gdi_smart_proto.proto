@@ -40,6 +40,7 @@ message Smart {
     optional EcgService ecg_service = 39;
     optional SettingsService settings_service = 42;
     optional FileSyncService file_sync_service = 43;
+    optional Service46 service46 = 46;
     optional Service47 service47 = 47;
     optional NotificationsService notifications_service = 49;
 }
@@ -117,6 +118,13 @@ message Service24 {
         optional string unk1 = 1;
     }
     optional Message1 from_device1 = 1;
+}
+
+message Service46 {
+    message Message1 {
+        optional string uri = 1;
+    }
+    optional Message1 message_1 = 1;
 }
 
 message Service47 {
