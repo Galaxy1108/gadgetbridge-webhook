@@ -42,7 +42,6 @@ import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_REQ
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_SLEEP_AS_ANDROID_ACTION;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_URI;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_WORLD_CLOCKS;
-import static nodomain.freeyourgadget.gadgetbridge.util.TextSanitizerKt.sanitizeText;
 
 import android.content.Context;
 import android.content.Intent;
@@ -62,7 +61,6 @@ import nodomain.freeyourgadget.gadgetbridge.activities.appmanager.config.Dynamic
 import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.LoyaltyCard;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventCameraRemote;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceService;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.model.CalendarEventSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
@@ -153,7 +151,7 @@ public class DeviceActionHandler {
                     notificationSpec.setCannedReplies(replies.toArray(new String[0]));
                 }
 
-                deviceSupport.onNotification(notificationSpec.transliterated(deviceSupport, device.getDeviceCoordinator(), device, transliterator));
+                deviceSupport.onNotification(notificationSpec.transliterated(deviceSupport, transliterator));
                 break;
             }
             case ACTION_DELETE_NOTIFICATION: {
@@ -177,7 +175,7 @@ public class DeviceActionHandler {
                 calendarEventSpec.setColor(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_COLOR, 0));
                 calendarEventSpec.setStatus(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_STATUS, 0));
                 calendarEventSpec.setAttendingStatus(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_ATTENDING_STATUS, 0));
-                deviceSupport.onAddCalendarEvent(calendarEventSpec.transliterated(deviceSupport, device.getDeviceCoordinator(), device, transliterator));
+                deviceSupport.onAddCalendarEvent(calendarEventSpec.transliterated(deviceSupport, transliterator));
                 break;
             }
             case ACTION_DELETE_CALENDAREVENT: {
@@ -230,7 +228,7 @@ public class DeviceActionHandler {
                 callSpec.setCategory(intentCopy.getStringExtra(EXTRA_CALL_CATEGORY));
                 callSpec.setVoip(intentCopy.getBooleanExtra(EXTRA_CALL_ISVOIP, false));
                 callSpec.setDndSuppressed(intentCopy.getIntExtra(EXTRA_CALL_DNDSUPPRESSED, 0));
-                deviceSupport.onSetCallState(callSpec.transliterated(deviceSupport, device.getDeviceCoordinator(), device, transliterator));
+                deviceSupport.onSetCallState(callSpec.transliterated(deviceSupport, transliterator));
                 break;
             case ACTION_SETCANNEDMESSAGES:
                 final int type = intentCopy.getIntExtra(EXTRA_CANNEDMESSAGES_TYPE, -1);
@@ -252,7 +250,7 @@ public class DeviceActionHandler {
                 musicSpec.setDuration(intentCopy.getIntExtra(EXTRA_MUSIC_DURATION, 0));
                 musicSpec.setTrackCount(intentCopy.getIntExtra(EXTRA_MUSIC_TRACKCOUNT, 0));
                 musicSpec.setTrackNr(intentCopy.getIntExtra(EXTRA_MUSIC_TRACKNR, 0));
-                deviceSupport.onSetMusicInfo(musicSpec.transliterated(deviceSupport, device.getDeviceCoordinator(), device, transliterator));
+                deviceSupport.onSetMusicInfo(musicSpec.transliterated(deviceSupport, transliterator));
                 break;
             case ACTION_SET_PHONE_VOLUME:
                 final float phoneVolume = intentCopy.getFloatExtra(EXTRA_PHONE_VOLUME, 0);

@@ -17,12 +17,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
-import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
-import nodomain.freeyourgadget.gadgetbridge.util.sanitizeText
 
 data class MusicSpec(
     var artist: String? = null,
@@ -37,20 +34,12 @@ data class MusicSpec(
 
     override fun transliterated(
         deviceSupport: DeviceSupport,
-        deviceCoordinator: DeviceCoordinator,
-        device: GBDevice,
         transliterator: Transliterator?
-    ): MusicSpec {
-        fun transform(text: String?): String? {
-            val sanitized = sanitizeText(deviceSupport, deviceCoordinator, device, text)
-            return transliterator?.let { sanitized?.let(it::transliterate) } ?: sanitized
-        }
-        return copy(
-            artist = transform(artist),
-            album = transform(album),
-            track = transform(track)
+    ): MusicSpec = copy(
+            artist = transform(artist, deviceSupport, transliterator),
+            album = transform(album, deviceSupport, transliterator),
+            track = transform(track, deviceSupport, transliterator)
         )
-    }
 
     override fun withRtlFix(): MusicSpec {
         if (!RtlUtils.rtlSupport()) return this

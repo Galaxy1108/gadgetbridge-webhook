@@ -17,12 +17,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
-import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
-import nodomain.freeyourgadget.gadgetbridge.util.sanitizeText
 
 data class CalendarEventSpec @JvmOverloads constructor(
     var type: Byte = TYPE_UNKNOWN,
@@ -43,21 +40,13 @@ data class CalendarEventSpec @JvmOverloads constructor(
 ) : DeviceTextAdaptable<CalendarEventSpec> {
     override fun transliterated(
         deviceSupport: DeviceSupport,
-        deviceCoordinator: DeviceCoordinator,
-        device: GBDevice,
         transliterator: Transliterator?
-    ): CalendarEventSpec {
-        fun transform(text: String?): String? {
-            val sanitized = sanitizeText(deviceSupport, deviceCoordinator, device, text)
-            return transliterator?.let { sanitized?.let(it::transliterate) } ?: sanitized
-        }
-        return copy(
-            title = transform(title),
-            description = transform(description),
-            location = transform(location),
-            calName = transform(calName)
+    ): CalendarEventSpec = copy(
+            title = transform(title, deviceSupport, transliterator),
+            description = transform(description, deviceSupport, transliterator),
+            location = transform(location, deviceSupport, transliterator),
+            calName = transform(calName, deviceSupport, transliterator)
         )
-    }
 
     override fun withRtlFix(): CalendarEventSpec {
         if (!RtlUtils.rtlSupport()) return this

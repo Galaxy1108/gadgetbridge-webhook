@@ -17,12 +17,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
-import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
-import nodomain.freeyourgadget.gadgetbridge.util.sanitizeText
 
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
@@ -64,22 +61,14 @@ data class NotificationSpec @JvmOverloads constructor(
 
     override fun transliterated(
         deviceSupport: DeviceSupport,
-        deviceCoordinator: DeviceCoordinator,
-        device: GBDevice,
         transliterator: Transliterator?
-    ): NotificationSpec {
-        fun transform(text: String?): String? {
-            val sanitized = sanitizeText(deviceSupport, deviceCoordinator, device, text)
-            return transliterator?.let { sanitized?.let(it::transliterate) } ?: sanitized
-        }
-        return copy(
-            sender = transform(sender),
-            subject = transform(subject),
-            title = transform(title),
-            body = transform(body),
-            sourceName = transform(sourceName)
+    ): NotificationSpec = copy(
+            sender = transform(sender, deviceSupport, transliterator),
+            subject = transform(subject, deviceSupport, transliterator),
+            title = transform(title, deviceSupport, transliterator),
+            body = transform(body, deviceSupport, transliterator),
+            sourceName = transform(sourceName, deviceSupport, transliterator)
         )
-    }
 
     companion object {
         private val c = AtomicInteger((System.currentTimeMillis() / 1000).toInt())

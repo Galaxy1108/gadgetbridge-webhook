@@ -17,13 +17,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
-import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.util.GBToStringBuilder
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils
 import nodomain.freeyourgadget.gadgetbridge.util.language.Transliterator
-import nodomain.freeyourgadget.gadgetbridge.util.sanitizeText
 
 data class CallSpec(
     var number: String? = null,
@@ -79,19 +76,11 @@ data class CallSpec(
 
     override fun transliterated(
         deviceSupport: DeviceSupport,
-        deviceCoordinator: DeviceCoordinator,
-        device: GBDevice,
         transliterator: Transliterator?
-    ): CallSpec {
-        fun transform(text: String?): String? {
-            val sanitized = sanitizeText(deviceSupport, deviceCoordinator, device, text)
-            return transliterator?.let { sanitized?.let(it::transliterate) } ?: sanitized
-        }
-        return copy(
-            name = transform(name),
-            sourceName = transform(sourceName)
+    ): CallSpec = copy(
+            name = transform(name, deviceSupport, transliterator),
+            sourceName = transform(sourceName, deviceSupport, transliterator)
         )
-    }
 
     override fun withRtlFix(): CallSpec {
         if (!RtlUtils.rtlSupport()) return this
