@@ -314,12 +314,12 @@ public class GBDeviceService implements DeviceService {
     @Override
     public void onSetMusicInfo(@NonNull MusicSpec musicSpec) {
         Intent intent = createIntent().setAction(ACTION_SETMUSICINFO)
-                .putExtra(EXTRA_MUSIC_ARTIST, musicSpec.artist)
-                .putExtra(EXTRA_MUSIC_ALBUM, musicSpec.album)
-                .putExtra(EXTRA_MUSIC_TRACK, musicSpec.track)
-                .putExtra(EXTRA_MUSIC_DURATION, musicSpec.duration)
-                .putExtra(EXTRA_MUSIC_TRACKCOUNT, musicSpec.trackCount)
-                .putExtra(EXTRA_MUSIC_TRACKNR, musicSpec.trackNr);
+                .putExtra(EXTRA_MUSIC_ARTIST, musicSpec.getArtist())
+                .putExtra(EXTRA_MUSIC_ALBUM, musicSpec.getAlbum())
+                .putExtra(EXTRA_MUSIC_TRACK, musicSpec.getTrack())
+                .putExtra(EXTRA_MUSIC_DURATION, musicSpec.getDuration())
+                .putExtra(EXTRA_MUSIC_TRACKCOUNT, musicSpec.getTrackCount())
+                .putExtra(EXTRA_MUSIC_TRACKNR, musicSpec.getTrackNr());
         invokeService(intent);
     }
 

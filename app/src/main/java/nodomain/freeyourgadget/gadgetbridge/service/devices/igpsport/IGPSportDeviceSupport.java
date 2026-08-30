@@ -755,14 +755,14 @@ public class IGPSportDeviceSupport extends AbstractBTLESingleDeviceSupport {
         LOG.debug("onSetMusicInfo: {}", musicSpec.toString());
 
         Media.track_message.Builder track_message = Media.track_message.newBuilder()
-                .setAlbum(musicSpec.album != null ? musicSpec.album : "")
-                .setArtist(musicSpec.artist != null ? musicSpec.artist : "")
-                .setTitle(musicSpec.track != null ? musicSpec.track : "")
-                .setTotalTime(musicSpec.duration);
+                .setAlbum(musicSpec.getAlbum() != null ? musicSpec.getAlbum() : "")
+                .setArtist(musicSpec.getArtist() != null ? musicSpec.getArtist() : "")
+                .setTitle(musicSpec.getTrack() != null ? musicSpec.getTrack() : "")
+                .setTotalTime(musicSpec.getDuration());
 
         Media.queue_message.Builder queue_message = Media.queue_message.newBuilder()
-                .setQueueCount(Math.max(0, musicSpec.trackCount))
-                .setQueueIndex(Math.max(0, musicSpec.trackNr));
+                .setQueueCount(Math.max(0, musicSpec.getTrackCount()))
+                .setQueueIndex(Math.max(0, musicSpec.getTrackNr()));
 
 
         Media.player_message.Builder player_message = Media.player_message.newBuilder();

@@ -1315,10 +1315,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         Map<MusicControlEntityUpdateMessage.MusicEntity, String> attributes = new HashMap<>();
 
-        attributes.put(MusicControlEntityUpdateMessage.TRACK.ARTIST, musicSpec.artist);
-        attributes.put(MusicControlEntityUpdateMessage.TRACK.ALBUM, musicSpec.album);
-        attributes.put(MusicControlEntityUpdateMessage.TRACK.TITLE, musicSpec.track);
-        attributes.put(MusicControlEntityUpdateMessage.TRACK.DURATION, String.valueOf(musicSpec.duration));
+        attributes.put(MusicControlEntityUpdateMessage.TRACK.ARTIST, musicSpec.getArtist());
+        attributes.put(MusicControlEntityUpdateMessage.TRACK.ALBUM, musicSpec.getAlbum());
+        attributes.put(MusicControlEntityUpdateMessage.TRACK.TITLE, musicSpec.getTrack());
+        attributes.put(MusicControlEntityUpdateMessage.TRACK.DURATION, String.valueOf(musicSpec.getDuration()));
 
         sendOutgoingMessage("set music info", new MusicControlEntityUpdateMessage(attributes));
 

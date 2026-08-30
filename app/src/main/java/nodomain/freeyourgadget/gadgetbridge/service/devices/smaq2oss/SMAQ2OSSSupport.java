@@ -219,9 +219,9 @@ public class SMAQ2OSSSupport extends AbstractBTLESingleDeviceSupport {
     public void onSetMusicInfo(MusicSpec musicSpec) {
         SMAQ2OSSProtos.MusicInfo.Builder musicInfo = SMAQ2OSSProtos.MusicInfo.newBuilder();
 
-        musicInfo.setArtist(truncateUTF8(musicSpec.artist,SMAQ2OSSConstants.MUSIC_ARTIST_MAX_LEN));
-        musicInfo.setAlbum(truncateUTF8(musicSpec.album,SMAQ2OSSConstants.MUSIC_ALBUM_MAX_LEN));
-        musicInfo.setTrack(truncateUTF8(musicSpec.track,SMAQ2OSSConstants.MUSIC_TRACK_MAX_LEN));
+        musicInfo.setArtist(truncateUTF8(musicSpec.getArtist(),SMAQ2OSSConstants.MUSIC_ARTIST_MAX_LEN));
+        musicInfo.setAlbum(truncateUTF8(musicSpec.getAlbum(),SMAQ2OSSConstants.MUSIC_ALBUM_MAX_LEN));
+        musicInfo.setTrack(truncateUTF8(musicSpec.getTrack(),SMAQ2OSSConstants.MUSIC_TRACK_MAX_LEN));
 
         try {
             TransactionBuilder builder;

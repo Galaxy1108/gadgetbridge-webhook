@@ -1437,9 +1437,9 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
         }
 
         if (musicSpec != null) {
-            artist = StringUtils.truncate(musicSpec.artist, 80);
-            album = StringUtils.truncate(musicSpec.album, 80);
-            track = StringUtils.truncate(musicSpec.track, 80);
+            artist = StringUtils.truncate(musicSpec.getArtist(), 80);
+            album = StringUtils.truncate(musicSpec.getAlbum(), 80);
+            track = StringUtils.truncate(musicSpec.getTrack(), 80);
 
             if (artist.getBytes().length > 0) {
                 length += artist.getBytes().length + 1;
@@ -1453,7 +1453,7 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
                 length += track.getBytes().length + 1;
                 flags |= MUSIC_FLAG_TRACK;
             }
-            if (musicSpec.duration != 0) {
+            if (musicSpec.getDuration() != 0) {
                 length += 2;
                 flags |= MUSIC_FLAG_DURATION;
             }
@@ -1491,8 +1491,8 @@ public abstract class HuamiSupport extends AbstractBTLESingleDeviceSupport
                 buf.put(track.getBytes());
                 buf.put((byte) 0);
             }
-            if (musicSpec.duration != 0) {
-                buf.putShort((short) musicSpec.duration);
+            if (musicSpec.getDuration() != 0) {
+                buf.putShort((short) musicSpec.getDuration());
             }
         }
 

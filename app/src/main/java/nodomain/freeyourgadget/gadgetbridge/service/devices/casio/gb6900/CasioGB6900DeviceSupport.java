@@ -547,14 +547,14 @@ public class CasioGB6900DeviceSupport extends CasioSupport {
         try {
             TransactionBuilder builder = performInitialized("sendMusicInfo");
             String info = "";
-            if (mBufferMusicSpec.track != null && mBufferMusicSpec.track.length() > 0) {
-                info += mBufferMusicSpec.track;
+            if (mBufferMusicSpec.getTrack() != null && mBufferMusicSpec.getTrack().length() > 0) {
+                info += mBufferMusicSpec.getTrack();
             }
-            if (mBufferMusicSpec.album != null && mBufferMusicSpec.album.length() > 0) {
-                info += mBufferMusicSpec.album;
+            if (mBufferMusicSpec.getAlbum() != null && mBufferMusicSpec.getAlbum().length() > 0) {
+                info += mBufferMusicSpec.getAlbum();
             }
-            if (mBufferMusicSpec.artist != null && mBufferMusicSpec.artist.length() > 0) {
-                info += mBufferMusicSpec.artist;
+            if (mBufferMusicSpec.getArtist() != null && mBufferMusicSpec.getArtist().length() > 0) {
+                info += mBufferMusicSpec.getArtist();
             }
             byte[] bInfo = info.getBytes(StandardCharsets.US_ASCII);
             int len = bInfo.length > 17 ? 17 : bInfo.length;

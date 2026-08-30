@@ -339,12 +339,12 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
         try {
             JSONObject o = new JSONObject();
             o.put("t", "musicinfo");
-            o.put("artist", musicSpec.artist);
-            o.put("album", musicSpec.album);
-            o.put("track", musicSpec.track);
-            o.put("dur", musicSpec.duration);
-            o.put("c", musicSpec.trackCount);
-            o.put("n", musicSpec.trackNr);
+            o.put("artist", musicSpec.getArtist());
+            o.put("album", musicSpec.getAlbum());
+            o.put("track", musicSpec.getTrack());
+            o.put("dur", musicSpec.getDuration());
+            o.put("c", musicSpec.getTrackCount());
+            o.put("n", musicSpec.getTrackNr());
             uartTxJSON("onSetMusicInfo", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());

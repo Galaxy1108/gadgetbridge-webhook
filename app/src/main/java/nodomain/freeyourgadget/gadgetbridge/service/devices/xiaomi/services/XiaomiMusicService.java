@@ -141,10 +141,10 @@ public class XiaomiMusicService extends AbstractXiaomiService {
             }
 
             musicInfo.setVolume(mediaManager.getPhoneVolume())
-                    .setTrack(musicSpec.track != null ? musicSpec.track : "")
-                    .setArtist(musicSpec.artist != null ? musicSpec.artist : "")
+                    .setTrack(musicSpec.getTrack() != null ? musicSpec.getTrack() : "")
+                    .setArtist(musicSpec.getArtist() != null ? musicSpec.getArtist() : "")
                     .setPosition(musicStateSpec.position)
-                    .setDuration(musicSpec.duration);
+                    .setDuration(musicSpec.getDuration());
         }
 
         final XiaomiProto.Music music = XiaomiProto.Music.newBuilder()

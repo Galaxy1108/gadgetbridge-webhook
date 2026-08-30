@@ -139,17 +139,17 @@ public class MediaManager {
 
         try {
             if (d.containsKey(MediaMetadata.METADATA_KEY_ARTIST))
-                musicSpec.artist = d.getString(MediaMetadata.METADATA_KEY_ARTIST);
+                musicSpec.setArtist(d.getString(MediaMetadata.METADATA_KEY_ARTIST));
             if (d.containsKey(MediaMetadata.METADATA_KEY_ALBUM))
-                musicSpec.album = d.getString(MediaMetadata.METADATA_KEY_ALBUM);
+                musicSpec.setAlbum(d.getString(MediaMetadata.METADATA_KEY_ALBUM));
             if (d.containsKey(MediaMetadata.METADATA_KEY_TITLE))
-                musicSpec.track = d.getString(MediaMetadata.METADATA_KEY_TITLE);
+                musicSpec.setTrack(d.getString(MediaMetadata.METADATA_KEY_TITLE));
             if (d.containsKey(MediaMetadata.METADATA_KEY_DURATION))
-                musicSpec.duration = (int) d.getLong(MediaMetadata.METADATA_KEY_DURATION) / 1000;
+                musicSpec.setDuration((int) d.getLong(MediaMetadata.METADATA_KEY_DURATION) / 1000);
             if (d.containsKey(MediaMetadata.METADATA_KEY_NUM_TRACKS))
-                musicSpec.trackCount = (int) d.getLong(MediaMetadata.METADATA_KEY_NUM_TRACKS);
+                musicSpec.setTrackCount((int) d.getLong(MediaMetadata.METADATA_KEY_NUM_TRACKS));
             if (d.containsKey(MediaMetadata.METADATA_KEY_TRACK_NUMBER))
-                musicSpec.trackNr = (int) d.getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER);
+                musicSpec.setTrackNr((int) d.getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER));
         } catch (final Exception e) {
             LOG.error("Failed to extract music spec", e);
         }

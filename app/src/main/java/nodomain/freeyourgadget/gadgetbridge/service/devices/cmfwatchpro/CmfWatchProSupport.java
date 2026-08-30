@@ -744,8 +744,8 @@ public class CmfWatchProSupport extends AbstractBTLESingleDeviceSupport implemen
         final byte[] artist;
 
         if (musicSpec != null) {
-            track = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncateToBytes(musicSpec.track, 63);
-            artist = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncateToBytes(musicSpec.artist, 63);
+            track = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncateToBytes(musicSpec.getTrack(), 63);
+            artist = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncateToBytes(musicSpec.getArtist(), 63);
         } else {
             track = new byte[0];
             artist = new byte[0];

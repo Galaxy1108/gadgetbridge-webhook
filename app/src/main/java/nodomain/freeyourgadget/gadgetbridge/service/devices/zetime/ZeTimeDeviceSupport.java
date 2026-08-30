@@ -348,7 +348,7 @@ public class ZeTimeDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetMusicInfo(MusicSpec musicSpec) {
-        songtitle = musicSpec.track;
+        songtitle = musicSpec.getTrack();
         if (musicState != -1) {
             music = new byte[songtitle.getBytes(StandardCharsets.UTF_8).length + 7]; // 7 bytes for status and overhead
             music[0] = ZeTimeConstants.CMD_PREAMBLE;

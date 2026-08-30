@@ -189,8 +189,8 @@ public class AsteroidOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
         // Send title
         {
             byte[] track_bytes;
-            if (musicSpec.track != null)
-                track_bytes = musicSpec.track.getBytes(StandardCharsets.UTF_8);
+            if (musicSpec.getTrack() != null)
+                track_bytes = musicSpec.getTrack().getBytes(StandardCharsets.UTF_8);
             else
                 track_bytes = "\"\"".getBytes(StandardCharsets.UTF_8);
             safeWriteToCharacteristic(builder, AsteroidOSConstants.MEDIA_TITLE_CHAR, track_bytes);
@@ -198,8 +198,8 @@ public class AsteroidOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
         // Send album
         {
             byte[] album_bytes;
-            if (musicSpec.album != null)
-                album_bytes = musicSpec.album.getBytes(StandardCharsets.UTF_8);
+            if (musicSpec.getAlbum() != null)
+                album_bytes = musicSpec.getAlbum().getBytes(StandardCharsets.UTF_8);
             else
                 album_bytes = "\"\"".getBytes(StandardCharsets.UTF_8);
             safeWriteToCharacteristic(builder, AsteroidOSConstants.MEDIA_ALBUM_CHAR, album_bytes);
@@ -207,8 +207,8 @@ public class AsteroidOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
         // Send artist
         {
             byte[] artist_bytes;
-            if (musicSpec.artist != null)
-                artist_bytes = musicSpec.artist.getBytes(StandardCharsets.UTF_8);
+            if (musicSpec.getArtist() != null)
+                artist_bytes = musicSpec.getArtist().getBytes(StandardCharsets.UTF_8);
             else
                 artist_bytes = "\"\"".getBytes(StandardCharsets.UTF_8);
             safeWriteToCharacteristic(builder, AsteroidOSConstants.MEDIA_ARTIST_CHAR, artist_bytes);

@@ -591,27 +591,27 @@ public class PineTimeJFSupport extends AbstractBTLESingleDeviceSupport implement
         try {
             TransactionBuilder builder = performInitialized("send playback info");
 
-            if (musicSpec.album != null && !musicSpec.album.equals(lastAlbum)) {
-                lastAlbum = musicSpec.album;
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_ALBUM, musicSpec.album.getBytes());
+            if (musicSpec.getAlbum() != null && !musicSpec.getAlbum().equals(lastAlbum)) {
+                lastAlbum = musicSpec.getAlbum();
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_ALBUM, musicSpec.getAlbum().getBytes());
             }
-            if (musicSpec.track != null && !musicSpec.track.equals(lastTrack)) {
-                lastTrack = musicSpec.track;
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_TRACK, musicSpec.track.getBytes());
+            if (musicSpec.getTrack() != null && !musicSpec.getTrack().equals(lastTrack)) {
+                lastTrack = musicSpec.getTrack();
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_TRACK, musicSpec.getTrack().getBytes());
             }
-            if (musicSpec.artist != null && !musicSpec.artist.equals(lastArtist)) {
-                lastArtist = musicSpec.artist;
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_ARTIST, musicSpec.artist.getBytes());
+            if (musicSpec.getArtist() != null && !musicSpec.getArtist().equals(lastArtist)) {
+                lastArtist = musicSpec.getArtist();
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_ARTIST, musicSpec.getArtist().getBytes());
             }
 
-            if (musicSpec.duration != MusicSpec.MUSIC_UNKNOWN) {
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_LENGTH_TOTAL, intToBytes(musicSpec.duration));
+            if (musicSpec.getDuration() != MusicSpec.MUSIC_UNKNOWN) {
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_LENGTH_TOTAL, intToBytes(musicSpec.getDuration()));
             }
-            if (musicSpec.trackNr != MusicSpec.MUSIC_UNKNOWN) {
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_TRACK_NUMBER, intToBytes(musicSpec.trackNr));
+            if (musicSpec.getTrackNr() != MusicSpec.MUSIC_UNKNOWN) {
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_TRACK_NUMBER, intToBytes(musicSpec.getTrackNr()));
             }
-            if (musicSpec.trackCount != MusicSpec.MUSIC_UNKNOWN) {
-                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_TRACK_TOTAL, intToBytes(musicSpec.trackCount));
+            if (musicSpec.getTrackCount() != MusicSpec.MUSIC_UNKNOWN) {
+                safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_MUSIC_TRACK_TOTAL, intToBytes(musicSpec.getTrackCount()));
             }
 
             builder.queue();

@@ -408,17 +408,17 @@ public class SonyWena3DeviceSupport extends AbstractBTLESingleDeviceSupport {
     @Override
     public void onSetMusicInfo(MusicSpec musicSpec) {
         StringBuilder sb = new StringBuilder();
-        boolean hasTrackName = musicSpec.track != null && musicSpec.track.trim().length() > 0;
-        boolean hasArtistName = musicSpec.artist != null && musicSpec.artist.trim().length() > 0;
+        boolean hasTrackName = musicSpec.getTrack() != null && musicSpec.getTrack().trim().length() > 0;
+        boolean hasArtistName = musicSpec.getArtist() != null && musicSpec.getArtist().trim().length() > 0;
 
         if(hasTrackName) {
-            sb.append(musicSpec.track.trim());
+            sb.append(musicSpec.getTrack().trim());
         }
         if(hasArtistName && hasTrackName) {
             sb.append(" / ");
         }
         if(hasArtistName) {
-            sb.append(musicSpec.artist.trim());
+            sb.append(musicSpec.getArtist().trim());
         }
 
         lastMusicInfo = sb.toString();

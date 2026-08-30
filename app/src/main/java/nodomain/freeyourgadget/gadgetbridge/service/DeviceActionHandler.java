@@ -258,12 +258,12 @@ public class DeviceActionHandler {
                 break;
             case ACTION_SETMUSICINFO:
                 final MusicSpec musicSpec = new MusicSpec();
-                musicSpec.artist = intentCopy.getStringExtra(EXTRA_MUSIC_ARTIST);
-                musicSpec.album = intentCopy.getStringExtra(EXTRA_MUSIC_ALBUM);
-                musicSpec.track = intentCopy.getStringExtra(EXTRA_MUSIC_TRACK);
-                musicSpec.duration = intentCopy.getIntExtra(EXTRA_MUSIC_DURATION, 0);
-                musicSpec.trackCount = intentCopy.getIntExtra(EXTRA_MUSIC_TRACKCOUNT, 0);
-                musicSpec.trackNr = intentCopy.getIntExtra(EXTRA_MUSIC_TRACKNR, 0);
+                musicSpec.setArtist(intentCopy.getStringExtra(EXTRA_MUSIC_ARTIST));
+                musicSpec.setAlbum(intentCopy.getStringExtra(EXTRA_MUSIC_ALBUM));
+                musicSpec.setTrack(intentCopy.getStringExtra(EXTRA_MUSIC_TRACK));
+                musicSpec.setDuration(intentCopy.getIntExtra(EXTRA_MUSIC_DURATION, 0));
+                musicSpec.setTrackCount(intentCopy.getIntExtra(EXTRA_MUSIC_TRACKCOUNT, 0));
+                musicSpec.setTrackNr(intentCopy.getIntExtra(EXTRA_MUSIC_TRACKNR, 0));
                 deviceSupport.onSetMusicInfo(musicSpec);
                 break;
             case ACTION_SET_PHONE_VOLUME:

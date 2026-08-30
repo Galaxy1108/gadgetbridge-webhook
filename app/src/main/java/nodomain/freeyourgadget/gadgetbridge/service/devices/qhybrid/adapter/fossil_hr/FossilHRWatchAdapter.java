@@ -1219,22 +1219,22 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
 
     @Override
     public void setMusicInfo(MusicSpec musicSpec) {
-        musicSpec = new MusicSpec(musicSpec);
-        if(musicSpec.album == null) musicSpec.album = "";
-        if(musicSpec.artist == null) musicSpec.artist = "";
-        if(musicSpec.track == null) musicSpec.track = "";
+        musicSpec = musicSpec.copyOf();
+        if(musicSpec.getAlbum() == null) musicSpec.setAlbum("");
+        if(musicSpec.getArtist() == null) musicSpec.setArtist("");
+        if(musicSpec.getTrack() == null) musicSpec.setTrack("");
         if (
                 currentSpec != null
-                        && currentSpec.album.equals(musicSpec.album)
-                        && currentSpec.artist.equals(musicSpec.artist)
-                        && currentSpec.track.equals(musicSpec.track)
+                        && currentSpec.getAlbum().equals(musicSpec.getAlbum())
+                        && currentSpec.getArtist().equals(musicSpec.getArtist())
+                        && currentSpec.getTrack().equals(musicSpec.getTrack())
         ) return;
         currentSpec = musicSpec;
         try {
             queueWrite(new MusicInfoSetRequest(
-                    musicSpec.artist,
-                    musicSpec.album,
-                    musicSpec.track,
+                    musicSpec.getArtist(),
+                    musicSpec.getAlbum(),
+                    musicSpec.getTrack(),
                     this
             ));
         } catch (BufferOverflowException e) {

@@ -1150,11 +1150,11 @@ public class Ak102DeviceSupport extends AbstractBTLESingleDeviceSupport {
         if (!supportsWatchFeature(Ak102Constants.FEATURE_MUSIC_INFO)) {
             return;
         }
-        final byte[] title = StringUtils.ensureNotNull(musicSpec.track).getBytes(StandardCharsets.UTF_8);
-        final byte[] artist = StringUtils.ensureNotNull(musicSpec.artist).getBytes(StandardCharsets.UTF_8);
+        final byte[] title = StringUtils.ensureNotNull(musicSpec.getTrack()).getBytes(StandardCharsets.UTF_8);
+        final byte[] artist = StringUtils.ensureNotNull(musicSpec.getArtist()).getBytes(StandardCharsets.UTF_8);
         final int titleLength = Math.min(title.length, 127);
         final int artistLength = Math.min(artist.length, 96);
-        final int duration = Math.max(musicSpec.duration, 0);
+        final int duration = Math.max(musicSpec.getDuration(), 0);
 
         final byte[] payload = new byte[6 + titleLength + artistLength];
         payload[0] = (byte) titleLength;

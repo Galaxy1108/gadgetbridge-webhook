@@ -167,7 +167,7 @@ public abstract class AbstractSerialDeviceSupportV2<T extends GBDeviceProtocol> 
 
     @Override
     public void onSetMusicInfo(final MusicSpec musicSpec) {
-        byte[] bytes = mDeviceProtocol.encodeSetMusicInfo(musicSpec.artist, musicSpec.album, musicSpec.track, musicSpec.duration, musicSpec.trackCount, musicSpec.trackNr);
+        byte[] bytes = mDeviceProtocol.encodeSetMusicInfo(musicSpec.getArtist(), musicSpec.getAlbum(), musicSpec.getTrack(), musicSpec.getDuration(), musicSpec.getTrackCount(), musicSpec.getTrackNr());
         sendToDevice(bytes);
     }
 
