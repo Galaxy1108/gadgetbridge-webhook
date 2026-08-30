@@ -16,10 +16,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class CannedMessagesSpec @JvmOverloads constructor(
     var type: Int = TYPE_GENERIC,
     var cannedMessages: Array<String>? = null
-) {
+) : Parcelable {
     companion object {
         const val TYPE_GENERIC: Int = 0
         const val TYPE_REJECTEDCALLS: Int = 1

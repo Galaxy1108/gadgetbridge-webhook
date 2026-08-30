@@ -147,13 +147,9 @@ public class DeviceActionHandler {
                 }
                 break;
             case ACTION_SETCANNEDMESSAGES:
-                final int type = intentCopy.getIntExtra(EXTRA_CANNEDMESSAGES_TYPE, -1);
-                final String[] cannedMessages = intentCopy.getStringArrayExtra(EXTRA_CANNEDMESSAGES);
-
-                final CannedMessagesSpec cannedMessagesSpec = new CannedMessagesSpec();
-                cannedMessagesSpec.setType(type);
-                cannedMessagesSpec.setCannedMessages(cannedMessages);
-                deviceSupport.onSetCannedMessages(cannedMessagesSpec);
+                final CannedMessagesSpec cannedMessagesSpec = intentCopy.getParcelableExtra(EXTRA_CALL_SPEC);
+                if(cannedMessagesSpec != null)
+                    deviceSupport.onSetCannedMessages(cannedMessagesSpec);
                 break;
             case ACTION_SETTIME:
                 deviceSupport.onSetTime();
