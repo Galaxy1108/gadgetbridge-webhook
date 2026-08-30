@@ -17,7 +17,7 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin
 
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.deviceevents.FileDownloadedDeviceEvent
 import nodomain.freeyourgadget.gadgetbridge.util.protobuf.buildWith
 import org.slf4j.LoggerFactory
@@ -141,7 +141,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         if (cursorId != null) {
             deviceSupport.sendProtobufRequest(
                 "continue file list",
-                GdiSmartProto.Smart.newBuilder().setFileSyncService(requestFileList()).build()
+                Smart.newBuilder().setFileSyncService(requestFileList()).build()
             )
         }
 
