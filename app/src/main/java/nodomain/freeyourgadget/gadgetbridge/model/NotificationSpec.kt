@@ -48,10 +48,10 @@ data class NotificationSpec @JvmOverloads constructor(
     var iconPackageId: String? = null,
     var picturePath: String? = null,
     var dndSuppressed: Int = 0
-) {
+) : DeviceTextAdaptable<NotificationSpec> {
     val id: Int = if (requestedId != -1) requestedId else c.incrementAndGet()
 
-    fun withRtlFix(): NotificationSpec {
+    override fun withRtlFix(): NotificationSpec {
         if (!RtlUtils.rtlSupport()) return this
         return copy(
             sender = sender?.let(RtlUtils::fixRtl),
@@ -62,7 +62,7 @@ data class NotificationSpec @JvmOverloads constructor(
         )
     }
 
-    fun transliterated(
+    override fun transliterated(
         deviceSupport: DeviceSupport,
         deviceCoordinator: DeviceCoordinator,
         device: GBDevice,

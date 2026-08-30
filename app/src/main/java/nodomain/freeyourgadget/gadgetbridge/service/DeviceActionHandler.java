@@ -242,7 +242,7 @@ public class DeviceActionHandler {
                 callSpec.setCategory(intentCopy.getStringExtra(EXTRA_CALL_CATEGORY));
                 callSpec.setVoip(intentCopy.getBooleanExtra(EXTRA_CALL_ISVOIP, false));
                 callSpec.setDndSuppressed(intentCopy.getIntExtra(EXTRA_CALL_DNDSUPPRESSED, 0));
-                deviceSupport.onSetCallState(callSpec);
+                deviceSupport.onSetCallState(callSpec.transliterated(deviceSupport, device.getDeviceCoordinator(), device, transliterator));
                 break;
             case ACTION_SETCANNEDMESSAGES:
                 final int type = intentCopy.getIntExtra(EXTRA_CANNEDMESSAGES_TYPE, -1);

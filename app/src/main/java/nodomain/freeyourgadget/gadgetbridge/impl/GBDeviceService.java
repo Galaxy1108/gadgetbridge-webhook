@@ -72,8 +72,6 @@ public class GBDeviceService implements DeviceService {
     private final GBDevice mDevice;
     private final Class<? extends Service> mServiceClass;
     public static final String[] transliterationExtras = new String[]{
-            EXTRA_CALL_DISPLAYNAME,
-            EXTRA_CALL_SOURCENAME,
             EXTRA_MUSIC_ARTIST,
             EXTRA_MUSIC_ALBUM,
             EXTRA_MUSIC_TRACK,
@@ -236,18 +234,19 @@ public class GBDeviceService implements DeviceService {
         } else {
             callSpec.setName(coalesce(callSpec.getName(), getContactDisplayNameByNumber(callSpec.getNumber())));
         }
+        final CallSpec withRtlFix = callSpec.withRtlFix();
 
         Intent intent = createIntent().setAction(ACTION_CALLSTATE)
-                .putExtra(EXTRA_CALL_PHONENUMBER, callSpec.getNumber())
-                .putExtra(EXTRA_CALL_DISPLAYNAME, callSpec.getName())
-                .putExtra(EXTRA_CALL_SOURCENAME, callSpec.getSourceName())
-                .putExtra(EXTRA_CALL_SOURCEAPPID, callSpec.getSourceAppId())
-                .putExtra(EXTRA_CALL_KEY, callSpec.getKey())
-                .putExtra(EXTRA_CALL_CHANNELID, callSpec.getChannelId())
-                .putExtra(EXTRA_CALL_CATEGORY, callSpec.getCategory())
-                .putExtra(EXTRA_CALL_ISVOIP, callSpec.isVoip())
-                .putExtra(EXTRA_CALL_COMMAND, callSpec.getCommand())
-                .putExtra(EXTRA_CALL_DNDSUPPRESSED, callSpec.getDndSuppressed());
+                .putExtra(EXTRA_CALL_PHONENUMBER, withRtlFix.getNumber())
+                .putExtra(EXTRA_CALL_DISPLAYNAME, withRtlFix.getName())
+                .putExtra(EXTRA_CALL_SOURCENAME, withRtlFix.getSourceName())
+                .putExtra(EXTRA_CALL_SOURCEAPPID, withRtlFix.getSourceAppId())
+                .putExtra(EXTRA_CALL_KEY, withRtlFix.getKey())
+                .putExtra(EXTRA_CALL_CHANNELID, withRtlFix.getChannelId())
+                .putExtra(EXTRA_CALL_CATEGORY, withRtlFix.getCategory())
+                .putExtra(EXTRA_CALL_ISVOIP, withRtlFix.isVoip())
+                .putExtra(EXTRA_CALL_COMMAND, withRtlFix.getCommand())
+                .putExtra(EXTRA_CALL_DNDSUPPRESSED, withRtlFix.getDndSuppressed());
         invokeService(intent);
     }
 
