@@ -189,7 +189,7 @@ public class DeviceActionHandler {
                 calendarEventSpec.setColor(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_COLOR, 0));
                 calendarEventSpec.setStatus(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_STATUS, 0));
                 calendarEventSpec.setAttendingStatus(intentCopy.getIntExtra(EXTRA_CALENDAREVENT_ATTENDING_STATUS, 0));
-                deviceSupport.onAddCalendarEvent(calendarEventSpec);
+                deviceSupport.onAddCalendarEvent(calendarEventSpec.transliterated(deviceSupport, device.getDeviceCoordinator(), device, transliterator));
                 break;
             }
             case ACTION_DELETE_CALENDAREVENT: {

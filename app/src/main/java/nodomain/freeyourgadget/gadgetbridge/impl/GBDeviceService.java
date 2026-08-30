@@ -72,10 +72,6 @@ public class GBDeviceService implements DeviceService {
     private final GBDevice mDevice;
     private final Class<? extends Service> mServiceClass;
     public static final String[] transliterationExtras = new String[]{
-            EXTRA_CALENDAREVENT_TITLE,
-            EXTRA_CALENDAREVENT_DESCRIPTION,
-            EXTRA_CALENDAREVENT_LOCATION,
-            EXTRA_CALENDAREVENT_CALNAME,
     };
     private final Executor mainExecutor = ContextCompat.getMainExecutor(GBApplication.getContext());
 
@@ -495,22 +491,24 @@ public class GBDeviceService implements DeviceService {
 
     @Override
     public void onAddCalendarEvent(@NonNull CalendarEventSpec calendarEventSpec) {
+        final CalendarEventSpec withRtlFix = calendarEventSpec.withRtlFix();
+
         Intent intent = createIntent().setAction(ACTION_ADD_CALENDAREVENT)
-                .putExtra(EXTRA_CALENDAREVENT_ID, calendarEventSpec.getId())
-                .putExtra(EXTRA_CALENDAREVENT_EVENT_ID, calendarEventSpec.getEventId())
-                .putExtra(EXTRA_CALENDAREVENT_TYPE, calendarEventSpec.getType())
-                .putExtra(EXTRA_CALENDAREVENT_TIMESTAMP, calendarEventSpec.getTimestamp())
-                .putExtra(EXTRA_CALENDAREVENT_DURATION, calendarEventSpec.getDurationInSeconds())
-                .putExtra(EXTRA_CALENDAREVENT_ALLDAY, calendarEventSpec.getAllDay())
-                .putExtra(EXTRA_CALENDAREVENT_REMINDERS, calendarEventSpec.getReminders())
-                .putExtra(EXTRA_CALENDAREVENT_TITLE, calendarEventSpec.getTitle())
-                .putExtra(EXTRA_CALENDAREVENT_DESCRIPTION, calendarEventSpec.getDescription())
-                .putExtra(EXTRA_CALENDAREVENT_CALNAME, calendarEventSpec.getCalName())
-                .putExtra(EXTRA_CALENDAREVENT_CALENDAR_COLOR, calendarEventSpec.getCalendarColor())
-                .putExtra(EXTRA_CALENDAREVENT_COLOR, calendarEventSpec.getColor())
-                .putExtra(EXTRA_CALENDAREVENT_LOCATION, calendarEventSpec.getLocation())
-                .putExtra(EXTRA_CALENDAREVENT_STATUS, calendarEventSpec.getLocation())
-                .putExtra(EXTRA_CALENDAREVENT_ATTENDING_STATUS, calendarEventSpec.getLocation());
+                .putExtra(EXTRA_CALENDAREVENT_ID, withRtlFix.getId())
+                .putExtra(EXTRA_CALENDAREVENT_EVENT_ID, withRtlFix.getEventId())
+                .putExtra(EXTRA_CALENDAREVENT_TYPE, withRtlFix.getType())
+                .putExtra(EXTRA_CALENDAREVENT_TIMESTAMP, withRtlFix.getTimestamp())
+                .putExtra(EXTRA_CALENDAREVENT_DURATION, withRtlFix.getDurationInSeconds())
+                .putExtra(EXTRA_CALENDAREVENT_ALLDAY, withRtlFix.getAllDay())
+                .putExtra(EXTRA_CALENDAREVENT_REMINDERS, withRtlFix.getReminders())
+                .putExtra(EXTRA_CALENDAREVENT_TITLE, withRtlFix.getTitle())
+                .putExtra(EXTRA_CALENDAREVENT_DESCRIPTION, withRtlFix.getDescription())
+                .putExtra(EXTRA_CALENDAREVENT_CALNAME, withRtlFix.getCalName())
+                .putExtra(EXTRA_CALENDAREVENT_CALENDAR_COLOR, withRtlFix.getCalendarColor())
+                .putExtra(EXTRA_CALENDAREVENT_COLOR, withRtlFix.getColor())
+                .putExtra(EXTRA_CALENDAREVENT_LOCATION, withRtlFix.getLocation())
+                .putExtra(EXTRA_CALENDAREVENT_STATUS, withRtlFix.getStatus())
+                .putExtra(EXTRA_CALENDAREVENT_ATTENDING_STATUS, withRtlFix.getAttendingStatus());
         invokeService(intent);
     }
 
