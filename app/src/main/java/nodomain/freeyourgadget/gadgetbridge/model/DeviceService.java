@@ -101,11 +101,7 @@ public interface DeviceService extends EventHandler {
     String EXTRA_CALL_SPEC = "call_spec";
     String EXTRA_CANNEDMESSAGES_SPEC = "cannedmessages_spec";
     String EXTRA_MUSIC_SPEC = "music_spec";
-    String EXTRA_MUSIC_STATE = "music_state";
-    String EXTRA_MUSIC_SHUFFLE = "music_shuffle";
-    String EXTRA_MUSIC_REPEAT = "music_repeat";
-    String EXTRA_MUSIC_POSITION = "music_position";
-    String EXTRA_MUSIC_RATE = "music_rate";
+    String EXTRA_MUSIC_STATE_SPEC = "music_state_spec";
     String EXTRA_PHONE_VOLUME = "phone_volume";
     String EXTRA_PHONE_RINGER_MODE = "ringer_mode";
     String EXTRA_NAVIGATION_INSTRUCTION = "navigation_instruction";

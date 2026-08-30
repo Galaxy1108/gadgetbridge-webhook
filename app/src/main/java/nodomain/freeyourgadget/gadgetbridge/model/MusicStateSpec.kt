@@ -17,6 +17,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class MusicStateSpec @JvmOverloads constructor(
     var state: Byte = STATE_UNKNOWN.toByte(),
     /**
@@ -29,7 +33,7 @@ data class MusicStateSpec @JvmOverloads constructor(
     var playRate: Int = STATE_UNKNOWN,
     var shuffle: Byte = STATE_UNKNOWN.toByte(),
     var repeat: Byte = STATE_UNKNOWN.toByte()
-) {
+) : Parcelable {
     constructor(old: MusicStateSpec) : this(
         state = old.state,
         position = old.position,
