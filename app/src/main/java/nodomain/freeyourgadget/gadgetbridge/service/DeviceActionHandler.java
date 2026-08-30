@@ -102,18 +102,6 @@ public class DeviceActionHandler {
         // Copy the incoming intent to make sure we don't modify it before it gets passed to other devices
         final Intent intentCopy = (Intent) intent.clone();
 
-        for (final String extra : GBDeviceService.transliterationExtras) {
-            if (intentCopy.hasExtra(extra)) {
-                // Ensure the text is sanitized (e.g. emoji converted to ascii) before applying the transliterators
-                // otherwise the emoji are removed before converting them
-                String sanitizedText = sanitizeText(deviceSupport, device.getDeviceCoordinator(), device, intentCopy.getStringExtra(extra));
-                if (transliterator != null) {
-                    sanitizedText = transliterator.transliterate(sanitizedText);
-                }
-                intentCopy.putExtra(extra, sanitizedText);
-            }
-        }
-
         switch (action) {
             case ACTION_REQUEST_DEVICEINFO:
                 device.sendDeviceUpdateIntent(context, GBDevice.DeviceUpdateSubject.NOTHING);

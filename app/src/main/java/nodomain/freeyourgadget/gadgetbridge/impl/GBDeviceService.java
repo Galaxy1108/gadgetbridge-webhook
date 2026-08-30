@@ -71,8 +71,6 @@ public class GBDeviceService implements DeviceService {
     protected final Context mContext;
     private final GBDevice mDevice;
     private final Class<? extends Service> mServiceClass;
-    public static final String[] transliterationExtras = new String[]{
-    };
     private final Executor mainExecutor = ContextCompat.getMainExecutor(GBApplication.getContext());
 
     private final ConflatingDispatcher<NavigationInfoSpec> navigationDispatcher =
@@ -105,14 +103,6 @@ public class GBDeviceService implements DeviceService {
     }
 
     protected void invokeService(@NonNull Intent intent) {
-
-        if (RtlUtils.rtlSupport()) {
-            for (String extra : transliterationExtras) {
-                if (intent.hasExtra(extra)) {
-                    intent.putExtra(extra, RtlUtils.fixRtl(intent.getStringExtra(extra)));
-                }
-            }
-        }
 
         if (mDevice != null) {
             intent.putExtra(GBDevice.EXTRA_DEVICE, mDevice);
