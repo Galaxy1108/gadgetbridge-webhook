@@ -87,7 +87,7 @@ public class WithingsSteelHRDeviceCoordinator extends AbstractBLEDeviceCoordinat
 
     @Override
     public ActivitySummaryParser getActivitySummaryParser(final GBDevice device, final Context context) {
-        return new WithingsActivitySummaryParser();
+        return new WithingsActivitySummaryParser(device);
     }
 
     @Override

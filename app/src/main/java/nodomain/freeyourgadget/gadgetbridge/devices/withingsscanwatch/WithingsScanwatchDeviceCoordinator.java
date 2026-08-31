@@ -38,7 +38,6 @@ import nodomain.freeyourgadget.gadgetbridge.devices.TimeSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr.WithingsSleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.model.RespiratoryRateSample;
@@ -47,7 +46,6 @@ import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.ServiceDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.activity.WithingsActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingsscanwatch.WithingsScanwatchDeviceSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.WithingsUUIDs;
 
 public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordinator {
 
@@ -62,12 +60,6 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
     @Override
     public Pattern getSupportedDeviceName() {
         return Pattern.compile("(?i)^ScanWatch(?! Light).*");
-    }
-
-    @Override
-    public boolean supports(@NonNull final GBDeviceCandidate candidate) {
-        return super.supports(candidate)
-                && !candidate.supportsService(WithingsUUIDs.SCANWATCH_LIGHT.WITHINGS_SERVICE_UUID);
     }
 
     @Override
@@ -118,19 +110,22 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
         return true;
     }
 
+    public boolean supportsEcgMeasurement(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    public boolean supportsRespiratoryScan(@NonNull final GBDevice device) {
+        return true;
+    }
+
     @Override
     public boolean supportsRespiratoryRate(@NonNull GBDevice device) {
         return false;
     }
 
     @Override
-    public boolean supportsSleepRespiratoryRate(@NonNull final GBDevice device) {
-        return false;
-    }
-
-    @Override
     public boolean supportsSleepBreathingQuality(@NonNull final GBDevice device) {
-        return true;
+        return supportsRespiratoryScan(device);
     }
 
     @Override
@@ -145,7 +140,7 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
 
     @Override
     public ActivitySummaryParser getActivitySummaryParser(final GBDevice device, final Context context) {
-        return new WithingsActivitySummaryParser();
+        return new WithingsActivitySummaryParser(device);
     }
 
     @Override
