@@ -265,6 +265,22 @@ data class SortableListSetting(
 ) : DeviceSetting()
 
 /**
+ * A time setting, backed by a custom DialogPreference (e.g. XTimePreference) that persists the
+ * value as a "HH:mm" string.
+ */
+data class TimeSetting(
+    override val key: String,
+    @StringRes val title: Int,
+    @StringRes val summary: Int = 0,
+    @DrawableRes val icon: Int = 0,
+    val defaultValue: String = "",
+    val dependency: String? = null,
+    override val visibleWhen: ((Prefs) -> Boolean)? = null,
+    override val connectedOnly: Boolean = true,
+    val onSharedPreferenceChanged: ((String) -> Unit)? = null,
+) : DeviceSetting()
+
+/**
  * A date setting, backed by a custom DialogPreference (e.g. XDatePreference) that persists the
  * value as a "yyyy-MM-dd" string.
  */
