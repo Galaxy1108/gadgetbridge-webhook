@@ -2,7 +2,8 @@ syntax = "proto2";
 
 package garmin_vivomovehr;
 
-option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService";
+option java_multiple_files = true;
 
 message SettingsService {
   optional ScreenDefinitionRequest definitionRequest = 1;
@@ -32,22 +33,12 @@ message ScreenDefinitionResponse {
 }
 
 message ScreenDefinition {
-  message Message6 {
-    optional uint32 unk1 = 1;
-    optional uint32 unk2 = 2;
-    optional Label label = 3;
-    optional uint32 unk4 = 4;
-    optional Target target = 5;
-    optional uint32 unk6 = 6;
-    optional uint32 unk7 = 7;
-    optional MenuMessage unk9 = 9;
-  }
   optional uint32 screenId = 1;
   optional uint32 unk2 = 2; // 0
   optional uint32 unk3 = 3; // 928002
   optional Label title = 4;
   repeated ScreenEntry entry = 5;
-  repeated Message6 unk6 = 6;
+  repeated MenuEntry menu_entry = 6;
 }
 
 message Label {
@@ -153,6 +144,7 @@ message ScreenStateRequest {
 
 message TargetOptions {
   repeated TargetOptionEntry option = 1;
+  repeated MenuEntry menu_entry = 2;
 }
 
 message TargetOptionEntry {
@@ -193,7 +185,7 @@ message EntryState {
     optional Label label2 = 2;
   }
   message Message8 {
-     optional uint32 unk1 = 1;
+    optional uint32 unk1 = 1;
   }
   message Message9 {
     optional Label label1 = 1;
@@ -217,6 +209,7 @@ message Summary {
   optional ValueList valueList = 2;
   optional ValueTimestamp valueTimestamp = 3;
   optional ValueTime valueTime = 4;
+  optional ValueFloat valueFloat = 5;
   optional ValueNumber valueNumber = 6;
   optional ValueDate valueDate = 8;
   optional ValueHeight valueHeight = 10;
@@ -311,8 +304,15 @@ message ChangeRequest {
 }
 
 message ChangeResponse {
+  message Message2 {
+    optional Label unk1 = 1;
+    optional Label unk2 = 2;
+    optional Label unk3 = 3;
+  }
   optional ResponseStatus status = 1;
+  optional Message2 unk2 = 2;
   optional ScreenState state = 3;
+  optional bool unk4 = 4;
   optional bool shouldReturn = 5;
 }
 
@@ -343,4 +343,15 @@ message MenuMessage {
   optional Label unk4 = 4;
   optional uint32 unk5 = 5;
   optional uint32 unk6 = 6;
+}
+
+message MenuEntry {
+  optional uint32 unk1 = 1;
+  optional uint32 unk2 = 2;
+  optional Label label = 3;
+  optional uint32 unk4 = 4;
+  optional Target target = 5;
+  optional uint32 unk6 = 6;
+  optional uint32 unk7 = 7;
+  optional MenuMessage menu_message = 9;
 }

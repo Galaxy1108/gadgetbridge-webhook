@@ -903,9 +903,9 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
                 WEATHER_CURRENT,
                 mapToGloryFitCondition(weather.currentConditionCode),
                 0x00,
-                (weather.currentTemp - 273).toByte(),
-                (weather.todayMaxTemp - 273).toByte(),
-                (weather.todayMinTemp - 273).toByte(),
+                encodeTemperature(weather.currentTemp),
+                encodeTemperature(weather.todayMaxTemp),
+                encodeTemperature(weather.todayMinTemp),
                 0x00,
                 0x01,
                 0x00,
@@ -930,8 +930,8 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
         weather.forecasts.take(4).forEach { forecast ->
             forecasts1[i++] = mapToGloryFitCondition(forecast.conditionCode)
             forecasts1[i++] = 0x00
-            forecasts1[i++] = (forecast.maxTemp - 273).toByte()
-            forecasts1[i++] = (forecast.minTemp - 273).toByte()
+            forecasts1[i++] = encodeTemperature(forecast.maxTemp)
+            forecasts1[i++] = encodeTemperature(forecast.minTemp)
         }
         builder.write(
             UUID_CHARACTERISTIC_GLORYFIT_DATA_WRITE,
@@ -945,8 +945,8 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
         weather.forecasts.drop(4).take(2).forEach { forecast ->
             forecasts2[i++] = mapToGloryFitCondition(forecast.conditionCode)
             forecasts2[i++] = 0x00
-            forecasts2[i++] = (forecast.maxTemp - 273).toByte()
-            forecasts2[i++] = (forecast.minTemp - 273).toByte()
+            forecasts2[i++] = encodeTemperature(forecast.maxTemp)
+            forecasts2[i++] = encodeTemperature(forecast.minTemp)
         }
         builder.write(
             UUID_CHARACTERISTIC_GLORYFIT_DATA_WRITE,
@@ -1526,5 +1526,10 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
         const val WEATHER_CONDITION_HAZE: Byte = 0x0b
         const val WEATHER_CONDITION_WINDY: Byte = 0x0c
         const val WEATHER_CONDITION_UNKNOWN: Byte = 0x0d
+
+        fun encodeTemperature(kelvin: Int): Byte {
+            val degC = kelvin - 273
+            return if (degC >= 0) degC.toByte() else (0x80 - degC).toByte()
+        }
     }
 }
