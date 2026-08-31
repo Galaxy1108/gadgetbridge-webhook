@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.activities.workouts.charts;
 
+import static nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutValueFormatter.getUnitString;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_BPM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_BREATHS_PER_MIN;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_CELSIUS;
@@ -810,14 +811,6 @@ public class DefaultWorkoutCharts {
             converted.add(new Entry(entry.getX(), (float) units.convert(quantity, entry.getY())));
         }
         return converted;
-    }
-
-    public static String getUnitString(final Context context, final String unit) {
-        final int resId = context.getResources().getIdentifier(unit, "string", context.getPackageName());
-        if (resId != 0) {
-            return context.getString(resId);
-        }
-        return unit;
     }
 
     public static LineDataSet createLineDataSet(final Context context,
