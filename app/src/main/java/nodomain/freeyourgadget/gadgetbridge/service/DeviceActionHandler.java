@@ -147,7 +147,7 @@ public class DeviceActionHandler {
                 }
                 break;
             case ACTION_SETCANNEDMESSAGES:
-                final CannedMessagesSpec cannedMessagesSpec = intentCopy.getParcelableExtra(EXTRA_CALL_SPEC);
+                final CannedMessagesSpec cannedMessagesSpec = intentCopy.getParcelableExtra(EXTRA_CANNEDMESSAGES_SPEC);
                 if(cannedMessagesSpec != null)
                     deviceSupport.onSetCannedMessages(cannedMessagesSpec);
                 break;
