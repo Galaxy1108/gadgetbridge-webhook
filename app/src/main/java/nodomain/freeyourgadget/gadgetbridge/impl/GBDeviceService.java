@@ -157,7 +157,7 @@ public class GBDeviceService implements DeviceService {
 
         NotificationSpec privacyCleared = notificationSpec.copyOf();
 
-        privacyCleared.withSender(coalesce(privacyCleared.getSender(), getContactDisplayNameByNumber(privacyCleared.getPhoneNumber())));
+        privacyCleared = privacyCleared.withSender(coalesce(privacyCleared.getSender(), getContactDisplayNameByNumber(privacyCleared.getPhoneNumber())));
 
         if (hideMessageDetails) {
             privacyCleared = privacyCleared.withMessageDetailsCleared();
