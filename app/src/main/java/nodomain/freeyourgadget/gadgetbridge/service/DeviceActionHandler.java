@@ -95,8 +95,6 @@ public class DeviceActionHandler {
                 final CalendarEventSpec calendarEventSpec = intentCopy.getParcelableExtra(EXTRA_CALENDAREVENT_SPEC);
                 if (calendarEventSpec != null) {
                     deviceSupport.onAddCalendarEvent(calendarEventSpec.transliterated(deviceSupport, transliterator));
-                } else {
-                    deviceSupport.onAddCalendarEvent(calendarEventSpec);
                 }
                 break;
             }
@@ -158,8 +156,6 @@ public class DeviceActionHandler {
                 final MusicSpec musicSpec = intentCopy.getParcelableExtra(EXTRA_MUSIC_SPEC);
                 if (musicSpec != null) {
                     deviceSupport.onSetMusicInfo(musicSpec.transliterated(deviceSupport, transliterator));
-                } else {
-                    deviceSupport.onSetMusicInfo(musicSpec);
                 }
                 break;
             case ACTION_SET_PHONE_VOLUME:
