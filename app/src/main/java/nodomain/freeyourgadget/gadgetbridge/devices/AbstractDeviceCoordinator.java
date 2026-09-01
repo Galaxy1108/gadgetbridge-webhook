@@ -118,6 +118,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs;
+import nodomain.freeyourgadget.gadgetbridge.widgets.DeviceWidgetsProvider;
 
 public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDeviceCoordinator.class);
@@ -796,6 +797,11 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     @Override
     public DeviceChartsProvider getChartsProvider() {
         return DefaultChartsProvider.INSTANCE;
+    }
+
+    @Override
+    public DeviceWidgetsProvider getWidgetsProvider() {
+        return DeviceWidgetsProvider.DEFAULT;
     }
 
     @Override

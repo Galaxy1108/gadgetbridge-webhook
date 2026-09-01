@@ -5301,66 +5301,6 @@
         <item>force_disabled</item>
     </string-array>
 
-    <string-array name="pref_dashboard_widgets_order">
-        <item>@string/pref_dashboard_widget_today_title</item>
-        <item>@string/pref_dashboard_widget_goals_chart_title</item>
-        <item>@string/steps</item>
-        <item>@string/distance</item>
-        <item>@string/active_time</item>
-        <item>@string/menuitem_sleep</item>
-        <item>@string/sleep_score</item>
-        <item>@string/body_energy</item>
-        <item>@string/menuitem_stress_simple</item>
-        <item>@string/menuitem_stress_segmented</item>
-        <item>@string/menuitem_stress_breakdown</item>
-        <item>@string/hrv</item>
-        <item>@string/blood_pressure</item>
-        <item>@string/menuitem_pai</item>
-        <item>@string/menuitem_vo2_max</item>
-        <item>@string/vo2max_running</item>
-        <item>@string/vo2max_cycling</item>
-        <item>@string/menuitem_calories_active_goal</item>
-        <item>@string/menuitem_calories_segmented</item>
-    </string-array>
-
-    <string-array name="pref_dashboard_widgets_order_values">
-        <item>today</item>
-        <item>goals</item>
-        <item>steps</item>
-        <item>distance</item>
-        <item>activetime</item>
-        <item>sleep</item>
-        <item>sleepscore</item>
-        <item>bodyenergy</item>
-        <item>stress_simple</item>
-        <item>stress_segmented</item>
-        <item>stress_breakdown</item>
-        <item>hrv</item>
-        <item>bloodpressure</item>
-        <item>pai</item>
-        <item>vo2max</item>
-        <item>vo2max_running</item>
-        <item>vo2max_cycling</item>
-        <item>calories_active</item>
-        <item>calories_segmented</item>
-    </string-array>
-
-    <string-array name="pref_dashboard_widgets_order_default">
-        <item>today</item>
-        <item>goals</item>
-        <item>steps</item>
-        <item>distance</item>
-        <item>activetime</item>
-        <item>sleep</item>
-        <item>bodyenergy</item>
-        <item>stress_segmented</item>
-        <item>hrv</item>
-        <item>bloodpressure</item>
-        <item>vo2max</item>
-        <item>calories_active</item>
-        <item>calories_segmented</item>
-    </string-array>
-
     <string-array name="huawei_find_headphones_names">
         <item>@string/off</item>
         <item>@string/left_earbud</item>

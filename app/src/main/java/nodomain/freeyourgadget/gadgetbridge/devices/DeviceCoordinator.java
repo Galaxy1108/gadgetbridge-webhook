@@ -79,6 +79,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.WorkoutLoadSample;
 import nodomain.freeyourgadget.gadgetbridge.model.heartratezones.HeartRateZonesSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.ServiceDeviceSupport;
+import nodomain.freeyourgadget.gadgetbridge.widgets.DeviceWidgetsProvider;
 
 /**
  * This interface is implemented at least once for every supported gadget device.
@@ -310,6 +311,14 @@ public interface DeviceCoordinator {
     DeviceChartsProvider getChartsProvider();
 
     /**
+     * Allows the coordinator to return device-specific dashboard widgets.
+     * <p/>
+     * Not to be confused with {@link #getWidgetManager(GBDevice)}, which manages a device's own
+     * on-watch widget screens.
+     */
+    DeviceWidgetsProvider getWidgetsProvider();
+
+    /**
      * Returns true if measurement and fetching of body temperature is supported by the device
      * (with this coordinator).
      */
@@ -448,7 +457,7 @@ public interface DeviceCoordinator {
      * Returns the sample provider for VO2 max values, for the device being supported.
      */
     @Nullable
-    TimeSampleProvider<? extends Vo2MaxSample> getVo2MaxSampleProvider(@NonNull final GBDevice device, @NonNull final DaoSession session);
+    Vo2MaxSampleProvider<? extends Vo2MaxSample> getVo2MaxSampleProvider(@NonNull final GBDevice device, @NonNull final DaoSession session);
 
     /**
      * Returns the stress ranges (relaxed, mild, moderate, high), so that stress can be categorized.
@@ -1004,6 +1013,9 @@ public interface DeviceCoordinator {
 
     /**
      * Gets the {@link WidgetManager} for this device. Must not be null if supportsWidgets is true.
+     * <p/>
+     * Not to be confused with {@link #getWidgetsProvider()}, which lets this coordinator
+     * declare its own dashboard widgets.
      */
     @Nullable
     WidgetManager getWidgetManager(@NonNull final GBDevice device);

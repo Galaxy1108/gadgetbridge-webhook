@@ -106,6 +106,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.BluetoothCompanyIdentif
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminSupport;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs;
+import nodomain.freeyourgadget.gadgetbridge.widgets.DeviceWidgetsProvider;
 
 public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     @Override
@@ -191,6 +192,11 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     @Override
     public DeviceChartsProvider getChartsProvider() {
         return new GarminChartsProvider();
+    }
+
+    @Override
+    public DeviceWidgetsProvider getWidgetsProvider() {
+        return GarminWidgetsProvider.INSTANCE;
     }
 
     @Nullable

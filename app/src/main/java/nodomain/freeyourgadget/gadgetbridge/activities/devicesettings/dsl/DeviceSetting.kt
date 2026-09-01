@@ -24,8 +24,8 @@ import android.widget.EditText
 import androidx.annotation.ArrayRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsHandler
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.SettingsRenderHost
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 
 /**
@@ -178,7 +178,7 @@ data class InfoSetting(
 ) : DeviceSetting()
 
 /**
- * A non-persistent action preference. [onClick] receives the [DeviceSpecificSettingsHandler] so
+ * A non-persistent action preference. [onClick] receives the [SettingsRenderHost] so
  * it can launch activities or invoke device-specific operations.
  */
 data class ActionSetting(
@@ -192,7 +192,24 @@ data class ActionSetting(
     @StringRes val confirmationMessage: Int = 0,
     override val visibleWhen: ((Prefs) -> Boolean)? = null,
     override val connectedOnly: Boolean = true,
-    val onClick: ((DeviceSpecificSettingsHandler) -> Boolean)? = null,
+    val onClick: ((SettingsRenderHost) -> Boolean)? = null,
+) : DeviceSetting()
+
+/**
+ * A multi-select list setting, equivalent to MultiSelectListPreference. Entry sources mirror
+ * [ListSetting]: exactly one of [entriesProvider] or [entries] should be provided.
+ */
+data class MultiSelectSetting(
+    override val key: String,
+    @StringRes val title: Int,
+    @StringRes val summary: Int = 0,
+    @DrawableRes val icon: Int = 0,
+    val entries: List<ListEntry> = emptyList(),
+    val entriesProvider: ((Prefs) -> List<ListEntry>)? = null,
+    val defaultValue: Set<String> = emptySet(),
+    val dependency: String? = null,
+    override val visibleWhen: ((Prefs) -> Boolean)? = null,
+    override val connectedOnly: Boolean = true,
 ) : DeviceSetting()
 
 /**
