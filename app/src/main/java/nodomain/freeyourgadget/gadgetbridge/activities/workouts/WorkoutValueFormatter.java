@@ -20,7 +20,10 @@ import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_EPOC_TIME;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_FOOT;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_FOOT_PER_HOUR;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_HOURS;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_JOULE;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_KG;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_KILOJOULE;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_KILOMETERS;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_KMPH;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_KNOTS;
@@ -35,9 +38,12 @@ import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MINUTES_PER_500_METERS;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MINUTES_PER_KM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MINUTES_PER_MILE;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_ML;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_ML_KG_MIN;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_INCH;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_NAUTICAL_MILES;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_PERCENTAGE;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_RAW_STRING;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_PER_100_METERS;
@@ -46,6 +52,12 @@ import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_PER_KM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_PER_M;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_SPORT;
+
+import android.content.Context;
+import android.content.res.Resources;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +74,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries;
 import nodomain.freeyourgadget.gadgetbridge.model.DistanceUnit;
 import nodomain.freeyourgadget.gadgetbridge.model.WeightUnit;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
+import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
 public class WorkoutValueFormatter {
     private static final Logger LOG = LoggerFactory.getLogger(WorkoutValueFormatter.class);
@@ -159,7 +172,7 @@ public class WorkoutValueFormatter {
                     Locale.getDefault(),
                     format,
                     (int) Math.floor(value), (int) Math.round(60 * (value - (int) Math.floor(value))),
-                    getStringResourceByName(unit)
+                    getUnitString(unit)
             );
         } else {
             String format = showUnit ? "%s %s" : "%s";
@@ -169,7 +182,7 @@ public class WorkoutValueFormatter {
                 case ActivitySummaryEntries.UNIT_BREATHS_PER_MIN -> String.valueOf(Math.round(value));
                 default -> df2.format(value);
             };
-            return String.format(format, formattedValue, getStringResourceByName(unit));
+            return String.format(format, formattedValue, getUnitString(unit));
         }
     }
 
@@ -315,10 +328,10 @@ public class WorkoutValueFormatter {
                 value = value / 60D;
                 unit = UNIT_MINUTES_PER_500_METERS;
                 break;
-            case ActivitySummaryEntries.UNIT_JOULE:
+            case UNIT_JOULE:
                 if (!fixedUnit && value > 10000) {
                     value = value / 1000D;
-                    unit = "unit_kilojoule";
+                    unit = UNIT_KILOJOULE;
                 }
                 break;
         }
@@ -326,13 +339,41 @@ public class WorkoutValueFormatter {
     }
 
     public String getStringResourceByName(String aString) {
+        return getStringResourceByName(GBApplication.getContext(), aString);
+    }
+
+    private static String getStringResourceByName(@NonNull final Context context, final String aString) {
         String packageName = BuildConfig.APPLICATION_ID;
-        int resId = GBApplication.getContext().getResources().getIdentifier(aString, "string", packageName);
+        int resId = context.getResources().getIdentifier(aString, "string", packageName);
         if (resId == 0) {
             //LOG.warn("SportsActivity " + "Missing string in strings:" + aString);
             return aString;
         } else {
-            return GBApplication.getContext().getString(resId);
+            return context.getString(resId);
         }
+    }
+
+    public static String getUnitString(@NonNull final Context context, @Nullable String unit) {
+        if (unit == null || context == null || unit.length() < 1) {
+            return unit;
+        }
+
+        // compatibility mappings
+        // removal would require updates to stored activity summaries
+        unit = switch (unit) {
+            case "%" -> UNIT_PERCENTAGE;
+            case "ml/kg/min" -> UNIT_ML_KG_MIN;
+            case "hours" -> UNIT_HOURS;
+            case "kg" -> UNIT_KG;
+            case "lb" -> UNIT_LB;
+            case "ml" -> UNIT_ML;
+            default -> unit;
+        };
+
+        return getStringResourceByName(context, unit);
+    }
+
+    public String getUnitString(@Nullable String unit) {
+        return getUnitString(GBApplication.getContext(), unit);
     }
 }

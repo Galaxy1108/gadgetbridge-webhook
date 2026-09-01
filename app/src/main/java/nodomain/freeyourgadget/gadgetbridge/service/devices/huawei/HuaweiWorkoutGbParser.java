@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei;
 
+import static nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutValueFormatter.getUnitString;
+
 import android.content.Context;
 import android.widget.Toast;
 
@@ -202,13 +204,13 @@ public class HuaweiWorkoutGbParser implements ActivitySummaryParser {
                 ActivitySummaryEntries.GROUP_SWIMMING,
                 new LineData(dataset),
                 null,
-                DefaultWorkoutCharts.getUnitString(context, ActivitySummaryEntries.UNIT_NONE)
+                getUnitString(context, ActivitySummaryEntries.UNIT_NONE)
         );
     }
 
     private static WorkoutChart createStrokeRateChart(final Context context,
                                                       final List<Entry> strokesDataPoints) {
-        final String label = String.format("%s (%s)", context.getString(R.string.stroke_rate), DefaultWorkoutCharts.getUnitString(context, ActivitySummaryEntries.UNIT_STROKES_PER_MINUTE));
+        final String label = String.format("%s (%s)", context.getString(R.string.stroke_rate), getUnitString(context, ActivitySummaryEntries.UNIT_STROKES_PER_MINUTE));
         final LineDataSet dataset = DefaultWorkoutCharts.createLineDataSet(context, strokesDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_stroke_rate));
         return new WorkoutChart(
                 "strokesRate",
@@ -216,13 +218,13 @@ public class HuaweiWorkoutGbParser implements ActivitySummaryParser {
                 ActivitySummaryEntries.GROUP_STROKES,
                 new LineData(dataset),
                 null,
-                DefaultWorkoutCharts.getUnitString(context, ActivitySummaryEntries.UNIT_STROKES_PER_MINUTE)
+                getUnitString(context, ActivitySummaryEntries.UNIT_STROKES_PER_MINUTE)
         );
     }
 
     private static WorkoutChart createFrequencyChart(final Context context,
                                                      final List<Entry> frequencyDataPoints) {
-        final String label = String.format("%s (%s)", context.getString(R.string.Speed), DefaultWorkoutCharts.getUnitString(context, ActivitySummaryEntries.UNIT_JUMPS_PER_MINUTE));
+        final String label = String.format("%s (%s)", context.getString(R.string.Speed), getUnitString(context, ActivitySummaryEntries.UNIT_JUMPS_PER_MINUTE));
         final LineDataSet dataset = DefaultWorkoutCharts.createLineDataSet(context, frequencyDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
         return new WorkoutChart(
                 "frequency",
@@ -230,7 +232,7 @@ public class HuaweiWorkoutGbParser implements ActivitySummaryParser {
                 ActivitySummaryEntries.GROUP_JUMPS,
                 new LineData(dataset),
                 null,
-                DefaultWorkoutCharts.getUnitString(context, ActivitySummaryEntries.UNIT_JUMPS_PER_MINUTE)
+                getUnitString(context, ActivitySummaryEntries.UNIT_JUMPS_PER_MINUTE)
         );
     }
 
@@ -697,7 +699,7 @@ public class HuaweiWorkoutGbParser implements ActivitySummaryParser {
 
     private static WorkoutChart createRecoveryHeartRateChart(final Context context,
                                                              final List<Entry> heartRateDataPoints) {
-        final String label = String.format("%s(%s)", context.getString(R.string.recovery_heart_rate), DefaultWorkoutCharts.getUnitString(context, ActivitySummaryEntries.UNIT_BPM));
+        final String label = String.format("%s(%s)", context.getString(R.string.recovery_heart_rate), getUnitString(context, ActivitySummaryEntries.UNIT_BPM));
         final LineDataSet dataset = DefaultWorkoutCharts.createLineDataSet(context, heartRateDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_heart_rate));
         return new WorkoutChart(
                 "recovery_heart_rate",
@@ -705,7 +707,7 @@ public class HuaweiWorkoutGbParser implements ActivitySummaryParser {
                 ActivitySummaryEntries.GROUP_RECOVERY_HEART_RATE,
                 new LineData(dataset),
                 null,
-                DefaultWorkoutCharts.getUnitString(context, ActivitySummaryEntries.UNIT_BPM)
+                getUnitString(context, ActivitySummaryEntries.UNIT_BPM)
         );
     }
 
