@@ -54,7 +54,6 @@ import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_SPORT;
 
 import android.content.Context;
-import android.content.res.Resources;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -74,7 +73,6 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries;
 import nodomain.freeyourgadget.gadgetbridge.model.DistanceUnit;
 import nodomain.freeyourgadget.gadgetbridge.model.WeightUnit;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
-import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
 public class WorkoutValueFormatter {
     private static final Logger LOG = LoggerFactory.getLogger(WorkoutValueFormatter.class);
@@ -161,7 +159,7 @@ public class WorkoutValueFormatter {
         if (unit.equals(UNIT_SECONDS) && !show_raw_data && showUnit) { //rather than plain seconds, show formatted duration
             return DateTimeUtils.formatDurationHoursMinutes((long) value, TimeUnit.SECONDS);
         } else if (unit.equals(UNIT_SECONDS_SPORT) && !show_raw_data && showUnit) {
-            return DateTimeUtils.formatSportsDuration(Math.round(1000L * (double) value), TimeUnit.MILLISECONDS);
+            return DateTimeUtils.formatSportsDuration(Math.round(1000L * value), TimeUnit.MILLISECONDS);
         } else if (UNIT_EPOC_TIME.equals(unit) && !show_raw_data) {
             long epoc = ((Number) rawValue).longValue();
             return DateTimeUtils.formatLocalTime(epoc * 1000L);
@@ -354,7 +352,7 @@ public class WorkoutValueFormatter {
     }
 
     public static String getUnitString(@NonNull final Context context, @Nullable String unit) {
-        if (unit == null || context == null || unit.length() < 1) {
+        if (unit == null || unit.isEmpty()) {
             return unit;
         }
 

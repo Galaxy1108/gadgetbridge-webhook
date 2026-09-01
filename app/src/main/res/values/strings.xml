@@ -3145,6 +3145,7 @@
     <string name="minutes_km">min/km</string>
     <string name="spm">steps/min</string>
     <string name="bpm">bpm</string>
+    <string name="unit_millimetre_of_mercury">mmHg</string>
     <string name="km">km</string>
     <string name="mi">mi</string>
     <string name="degrees">degrees</string>
