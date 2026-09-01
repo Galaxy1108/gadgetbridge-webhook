@@ -6,8 +6,8 @@
 * Initial support for Redmi Watch 6
 * Initial support for Garmin Edge 1050, Forerunner 230, Vívoactive 3 Music
 * Initial support for GRV FC1, Swiss Peak (GloryFit)
-* Initial support for Jabra Evolve2 55
-* Initial support for Alt Vibe (MoYoung / Da Fit)
+* Initial support for Jabra Evole 65, Evolve2 55 / Evolve2 65
+* Initial support for Alt Vibe, MT55 (MoYoung / Da Fit)
 * Initial support for Xiaomi Watch 5
 * Experimental support for 59 new Garmin devices
 * 1MORE SonoFlow: Add quick settings
@@ -21,8 +21,11 @@
 * Bose: Add quick settings
 * Charts: Add optimal training load baseline
 * Charts: Add VO2 Max 6-month and year views
+* Charts: Display HR on blood pressure charts
 * Charts: Fix crash when exiting live activity
 * CMF Watch 2+: Fixed watchface upload
+* Colmi/Yawell rings: Ignore heart rate samples in the future
+* Debug: Add Internet Helper
 * Discovery Activity: Improve list refresh timing
 * Endurain: Map some missing activity types
 * Fix crash on some Android 13 ROMs
@@ -34,6 +37,7 @@
 * Garmin: Allow upload of gpx with navigation instructions
 * Garmin: Allow waypoint upload on all devices
 * Garmin: Do not send stale GPS location to watch
+* Garmin: Enable MLR by default
 * Garmin: Fix COBS decoder wedging on truncated frames
 * Garmin: Fix crash on some older devices
 * Garmin: Fix dismiss of old notifications
@@ -46,19 +50,23 @@
 * GloryFit: Add weather
 * GloryFit: Fix crash on health settings screen
 * GPX export: Give tracks a real name
+* Huawei: Fix battery charging status on some watches
 * Maps: Display map files in selected folder
 * Mi Body Composition Scale 2: Do not persist implausible weight samples
 * MoYoung: Add more workout types and parse max speed
+* Moyoung: Fix battery percentage on some devices
 * Nothing Ear (a): Fix bluetooth name
 * Optionally order disconnected devices by their most recent connection instead of by name
 * Pebble: Initial support for new weather v4
 * Rate limit the serialization of incoming CoMaps navigation messages
+* Sony Headphones: Fix reconnection
 * UNA Watch: Connection improvements
 * UNA Watch: Faster workout and health sync
 * UNA Watch: Import workouts as soon as they are saved on the watch
-* UNA Watch: Phone notifications
 * UNA Watch: Per-minute heart rate and honest daily totals
+* UNA Watch: Phone notifications
 * WeatherSpec: Add atmospheric pressure, cloud cover and dew point forecasts
+* Workouts: Fix some missing units localization
 * Xiaomi-protobuf: Fix crash on resting heart rate query
 * Xiaomi-protobuf: Fix crash when dismissing some notifications
 * Xiaomi-protobuf: Fix notification "open on phone"
