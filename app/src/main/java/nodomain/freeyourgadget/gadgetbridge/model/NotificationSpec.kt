@@ -47,10 +47,9 @@ data class NotificationSpec @JvmOverloads constructor(
     var iconId: Int = 0,
     var iconPackageId: String? = null,
     var picturePath: String? = null,
-    var dndSuppressed: Int = 0
+    var dndSuppressed: Int = 0,
+    val id: Int = if (requestedId != -1) requestedId else c.incrementAndGet(),
 ) : DeviceTextAdaptable<NotificationSpec>, Parcelable {
-    val id: Int = if (requestedId != -1) requestedId else c.incrementAndGet()
-
     override fun withRtlFix(): NotificationSpec {
         if (!RtlUtils.rtlSupport()) return this
         return copy(
