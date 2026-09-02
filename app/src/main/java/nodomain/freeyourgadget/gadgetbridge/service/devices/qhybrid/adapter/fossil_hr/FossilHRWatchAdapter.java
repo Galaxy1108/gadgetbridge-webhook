@@ -1219,22 +1219,22 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
 
     @Override
     public void setMusicInfo(MusicSpec musicSpec) {
-        musicSpec = new MusicSpec(musicSpec);
-        if(musicSpec.album == null) musicSpec.album = "";
-        if(musicSpec.artist == null) musicSpec.artist = "";
-        if(musicSpec.track == null) musicSpec.track = "";
+        musicSpec = musicSpec.copyOf();
+        if(musicSpec.getAlbum() == null) musicSpec.setAlbum("");
+        if(musicSpec.getArtist() == null) musicSpec.setArtist("");
+        if(musicSpec.getTrack() == null) musicSpec.setTrack("");
         if (
                 currentSpec != null
-                        && currentSpec.album.equals(musicSpec.album)
-                        && currentSpec.artist.equals(musicSpec.artist)
-                        && currentSpec.track.equals(musicSpec.track)
+                        && currentSpec.getAlbum().equals(musicSpec.getAlbum())
+                        && currentSpec.getArtist().equals(musicSpec.getArtist())
+                        && currentSpec.getTrack().equals(musicSpec.getTrack())
         ) return;
         currentSpec = musicSpec;
         try {
             queueWrite(new MusicInfoSetRequest(
-                    musicSpec.artist,
-                    musicSpec.album,
-                    musicSpec.track,
+                    musicSpec.getArtist(),
+                    musicSpec.getAlbum(),
+                    musicSpec.getTrack(),
                     this
             ));
         } catch (BufferOverflowException e) {
@@ -1247,7 +1247,7 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
         super.setMusicState(stateSpec);
 
         queueWrite(new MusicControlRequest(
-                stateSpec.state == MusicStateSpec.STATE_PLAYING ? MUSIC_PHONE_REQUEST.MUSIC_REQUEST_SET_PLAYING : MUSIC_PHONE_REQUEST.MUSIC_REQUEST_SET_PAUSED
+                stateSpec.getState() == MusicStateSpec.STATE_PLAYING ? MUSIC_PHONE_REQUEST.MUSIC_REQUEST_SET_PLAYING : MUSIC_PHONE_REQUEST.MUSIC_REQUEST_SET_PAUSED
         ));
     }
 
@@ -1362,17 +1362,17 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
     }
 
     public boolean playRawNotification(NotificationSpec notificationSpec) {
-        String sourceAppId = notificationSpec.sourceAppId;
-        String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        String sourceAppId = notificationSpec.getSourceAppId();
+        String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
 
         // Retrieve and store notification or app icon
         if (sourceAppId != null) {
             if (appIconCache.get(sourceAppId) == null) {
                 try {
                     Drawable icon = null;
-                    if (notificationSpec.iconId != 0) {
-                        Context sourcePackageContext = getContext().createPackageContext(notificationSpec.iconPackageId, 0);
-                        icon = ResourcesCompat.getDrawable(sourcePackageContext.getResources(), notificationSpec.iconId, null);
+                    if (notificationSpec.getIconId() != 0) {
+                        Context sourcePackageContext = getContext().createPackageContext(notificationSpec.getIconPackageId(), 0);
+                        icon = ResourcesCompat.getDrawable(sourcePackageContext.getResources(), notificationSpec.getIconId(), null);
                     }
                     if (icon == null) {
                         icon = NotificationUtils.getAppIcon(getContext(), sourceAppId);
@@ -1443,13 +1443,13 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
     public void onSetCallState(CallSpec callSpec) {
         super.onSetCallState(callSpec);
         String[] quickReplies = getQuickReplies();
-        boolean quickRepliesEnabled = quickReplies.length > 0 && callSpec.number != null && callSpec.number.matches("^\\+(?:[0-9] ?){6,14}[0-9]$");
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        boolean quickRepliesEnabled = quickReplies.length > 0 && callSpec.getNumber() != null && callSpec.getNumber().matches("^\\+(?:[0-9] ?){6,14}[0-9]$");
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
             currentCallSpec = callSpec;
-            queueWrite(new PlayCallNotificationRequest(StringUtils.getFirstOf(callSpec.name, callSpec.number), true, quickRepliesEnabled, callSpec.dndSuppressed, this));
+            queueWrite(new PlayCallNotificationRequest(StringUtils.getFirstOf(callSpec.getName(), callSpec.getNumber()), true, quickRepliesEnabled, callSpec.getDndSuppressed(), this));
         } else {
             currentCallSpec = null;
-            queueWrite(new PlayCallNotificationRequest(StringUtils.getFirstOf(callSpec.name, callSpec.number), false, quickRepliesEnabled, callSpec.dndSuppressed, this));
+            queueWrite(new PlayCallNotificationRequest(StringUtils.getFirstOf(callSpec.getName(), callSpec.getNumber()), false, quickRepliesEnabled, callSpec.getDndSuppressed(), this));
         }
     }
 
@@ -2136,7 +2136,7 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
         }
         GBDeviceEventNotificationControl devEvtNotificationControl = new GBDeviceEventNotificationControl();
         devEvtNotificationControl.handle = callId;
-        devEvtNotificationControl.phoneNumber = currentCallSpec.number;
+        devEvtNotificationControl.phoneNumber = currentCallSpec.getNumber();
         devEvtNotificationControl.reply = quickReplies[replyChoice];
         devEvtNotificationControl.event = GBDeviceEventNotificationControl.Event.REPLY;
         getDeviceSupport().evaluateGBDeviceEvent(devEvtNotificationControl);

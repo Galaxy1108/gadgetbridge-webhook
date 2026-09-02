@@ -610,10 +610,17 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
     }
 
     private void handleBatteryInfo(BatteryInfo info) {
-        LOG.warn("Battery info: {}", info);
-        batteryCmd.level = (short) info.getPercentCharged();
-        if (batteryCmd.state == BatteryState.UNKNOWN)
+        LOG.debug("Battery info: {}", info);
+        int level = info.getPercentCharged();
+        // Some Moyoung watches add 100 to the reported level while charging
+        // (i.e. values > 100). Detect charging and recover the real level.
+        if (level > 100) {
+            level -= 100;
+            batteryCmd.state = BatteryState.BATTERY_CHARGING;
+        } else {
             batteryCmd.state = BatteryState.BATTERY_NORMAL;
+        }
+        batteryCmd.level = (short) level;
         handleGBDeviceEvent(batteryCmd);
     }
 
@@ -648,28 +655,28 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
 
         // Notifications are sent with both sender/title and message in 1 packet, separated by a ':',
         // so we have to make sure there is no ':' in the sender/title part
         String message = StringUtils.truncate(senderOrTitle, 32).replace(":", ";") + ":";
-        if (notificationSpec.subject != null) {
-            message += StringUtils.truncate(notificationSpec.subject, 128) + "\n\n";
+        if (notificationSpec.getSubject() != null) {
+            message += StringUtils.truncate(notificationSpec.getSubject(), 128) + "\n\n";
         }
-        if (notificationSpec.body != null) {
-            message += StringUtils.truncate(notificationSpec.body, 512);
+        if (notificationSpec.getBody() != null) {
+            message += StringUtils.truncate(notificationSpec.getBody(), 512);
         }
-        if (notificationSpec.body == null && notificationSpec.subject == null) {
+        if (notificationSpec.getBody() == null && notificationSpec.getSubject() == null) {
             message += " ";
         }
 
         // The notification is split at first : into sender and text
-        sendNotification(MoyoungConstants.notificationType(notificationSpec.type), message);
+        sendNotification(MoyoungConstants.notificationType(notificationSpec.getType()), message);
     }
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING)
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING)
             sendNotification(MoyoungConstants.NOTIFICATION_TYPE_CALL, NotificationUtils.getPreferredTextFor(callSpec));
         else
             sendNotification(MoyoungConstants.NOTIFICATION_TYPE_CALL_OFF_HOOK, "");
@@ -962,7 +969,7 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
     public void onSetMusicState(MusicStateSpec stateSpec) {
         try {
             TransactionBuilder builder = performInitialized("sendMusicState");
-            byte[] payload = new byte[]{(byte) (stateSpec.state == MusicStateSpec.STATE_PLAYING ? 0x01 : 0x00)};
+            byte[] payload = new byte[]{(byte) (stateSpec.getState() == MusicStateSpec.STATE_PLAYING ? 0x01 : 0x00)};
             sendPacket(builder, MoyoungPacketOut.buildPacket(getMtu(), MoyoungConstants.CMD_SET_MUSIC_STATE, payload));
             builder.queue();
         } catch (IOException e) {
@@ -975,12 +982,12 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
         try {
             TransactionBuilder builder = performInitialized("sendMusicInfo");
 
-            byte[] artistBytes = musicSpec.artist.getBytes();
+            byte[] artistBytes = musicSpec.getArtist().getBytes();
             byte[] artistPayload = new byte[artistBytes.length + 1];
             artistPayload[0] = 1;
             System.arraycopy(artistBytes, 0, artistPayload, 1, artistBytes.length);
             sendPacket(builder, MoyoungPacketOut.buildPacket(getMtu(), MoyoungConstants.CMD_SET_MUSIC_INFO, artistPayload));
-            byte[] trackBytes = musicSpec.track.getBytes();
+            byte[] trackBytes = musicSpec.getTrack().getBytes();
             byte[] trackPayload = new byte[trackBytes.length + 1];
             trackPayload[0] = 0;
             System.arraycopy(trackBytes, 0, trackPayload, 1, trackBytes.length);

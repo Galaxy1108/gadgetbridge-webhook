@@ -538,19 +538,19 @@ public class PebbleProtocol extends GBDeviceProtocol {
         String subtitle = null;
 
         // for SMS that came in though the SMS receiver
-        if (notificationSpec.sender != null) {
-            title = notificationSpec.sender;
-            subtitle = notificationSpec.subject;
+        if (notificationSpec.getSender() != null) {
+            title = notificationSpec.getSender();
+            subtitle = notificationSpec.getSubject();
         } else {
-            title = notificationSpec.title;
+            title = notificationSpec.getTitle();
         }
 
         long ts = System.currentTimeMillis();
         ts /= 1000;
 
-        return encodeNotification(id, (int) (ts & 0xffffffffL), title, subtitle, notificationSpec.body,
+        return encodeNotification(id, (int) (ts & 0xffffffffL), title, subtitle, notificationSpec.getBody(),
                 pebbleNotification,
-                notificationSpec.cannedReplies, notificationSpec.attachedActions);
+                notificationSpec.getCannedReplies(), notificationSpec.getAttachedActions());
     }
 
     @Override
@@ -560,11 +560,11 @@ public class PebbleProtocol extends GBDeviceProtocol {
 
     @Override
     public byte[] encodeAddCalendarEvent(CalendarEventSpec calendarEventSpec) {
-        long id = calendarEventSpec.id != -1 ? calendarEventSpec.id : mRandom.nextLong();
+        long id = calendarEventSpec.getId() != -1 ? calendarEventSpec.getId() : mRandom.nextLong();
         int iconId;
         ArrayList<Pair<Integer, Object>> attributes = new ArrayList<>();
-        attributes.add(new Pair<>(1, calendarEventSpec.title));
-        switch (calendarEventSpec.type) {
+        attributes.add(new Pair<>(1, calendarEventSpec.getTitle()));
+        switch (calendarEventSpec.getType()) {
             case CalendarEventSpec.TYPE_SUNRISE:
                 iconId = PebbleIconID.SUNRISE;
                 break;
@@ -573,13 +573,13 @@ public class PebbleProtocol extends GBDeviceProtocol {
                 break;
             default:
                 iconId = PebbleIconID.TIMELINE_CALENDAR;
-                attributes.add(new Pair<>(3, calendarEventSpec.description));
-                attributes.add(new Pair<>(11, calendarEventSpec.location));
+                attributes.add(new Pair<>(3, calendarEventSpec.getDescription()));
+                attributes.add(new Pair<>(11, calendarEventSpec.getLocation()));
         }
 
 
-        int startTimestamp = calendarEventSpec.timestamp;
-        if (calendarEventSpec.allDay) {
+        int startTimestamp = calendarEventSpec.getTimestamp();
+        if (calendarEventSpec.getAllDay()) {
             // For all-day events, Pebble expects the start date to match the midnight boundaries
             // in the user's timezone. However, the calendar event will have them in the UTC timezone,
             // so we need to convert it
@@ -587,7 +587,7 @@ public class PebbleProtocol extends GBDeviceProtocol {
             startTimestamp = (int) (DateTimeUtils.utcDateTimeToLocal(startTimestampMs) / 1000);
         }
 
-        return encodeTimelinePin(new UUID(GB_UUID_MASK | calendarEventSpec.type, id), startTimestamp, (short) (calendarEventSpec.durationInSeconds / 60), iconId, attributes);
+        return encodeTimelinePin(new UUID(GB_UUID_MASK | calendarEventSpec.getType(), id), startTimestamp, (short) (calendarEventSpec.getDurationInSeconds() / 60), iconId, attributes);
     }
 
     @Override
@@ -911,7 +911,7 @@ public class PebbleProtocol extends GBDeviceProtocol {
         if (attachedActions != null && !attachedActions.isEmpty()) {
             for (Action act : attachedActions) {
                 actions_count++;
-                actions_length += (short) (ACTION_LENGTH_MIN + act.title.getBytes().length);
+                actions_length += (short) (ACTION_LENGTH_MIN + act.getTitle().getBytes().length);
                 if (act.isReply()) {
                     actions_length += (short) ((short) replies_length + 3);  // 3 = attribute id (byte) + length(short)
                 }
@@ -981,7 +981,7 @@ public class PebbleProtocol extends GBDeviceProtocol {
         if (attachedActions != null && !attachedActions.isEmpty()) {
             for (int ai = 0; ai < attachedActions.size(); ai++) {
                 Action act = attachedActions.get(ai);
-                switch (act.type) {
+                switch (act.getType()) {
                     case Action.TYPE_SYNTHETIC_OPEN:
                         buf.put((byte) 0x01);
                         break;
@@ -1002,7 +1002,7 @@ public class PebbleProtocol extends GBDeviceProtocol {
                     buf.put((byte) 0x03); // reply action
                     buf.put((byte) 0x02); // number attributes
                 } else {
-                    if (act.type == Action.TYPE_SYNTHETIC_DISMISS) {
+                    if (act.getType() == Action.TYPE_SYNTHETIC_DISMISS) {
                         buf.put(dismiss_action_type);
                     } else {
                         buf.put((byte) 0x02); // generic action
@@ -1011,8 +1011,8 @@ public class PebbleProtocol extends GBDeviceProtocol {
                 }
 
                 buf.put((byte) 0x01); // attribute id (title)
-                buf.putShort((short) act.title.getBytes().length);
-                buf.put(act.title.getBytes());
+                buf.putShort((short) act.getTitle().getBytes().length);
+                buf.put(act.getTitle().getBytes());
                 if (act.isReply()) {
                     buf.put((byte) 0x08); // canned replies
                     buf.putShort((short) replies_length);
@@ -1590,12 +1590,12 @@ public class PebbleProtocol extends GBDeviceProtocol {
     @Override
     public byte[] encodeSetCannedMessages(CannedMessagesSpec cannedMessagesSpec) {
 
-        if (cannedMessagesSpec.cannedMessages == null || cannedMessagesSpec.cannedMessages.length == 0) {
+        if (cannedMessagesSpec.getCannedMessages() == null || cannedMessagesSpec.getCannedMessages().length == 0) {
             return null;
         }
 
         String blobDBKey;
-        switch (cannedMessagesSpec.type) {
+        switch (cannedMessagesSpec.getType()) {
             case CannedMessagesSpec.TYPE_REJECTEDCALLS:
                 blobDBKey = "com.pebble.android.phone";
                 break;
@@ -1608,7 +1608,7 @@ public class PebbleProtocol extends GBDeviceProtocol {
 
         int replies_length = -1;
 
-        for (String reply : cannedMessagesSpec.cannedMessages) {
+        for (String reply : cannedMessagesSpec.getCannedMessages()) {
             replies_length += reply.getBytes().length + 1;
         }
 
@@ -1624,12 +1624,12 @@ public class PebbleProtocol extends GBDeviceProtocol {
         buf.put((byte) 0x01); // attributes count
         buf.put((byte) 0x08); // canned messages
         buf.putShort((short) replies_length);
-        for (int i = 0; i < cannedMessagesSpec.cannedMessages.length - 1; i++) {
-            buf.put(cannedMessagesSpec.cannedMessages[i].getBytes());
+        for (int i = 0; i < cannedMessagesSpec.getCannedMessages().length - 1; i++) {
+            buf.put(cannedMessagesSpec.getCannedMessages()[i].getBytes());
             buf.put((byte) 0x00);
         }
         // last one must not be zero terminated, else we get an additional empty reply
-        buf.put(cannedMessagesSpec.cannedMessages[cannedMessagesSpec.cannedMessages.length - 1].getBytes());
+        buf.put(cannedMessagesSpec.getCannedMessages()[cannedMessagesSpec.getCannedMessages().length - 1].getBytes());
 
         return encodeBlobdb(blobDBKey, BLOBDB_INSERT, BLOBDB_CANNED_MESSAGES, buf.array());
     }

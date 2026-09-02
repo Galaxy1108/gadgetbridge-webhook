@@ -404,7 +404,7 @@ public class LaxasFitDeviceSupport extends AbstractBTLESingleDeviceSupport {
         LOG.debug("LaxasFit send call notification");
         TransactionBuilder builder = createTransactionBuilder("CALL");
 
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
@@ -412,12 +412,12 @@ public class LaxasFitDeviceSupport extends AbstractBTLESingleDeviceSupport {
                 outputStream.write(0x0);
                 outputStream.write(0x0);
 
-                if (callSpec.name != null) {
-                    outputStream.write(callSpec.name.getBytes(StandardCharsets.UTF_8));
+                if (callSpec.getName() != null) {
+                    outputStream.write(callSpec.getName().getBytes(StandardCharsets.UTF_8));
                     outputStream.write(0x20);
                 }
-                if (callSpec.number != null) {
-                    outputStream.write(callSpec.number.getBytes(StandardCharsets.UTF_8));
+                if (callSpec.getNumber() != null) {
+                    outputStream.write(callSpec.getNumber().getBytes(StandardCharsets.UTF_8));
                     outputStream.write(0x20);
                 }
 
@@ -533,10 +533,10 @@ public class LaxasFitDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        LOG.debug("LaxasFit notification: " + notificationSpec.type);
+        LOG.debug("LaxasFit notification: " + notificationSpec.getType());
         TransactionBuilder builder = createTransactionBuilder("notification");
         byte icon = NOTIFICATION_ICON_SMS;
-        switch (notificationSpec.type) {
+        switch (notificationSpec.getType()) {
             case GENERIC_SMS:
                 icon = NOTIFICATION_ICON_SMS;
                 break;
@@ -576,22 +576,22 @@ public class LaxasFitDeviceSupport extends AbstractBTLESingleDeviceSupport {
             outputStream.write(0x0);
             outputStream.write(0x0);
 
-            if (notificationSpec.sender != null) {
-                outputStream.write(notificationSpec.sender.getBytes(StandardCharsets.UTF_8));
+            if (notificationSpec.getSender() != null) {
+                outputStream.write(notificationSpec.getSender().getBytes(StandardCharsets.UTF_8));
                 outputStream.write(0x20);
             } else {
-                if (notificationSpec.phoneNumber != null) { //use number only if there is no sender
-                    outputStream.write(notificationSpec.phoneNumber.getBytes(StandardCharsets.UTF_8));
+                if (notificationSpec.getPhoneNumber() != null) { //use number only if there is no sender
+                    outputStream.write(notificationSpec.getPhoneNumber().getBytes(StandardCharsets.UTF_8));
                     outputStream.write(0x20);
                 }
             }
 
-            if (notificationSpec.subject != null) {
-                outputStream.write(notificationSpec.subject.getBytes(StandardCharsets.UTF_8));
+            if (notificationSpec.getSubject() != null) {
+                outputStream.write(notificationSpec.getSubject().getBytes(StandardCharsets.UTF_8));
                 outputStream.write(0x20);
             }
-            if (notificationSpec.body != null) {
-                outputStream.write(notificationSpec.body.getBytes(StandardCharsets.UTF_8));
+            if (notificationSpec.getBody() != null) {
+                outputStream.write(notificationSpec.getBody().getBytes(StandardCharsets.UTF_8));
                 outputStream.write(0x20);
             }
 

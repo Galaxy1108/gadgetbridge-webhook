@@ -662,7 +662,7 @@ public class ProtocolBufferHandler implements MessageHandler {
 
     public ProtobufMessage setCannedMessages(CannedMessagesSpec cannedMessagesSpec) {
         final GdiSmsNotification.SmsNotificationService.CannedListType cannedListType;
-        switch (cannedMessagesSpec.type) {
+        switch (cannedMessagesSpec.getType()) {
             case CannedMessagesSpec.TYPE_REJECTEDCALLS:
                 cannedListType = GdiSmsNotification.SmsNotificationService.CannedListType.PHONE_CALL_RESPONSE;
                 break;
@@ -675,7 +675,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 return null;
         }
 
-        this.cannedListTypeMap.put(cannedListType, cannedMessagesSpec.cannedMessages);
+        this.cannedListTypeMap.put(cannedListType, cannedMessagesSpec.getCannedMessages());
 
         Smart smart = Smart.newBuilder()
                 .setSmsNotificationService(GdiSmsNotification.SmsNotificationService.newBuilder()

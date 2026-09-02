@@ -1137,8 +1137,8 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 break;
             case SleepAsAndroidAction.SHOW_NOTIFICATION: {
                 final NotificationSpec spec = new NotificationSpec();
-                spec.title = extras.getString("TITLE");
-                spec.body = extras.getString("TEXT");
+                spec.setTitle(extras.getString("TITLE"));
+                spec.setBody(extras.getString("TEXT"));
                 onNotification(spec);
                 break;
             }
@@ -1315,17 +1315,17 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         Map<MusicControlEntityUpdateMessage.MusicEntity, String> attributes = new HashMap<>();
 
-        attributes.put(MusicControlEntityUpdateMessage.TRACK.ARTIST, musicSpec.artist);
-        attributes.put(MusicControlEntityUpdateMessage.TRACK.ALBUM, musicSpec.album);
-        attributes.put(MusicControlEntityUpdateMessage.TRACK.TITLE, musicSpec.track);
-        attributes.put(MusicControlEntityUpdateMessage.TRACK.DURATION, String.valueOf(musicSpec.duration));
+        attributes.put(MusicControlEntityUpdateMessage.TRACK.ARTIST, musicSpec.getArtist());
+        attributes.put(MusicControlEntityUpdateMessage.TRACK.ALBUM, musicSpec.getAlbum());
+        attributes.put(MusicControlEntityUpdateMessage.TRACK.TITLE, musicSpec.getTrack());
+        attributes.put(MusicControlEntityUpdateMessage.TRACK.DURATION, String.valueOf(musicSpec.getDuration()));
 
         sendOutgoingMessage("set music info", new MusicControlEntityUpdateMessage(attributes));
 
         // Update the music state spec as well
         final MusicStateSpec bufferMusicStateSpec = mediaManager.getBufferMusicStateSpec();
         if (bufferMusicStateSpec != null) {
-            sendMusicState(bufferMusicStateSpec, bufferMusicStateSpec.position);
+            sendMusicState(bufferMusicStateSpec, bufferMusicStateSpec.getPosition());
         }
     }
 
@@ -1337,15 +1337,15 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         LOG.debug("onSetMusicState: {}", stateSpec.toString());
 
-        sendMusicState(stateSpec, stateSpec.position);
+        sendMusicState(stateSpec, stateSpec.getPosition());
     }
 
     private void sendMusicState(final MusicStateSpec stateSpec, final int progress) {
         final int playing;
         final float playRate;
-        if (stateSpec.state == MusicStateSpec.STATE_PLAYING) {
+        if (stateSpec.getState() == MusicStateSpec.STATE_PLAYING) {
             playing = 1;
-            playRate = stateSpec.playRate > 0 ? stateSpec.playRate / 100f : 1.0f;
+            playRate = stateSpec.getPlayRate() > 0 ? stateSpec.getPlayRate() / 100f : 1.0f;
         } else {
             playing = 0;
             playRate = 0;

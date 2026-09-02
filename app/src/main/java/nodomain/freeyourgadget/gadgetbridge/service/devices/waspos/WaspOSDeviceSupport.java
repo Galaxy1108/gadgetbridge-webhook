@@ -244,12 +244,12 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             JSONObject o = new JSONObject();
             o.put("t", "notify");
             o.put("id", notificationSpec.getId());
-            o.put("src", notificationSpec.sourceName);
-            o.put("title", notificationSpec.title);
-            o.put("subject", notificationSpec.subject);
-            o.put("body", notificationSpec.body);
-            o.put("sender", notificationSpec.sender);
-            o.put("tel", notificationSpec.phoneNumber);
+            o.put("src", notificationSpec.getSourceName());
+            o.put("title", notificationSpec.getTitle());
+            o.put("subject", notificationSpec.getSubject());
+            o.put("body", notificationSpec.getBody());
+            o.put("sender", notificationSpec.getSender());
+            o.put("tel", notificationSpec.getPhoneNumber());
             uartTxJSON("onNotification", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());
@@ -309,9 +309,9 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             JSONObject o = new JSONObject();
             o.put("t", "call");
             String[] cmdString = {"", "undefined", "accept", "incoming", "outgoing", "reject", "start", "end"};
-            o.put("cmd", cmdString[callSpec.command]);
-            o.put("name", callSpec.name);
-            o.put("number", callSpec.number);
+            o.put("cmd", cmdString[callSpec.getCommand()]);
+            o.put("name", callSpec.getName());
+            o.put("number", callSpec.getNumber());
             uartTxJSON("onSetCallState", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());
@@ -324,10 +324,10 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             JSONObject o = new JSONObject();
             o.put("t", "musicstate");
             String[] musicStates = {"play", "pause", "stop", ""};
-            o.put("state", musicStates[stateSpec.state]);
-            o.put("position", stateSpec.position);
-            o.put("shuffle", stateSpec.shuffle);
-            o.put("repeat", stateSpec.repeat);
+            o.put("state", musicStates[stateSpec.getState()]);
+            o.put("position", stateSpec.getPosition());
+            o.put("shuffle", stateSpec.getShuffle());
+            o.put("repeat", stateSpec.getRepeat());
             uartTxJSON("onSetMusicState", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());
@@ -339,12 +339,12 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
         try {
             JSONObject o = new JSONObject();
             o.put("t", "musicinfo");
-            o.put("artist", musicSpec.artist);
-            o.put("album", musicSpec.album);
-            o.put("track", musicSpec.track);
-            o.put("dur", musicSpec.duration);
-            o.put("c", musicSpec.trackCount);
-            o.put("n", musicSpec.trackNr);
+            o.put("artist", musicSpec.getArtist());
+            o.put("album", musicSpec.getAlbum());
+            o.put("track", musicSpec.getTrack());
+            o.put("dur", musicSpec.getDuration());
+            o.put("c", musicSpec.getTrackCount());
+            o.put("n", musicSpec.getTrackNr());
             uartTxJSON("onSetMusicInfo", o);
         } catch (JSONException e) {
             LOG.info("JSONException: " + e.getLocalizedMessage());

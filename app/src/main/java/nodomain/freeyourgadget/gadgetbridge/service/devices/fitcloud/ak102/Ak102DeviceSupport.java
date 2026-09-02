@@ -817,21 +817,21 @@ public class Ak102DeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(final NotificationSpec notificationSpec) {
-        final String name = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        final String name = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
         final StringBuilder content = new StringBuilder();
-        if (!StringUtils.isEmpty(notificationSpec.title) && !notificationSpec.title.equals(name)) {
-            content.append(notificationSpec.title).append(": ");
+        if (!StringUtils.isEmpty(notificationSpec.getTitle()) && !notificationSpec.getTitle().equals(name)) {
+            content.append(notificationSpec.getTitle()).append(": ");
         }
-        if (!StringUtils.isEmpty(notificationSpec.body)) {
-            content.append(notificationSpec.body);
-        } else if (!StringUtils.isEmpty(notificationSpec.subject)) {
-            content.append(notificationSpec.subject);
+        if (!StringUtils.isEmpty(notificationSpec.getBody())) {
+            content.append(notificationSpec.getBody());
+        } else if (!StringUtils.isEmpty(notificationSpec.getSubject())) {
+            content.append(notificationSpec.getSubject());
         }
         sendNotification(mapNotificationType(notificationSpec), name, content.toString());
     }
 
     private byte mapNotificationType(final NotificationSpec notificationSpec) {
-        switch (notificationSpec.type) {
+        switch (notificationSpec.getType()) {
             case GENERIC_SMS:
                 return Ak102Constants.NOTIFICATION_SMS;
             case QQ:
@@ -919,18 +919,18 @@ public class Ak102DeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetCallState(final CallSpec callSpec) {
-        final String name = StringUtils.getFirstOf(callSpec.name, callSpec.number);
-        switch (callSpec.command) {
+        final String name = StringUtils.getFirstOf(callSpec.getName(), callSpec.getNumber());
+        switch (callSpec.getCommand()) {
             case CallSpec.CALL_INCOMING:
-                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_INCOMING, name, callSpec.number);
+                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_INCOMING, name, callSpec.getNumber());
                 break;
             case CallSpec.CALL_REJECT:
-                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_REJECTED, name, callSpec.number);
+                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_REJECTED, name, callSpec.getNumber());
                 break;
             case CallSpec.CALL_ACCEPT:
             case CallSpec.CALL_START:
             case CallSpec.CALL_END:
-                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_ANSWERED, name, callSpec.number);
+                sendNotification(Ak102Constants.NOTIFICATION_TELEPHONY_ANSWERED, name, callSpec.getNumber());
                 break;
             default:
                 break;
@@ -1150,11 +1150,11 @@ public class Ak102DeviceSupport extends AbstractBTLESingleDeviceSupport {
         if (!supportsWatchFeature(Ak102Constants.FEATURE_MUSIC_INFO)) {
             return;
         }
-        final byte[] title = StringUtils.ensureNotNull(musicSpec.track).getBytes(StandardCharsets.UTF_8);
-        final byte[] artist = StringUtils.ensureNotNull(musicSpec.artist).getBytes(StandardCharsets.UTF_8);
+        final byte[] title = StringUtils.ensureNotNull(musicSpec.getTrack()).getBytes(StandardCharsets.UTF_8);
+        final byte[] artist = StringUtils.ensureNotNull(musicSpec.getArtist()).getBytes(StandardCharsets.UTF_8);
         final int titleLength = Math.min(title.length, 127);
         final int artistLength = Math.min(artist.length, 96);
-        final int duration = Math.max(musicSpec.duration, 0);
+        final int duration = Math.max(musicSpec.getDuration(), 0);
 
         final byte[] payload = new byte[6 + titleLength + artistLength];
         payload[0] = (byte) titleLength;
@@ -1174,9 +1174,9 @@ public class Ak102DeviceSupport extends AbstractBTLESingleDeviceSupport {
             return;
         }
         // FitCloud states: 0 stop, 1 playing, 2 pause.
-        final int state = stateSpec.state == MusicStateSpec.STATE_PLAYING ? 1
-                : stateSpec.state == MusicStateSpec.STATE_PAUSED ? 2 : 0;
-        final int position = Math.max(stateSpec.position, 0);
+        final int state = stateSpec.getState() == MusicStateSpec.STATE_PLAYING ? 1
+                : stateSpec.getState() == MusicStateSpec.STATE_PAUSED ? 2 : 0;
+        final int position = Math.max(stateSpec.getPosition(), 0);
         final int speed = 100;
 
         final byte[] payload = new byte[7];

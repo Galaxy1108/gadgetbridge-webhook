@@ -166,7 +166,7 @@ public abstract class AbstractSerialDeviceSupport extends AbstractBluetoothDevic
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        byte[] bytes = gbDeviceProtocol.encodeSetCallState(callSpec.number, callSpec.name, callSpec.command);
+        byte[] bytes = gbDeviceProtocol.encodeSetCallState(callSpec.getNumber(), callSpec.getName(), callSpec.getCommand());
         sendToDevice(bytes);
     }
 
@@ -178,13 +178,13 @@ public abstract class AbstractSerialDeviceSupport extends AbstractBluetoothDevic
 
     @Override
     public void onSetMusicState(MusicStateSpec stateSpec) {
-        byte[] bytes = gbDeviceProtocol.encodeSetMusicState(stateSpec.state, stateSpec.position, stateSpec.playRate, stateSpec.shuffle, stateSpec.repeat);
+        byte[] bytes = gbDeviceProtocol.encodeSetMusicState(stateSpec.getState(), stateSpec.getPosition(), stateSpec.getPlayRate(), stateSpec.getShuffle(), stateSpec.getRepeat());
         sendToDevice(bytes);
     }
 
     @Override
     public void onSetMusicInfo(MusicSpec musicSpec) {
-        byte[] bytes = gbDeviceProtocol.encodeSetMusicInfo(musicSpec.artist, musicSpec.album, musicSpec.track, musicSpec.duration, musicSpec.trackCount, musicSpec.trackNr);
+        byte[] bytes = gbDeviceProtocol.encodeSetMusicInfo(musicSpec.getArtist(), musicSpec.getAlbum(), musicSpec.getTrack(), musicSpec.getDuration(), musicSpec.getTrackCount(), musicSpec.getTrackNr());
         sendToDevice(bytes);
     }
 

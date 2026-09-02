@@ -555,14 +555,14 @@ public class QHybridSupport extends QHybridBaseSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        log("notif from " + notificationSpec.sourceAppId + "  " + notificationSpec.sender + "   " + notificationSpec.phoneNumber);
+        log("notif from " + notificationSpec.getSourceAppId() + "  " + notificationSpec.getSender() + "   " + notificationSpec.getPhoneNumber());
         //new Exception().printStackTrace();
 
         if(this.watchAdapter instanceof FossilHRWatchAdapter){
             if(((FossilHRWatchAdapter) watchAdapter).playRawNotification(notificationSpec)) return;
         }
 
-        String packageName = notificationSpec.sourceName;
+        String packageName = notificationSpec.getSourceName();
 
         NotificationConfiguration config = null;
         try {
