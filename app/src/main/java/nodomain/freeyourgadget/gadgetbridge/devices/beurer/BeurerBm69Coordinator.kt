@@ -27,8 +27,7 @@ class BeurerBm69Coordinator : AbstractBLEDeviceCoordinator() {
     }
 
     override fun getBondingStyle(): Int {
-        // TODO: Confirm
-        return BONDING_STYLE_ASK
+        return BONDING_STYLE_NONE
     }
 
     override fun getDeviceSupportClass(device: GBDevice): Class<out DeviceSupport> {
