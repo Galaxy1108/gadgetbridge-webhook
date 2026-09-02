@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventBatteryInfo;
@@ -167,18 +168,18 @@ public class WaspOSDeviceSupport extends AbstractBTLESingleDeviceSupport {
             } break;
             case "music": {
                 GBDeviceEventMusicControl deviceEventMusicControl = new GBDeviceEventMusicControl();
-                deviceEventMusicControl.event = GBDeviceEventMusicControl.Event.valueOf(json.getString("n").toUpperCase());
+                deviceEventMusicControl.event = GBDeviceEventMusicControl.Event.valueOf(json.getString("n").toUpperCase(Locale.ROOT));
                 evaluateGBDeviceEvent(deviceEventMusicControl);
             } break;
             case "call": {
                 GBDeviceEventCallControl deviceEventCallControl = new GBDeviceEventCallControl();
-                deviceEventCallControl.event = GBDeviceEventCallControl.Event.valueOf(json.getString("n").toUpperCase());
+                deviceEventCallControl.event = GBDeviceEventCallControl.Event.valueOf(json.getString("n").toUpperCase(Locale.ROOT));
                 evaluateGBDeviceEvent(deviceEventCallControl);
             } break;
             case "notify" : {
                 GBDeviceEventNotificationControl deviceEvtNotificationControl = new GBDeviceEventNotificationControl();
                 // .title appears unused
-                deviceEvtNotificationControl.event = GBDeviceEventNotificationControl.Event.valueOf(json.getString("n").toUpperCase());
+                deviceEvtNotificationControl.event = GBDeviceEventNotificationControl.Event.valueOf(json.getString("n").toUpperCase(Locale.ROOT));
                 if (json.has("id"))
                     deviceEvtNotificationControl.handle = json.getInt("id");
                 if (json.has("tel"))
