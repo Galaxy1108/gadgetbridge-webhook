@@ -111,7 +111,8 @@ abstract class AbstractEarCoordinator : AbstractBLClassicDeviceCoordinator() {
                         key = "pref_nothing_ultra_bass_level",
                         title = R.string.nothing_prefs_ultra_bass_level_title,
                         icon = R.drawable.ic_speaker,
-                        max = 5, //min is clamped to 1 in encodeUltraBass() of Ear1Support.java, was previously set also in the layout file
+                        min = 1,
+                        max = 5,
                         defaultValue = 2,
                         showValue = true,
                         dependency = "pref_nothing_ultra_bass_enabled"

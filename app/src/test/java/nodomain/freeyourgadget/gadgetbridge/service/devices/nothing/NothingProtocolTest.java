@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEvent;
@@ -22,7 +23,7 @@ public class NothingProtocolTest extends TestBase {
         final GBDeviceEvent[] equalizerEvents = protocol.decodeResponse(GB.hexStringToByteArray("5560015040010060057f43"));
         final GBDeviceEventUpdatePreferences equalizerUpdate = findEvent(equalizerEvents, GBDeviceEventUpdatePreferences.class);
         Assert.assertNotNull(equalizerUpdate);
-        Assert.assertEquals(NothingEqualizer.CLASSICAL.name(), equalizerUpdate.preferences.get(DeviceSettingsPreferenceConst.PREF_HEADPHONES_EQUALIZER));
+        Assert.assertEquals(NothingEqualizer.CLASSICAL.name().toLowerCase(Locale.ROOT), equalizerUpdate.preferences.get(DeviceSettingsPreferenceConst.PREF_HEADPHONES_EQUALIZER));
 
         final GBDeviceEvent[] ultraBassEvents = protocol.decodeResponse(GB.hexStringToByteArray("5560014e4002001b00028071"));
         final GBDeviceEventUpdatePreferences ultraBassUpdate = findEvent(ultraBassEvents, GBDeviceEventUpdatePreferences.class);
