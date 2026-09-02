@@ -119,6 +119,7 @@ data class SeekBarSetting(
     @StringRes val title: Int,
     @StringRes val summary: Int = 0,
     @DrawableRes val icon: Int = 0,
+    val min: Int = 0,
     val max: Int,
     val defaultValue: Int,
     val showValue: Boolean = true,

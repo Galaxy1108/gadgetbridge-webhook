@@ -285,7 +285,7 @@ object DeviceSettingRenderer {
                         setTitle(setting.title)
                         if (setting.summary != 0) setSummary(setting.summary)
                         if (setting.icon != 0) setIcon(setting.icon)
-                        // TODO: Not supported by our sdk version: min = setting.min
+                        min = setting.min
                         max = setting.max
                         setDefaultValue(setting.defaultValue)
                         showSeekBarValue = setting.showValue
