@@ -123,12 +123,35 @@ object ZeppOsWeatherHandlerV5 {
     private fun createHourlyWeather(weatherSpec: WeatherSpec): HourlyWeather {
         // Round down to the hour, so that the entry covering the current hour is kept
         val cutoff = weatherSpec.timestamp - Math.floorMod(weatherSpec.timestamp, 3600)
-        return HourlyWeather(
-            metadata = createMetadata(weatherSpec),
-            hours = weatherSpec.hourly
-                .filter { it.timestamp != 0 && it.timestamp >= cutoff }
-                .take(72)
-                .map {
+
+        val filteredHourly = weatherSpec.hourly.filter { it.timestamp != 0 && it.timestamp >= cutoff }
+
+        // weatherSpec.hourly may not have an entry for the current hour, e.g. if its first
+        // entry is later than cutoff. If so, add the current hour from weatherSpec itself,
+        // so that the current hour is never missing. Devices misbehave otherwise, and only
+        // start displaying weather once a known hour starts (#6663). Some weather providers
+        // such as TinyWeatherForecast have a gap in the first hour.
+        val currentHourMissing = filteredHourly.firstOrNull()?.timestamp != cutoff
+
+        val hours = buildList {
+            if (currentHourMissing) {
+                add(
+                    HourlyWeatherHour(
+                        forecastStart = toOffsetDateTime(Date(cutoff * 1000L)),
+                        conditionCode = ZeppOsWeatherHandler.mapToZeppOsWeatherCode(weatherSpec.currentConditionCode).toString(),
+                        humidity = weatherSpec.currentHumidity / 100.0f,
+                        pressure = weatherSpec.pressure,
+                        temperature = weatherSpec.currentTemp - 273f,
+                        uvIndex = weatherSpec.uvIndex.roundToInt(),
+                        visibility = weatherSpec.visibility,
+                        windDirection = weatherSpec.windDirection,
+                        windSpeed = weatherSpec.windSpeed,
+                        windScale = weatherSpec.windSpeedAsBeaufort(),
+                    )
+                )
+            }
+            filteredHourly.forEach {
+                add(
                     HourlyWeatherHour(
                         forecastStart = toOffsetDateTime(Date(it.timestamp * 1000L)),
                         conditionCode = ZeppOsWeatherHandler.mapToZeppOsWeatherCode(it.conditionCode).toString(),
@@ -141,7 +164,13 @@ object ZeppOsWeatherHandlerV5 {
                         windSpeed = it.windSpeed,
                         windScale = it.windSpeedAsBeaufort(),
                     )
-                }.toList()
+                )
+            }
+        }.take(72)
+
+        return HourlyWeather(
+            metadata = createMetadata(weatherSpec),
+            hours = hours
         )
     }
 
