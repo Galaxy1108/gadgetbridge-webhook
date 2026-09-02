@@ -2359,6 +2359,7 @@
     <string name="devicetype_huawei_freebuds_6" translatable="false">Huawei FreeBuds 6</string>
     <string name="devicetype_femometer_vinca2" translatable="false">Femometer Vinca II</string>
     <string name="devicetype_xiaomi_watch_lite" translatable="false">Xiaomi Watch Lite</string>
+    <string name="devicetype_zeblaze_beyond_3_pro" translatable="false">Zeblaze Beyond 3 Pro</string>
     <string name="devicetype_redmiwatch3active" translatable="false">Redmi Watch 3 Active</string>
     <string name="devicetype_redmiwatch3" translatable="false">Redmi Watch 3</string>
     <string name="devicetype_redmi_buds_3_pro" translatable="false">Redmi Buds 3 Pro</string>

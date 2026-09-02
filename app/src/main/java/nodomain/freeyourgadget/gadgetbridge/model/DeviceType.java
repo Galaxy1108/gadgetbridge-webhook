@@ -595,6 +595,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS1
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS4Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi_scooters.XiaomiScooter5MaxCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.zeblaze.Beyond3ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xplora.XploraXmoveDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xwatch.XWatchCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.yawell.ring.ColmiR02Coordinator;
@@ -1207,6 +1208,7 @@ public enum DeviceType {
     IGPSPORT_BINAVI(IGPSportBiNaviCoordinator.class),
     OLLEE_WATCH_ONE(OlleeDeviceCoordinator.class),
     UNA_WATCH(UnaDeviceCoordinator.class),
+    ZEBLAZE_BEYOND_3_PRO(Beyond3ProCoordinator.class),
     TEST(TestDeviceCoordinator.class);
 
     private DeviceCoordinator coordinator;

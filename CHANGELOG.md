@@ -9,6 +9,7 @@
 * Initial support for Jabra Evole 65, Evolve2 55 / Evolve2 65
 * Initial support for Alt Vibe, MT55 (MoYoung / Da Fit)
 * Initial support for Xiaomi Watch 5
+* Experimental support for Zeblaze Beyond 3 Pro
 * Experimental support for 59 new Garmin devices
 * 1MORE SonoFlow: Add quick settings
 * Accessibility: Label image controls for screen readers
