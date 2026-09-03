@@ -48,6 +48,7 @@ import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.charts.ScatterChart
+import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.ScatterData
@@ -469,6 +470,23 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
             is ScatterChart if chart.chartData is ScatterData -> {
                 lineChart.data = chart.chartData
             }
+        }
+        // A metric may be split into several gapped segments (all sharing one label), which
+        // would otherwise each add their own auto-generated legend entry for the same metric.
+        val legendDataSet = chart.chartData.dataSets.firstOrNull()
+        if (legendDataSet != null) {
+            lineChart.legend.setCustom(
+                listOf(
+                    LegendEntry(
+                        legendDataSet.label,
+                        legendDataSet.form,
+                        legendDataSet.formSize,
+                        legendDataSet.formLineWidth,
+                        legendDataSet.formLineDashEffect,
+                        legendDataSet.color
+                    )
+                )
+            )
         }
         lineChart.description.isEnabled = false
         lineChart.onChartGestureListener = object : OnChartGestureListener {

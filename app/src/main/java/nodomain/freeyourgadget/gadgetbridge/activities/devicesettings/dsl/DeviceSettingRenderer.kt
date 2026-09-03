@@ -24,6 +24,7 @@ import android.text.InputFilter
 import android.text.InputFilter.LengthFilter
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
+import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceGroup
@@ -31,7 +32,7 @@ import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import nodomain.freeyourgadget.gadgetbridge.R
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsHandler
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.SettingsRenderHost
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.GBSimpleSummaryProvider
 import org.slf4j.Logger
@@ -68,10 +69,11 @@ object DeviceSettingRenderer {
         items: List<DeviceSetting>,
         parent: PreferenceGroup,
         prefs: Prefs,
-        handler: DeviceSpecificSettingsHandler,
+        handler: SettingsRenderHost,
     ): DeviceSettingsRefreshHandle {
         val visibilityPairs = mutableListOf<Pair<Preference, (Prefs) -> Boolean>>()
         val dynamicEntryPairs = mutableListOf<Pair<ListPreference, (Prefs) -> List<ListEntry>>>()
+        val dynamicMultiEntryPairs = mutableListOf<Pair<MultiSelectListPreference, (Prefs) -> List<ListEntry>>>()
         val categoryMemberPairs = mutableListOf<Pair<PreferenceCategory, MutableList<Preference>>>()
         val spListeners = mutableListOf<SharedPreferences.OnSharedPreferenceChangeListener>()
         val mainHandler = Handler(Looper.getMainLooper())
@@ -84,6 +86,9 @@ object DeviceSettingRenderer {
             val context = handler.context
             visibilityPairs.forEach { (pref, predicate) -> pref.isVisible = predicate(livePrefs) }
             dynamicEntryPairs.forEach { (pref, provider) ->
+                applyEntries(pref, provider(livePrefs), context)
+            }
+            dynamicMultiEntryPairs.forEach { (pref, provider) ->
                 applyEntries(pref, provider(livePrefs), context)
             }
             categoryMemberPairs.forEach { (cat, members) ->
@@ -104,6 +109,7 @@ object DeviceSettingRenderer {
             handler,
             visibilityPairs,
             dynamicEntryPairs,
+            dynamicMultiEntryPairs,
             categoryMemberPairs,
             spListeners,
             mainHandler,
@@ -130,13 +136,39 @@ object DeviceSettingRenderer {
         pref.entryValues = entries.map { it.value }.toTypedArray()
     }
 
+    private fun applyEntries(pref: MultiSelectListPreference, entries: List<ListEntry>, context: Context) {
+        pref.entries = entries.map { entry ->
+            when (entry) {
+                is ListEntry.Res -> context.getString(entry.label)
+                is ListEntry.Text -> entry.label
+            }
+        }.toTypedArray()
+        pref.entryValues = entries.map { it.value }.toTypedArray()
+    }
+
+    /**
+     * Summary provider used by [MultiSelectSetting] when no static [MultiSelectSetting.summary] is given:
+     * a comma-delimited list of the currently selected entries' labels, matching [ListPreference.SimpleSummaryProvider]'s
+     * behavior for single-select lists.
+     */
+    private fun multiSelectCommaSummaryProvider(context: Context) =
+        Preference.SummaryProvider<MultiSelectListPreference> { pref ->
+            val entries = pref.entries.orEmpty()
+            val entryValues = pref.entryValues.orEmpty()
+            val selected = entryValues.indices
+                .filter { entryValues[it].toString() in pref.values }
+                .map { entries[it] }
+            if (selected.isEmpty()) context.getString(R.string.not_set) else selected.joinToString(", ")
+        }
+
     private fun renderItems(
         items: List<DeviceSetting>,
         parent: PreferenceGroup,
         prefs: Prefs,
-        handler: DeviceSpecificSettingsHandler,
+        handler: SettingsRenderHost,
         visibilityPairs: MutableList<Pair<Preference, (Prefs) -> Boolean>>,
         dynamicEntryPairs: MutableList<Pair<ListPreference, (Prefs) -> List<ListEntry>>>,
+        dynamicMultiEntryPairs: MutableList<Pair<MultiSelectListPreference, (Prefs) -> List<ListEntry>>>,
         categoryMemberPairs: MutableList<Pair<PreferenceCategory, MutableList<Preference>>>,
         spListeners: MutableList<SharedPreferences.OnSharedPreferenceChangeListener>,
         mainHandler: Handler,
@@ -164,6 +196,7 @@ object DeviceSettingRenderer {
                         handler,
                         visibilityPairs,
                         dynamicEntryPairs,
+                        dynamicMultiEntryPairs,
                         categoryMemberPairs,
                         spListeners,
                         mainHandler,
@@ -195,6 +228,7 @@ object DeviceSettingRenderer {
                         handler,
                         visibilityPairs,
                         dynamicEntryPairs,
+                        dynamicMultiEntryPairs,
                         categoryMemberPairs,
                         spListeners,
                         mainHandler,
@@ -279,13 +313,39 @@ object DeviceSettingRenderer {
                     }
                 }
 
+                is MultiSelectSetting -> {
+                    MultiSelectListPreference(context).apply {
+                        key = setting.key
+                        setTitle(setting.title)
+                        setDialogTitle(setting.title)
+                        if (setting.icon != 0) setIcon(setting.icon)
+                        if (setting.entriesProvider != null) {
+                            applyEntries(this, setting.entriesProvider.invoke(prefs), context)
+                            dynamicMultiEntryPairs.add(this to setting.entriesProvider)
+                        } else {
+                            applyEntries(this, setting.entries, context)
+                        }
+                        setDefaultValue(setting.defaultValue)
+                        if (setting.summary != 0) {
+                            setSummary(setting.summary)
+                        } else {
+                            summaryProvider = multiSelectCommaSummaryProvider(context)
+                        }
+                        setOnPreferenceChangeListener { _, _ ->
+                            handler.notifyPreferenceChanged(setting.key)
+                            postRefresh()
+                            true
+                        }
+                    }
+                }
+
                 is SeekBarSetting -> {
                     SeekBarPreference(context).apply {
                         key = setting.key
                         setTitle(setting.title)
                         if (setting.summary != 0) setSummary(setting.summary)
                         if (setting.icon != 0) setIcon(setting.icon)
-                        // TODO: Not supported by our sdk version: min = setting.min
+                        min = setting.min
                         max = setting.max
                         setDefaultValue(setting.defaultValue)
                         showSeekBarValue = setting.showValue
@@ -405,6 +465,7 @@ object DeviceSettingRenderer {
             val dependency: String? = when (setting) {
                 is SwitchSetting -> setting.dependency
                 is ListSetting -> setting.dependency
+                is MultiSelectSetting -> setting.dependency
                 is SeekBarSetting -> setting.dependency
                 is TextSetting -> setting.dependency
                 is ActionSetting -> setting.dependency

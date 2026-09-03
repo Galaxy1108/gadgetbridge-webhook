@@ -19,13 +19,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.workouts.charts;
 import static nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutValueFormatter.getUnitString;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_BPM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_BREATHS_PER_MIN;
-import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_CELSIUS;
-import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_KMPH;
-import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_METERS;
-import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_METERS_PER_SECOND;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MILLISECONDS;
-import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MINUTES_PER_100_METERS;
-import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MINUTES_PER_KM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_PERCENTAGE;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_PER_100_METERS;
@@ -46,8 +40,10 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.ScatterData;
 import com.github.mikephil.charting.data.ScatterDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -135,14 +131,14 @@ public class DefaultWorkoutCharts {
 
             // Speed
             final float speed = point.getSpeed();
-            if(speed >= 0.0f) {
+            if (speed >= 0.0f) {
                 speedDataPoints.add(new Entry(tsShorten, speed));
                 hasSpeedValues = hasSpeedValues || (speed > 0.0f);
             }
 
             // Cadence
             final float cadence = point.getCadence();
-            if(cadence >= 0.0f){
+            if (cadence >= 0.0f) {
                 cadenceDataPoints.add(new Entry(tsShorten, cadence));
                 cadenceAccumulator.add(cadence);
                 hasCadenceValues = hasCadenceValues || (cadence > 0.0f);
@@ -346,12 +342,14 @@ public class DefaultWorkoutCharts {
         final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.ELEVATION;
         final String unitString = getUnitString(context, units.token(quantity));
         final String label = String.format("%s (%s)", context.getString(R.string.Elevation), unitString);
-        final LineDataSet dataset = createLineDataSet(context, convertPoints(elevationDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_elevation));
+        // Elevation is safe (and often desirable) to interpolate across a gap: altitude
+        // typically doesn't jump discontinuously, even across a paused or dropped-out stretch.
+        final LineData lineData = createLineData(context, convertPoints(elevationDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_elevation));
         return new WorkoutChart(
                 "elevation",
                 context.getString(R.string.Elevation),
                 ActivitySummaryEntries.GROUP_ELEVATION,
-                new LineData(dataset),
+                lineData,
                 new DecimalValueFormatter(units.decimals(quantity)),
                 unitString
         );
@@ -360,7 +358,7 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createHeartRateChart(final Context context,
                                                      final List<Entry> heartRateDataPoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.heart_rate), getUnitString(context, UNIT_BPM));
-        final LineDataSet dataset = createLineDataSet(context, heartRateDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_heart_rate));
+        final LineData lineData = createGappedLineData(context, heartRateDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_heart_rate));
         final ValueFormatter integerFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -371,7 +369,7 @@ public class DefaultWorkoutCharts {
                 "heart_rate",
                 context.getString(R.string.heart_rate),
                 ActivitySummaryEntries.GROUP_HEART_RATE,
-                new LineData(dataset),
+                lineData,
                 integerFormatter,
                 getUnitString(context, UNIT_BPM)
         );
@@ -384,36 +382,36 @@ public class DefaultWorkoutCharts {
         if (ActivityKind.isRowingActivity(activityKind)) {
             final String unitString = getUnitString(context, units.token(WorkoutChartUnits.Quantity.PACE_500M));
             final String label = String.format("%s (%s)", context.getString(R.string.Pace), unitString);
-            final LineDataSet dataset = createLineDataSet(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
+            final LineData lineData = createGappedLineData(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
             return new WorkoutChart(
                     "pace",
                     context.getString(R.string.Pace),
                     ActivitySummaryEntries.GROUP_SPEED,
-                    new LineData(dataset),
+                    lineData,
                     new SpeedYLabelFormatter(UNIT_SECONDS_PER_500_METERS),
                     unitString
             );
         } else if (ActivityKind.isSwimActivity(activityKind)) {
             final String unitString = getUnitString(context, units.token(WorkoutChartUnits.Quantity.PACE_SWIM));
             final String label = String.format("%s (%s)", context.getString(R.string.Pace), unitString);
-            final LineDataSet dataset = createLineDataSet(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
+            final LineData lineData = createGappedLineData(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
             return new WorkoutChart(
                     "pace",
                     context.getString(R.string.Pace),
                     ActivitySummaryEntries.GROUP_SPEED,
-                    new LineData(dataset),
+                    lineData,
                     new SpeedYLabelFormatter(UNIT_SECONDS_PER_100_METERS),
                     unitString
             );
         } else if (ActivityKind.isPaceActivity(activityKind)) {
             final String unitString = getUnitString(context, units.token(WorkoutChartUnits.Quantity.PACE));
             final String label = String.format("%s (%s)", context.getString(R.string.Pace), unitString);
-            final LineDataSet dataset = createLineDataSet(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
+            final LineData lineData = createGappedLineData(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
             return new WorkoutChart(
                     "pace",
                     context.getString(R.string.Pace),
                     ActivitySummaryEntries.GROUP_SPEED,
-                    new LineData(dataset),
+                    lineData,
                     new SpeedYLabelFormatter(UNIT_SECONDS_PER_KM),
                     unitString
             );
@@ -421,12 +419,12 @@ public class DefaultWorkoutCharts {
             final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.SPEED;
             final String unitString = getUnitString(context, units.token(quantity));
             final String label = String.format("%s (%s)", context.getString(R.string.Speed), unitString);
-            final LineDataSet dataset = createLineDataSet(context, convertPoints(speedDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_speed));
+            final LineData lineData = createGappedLineData(context, convertPoints(speedDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_speed));
             return new WorkoutChart(
                     "speed",
                     context.getString(R.string.Speed),
                     ActivitySummaryEntries.GROUP_SPEED,
-                    new LineData(dataset),
+                    lineData,
                     new DecimalValueFormatter(units.decimals(quantity)),
                     unitString
             );
@@ -472,20 +470,20 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createPowerChart(final Context context,
                                                  final List<Entry> powerDataPoints) {
         final String label = String.format("%s (%s)", context.getString(R.string.workout_power), getUnitString(context, UNIT_WATT));
-        LineDataSet dataset = createLineDataSet(context, powerDataPoints, label, context.getResources().getColor(R.color.chart_line_power));
+        final LineData lineData = createGappedLineData(context, powerDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_power));
         final ValueFormatter integerFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
                 return String.valueOf((int) value);
             }
         };
-        return new WorkoutChart("power", context.getString(R.string.workout_power), ActivitySummaryEntries.GROUP_POWER, new LineData(dataset), integerFormatter, getUnitString(context, UNIT_WATT));
+        return new WorkoutChart("power", context.getString(R.string.workout_power), ActivitySummaryEntries.GROUP_POWER, lineData, integerFormatter, getUnitString(context, UNIT_WATT));
     }
 
     private static WorkoutChart createRespiratoryRateChart(final Context context,
                                                            final List<Entry> powerDataPoints) {
         final String label = String.format("%s (%s)", context.getString(R.string.respiratoryrate), getUnitString(context, UNIT_BREATHS_PER_MIN));
-        LineDataSet dataset = createLineDataSet(context, powerDataPoints, label, context.getResources().getColor(R.color.respiratory_rate_color));
+        final LineData lineData = createGappedLineData(context, powerDataPoints, label, ContextCompat.getColor(context, R.color.respiratory_rate_color));
         final ValueFormatter integerFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -496,24 +494,26 @@ public class DefaultWorkoutCharts {
                 "respiratory_rate",
                 context.getString(R.string.respiratoryrate),
                 ActivitySummaryEntries.GROUP_RESPIRATORY_RATE,
-                new LineData(dataset),
+                lineData,
                 integerFormatter,
                 getUnitString(context, UNIT_BREATHS_PER_MIN)
         );
     }
 
     private static WorkoutChart createDepthChart(final Context context,
-                                                     final List<Entry> depthDataPoints) {
+                                                 final List<Entry> depthDataPoints) {
         final WorkoutChartUnits units = chartUnits();
         final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.DEPTH;
         final String unitString = getUnitString(context, units.token(quantity));
         final String label = String.format("%s(%s)", context.getString(R.string.diving_depth), unitString);
-        final LineDataSet dataset = createLineDataSet(context, convertPoints(depthDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_depth));
+        // Depth changes continuously during a dive, so it's safe to interpolate across a gap
+        // rather than break the segment.
+        final LineData lineData = createLineData(context, convertPoints(depthDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_depth));
         return new WorkoutChart(
                 "diving_depth",
                 context.getString(R.string.diving_depth),
                 ActivitySummaryEntries.GROUP_DIVING,
-                new LineData(dataset),
+                lineData,
                 new DecimalValueFormatter(units.decimals(quantity)),
                 unitString
         );
@@ -526,7 +526,9 @@ public class DefaultWorkoutCharts {
         final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.TEMPERATURE;
         final String unitString = getUnitString(context, units.token(quantity));
         final String label = String.format("%s(%s)", context.getString(R.string.menuitem_temperature), unitString);
-        final LineDataSet dataset = createLineDataSet(context, convertPoints(temperatureDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_heart_rate));
+        // Ambient temperature drifts slowly and gradually, so it's safe to interpolate across
+        // a gap rather than break the segment.
+        final LineData lineData = createLineData(context, convertPoints(temperatureDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_heart_rate));
         // axis bounds mirror the plotted (already converted) values
         final float axisMin = (float) units.convert(quantity, 0);
         final float axisMax = (float) units.convert(quantity, Math.max(35, temperatureAccumulator.getMax() + 5));
@@ -534,7 +536,7 @@ public class DefaultWorkoutCharts {
                 "temperature",
                 context.getString(R.string.menuitem_temperature),
                 ActivitySummaryEntries.GROUP_TEMPERATURE,
-                new LineData(dataset),
+                lineData,
                 new DecimalValueFormatter(units.decimals(quantity)),
                 unitString,
                 lineChart -> {
@@ -555,21 +557,23 @@ public class DefaultWorkoutCharts {
         final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.DISTANCE;
         final String unitString = getUnitString(context, units.token(quantity));
         final String label = String.format("%s(%s)", context.getString(R.string.distance), unitString);
-        final LineDataSet dataset = createLineDataSet(context, convertPoints(distancePoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_distance));
+        final LineData lineData = createGappedLineData(context, convertPoints(distancePoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_distance));
         return new WorkoutChart(
                 "chart_distance",
                 context.getString(R.string.distance),
                 ActivitySummaryEntries.GROUP_DISTANCE,
-                new LineData(dataset),
+                lineData,
                 new DecimalValueFormatter(units.decimals(quantity)),
                 unitString
         );
     }
 
     private static WorkoutChart createBodyEnergyChart(final Context context,
-                                                  final List<Entry> bodyEnergyPoints) {
+                                                      final List<Entry> bodyEnergyPoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.body_energy), getUnitString(context, UNIT_PERCENTAGE));
-        final LineDataSet dataset = createLineDataSet(context, bodyEnergyPoints, label, ContextCompat.getColor(context, R.color.chart_line_body_energy));
+        // Body energy is a slowly-changing reserve metric, so it's safe to interpolate across
+        // a gap rather than break the segment.
+        final LineData lineData = createLineData(context, bodyEnergyPoints, label, ContextCompat.getColor(context, R.color.chart_line_body_energy));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -580,16 +584,18 @@ public class DefaultWorkoutCharts {
                 "chart_body_energy",
                 context.getString(R.string.body_energy),
                 ActivitySummaryEntries.GROUP_TRAINING_EFFECT,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_PERCENTAGE)
         );
     }
 
     private static WorkoutChart createStaminaChart(final Context context,
-                                                      final List<Entry> staminaPoints) {
+                                                   final List<Entry> staminaPoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.stamina), getUnitString(context, UNIT_PERCENTAGE));
-        final LineDataSet dataset = createLineDataSet(context, staminaPoints, label, ContextCompat.getColor(context, R.color.chart_line_stamina));
+        // Stamina is a slowly draining/recovering reserve, so it's safe to interpolate across
+        // a gap rather than break the segment.
+        final LineData lineData = createLineData(context, staminaPoints, label, ContextCompat.getColor(context, R.color.chart_line_stamina));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -600,24 +606,24 @@ public class DefaultWorkoutCharts {
                 "chart_stamina",
                 context.getString(R.string.stamina),
                 ActivitySummaryEntries.GROUP_TRAINING_EFFECT,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_PERCENTAGE)
         );
     }
 
     private static WorkoutChart createStepLengthChart(final Context context,
-                                                  final List<Entry> stepLengthPoints) {
+                                                      final List<Entry> stepLengthPoints) {
         final WorkoutChartUnits units = chartUnits();
         final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.STEP_LENGTH;
         final String unitString = getUnitString(context, units.token(quantity));
         final String label = String.format("%s(%s)", context.getString(R.string.step_length), unitString);
-        final LineDataSet dataset = createLineDataSet(context, convertPoints(stepLengthPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_step_length));
+        final LineData lineData = createGappedLineData(context, convertPoints(stepLengthPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_step_length));
         return new WorkoutChart(
                 "chart_step_length",
                 context.getString(R.string.step_length),
                 ActivitySummaryEntries.GROUP_STEPS,
-                new LineData(dataset),
+                lineData,
                 new DecimalValueFormatter(units.decimals(quantity)),
                 unitString
         );
@@ -626,7 +632,9 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createCnsToxicityChart(final Context context,
                                                        final List<Entry> cnsToxicityPoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.diving_cns_toxicity), getUnitString(context, UNIT_PERCENTAGE));
-        final LineDataSet dataset = createLineDataSet(context, cnsToxicityPoints, label, ContextCompat.getColor(context, R.color.chart_cns_toxicity));
+        // CNS toxicity decays continuously over time (even during a pause), so it's safe to
+        // interpolate across a gap rather than break the segment.
+        final LineData lineData = createLineData(context, cnsToxicityPoints, label, ContextCompat.getColor(context, R.color.chart_cns_toxicity));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -637,16 +645,18 @@ public class DefaultWorkoutCharts {
                 "chart_cns_toxicity",
                 context.getString(R.string.diving_cns_toxicity),
                 ActivitySummaryEntries.GROUP_DIVING,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_PERCENTAGE)
         );
     }
 
     private static WorkoutChart createN2LoadChart(final Context context,
-                                                       final List<Entry> n2LoadPoints) {
+                                                  final List<Entry> n2LoadPoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.diving_nitrogen_load), getUnitString(context, UNIT_PERCENTAGE));
-        final LineDataSet dataset = createLineDataSet(context, n2LoadPoints, label, ContextCompat.getColor(context, R.color.chart_n2_load));
+        // N2 load changes continuously over time (even during a pause, as nitrogen off-gasses),
+        // so it's safe to interpolate across a gap rather than break the segment.
+        final LineData lineData = createLineData(context, n2LoadPoints, label, ContextCompat.getColor(context, R.color.chart_n2_load));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -657,7 +667,7 @@ public class DefaultWorkoutCharts {
                 "chart_n2_load",
                 context.getString(R.string.diving_nitrogen_load),
                 ActivitySummaryEntries.GROUP_DIVING,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_PERCENTAGE)
         );
@@ -666,7 +676,7 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createVerticalOscillationChart(final Context context,
                                                                final List<Entry> verticalOscillationPoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.vertical_oscillation), getUnitString(context, UNIT_MM));
-        final LineDataSet dataset = createLineDataSet(context, verticalOscillationPoints, label, ContextCompat.getColor(context, R.color.chart_line_stride));
+        final LineData lineData = createGappedLineData(context, verticalOscillationPoints, label, ContextCompat.getColor(context, R.color.chart_line_stride));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -677,7 +687,7 @@ public class DefaultWorkoutCharts {
                 "chart_vertical_oscillation",
                 context.getString(R.string.vertical_oscillation),
                 ActivitySummaryEntries.GROUP_RUNNING_FORM,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_MM)
         );
@@ -686,7 +696,7 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createStanceTimePercentChart(final Context context,
                                                              final List<Entry> stanceTimePercentPoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.stance_time_percent), getUnitString(context, UNIT_PERCENTAGE));
-        final LineDataSet dataset = createLineDataSet(context, stanceTimePercentPoints, label, ContextCompat.getColor(context, R.color.chart_line_swolf));
+        final LineData lineData = createGappedLineData(context, stanceTimePercentPoints, label, ContextCompat.getColor(context, R.color.chart_line_swolf));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -697,7 +707,7 @@ public class DefaultWorkoutCharts {
                 "chart_stance_time_percent",
                 context.getString(R.string.stance_time_percent),
                 ActivitySummaryEntries.GROUP_RUNNING_FORM,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_PERCENTAGE)
         );
@@ -706,7 +716,7 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createStanceTimeChart(final Context context,
                                                       final List<Entry> stanceTimePoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.ground_contact_time), getUnitString(context, UNIT_MILLISECONDS));
-        final LineDataSet dataset = createLineDataSet(context, stanceTimePoints, label, ContextCompat.getColor(context, R.color.chart_line_step_length));
+        final LineData lineData = createGappedLineData(context, stanceTimePoints, label, ContextCompat.getColor(context, R.color.chart_line_step_length));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -717,7 +727,7 @@ public class DefaultWorkoutCharts {
                 "chart_stance_time",
                 context.getString(R.string.ground_contact_time),
                 ActivitySummaryEntries.GROUP_RUNNING_FORM,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_MILLISECONDS)
         );
@@ -726,7 +736,7 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createVerticalRatioChart(final Context context,
                                                          final List<Entry> verticalRatioPoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.vertical_ratio), getUnitString(context, UNIT_PERCENTAGE));
-        final LineDataSet dataset = createLineDataSet(context, verticalRatioPoints, label, ContextCompat.getColor(context, R.color.chart_line_stamina));
+        final LineData lineData = createGappedLineData(context, verticalRatioPoints, label, ContextCompat.getColor(context, R.color.chart_line_stamina));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -737,7 +747,7 @@ public class DefaultWorkoutCharts {
                 "chart_vertical_ratio",
                 context.getString(R.string.vertical_ratio),
                 ActivitySummaryEntries.GROUP_RUNNING_FORM,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_PERCENTAGE)
         );
@@ -746,7 +756,7 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createStanceTimeBalanceChart(final Context context,
                                                              final List<Entry> stanceTimeBalancePoints) {
         final String label = String.format("%s(%s)", context.getString(R.string.ground_contact_time_balance), getUnitString(context, UNIT_PERCENTAGE));
-        final LineDataSet dataset = createLineDataSet(context, stanceTimeBalancePoints, label, ContextCompat.getColor(context, R.color.chart_line_body_energy));
+        final LineData lineData = createGappedLineData(context, stanceTimeBalancePoints, label, ContextCompat.getColor(context, R.color.chart_line_body_energy));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -757,7 +767,7 @@ public class DefaultWorkoutCharts {
                 "chart_stance_time_balance",
                 context.getString(R.string.ground_contact_time_balance),
                 ActivitySummaryEntries.GROUP_RUNNING_FORM,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 getUnitString(context, UNIT_PERCENTAGE)
         );
@@ -766,7 +776,7 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createPerformanceConditionChart(final Context context,
                                                                 final List<Entry> performanceConditionPoints) {
         final String label = context.getString(R.string.performance_condition);
-        final LineDataSet dataset = createLineDataSet(context, performanceConditionPoints, label, ContextCompat.getColor(context, R.color.chart_line_elevation));
+        final LineData lineData = createGappedLineData(context, performanceConditionPoints, label, ContextCompat.getColor(context, R.color.chart_line_elevation));
         final ValueFormatter valueFormatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -777,7 +787,7 @@ public class DefaultWorkoutCharts {
                 "chart_performance_condition",
                 context.getString(R.string.performance_condition),
                 ActivitySummaryEntries.GROUP_PERFORMANCE_CONDITION,
-                new LineData(dataset),
+                lineData,
                 valueFormatter,
                 ""
         );
@@ -811,6 +821,80 @@ public class DefaultWorkoutCharts {
             converted.add(new Entry(entry.getX(), (float) units.convert(quantity, entry.getY())));
         }
         return converted;
+    }
+
+    // A gap between consecutive points larger than this multiple of the series' median
+    // sample gap starts a new segment, and is not bridged by an interpolated line.
+    private static final float GAP_THRESHOLD_FACTOR = 5f;
+
+    // Failsafe for devices with noisy data / too many gaps.
+    private static final int MAX_SEGMENTS = 50;
+
+    /**
+     * Splits a chronological entry list into segments, starting a new segment after any gap that is
+     * larger than to the series' own median sample gap (e.g. a paused workout, or a sensor dropout).
+     * Each segment is later rendered as its own {@link LineDataSet}, so the chart does not draw a
+     * misleading interpolated line across the gap.
+     */
+    private static List<List<Entry>> splitOnGaps(final List<Entry> entries) {
+        final List<List<Entry>> segments = new ArrayList<>();
+        if (entries.isEmpty()) {
+            return segments;
+        }
+        if (entries.size() < 3) {
+            segments.add(entries);
+            return segments;
+        }
+
+        final float[] gaps = new float[entries.size() - 1];
+        for (int i = 1; i < entries.size(); i++) {
+            gaps[i - 1] = entries.get(i).getX() - entries.get(i - 1).getX();
+        }
+        final float[] sortedGaps = gaps.clone();
+        Arrays.sort(sortedGaps);
+        final float medianGap = sortedGaps[sortedGaps.length / 2];
+        if (medianGap <= 0) {
+            // Should never happen? No meaningful gap to compare against (e.g. duplicate timestamps), keep as one segment.
+            segments.add(entries);
+            return segments;
+        }
+
+        final float gapThreshold = medianGap * GAP_THRESHOLD_FACTOR;
+        List<Entry> currentSegment = new LinkedList<>();
+        currentSegment.add(entries.get(0));
+        for (int i = 1; i < entries.size(); i++) {
+            if (gaps[i - 1] > gapThreshold) {
+                segments.add(currentSegment);
+                if (segments.size() >= MAX_SEGMENTS) {
+                    segments.clear();
+                    segments.add(entries);
+                    return segments;
+                }
+                currentSegment = new LinkedList<>();
+            }
+            currentSegment.add(entries.get(i));
+        }
+        segments.add(currentSegment);
+        return segments;
+    }
+
+    private static LineData createGappedLineData(final Context context,
+                                                 final List<Entry> entries,
+                                                 final String label,
+                                                 final int color) {
+        final List<ILineDataSet> dataSets = new ArrayList<>();
+        // Every segment keeps the same label
+        for (final List<Entry> segment : splitOnGaps(entries)) {
+            dataSets.add(createLineDataSet(context, segment, label, color));
+        }
+        return new LineData(dataSets);
+    }
+
+    private static LineData createLineData(final Context context,
+                                           final List<Entry> entries,
+                                           final String label,
+                                           final int color) {
+        return new LineData(createLineDataSet(context, entries, label, color));
     }
 
     public static LineDataSet createLineDataSet(final Context context,

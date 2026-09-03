@@ -46,6 +46,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractBLEDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminBodyEnergySampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.GarminSolarChargeSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminHeartRateRestingSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminHrvSummarySampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminHrvValueSampleProvider;
@@ -89,6 +90,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityTrackProvider;
 import nodomain.freeyourgadget.gadgetbridge.model.BodyEnergySample;
+import nodomain.freeyourgadget.gadgetbridge.model.SolarChargeSample;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
 import nodomain.freeyourgadget.gadgetbridge.model.FitActivityTrackProvider;
 import nodomain.freeyourgadget.gadgetbridge.model.GpxActivityTrackProvider;
@@ -106,6 +108,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.BluetoothCompanyIdentif
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminSupport;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs;
+import nodomain.freeyourgadget.gadgetbridge.widgets.DeviceWidgetsProvider;
 
 public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     @Override
@@ -193,6 +196,11 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
         return new GarminChartsProvider();
     }
 
+    @Override
+    public DeviceWidgetsProvider getWidgetsProvider() {
+        return GarminWidgetsProvider.INSTANCE;
+    }
+
     @Nullable
     @Override
     public ActivitySummaryParser getActivitySummaryParser(final GBDevice device, final Context context) {
@@ -231,6 +239,11 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     @Override
     public TimeSampleProvider<? extends BodyEnergySample> getBodyEnergySampleProvider(final GBDevice device, final DaoSession session) {
         return new GarminBodyEnergySampleProvider(device, session);
+    }
+
+    @Override
+    public TimeSampleProvider<? extends SolarChargeSample> getSolarChargeSampleProvider(final GBDevice device, final DaoSession session) {
+        return new GarminSolarChargeSampleProvider(device, session);
     }
 
     @Override

@@ -1924,6 +1924,15 @@
     <string name="steps_distance_unit">%1$,.2f km</string>
     <string name="body_energy_gained">Gained</string>
     <string name="body_energy_lost">Lost</string>
+    <string name="solar_charging_lux_hours">Lux hours</string>
+    <string name="solar_charging_peak_intensity">Peak intensity</string>
+    <string name="solar_charging_battery_gain">Battery gain</string>
+    <string name="solar_charging_lux_hours_avg">Lux hours AVG</string>
+    <string name="solar_charging_battery_gain_avg">Battery gain AVG</string>
+    <string name="solar_charging_lux_hours_total">Lux hours total</string>
+    <string name="solar_charging_battery_gain_total">Battery gain total</string>
+    <string name="minutes_unit">min</string>
+    <string name="lux_hours_unit">K</string>
     <string name="body_energy_legend_level">Body Energy Level</string>
     <string name="activity_type_biking">Biking</string>
     <string name="activity_type_treadmill">Treadmill</string>
@@ -2359,6 +2368,7 @@
     <string name="devicetype_huawei_freebuds_6" translatable="false">Huawei FreeBuds 6</string>
     <string name="devicetype_femometer_vinca2" translatable="false">Femometer Vinca II</string>
     <string name="devicetype_xiaomi_watch_lite" translatable="false">Xiaomi Watch Lite</string>
+    <string name="devicetype_zeblaze_beyond_3_pro" translatable="false">Zeblaze Beyond 3 Pro</string>
     <string name="devicetype_redmiwatch3active" translatable="false">Redmi Watch 3 Active</string>
     <string name="devicetype_redmiwatch3" translatable="false">Redmi Watch 3</string>
     <string name="devicetype_redmi_buds_3_pro" translatable="false">Redmi Buds 3 Pro</string>
@@ -2489,6 +2499,9 @@
     <string name="metric_garmin_training_readiness">Training Readiness</string>
     <string name="menuitem_race_predictor">Race Predictor</string>
     <string name="p_raceprediction" translatable="false">raceprediction</string>
+    <string name="menuitem_solar_charging">Solar Charging</string>
+    <string name="solar_charging_intensity_chart_label">Solar Charging Intensity</string>
+    <string name="p_solar_charging" translatable="false">solarcharging</string>
     <string name="metric_generic_race_predictor_5k">5K</string>
     <string name="metric_generic_race_predictor_10k">10K</string>
     <string name="metric_generic_race_predictor_half_marathon">Half Marathon</string>
@@ -3412,6 +3425,7 @@
     <string name="devicetype_galaxybuds_3_pro" translatable="false">Galaxy Buds3 Pro</string>
     <string name="devicetype_sanitas_sbm_67" translatable="false">Sanitas SBM67</string>
     <string name="devicetype_silvercrest_sbm_67" translatable="false">SilverCrest SBM67</string>
+    <string name="devicetype_beurer_bm_69" translatable="false">Beurer BM69</string>
     <string name="nothing_prefs_inear_summary">Play/pause the music depending on whether you wear the earbuds</string>
     <string name="nothing_prefs_inear_title">In-Ear detection</string>
     <string name="prefs_in_ear_detection_summary">Play calls through your earbuds when they are in your ears</string>
@@ -4472,6 +4486,19 @@
     <string name="pref_dashboard_select_devices_summary">Combine activity data from specific devices for the totals on the dashboard</string>
     <string name="pref_dashboard_widget_today_hr_interval_title">Heart rate interval</string>
     <string name="pref_dashboard_widget_today_hr_interval_summary">The amount of minutes the chart shows \"worn\" after each successful heart rate measurement</string>
+    <string name="pref_dashboard_manage_widgets_title">Manage widgets</string>
+    <string name="pref_dashboard_manage_widgets_summary">Add, remove, reorder and configure individual dashboard widgets</string>
+    <string name="widgets_add_widget">Add widget</string>
+    <string name="widgets_duplicate">Duplicate</string>
+    <string name="widgets_remove">Remove</string>
+    <string name="widgets_drag_to_reorder">Drag to reorder</string>
+    <string name="widgets_more_options">More options</string>
+    <string name="pref_widget_devices_mode_inherit">Inherit from dashboard</string>
+    <string name="pref_widget_columns_title">Width</string>
+    <string name="pref_widget_columns_one">1 column</string>
+    <string name="pref_widget_columns_two">2 columns</string>
+    <string name="pref_widget_title_title">Custom title</string>
+    <string name="pref_widget_title_summary">Overrides the widget\'s default title. Leave empty to use the default.</string>
     <plurals name="amount_of_days">
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>

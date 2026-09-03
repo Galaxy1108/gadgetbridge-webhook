@@ -391,6 +391,8 @@ public class ActivitySummaryEntries {
     public static final String UNIT_INCH = "unit_inch";
     /// @see R.string.unit_fahrenheit
     public static final String UNIT_FAHRENHEIT = "unit_fahrenheit";
+    public static final String UNIT_MINUTES = "minutes_unit";
+    public static final String UNIT_LUX_HOURS_KILO = "lux_hours_unit";
 
     public static final String GROUP_PACE = "Pace";
     public static final String GROUP_ACTIVITY = "Activity";
