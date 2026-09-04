@@ -66,6 +66,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.femometer.FemometerVinca2Dev
 import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.ak102.Ak102Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.ak75.Ak75ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.ak86.Ak86Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.colmi.ColmiI31Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitpro.FitProDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitpro.colacao.ColaCao21Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitpro.colacao.ColaCao23Coordinator;
@@ -1151,6 +1152,7 @@ public enum DeviceType {
     COLMI_R12(ColmiR12Coordinator.class),
     H59(H59Coordinator.class),
     COLMI_I28_ULTRA(ColmiI28UltraCoordinator.class),
+    COLMI_I31(ColmiI31Coordinator.class),
     COLMI_P76(ColmiP76Coordinator.class),
     COLMI_P80(ColmiP80Coordinator.class),
     COLMI_V72(ColmiV72Coordinator.class),
