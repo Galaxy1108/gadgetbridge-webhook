@@ -59,6 +59,16 @@ public class DeviceInformationMessage extends GFDIMessage {
         final String bluetoothFriendlyName = reader.readString();
         final String deviceName = reader.readString();
         final String deviceModel = reader.readString();
+        if (0 < reader.remaining()) {
+            final int hasMac = reader.readByte();
+            if (hasMac == 1) {
+                byte[] ble = reader.readBytes(6);
+                byte[] bt = reader.readBytes(6);
+            }
+            if (0 < reader.remaining()) {
+                final int unk = reader.readByte();
+            }
+        }
 
         // send reply so "Connected with X" shows
         return new DeviceInformationMessage(garminMessage, protocolVersion, productNumber, unitNumber, softwareVersion, maxPacketSize, bluetoothFriendlyName, deviceName, deviceModel, true);

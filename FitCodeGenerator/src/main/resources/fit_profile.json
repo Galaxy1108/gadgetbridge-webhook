@@ -4181,6 +4181,7 @@
     {"manufacturer":1,"product":3847,"name":"Forerunner 45 Plus","type":"DeviceType.GARMIN_FORERUNNER_45_PLUS"},
     {"manufacturer":1,"product":3850,"name":"MARQ Golfer"},
     {"manufacturer":1,"product":3851,"name":"Venu 2 Plus","type":"DeviceType.GARMIN_VENU_2_PLUS"},
+    {"manufacturer":1,"product":3852,"name":"Descent S1"},
     {"manufacturer":1,"product":3865,"name":"AG3335M"},
     {"manufacturer":1,"product":3866,"name":"AG3335MN"},
     {"manufacturer":1,"product":3869,"name":"Forerunner 55","type":"DeviceType.GARMIN_FORERUNNER_55"},
