@@ -10,7 +10,9 @@ message DeviceStatusService {
     optional RemoteDeviceBatteryStatusResponse remote_device_battery_status_response = 3;
     optional ActivityStatusRequest activity_status_request = 4;
     optional ActivityStatusResponse activity_status_response = 5;
+    optional Message7 unk7 = 7;
     optional DeviceUnlockedNotification device_unlocked_notification = 9;
+    optional Message14 unk14 = 14;
 
     message DeviceUnlockedNotification {
     }
@@ -45,5 +47,13 @@ message DeviceStatusService {
         UNKNOWN_RESPONSE_STATUS = 0;
         OK = 1;
         NO_REMOTE_DEVICE = 2;
+    }
+
+    message Message7 {
+        optional uint32 unk1 = 1;
+    }
+
+    message Message14 {
+        optional uint32 unk1 = 1;
     }
 }

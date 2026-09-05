@@ -19,6 +19,16 @@ message SettingsService {
 
   optional InitRequest initRequest = 8;
   optional InitResponse initResponse = 9;
+
+  optional Message11 unk11 = 11;
+  optional Message13 unk13 = 13;
+
+  message Message11 {
+    optional uint32 unk1 = 1;
+  }
+
+  message Message13 {
+  }
 }
 
 message ScreenDefinitionRequest {
