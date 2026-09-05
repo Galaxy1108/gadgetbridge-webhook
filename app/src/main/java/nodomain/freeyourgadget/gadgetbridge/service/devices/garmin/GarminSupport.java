@@ -1627,41 +1627,105 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                     }
                     return;
                 }
-                LOG.debug("Inflated to {} bytes", inflated.length);
 
-                final File file;
-                try {
-                    final File cacheDir = getContext().getExternalCacheDir();
-                    final File inflateDir = new File(cacheDir, "garmin-inflated");
-                    //noinspection ResultOfMethodCallIgnored
-                    inflateDir.mkdirs();
-                    file = File.createTempFile("activity-files-import", ".fit", inflateDir);
-                    file.deleteOnExit();
-                    FileUtils.copyStreamToFile(new ByteArrayInputStream(inflated), file);
-                } catch (final IOException e) {
-                    LOG.error("Failed to create temp file for activity file", e);
-                    if (currentlyDownloading != null && currentlyDownloading.getSyncFile() != null) {
-                        currentlyDownloading = null;
-                    }
-                    return;
+                LOG.debug("Inflated {} bytes", inflated.length);
+
+                final GdiFileSyncService.File gdiFile = (currentlyDownloading != null) ? currentlyDownloading.getSyncFile() : null;
+                String typeName;
+                FileType.FILETYPE filetype;
+                if(gdiFile != null && gdiFile.hasType() && gdiFile.getType().hasName()) {
+                    typeName = gdiFile.getType().getName();
+                    filetype = FileType.FILETYPE.findByTypeName(typeName);
+                } else {
+                    typeName = null;
+                    filetype = null;
                 }
 
-                LOG.debug("Dumped inflated bytes to {}", file.getAbsolutePath());
-
-                try {
-                    final FitImporter fitImporter = new FitImporter(getContext(), gbDevice);
-                    fitImporter.importFile(file, false);
-                } catch (final Exception e) {
-                    LOG.error("Failed to parse file as fit", e);
-                    if (currentlyDownloading != null && currentlyDownloading.getSyncFile() != null) {
-                        currentlyDownloading = null;
-                    }
-                    return;
+                String fileExtension = FileUtils.guessFileExtension(inflated);
+                final boolean assumeFit;
+                if (filetype != null) {
+                    assumeFit = filetype.isFitFile();
+                } else if (fileExtension != null) {
+                    assumeFit = "fit".equals(fileExtension);
+                } else {
+                    assumeFit = false;
+                }
+                if (fileExtension == null){
+                    fileExtension = "bin";
+                }
+                if (typeName == null) {
+                    typeName = fileExtension.toUpperCase(Locale.ROOT);
                 }
 
-                if (!getKeepActivityDataOnDevice()) { // delete file from watch upon successful download
+                LOG.debug("Identified file as typeName={} fileExtension={} assumeFit={}", typeName, fileExtension, assumeFit);
+
+                if(assumeFit) {
+                    final File file;
+                    try {
+                        final File cacheDir = getContext().getExternalCacheDir();
+                        final File inflateDir = new File(cacheDir, "garmin-inflated");
+                        //noinspection ResultOfMethodCallIgnored
+                        inflateDir.mkdirs();
+                        file = File.createTempFile("activity-files-import", ".fit", inflateDir);
+                        file.deleteOnExit();
+                        FileUtils.copyStreamToFile(new ByteArrayInputStream(inflated), file);
+                    } catch (final IOException e) {
+                        LOG.error("Failed to create temp file for activity file", e);
+                        if (currentlyDownloading != null && currentlyDownloading.getSyncFile() != null) {
+                            currentlyDownloading = null;
+                        }
+                        return;
+                    }
+
+                    LOG.debug("Dumped inflated bytes to {}", file.getAbsolutePath());
+
+                    try {
+                        final FitImporter fitImporter = new FitImporter(getContext(), gbDevice);
+                        fitImporter.importFile(file, false);
+                    } catch (final Exception e) {
+                        LOG.error("Failed to parse file as fit", e);
+                        if (currentlyDownloading != null && currentlyDownloading.getSyncFile() != null) {
+                            currentlyDownloading = null;
+                        }
+                        return;
+                    }
+                } else {
+                    try {
+                        Date fileDate = null;
+                        if(gdiFile != null && gdiFile.hasTimestamp()) {
+                            int ts = gdiFile.getTimestamp();
+                            if(ts != 0){
+                                fileDate = new Date(GarminTimeUtils.garminTimestampToJavaMillis(ts));
+                            }
+                        }
+                        String suffix = "";
+                        if(gdiFile != null && gdiFile.hasId()) {
+                            suffix = new UUID(gdiFile.getId().getId1(), gdiFile.getId().getId2()).toString();
+                        }
+                        String fileName =  GarminUtils.buildExportPath(typeName, fileDate, suffix, fileExtension);
+                        File deviceDir = getWritableExportDirectory();
+                        File outputFile = new File(deviceDir, fileName);
+                        LOG.info("Saving {} bytes to {}", inflated.length, outputFile.getAbsolutePath());
+                        final File parentFile = outputFile.getParentFile();
+                        parentFile.mkdirs();
+                        // overwrite the file even if it exists - meta data of non-FIT files not always available
+                        // potentially resulting in the same name for a newer file
+                        FileUtils.writeToFile(inflated, outputFile);
+                        if (fileDate != null) {
+                            outputFile.setLastModified(fileDate.getTime());
+                        }
+                    } catch (final IOException e) {
+                        LOG.error("Failed to save file", e);
+                        if (currentlyDownloading != null && currentlyDownloading.getSyncFile() != null) {
+                            currentlyDownloading = null;
+                        }
+                        return;
+                    }
+                }
+
+                if (gdiFile != null && !getKeepActivityDataOnDevice()) { // delete file from watch upon successful download
                     final GdiFileSyncService.FileSyncService syncedCommand = protocolBufferHandler.getFileSyncServiceHandler()
-                            .markSynced(currentlyDownloading.getSyncFile());
+                            .markSynced(gdiFile);
                     if (syncedCommand != null) {
                         sendProtobufRequest("mark file as synced",
                                 Smart.newBuilder().setFileSyncService(syncedCommand).build());
