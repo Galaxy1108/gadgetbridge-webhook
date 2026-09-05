@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin
 
+import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.deviceevents.FileDownloadedDeviceEvent
@@ -34,11 +35,18 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
             fileSyncService.hasFileModifiedFlags() -> handleFileModifiedFlags(fileSyncService.fileModifiedFlags)
             fileSyncService.hasTransferStatusRequest() -> handleTransferStatusRequest(fileSyncService.transferStatusRequest)
             fileSyncService.hasFileUpdateNotification() -> handleFileUpdateNotification(fileSyncService.fileUpdateNotification)
+            fileSyncService.hasStartSyncNotification() -> handleStartSyncNotification(fileSyncService.startSyncNotification)
             else -> {
                 LOG.warn("Unhandled file sync service: {}", fileSyncService)
                 return null
             }
         }
+    }
+
+    private fun handleStartSyncNotification(startSyncNotification: GdiFileSyncService.StartSyncNotification): GdiFileSyncService.FileSyncService? {
+        LOG.debug("Got start sync notification: {}", startSyncNotification)
+        deviceSupport.onFetchRecordedData(RecordedDataTypes.TYPE_ALL)
+        return null
     }
 
 
