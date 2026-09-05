@@ -981,7 +981,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             LOG.debug("No more files to download, will process pending files");
 
             final List<File> filesToProcess;
-            try (DBHandler handler = GBApplication.acquireDB()) {
+            try (DBHandler handler = GBApplication.acquireDbReadOnly()) {
                 final DaoSession session = handler.getDaoSession();
 
                 final PendingFileProvider pendingFileProvider = new PendingFileProvider(gbDevice, session);
