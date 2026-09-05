@@ -21,6 +21,7 @@ import static nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutVa
 import android.content.Context;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.data.Entry;
@@ -40,6 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import de.greenrobot.dao.query.CloseableListIterator;
@@ -575,31 +577,34 @@ public class HuaweiWorkoutGbParser implements ActivitySummaryParser {
         };
     }
 
-    public void parseWorkout(Long workoutId) {
+    @Nullable
+    public BaseActivitySummary parseWorkout(final Long workoutId) {
         LOG.debug("Parsing workout ID {}", workoutId);
         if (workoutId == null)
-            return;
+            return null;
 
         try (DBHandler db = GBApplication.acquireDB()) {
             final DaoSession session = db.getDaoSession();
             final Device device = DBHelper.getDevice(gbDevice, session);
-            parseWorkout(session, workoutId, device.getId());
+            return parseWorkout(session, workoutId, Objects.requireNonNull(device.getId()));
         } catch (Exception e) {
             GB.toast("Exception parsing workout data", Toast.LENGTH_SHORT, GB.ERROR, e);
             LOG.error("Exception parsing workout data", e);
         }
+
+        return null;
     }
 
-    public void parseWorkout(final DaoSession session, final Long workoutId, final long deviceId) {
+    public BaseActivitySummary parseWorkout(final DaoSession session, final Long workoutId, final long deviceId) {
         if (workoutId == null)
-            return;
+            return null;
 
         QueryBuilder<HuaweiWorkoutSummarySample> qbSummary = session.getHuaweiWorkoutSummarySampleDao().queryBuilder().where(
                 HuaweiWorkoutSummarySampleDao.Properties.WorkoutId.eq(workoutId)
         );
         List<HuaweiWorkoutSummarySample> summarySamples = qbSummary.build().list();
         if (summarySamples.size() != 1)
-            return;
+            return null;
         HuaweiWorkoutSummarySample summary = summarySamples.get(0);
 
         final BaseActivitySummary baseSummary = ActivitySummaryParser.findOrCreateBaseActivitySummary(
@@ -612,6 +617,8 @@ public class HuaweiWorkoutGbParser implements ActivitySummaryParser {
         updateBaseSummary(session, summary, baseSummary, activityPoints);
 
         session.getBaseActivitySummaryDao().insertOrReplace(baseSummary);
+
+        return baseSummary;
     }
 
     public static Integer parseAndValidatePostureType(final String postureType) {
