@@ -33,11 +33,19 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
             fileSyncService.hasFileResponse() -> handleFileResponse(fileSyncService.fileResponse)
             fileSyncService.hasFileModifiedFlags() -> handleFileModifiedFlags(fileSyncService.fileModifiedFlags)
             fileSyncService.hasTransferStatusRequest() -> handleTransferStatusRequest(fileSyncService.transferStatusRequest)
+            fileSyncService.hasFileUpdateNotification() -> handleFileUpdateNotification(fileSyncService.fileUpdateNotification)
             else -> {
                 LOG.warn("Unhandled file sync service: {}", fileSyncService)
                 return null
             }
         }
+    }
+
+
+    private fun handleFileUpdateNotification(fileUpdateNotification: GdiFileSyncService.FileUpdateNotification): GdiFileSyncService.FileSyncService? {
+        LOG.debug("Got file updated flags: {}", fileUpdateNotification)
+        // no action required
+        return null
     }
 
     private fun handleFileModifiedFlags(fileModifiedFlags: GdiFileSyncService.FileModifiedFlags): GdiFileSyncService.FileSyncService? {
