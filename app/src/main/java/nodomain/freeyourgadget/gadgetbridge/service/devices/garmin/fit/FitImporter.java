@@ -114,6 +114,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitMonitoringHrData;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitMonitoringInfo;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitNap;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitPad;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitPhysiologicalMetrics;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitRacePrediction;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitRecord;
@@ -530,6 +531,8 @@ public class FitImporter {
                     sample.setMetric(MetricSample.Metric.GARMIN_MET_MAX_VO2, vo2Max, maxMetCategory);
                     genericMetricSamples.add(sample);
                 }
+            } else if (record instanceof FitPad) {
+                // nothing to do - this is just a spacer
             } else {
                 LOG.trace("Unknown record: {}", record);
 
