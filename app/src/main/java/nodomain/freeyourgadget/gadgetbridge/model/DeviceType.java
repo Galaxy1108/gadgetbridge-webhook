@@ -280,6 +280,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.Y6Coordinat
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfitpro.watches.DM58Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gree.GreeAcCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.hama.fit6900.HamaFit6900DeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.GarettEvaCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.haylou.HaylouS35AncCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.hplus.EXRIZUK8Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.hplus.HPlusCoordinator;
@@ -1174,6 +1175,7 @@ public enum DeviceType {
     R50PRO(R50ProCoordinator.class),
     RAINBUVVY_T97(RainbuvvyT97Coordinator.class),
     MT55(MT55Coordinator.class),
+    GARETT_EVA(GarettEvaCoordinator.class),
     ADVAN_WATCH_SE1_AI(AdvanWatchSE1AICoordinator.class),
     B_AND_W_P_SERIES(BandWPSeriesDeviceCoordinator.class),
     EARFUN_AIR_S(EarFunAirSCoordinator.class),

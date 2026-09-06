@@ -2424,6 +2424,7 @@
     <string name="devicetype_viran_c29" translatable="false">Viran C29</string>
     <string name="devicetype_r50pro" translatable="false">R50Pro</string>
     <string name="devicetype_rainbuvvy_t97" translatable="false">Rainbuvvy T97</string>
+    <string name="devicetype_garett_eva" translatable="false">Garret Eva</string>
     <string name="devicetype_advan_watch_se1ai" translatable="false">Advan Watch SE1 AI</string>
     <string name="devicetype_mt55" translatable="false">MT55</string>
     <string name="devicetype_ultrahuma_ring_air" translatable="false">Ultrahuman Ring AIR</string>
