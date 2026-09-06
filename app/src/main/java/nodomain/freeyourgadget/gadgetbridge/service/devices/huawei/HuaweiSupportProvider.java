@@ -93,6 +93,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Notifications
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Weather;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.ui.HuaweiStressCalibrationFragment;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
+import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgDataSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgDataSampleDao;
@@ -3183,10 +3184,13 @@ public class HuaweiSupportProvider {
                             track.addTrackPoint(activityPoint);
                         }
 
-                        AutoGpxExporter.doExport(getContext(), getDevice(), null, track);
-                        AutoFitExporter.doExport(getContext(), getDevice(), null, track);
+                        final BaseActivitySummary summary = new HuaweiWorkoutGbParser(getDevice(), getContext())
+                                .parseWorkout(databaseId);
 
-                        new HuaweiWorkoutGbParser(getDevice(), getContext()).parseWorkout(databaseId);
+                        if (summary != null) {
+                            AutoGpxExporter.doExport(getContext(), getDevice(), summary, track);
+                            AutoFitExporter.doExport(getContext(), getDevice(), summary, track);
+                        }
 
                         LOG.debug("Completed workout GPS parsing and inserting");
                         syncState.stopWorkoutGpsDownload();

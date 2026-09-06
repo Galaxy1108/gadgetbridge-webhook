@@ -114,6 +114,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitMonitoringHrData;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitMonitoringInfo;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitNap;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitPad;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitPhysiologicalMetrics;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitRacePrediction;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitRecord;
@@ -530,6 +531,8 @@ public class FitImporter {
                     sample.setMetric(MetricSample.Metric.GARMIN_MET_MAX_VO2, vo2Max, maxMetCategory);
                     genericMetricSamples.add(sample);
                 }
+            } else if (record instanceof FitPad) {
+                // nothing to do - this is just a spacer
             } else {
                 LOG.trace("Unknown record: {}", record);
 
@@ -582,35 +585,19 @@ public class FitImporter {
         try (DBHandler handler = GBApplication.acquireDB()) {
             final DaoSession session = handler.getDaoSession();
 
+            // specific rules
             switch (fileId.getType()) {
                 case ACTIVITY:
                     persistWorkout(finalExportFile, session, isReprocessing, fitFile);
                     break;
                 case MONITOR:
                     persistActivitySamples(session);
-                    persistAbstractSamples(spo2samples, new GarminSpo2SampleProvider(gbDevice, session));
-                    persistAbstractSamples(respiratoryRateSamples, new GarminRespiratoryRateSampleProvider(gbDevice, session));
-                    persistAbstractSamples(restingHrSamples, new GarminHeartRateRestingSampleProvider(gbDevice, session));
-                    persistAbstractSamples(stressSamples, new GarminStressSampleProvider(gbDevice, session));
-                    persistAbstractSamples(bodyEnergySamples, new GarminBodyEnergySampleProvider(gbDevice, session));
-                    persistAbstractSamples(solarChargeSamples, new GarminSolarChargeSampleProvider(gbDevice, session));
-                    persistAbstractSamples(restingMetabolicRateSamples, new GarminRestingMetabolicRateSampleProvider(gbDevice, session));
                     break;
                 case METRICS:
-                    persistAbstractSamples(trainingLoadAcuteSamples, new GenericTrainingLoadAcuteSampleProvider(gbDevice, session));
-                    persistAbstractSamples(trainingLoadChronicSamples, new GenericTrainingLoadChronicSampleProvider(gbDevice, session));
                     break;
                 case DEVICE_58:
-                    // Solar charge data (FitSolarCharge) has been observed here in practice,
-                    // not in MONITOR files, on Garmin Instinct 2 Solar (software 16.11).
-                    persistAbstractSamples(solarChargeSamples, new GarminSolarChargeSampleProvider(gbDevice, session));
                     break;
                 case SLEEP:
-                    persistAbstractSamples(events, new GarminEventSampleProvider(gbDevice, session));
-                    persistAbstractSamples(sleepStatsSamples, new GarminSleepStatsSampleProvider(gbDevice, session));
-                    persistAbstractSamples(napSamples, new GarminNapSampleProvider(gbDevice, session));
-                    persistAbstractSamples(sleepRestlessMomentsSamples, new GarminSleepRestlessMomentsSampleProvider(gbDevice, session));
-
                     // We may have samples, but not sleep samples - #4048
                     // 0 unmeasurable, 1 awake
                     final boolean anySleepSample = sleepStageSamples.stream()
@@ -622,25 +609,31 @@ public class FitImporter {
                     processRawSleepSamples(session);
                     break;
                 case HRV_STATUS:
-                    persistAbstractSamples(hrvSummarySamples, new GarminHrvSummarySampleProvider(gbDevice, session));
-                    persistAbstractSamples(hrvValueSamples, new GarminHrvValueSampleProvider(gbDevice, session));
                     break;
                 default:
-                    LOG.warn("Unable to handle fit file of type {}", fileId.getType());
+                    LOG.warn("No specific rules for FIT files of type {}", fileId.getType());
             }
-        } catch (final Exception e) {
-            GB.toast(context, "Error saving specific samples", Toast.LENGTH_LONG, GB.ERROR, e);
-        }
 
-        // these samples can occur in multiple FIT file types
-        try (DBHandler handler = GBApplication.acquireDB()) {
-            final DaoSession session = handler.getDaoSession();
-            final long deviceId = DBHelper.getDevice(gbDevice, session).getId();
-            final long userId = DBHelper.getUser(session).getId();
+            // some of these samples can occur in multiple FIT file types
             persistAbstractSamples(batterySamples, new BatteryLevelProvider(gbDevice, session));
+            persistAbstractSamples(bodyEnergySamples, new GarminBodyEnergySampleProvider(gbDevice, session));
+            persistAbstractSamples(events, new GarminEventSampleProvider(gbDevice, session));
+            persistAbstractSamples(hrvSummarySamples, new GarminHrvSummarySampleProvider(gbDevice, session));
+            persistAbstractSamples(hrvValueSamples, new GarminHrvValueSampleProvider(gbDevice, session));
+            persistAbstractSamples(napSamples, new GarminNapSampleProvider(gbDevice, session));
+            persistAbstractSamples(respiratoryRateSamples, new GarminRespiratoryRateSampleProvider(gbDevice, session));
+            persistAbstractSamples(restingHrSamples, new GarminHeartRateRestingSampleProvider(gbDevice, session));
+            persistAbstractSamples(restingMetabolicRateSamples, new GarminRestingMetabolicRateSampleProvider(gbDevice, session));
+            persistAbstractSamples(sleepRestlessMomentsSamples, new GarminSleepRestlessMomentsSampleProvider(gbDevice, session));
+            persistAbstractSamples(sleepStatsSamples, new GarminSleepStatsSampleProvider(gbDevice, session));
+            persistAbstractSamples(solarChargeSamples, new GarminSolarChargeSampleProvider(gbDevice, session));
+            persistAbstractSamples(spo2samples, new GarminSpo2SampleProvider(gbDevice, session));
+            persistAbstractSamples(stressSamples, new GarminStressSampleProvider(gbDevice, session));
+            persistAbstractSamples(trainingLoadAcuteSamples, new GenericTrainingLoadAcuteSampleProvider(gbDevice, session));
+            persistAbstractSamples(trainingLoadChronicSamples, new GenericTrainingLoadChronicSampleProvider(gbDevice, session));
             persistMetricSamples(session);
         } catch (final Exception e) {
-            GB.toast(context, "Error saving generic samples", Toast.LENGTH_LONG, GB.ERROR, e);
+            GB.toast(context, "Error saving FIT samples", Toast.LENGTH_LONG, GB.ERROR, e);
         }
 
         for (final Map.Entry<Integer, Integer> e : unknownRecords.entrySet()) {

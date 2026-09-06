@@ -1,4 +1,4 @@
-/*  Copyright (C) 2024-2025 Daniele Gobbetti, José Rebelo, Thomas Kuehne
+/*  Copyright (C) 2024-2026 Daniele Gobbetti, José Rebelo, Thomas Kuehne
 
     This file is part of Gadgetbridge.
 
@@ -41,6 +41,7 @@ import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.deviceevents.FileDownloadedDeviceEvent;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.CreateFileMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.DownloadRequestMessage;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.FileAvailableMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.FileTransferDataMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.FilterMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.GFDIMessage;
@@ -120,6 +121,10 @@ public class FileTransferHandler implements MessageHandler {
             return processSynchronizationMessage((SynchronizationMessage) message);
         else if (message instanceof FilterStatusMessage)
             return initiateDownload();
+        else if (message instanceof FileAvailableMessage available) {
+            conditionallyDownload(available.getDirectoryEntry());
+            return null;
+        }
         return null;
     }
 
@@ -243,7 +248,6 @@ public CreateFileMessage initiateUpload(byte[] fileAsByteArray, FileType.FILETYP
                 throw new IllegalArgumentException("Invalid directory data length");
             final GarminByteBufferReader reader = new GarminByteBufferReader(currentlyDownloading.dataHolder.array());
             reader.setByteOrder(ByteOrder.LITTLE_ENDIAN);
-            final boolean fetchUnknownFiles = deviceSupport.getDevicePrefs().getFetchUnknownFiles();
             while (reader.remaining() > 0) {
                 final int fileIndex = reader.readShort();//2
                 final int fileDataType = reader.readByte();//3
@@ -267,19 +271,37 @@ public CreateFileMessage initiateUpload(byte[] fileAsByteArray, FileType.FILETYP
                     LOG.warn("Unsupported directory entry of type {}/{}: {}", fileDataType, fileSubType, directoryEntry);
                     continue;
                 }
-                if (fileType != FileType.FILETYPE.DIRECTORY && !filetype.pull && !fetchUnknownFiles) {
-                    LOG.debug("Skipping directory entry: {}", directoryEntry);
-                    continue;
-                }
-                if (fileIndex == 0 && fileDataType == 0 && fileSubType == 0 && fileNumber == 0 && specificFlags == 0 && fileFlags == 0 && fileSize == 0) {
-                    LOG.warn("Ignoring {} to avoid infinite loop", directoryEntry);
-                    continue;
-                }
-                LOG.debug("Queueing {} for download", directoryEntry);
-                deviceSupport.addFileToDownloadList(directoryEntry);
+                conditionallyDownload(directoryEntry);
             }
             currentlyDownloading = null;
         }
+    }
+
+    private void conditionallyDownload(@Nullable final DirectoryEntry entry) {
+        if (entry == null){
+            LOG.warn("Directory entry is null");
+            return;
+        }
+
+        if (entry.isAllNull()) {
+            LOG.warn("Ignoring directory entry to avoid infinite loop: {}", entry);
+            return;
+        }
+
+        final FileType.FILETYPE fileType = entry.getFiletype();
+        if (fileType == null){
+            LOG.warn("Directory entry has unknown file type: {}", entry);
+            return;
+        }
+
+        final boolean fetchUnknownFiles = deviceSupport.getDevicePrefs().getFetchUnknownFiles();
+        if (fileType != FileType.FILETYPE.DIRECTORY && !fileType.pull && !fetchUnknownFiles) {
+            LOG.debug("Skipping directory entry: {}", entry);
+            return;
+        }
+
+        LOG.debug("Queueing {} for download", entry);
+        deviceSupport.addFileToDownloadList(entry);
     }
 
     private void updateUploadProgress(final int percentage) {
@@ -499,6 +521,16 @@ public CreateFileMessage initiateUpload(byte[] fileAsByteArray, FileType.FILETYP
             this.fileFlags = fileFlags;
             this.fileSize = fileSize;
             this.fileDate = fileDate;
+        }
+
+        public boolean isAllNull() {
+            return fileIndex == 0
+                    && (filetype == null || filetype == FileType.FILETYPE.DIRECTORY)
+                    && fileNumber == 0
+                    && specificFlags == 0
+                    && fileFlags == 0
+                    && fileSize == 0
+                    && fileDate == null;
         }
 
         public int getFileIndex() {

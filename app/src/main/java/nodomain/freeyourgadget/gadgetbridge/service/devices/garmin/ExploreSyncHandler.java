@@ -254,7 +254,7 @@ class ExploreSyncHandler {
             // Resolve and cache the (deviceId, userId) ids up front so
             // per-op write paths can re-acquireDB() briefly instead of
             // holding the global write lock for the whole sync.
-            try (DBHandler dbHandler = GBApplication.acquireDB()) {
+            try (DBHandler dbHandler = GBApplication.acquireDbReadOnly()) {
                 final DaoSession daoSession = dbHandler.getDaoSession();
                 this.deviceId = DBHelper.getDevice(deviceSupport.getDevice(), daoSession).getId();
                 this.userId = DBHelper.getUser(daoSession).getId();
@@ -437,7 +437,7 @@ class ExploreSyncHandler {
              * to fail the same way.
              */
             private boolean alreadyImported(final long startTimeSeconds) {
-                try (DBHandler dbHandler = GBApplication.acquireDB()) {
+                try (DBHandler dbHandler = GBApplication.acquireDbReadOnly()) {
                     return ActivitySummaryParser.findBaseActivitySummary(dbHandler.getDaoSession(),
                             deviceSupport.getDevice(), startTimeSeconds) != null;
                 } catch (final Exception e) {

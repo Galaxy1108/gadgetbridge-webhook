@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -211,7 +213,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 }
             }
             if (smart.hasFileSyncService()) {
-                if (deviceSupport.getDevicePrefs().getBoolean("new_sync_protocol", false)) {
+                if (deviceSupport.newSyncProtocol()) {
                     processed = true;
                     final GdiFileSyncService.FileSyncService response = fileSyncServiceHandler.handle(smart.getFileSyncService());
                     if (response != null) {
@@ -222,7 +224,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 }
             }
             if (smart.hasEcgService()) {
-                if (deviceSupport.getDevicePrefs().getBoolean("new_sync_protocol", false)) {
+                if (deviceSupport.newSyncProtocol()) {
                     processed = true;
                     final GdiEcgService.EcgService response = ecgServiceHandler.handle(smart.getEcgService());
                     if (response != null) {
@@ -413,7 +415,8 @@ public class ProtocolBufferHandler implements MessageHandler {
         LOG.warn("Unknown DeviceStatusService response: {}", deviceStatusService);
     }
 
-    private Smart processProtobufCoreRequest(GdiCore.CoreService coreService) {
+    @Nullable
+    private Smart processProtobufCoreRequest(@NonNull GdiCore.CoreService coreService) {
         if (coreService.hasSyncResponse()) {
             final GdiCore.CoreService.SyncResponse syncResponse = coreService.getSyncResponse();
             LOG.info("Received sync status: {}", syncResponse.getStatus());
@@ -488,6 +491,15 @@ public class ProtocolBufferHandler implements MessageHandler {
 
             return Smart.newBuilder().setCoreService(
                     GdiCore.CoreService.newBuilder().setLocationUpdatedSetEnabledResponse(response)).build();
+        }
+
+        if (coreService.hasConnectedNotification()) {
+            LOG.info("Got ConnectedNotification");
+            // ping-pong to notify the gadget that the connection is live and working
+            return Smart.newBuilder().setCoreService(
+                    GdiCore.CoreService.newBuilder().setConnectedNotification(
+                            GdiCore.CoreService.ConnectedNotification.newBuilder().build()
+                    )).build();
         }
 
         LOG.warn("Unknown CoreService request: {}", coreService);
