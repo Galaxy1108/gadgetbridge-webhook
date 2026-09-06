@@ -21,7 +21,7 @@ import java.util.regex.Pattern
 
 class JabraEvolve265Coordinator : JabraEvolve255Coordinator() {
     override fun getSupportedDeviceName(): Pattern {
-        return Pattern.compile("Jabra Evolve2 65")
+        return Pattern.compile("Jabra Evolve2 65", Pattern.CASE_INSENSITIVE)
     }
 
     override fun getDeviceNameResource(): Int {

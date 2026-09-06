@@ -38,7 +38,7 @@ import java.util.regex.Pattern
 
 open class JabraEvolve255Coordinator : AbstractBLClassicDeviceCoordinator() {
     override fun getSupportedDeviceName(): Pattern {
-        return Pattern.compile("Jabra Evolve2 55")
+        return Pattern.compile("Jabra Evolve2 55", Pattern.CASE_INSENSITIVE)
     }
 
     override fun getManufacturer(): String {
