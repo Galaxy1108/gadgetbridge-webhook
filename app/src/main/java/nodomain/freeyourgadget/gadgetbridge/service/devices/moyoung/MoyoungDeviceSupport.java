@@ -1252,16 +1252,8 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
         }
         try (DBHandler dbHandler = GBApplication.acquireDB()) {
             MoyoungHeartRateSampleProvider sampleProvider = new MoyoungHeartRateSampleProvider(getDevice(), dbHandler.getDaoSession());
-            Long userId = DBHelper.getUser(dbHandler.getDaoSession()).getId();
-            Long deviceId = DBHelper.getDevice(getDevice(), dbHandler.getDaoSession()).getId();
 
-            for (MoyoungHeartRateSample sample : hrSamples) {
-                sample.setDeviceId(deviceId);
-                sample.setUserId(userId);
-            }
-
-            LOG.debug("Will persist {} HR samples", hrSamples.size());
-            sampleProvider.addSamples(hrSamples);
+            sampleProvider.persistSamples(hrSamples, getContext());
         } catch (Exception e) {
             LOG.error("Error acquiring database for recording heart rate samples", e);
         }
