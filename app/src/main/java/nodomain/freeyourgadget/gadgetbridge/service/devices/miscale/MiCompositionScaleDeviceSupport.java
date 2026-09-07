@@ -167,6 +167,8 @@ public class MiCompositionScaleDeviceSupport extends AbstractBTLESingleDeviceSup
             sample.setWeightKg(weightKg);
             sample.setImpedanceOhm(impedanceOhm);
             provider.persistSamples(sample, getContext());
+            // let the dashboard and charts know there is a new value to show
+            GB.signalActivityDataFinish(getDevice());
         } catch (final Exception e) {
             LOG.error("Error saving weight sample", e);
         }

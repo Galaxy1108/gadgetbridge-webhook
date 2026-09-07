@@ -287,6 +287,8 @@ public class MiSmartScaleDeviceSupport extends AbstractBTLESingleDeviceSupport {
             }
 
             provider.addSamples(samples);
+            // let the dashboard and charts know there are new values to show
+            GB.signalActivityDataFinish(getDevice());
         } catch (Exception e) {
             LOG.error("Error acquiring database", e);
         }
