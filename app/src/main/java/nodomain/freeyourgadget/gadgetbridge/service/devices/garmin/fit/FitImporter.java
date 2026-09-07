@@ -181,7 +181,7 @@ public class FitImporter {
      * @noinspection StatementWithEmptyBody
      */
     public void importFile(@NonNull final File file, final boolean isReprocessing) throws IOException, FitParseException {
-        LOG.debug("Parsing {}", file.getAbsolutePath());
+        LOG.debug("Importing {}", file.getAbsolutePath());
 
         reset();
 
@@ -555,7 +555,7 @@ public class FitImporter {
             return;
         }
 
-        // If the file is not yet on the export directory (eg. we're importing from phone storage), copy it
+        // If the file is not yet on the export directory (e.g. we're importing from phone storage), copy it
         File finalExportFile = file;
         try {
             final File exportDirectory = gbDevice.getDeviceCoordinator().getWritableExportDirectory(gbDevice, true);
