@@ -37,6 +37,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.GBSimpleSummaryProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.math.roundToInt
 
 /**
  * Handle returned by [DeviceSettingRenderer.render]. Call [run] to refresh visibility and dynamic
@@ -349,7 +350,29 @@ object DeviceSettingRenderer {
                         min = setting.min
                         setDefaultValue(setting.defaultValue)
                         showSeekBarValue = setting.showValue
-                        setOnPreferenceChangeListener { _, _ ->
+                        seekBarIncrement = setting.step
+
+                        if (setting.valueFormat != 0) {
+                            summary = context.getString(setting.valueFormat, value * setting.scale)
+                        }
+
+                        setOnPreferenceChangeListener { pref, newValue ->
+                            val raw = newValue as Int
+                            val step = setting.step
+                            val snapped = if (step > 1) {
+                                setting.min + ((raw - setting.min).toDouble() / step).roundToInt() * step
+                            } else {
+                                raw
+                            }
+
+                            if (setting.valueFormat != 0) {
+                                summary = context.getString(setting.valueFormat, snapped * setting.scale)
+                            }
+
+                            if (snapped != raw) {
+                                (pref as SeekBarPreference).value = snapped
+                            }
+
                             handler.notifyPreferenceChanged(setting.key)
                             postRefresh()
                             true
