@@ -345,8 +345,8 @@ object DeviceSettingRenderer {
                         setTitle(setting.title)
                         if (setting.summary != 0) setSummary(setting.summary)
                         if (setting.icon != 0) setIcon(setting.icon)
-                        min = setting.min
                         max = setting.max
+                        min = setting.min
                         setDefaultValue(setting.defaultValue)
                         showSeekBarValue = setting.showValue
                         setOnPreferenceChangeListener { _, _ ->

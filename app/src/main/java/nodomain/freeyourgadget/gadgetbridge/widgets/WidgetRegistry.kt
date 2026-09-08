@@ -21,6 +21,8 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.impl.TodayWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxAnyWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxCyclingWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxRunningWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BmiWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.WeightWidget
 
 /**
  * Resolves [GBWidget] implementations by their IDs ([GBWidget.id]) - the common ones
@@ -31,6 +33,7 @@ object WidgetRegistry {
     private val common: List<GBWidget<*>> = listOf(
         ActiveTimeWidget,
         BloodPressureWidget,
+        BmiWidget,
         BodyEnergyWidget,
         CaloriesActiveWidget,
         CaloriesSegmentedWidget,
@@ -49,6 +52,7 @@ object WidgetRegistry {
         Vo2MaxAnyWidget,
         Vo2MaxCyclingWidget,
         Vo2MaxRunningWidget,
+        WeightWidget,
     )
 
     /**

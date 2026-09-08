@@ -1290,11 +1290,7 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
                             // SpO2, should be empty for an unsupported device
                             ArrayList<HybridHRSpo2Sample> spo2Samples = parser.getSpo2Samples();
                             HybridHRSpo2SampleProvider spo2Provider = new HybridHRSpo2SampleProvider(getDeviceSupport().getDevice(), dbHandler.getDaoSession());
-                            for (HybridHRSpo2Sample sample : spo2Samples) {
-                                sample.setDevice(device);
-                                sample.setUser(user);
-                            }
-                            spo2Provider.addSamples(spo2Samples);
+                            spo2Provider.persistSamples(spo2Samples, getContext());
                             // Workout summaries
                             ArrayList<BaseActivitySummary> workoutSummaries = parser.getWorkoutSummaries();
                             LOG.debug("WORKOUT SUMMARIES FOUND: {}", workoutSummaries);

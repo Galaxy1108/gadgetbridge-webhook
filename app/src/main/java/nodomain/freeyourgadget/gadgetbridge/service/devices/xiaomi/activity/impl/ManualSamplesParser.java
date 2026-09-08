@@ -200,17 +200,8 @@ public class ManualSamplesParser extends XiaomiActivityParser {
 
         try (DBHandler handler = GBApplication.acquireDB()) {
             final DaoSession session = handler.getDaoSession();
-
-            final Device device = DBHelper.getDevice(gbDevice, session);
-            final User user = DBHelper.getUser(session);
-
-            for (final XiaomiManualSample sample : samples) {
-                sample.setDevice(device);
-                sample.setUser(user);
-            }
-
             final XiaomiManualSampleProvider sampleProvider = new XiaomiManualSampleProvider(gbDevice, session);
-            sampleProvider.addSamples(samples);
+            sampleProvider.persistSamples(samples, context);
         } catch (final Exception e) {
             GB.toast(context, "Error saving manual samples", Toast.LENGTH_LONG, GB.ERROR);
             LOG.error("Error saving manual samples", e);
