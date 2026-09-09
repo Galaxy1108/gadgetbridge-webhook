@@ -342,6 +342,8 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
             getDevice().sendDeviceUpdateIntent(getContext());
 
             broadcastSpo2Sample(percent);
+            // and let the dashboard and charts know there is a new value to show
+            GB.signalActivityDataFinish(getDevice());
 
             return true;
         }
