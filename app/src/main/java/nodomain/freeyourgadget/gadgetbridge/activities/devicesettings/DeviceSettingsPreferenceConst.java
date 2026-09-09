@@ -665,7 +665,24 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_MIJIA_LYWSD_COMFORT_HUMIDITY_LOWER = "pref_mijia_lywsd_comfort_humidity_lower";
     public static final String PREF_MIJIA_LYWSD_COMFORT_HUMIDITY_UPPER = "pref_mijia_lywsd_comfort_humidity_upper";
 
-    public static final String PREF_QC35_NOISE_CANCELLING_LEVEL = "qc35_noise_cancelling_level";
+    public static final String PREF_BOSE_CNC_LEVEL = "bose_cnc_level";
+    public static final String PREF_BOSE_ANR_LEVEL = "bose_anr_level";
+
+    public static final String PREF_BOSE_VOICE_PROMPTS = "bose_voice_prompts";
+    public static final String PREF_BOSE_VOICE_PROMPTS_LANGUAGE = "bose_voice_prompts_language";
+    public static final String PREF_BOSE_VOICE_PROMPTS_SUPPORTED = "bose_voice_prompts_supported";
+    public static final String PREF_BOSE_VOICE_PROMPTS_TOGGLABLE = "bose_voice_prompts_togglable";
+    public static final String PREF_BOSE_MULTIPOINT_SUPPORTED = "bose_multipoint_supported";
+    public static final String PREF_BOSE_MULTIPOINT_DISABLE_SUPPORTED = "bose_multipoint_disable_supported";
+    public static final String PREF_BOSE_AUTO_OFF = "bose_auto_off";
+    public static final String PREF_BOSE_SHORTCUT = "bose_shortcut";
+    public static final String PREF_BOSE_SHORTCUT_SUPPORTED = "bose_shortcut_supported";
+    public static final String PREF_BOSE_SHORTCUT_UNAVAILABLE = "bose_shortcut_unavailable";
+    public static final String PREF_BOSE_MEDIA_PLAY = "bose_media_play";
+    public static final String PREF_BOSE_MEDIA_PAUSE = "bose_media_pause";
+    public static final String PREF_BOSE_MEDIA_NEXT = "bose_media_next";
+    public static final String PREF_BOSE_MEDIA_PREVIOUS = "bose_media_previous";
+    public static final String PREF_BOSE_MEDIA_SUPPORTED = "bose_media_supported";
 
     public static final String PREF_DUAL_DEVICE_SUPPORT = "dual_device_support";
 
