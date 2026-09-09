@@ -51,7 +51,7 @@ public class GpxRouteFileConverterTest extends TestBase {
         final GpxRouteFileConverter converter = new GpxRouteFileConverter(gpx, gpx.getName(), true, true, gpx.getTime());
         final FitFile fit = converter.getConvertedFile();
         final byte[] generatedFit = fit.getOutgoingMessage();
-        //Files.write(Path.of("a.fit"), generatedFit);
+        //java.nio.file.Files.write(java.nio.file.Path.of("src/test/resources" + expectedFitResource), generatedFit);
         final byte[] expectedFit = readBinaryResource(expectedFitResource);
         Assert.assertArrayEquals(expectedFit, generatedFit);
     }
