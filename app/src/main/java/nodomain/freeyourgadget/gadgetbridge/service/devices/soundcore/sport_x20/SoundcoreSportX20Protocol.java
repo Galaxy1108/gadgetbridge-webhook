@@ -113,6 +113,9 @@ public class SoundcoreSportX20Protocol extends SoundcoreLibertyProtocol {
 
     private static final Map<Integer, byte[]> EQ_PRESET_PAYLOADS = buildPresetPayloads();
 
+    private final List<MultipointDevice> pairedDevices = new ArrayList<>();
+    private String activeSourceAddress;
+
     protected SoundcoreSportX20Protocol(final GBDevice device) {
         super(device);
     }
@@ -165,7 +168,7 @@ public class SoundcoreSportX20Protocol extends SoundcoreLibertyProtocol {
             // Examples (payload):
             //   00 00 00 00 00 00 00                -> nothing playing
             //   01 F1 F2 F3 F4 F5 F6                -> F6:F5:F4:F3:F2:F1 is playing
-            LOG.debug("Connection status notification, {} bytes", packet.getPayload().length);
+            decodeConnectionStatus(packet.getPayload());
             return new GBDeviceEvent[0];
         }
 
@@ -302,8 +305,7 @@ public class SoundcoreSportX20Protocol extends SoundcoreLibertyProtocol {
      *
      * Payload layout:
      * <pre>
-     * [0]      = number of connected devices
-     * [1]      = ??
+     * [0..1]   = unknown header (01 01 even with two connected devices)
      * then, per paired device:
      *   [0]      = entry length (including this byte), e.g. 0x28 = 40
      *   [1]      = connection flag (0x01 = connected, 0x00 = not connected)
@@ -323,9 +325,7 @@ public class SoundcoreSportX20Protocol extends SoundcoreLibertyProtocol {
                 break;
             }
             final boolean connected = payload[offset + 1] != 0;
-            final String address = String.format("%02X:%02X:%02X:%02X:%02X:%02X",
-                    payload[offset + 7], payload[offset + 6], payload[offset + 5],
-                    payload[offset + 4], payload[offset + 3], payload[offset + 2]);
+            final String address = formatMacAddress(payload, offset + 2);
             final int nameLen = entrySize - 8;
             int nameEnd = 0;
             while (nameEnd < nameLen && payload[offset + 8 + nameEnd] != 0) {
@@ -333,8 +333,29 @@ public class SoundcoreSportX20Protocol extends SoundcoreLibertyProtocol {
             }
             final String name = new String(payload, offset + 8, nameEnd, StandardCharsets.UTF_8);
             LOG.debug("Paired device: addr={} name='{}' connected={}", address, name, connected);
-            devices.add(new MultipointDevice(address, name, connected));
+            devices.add(new MultipointDevice(address, name, connected, false, true));
             offset += entrySize;
+        }
+        pairedDevices.clear();
+        pairedDevices.addAll(devices);
+        broadcastPairedDevices();
+    }
+
+    private void decodeConnectionStatus(final byte[] payload) {
+        if (payload.length != 7 || (payload[0] != 0x00 && payload[0] != 0x01)) {
+            LOG.warn("Invalid connection status payload");
+            return;
+        }
+        activeSourceAddress = payload[0] == 0x01 ? formatMacAddress(payload, 1) : null;
+        broadcastPairedDevices();
+    }
+
+    private void broadcastPairedDevices() {
+        final List<MultipointDevice> devices = new ArrayList<>();
+        for (final MultipointDevice device : pairedDevices) {
+            devices.add(new MultipointDevice(device.getAddress(), device.getName(), device.isConnected(),
+                    device.isConnected() && device.getAddress().equalsIgnoreCase(activeSourceAddress),
+                    device.getCanForget()));
         }
         broadcastMultipointList(devices);
     }
@@ -387,6 +408,17 @@ public class SoundcoreSportX20Protocol extends SoundcoreLibertyProtocol {
         return mac;
     }
 
+    public static String formatMacAddress(byte[] payload, int position) {
+        StringBuilder mac = new StringBuilder(17);
+        for (int i = 5; i >= 0; i--) {
+            if (mac.length() > 0) {
+                mac.append(':');
+            }
+            mac.append(String.format("%02X", payload[position + i] & 0xFF));
+        }
+        return mac.toString();
+    }
+
     void broadcastMultipointStatus(final boolean enabled) {
         final Intent intent = new Intent(MultipointPairingActivity.ACTION_MULTIPOINT_STATUS_UPDATE);
         intent.putExtra(GBDevice.EXTRA_DEVICE, getDevice());
@@ -401,7 +433,7 @@ public class SoundcoreSportX20Protocol extends SoundcoreLibertyProtocol {
         LocalBroadcastManager.getInstance(GBApplication.getContext()).sendBroadcast(intent);
     }
 
-    private void broadcastMultipointList(final List<MultipointDevice> devices) {
+    void broadcastMultipointList(final List<MultipointDevice> devices) {
         final Intent intent = new Intent(MultipointPairingActivity.ACTION_MULTIPOINT_DEVICE_LIST);
         intent.putExtra(GBDevice.EXTRA_DEVICE, getDevice());
         intent.putParcelableArrayListExtra(
