@@ -165,11 +165,12 @@ public class WorkoutValueFormatter {
             return DateTimeUtils.formatLocalTime(epoc * 1000L);
         } else if (unit.equals(UNIT_MINUTES_PER_KM) || unit.equals(UNIT_MINUTES_PER_MILE) || unit.equals(UNIT_MINUTES_PER_100_METERS) || unit.equals(UNIT_MINUTES_PER_100_YARDS) || unit.equals(UNIT_MINUTES_PER_500_METERS)) {
             // Format pace
+            final long totalSeconds = Math.round(value * 60);
             String format = showUnit ? "%d:%02d %s" : "%d:%02d";
             return String.format(
                     Locale.getDefault(),
                     format,
-                    (int) Math.floor(value), (int) Math.round(60 * (value - (int) Math.floor(value))),
+                    totalSeconds / 60, totalSeconds % 60,
                     getUnitString(unit)
             );
         } else {
