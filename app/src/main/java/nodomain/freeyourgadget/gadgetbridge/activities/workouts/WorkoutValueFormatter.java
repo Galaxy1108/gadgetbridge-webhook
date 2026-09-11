@@ -16,8 +16,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.activities.workouts;
 
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_CELSIUS;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_CM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_EPOC_TIME;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_FAHRENHEIT;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_FOOT;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_FOOT_PER_HOUR;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_HOURS;
@@ -65,12 +67,14 @@ import java.text.DecimalFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import lineageos.weather.util.TemperatureUtils;
 import nodomain.freeyourgadget.gadgetbridge.BuildConfig;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries;
 import nodomain.freeyourgadget.gadgetbridge.model.DistanceUnit;
+import nodomain.freeyourgadget.gadgetbridge.model.TemperatureUnit;
 import nodomain.freeyourgadget.gadgetbridge.model.WeightUnit;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
 
@@ -83,6 +87,7 @@ public class WorkoutValueFormatter {
     private final DistanceUnit distanceUnit;
     private final WeightUnit weightUnit;
     private final boolean useNauticalUnits;
+    private final boolean useFahrenheit;
     private final DecimalFormat df2 = new DecimalFormat("#.##");
     private final DecimalFormat df1 = new DecimalFormat("#.#");
 
@@ -94,7 +99,8 @@ public class WorkoutValueFormatter {
         this(activityKind,
                 GBApplication.getPrefs().getDistanceUnit(),
                 GBApplication.getPrefs().getWeightUnit(),
-                GBApplication.getPrefs().getBoolean("units_nautical", true));
+                GBApplication.getPrefs().getBoolean("units_nautical", true),
+                GBApplication.getPrefs().getTemperatureUnit() == TemperatureUnit.FAHRENHEIT);
     }
 
     /**
@@ -104,10 +110,19 @@ public class WorkoutValueFormatter {
                                  final DistanceUnit distanceUnit,
                                  final WeightUnit weightUnit,
                                  final boolean useNauticalUnits) {
+        this(activityKind, distanceUnit, weightUnit, useNauticalUnits, false);
+    }
+
+    public WorkoutValueFormatter(final ActivityKind activityKind,
+                                 final DistanceUnit distanceUnit,
+                                 final WeightUnit weightUnit,
+                                 final boolean useNauticalUnits,
+                                 final boolean useFahrenheit) {
         this.activityKind = activityKind;
         this.distanceUnit = distanceUnit;
         this.weightUnit = weightUnit;
         this.useNauticalUnits = useNauticalUnits;
+        this.useFahrenheit = useFahrenheit;
     }
 
     public void setActivityKind(final ActivityKind activityKind) {
@@ -165,11 +180,12 @@ public class WorkoutValueFormatter {
             return DateTimeUtils.formatLocalTime(epoc * 1000L);
         } else if (unit.equals(UNIT_MINUTES_PER_KM) || unit.equals(UNIT_MINUTES_PER_MILE) || unit.equals(UNIT_MINUTES_PER_100_METERS) || unit.equals(UNIT_MINUTES_PER_100_YARDS) || unit.equals(UNIT_MINUTES_PER_500_METERS)) {
             // Format pace
+            final long totalSeconds = Math.round(value * 60);
             String format = showUnit ? "%d:%02d %s" : "%d:%02d";
             return String.format(
                     Locale.getDefault(),
                     format,
-                    (int) Math.floor(value), (int) Math.round(60 * (value - (int) Math.floor(value))),
+                    totalSeconds / 60, totalSeconds % 60,
                     getUnitString(unit)
             );
         } else {
@@ -325,6 +341,18 @@ public class WorkoutValueFormatter {
             case UNIT_SECONDS_PER_500_METERS:
                 value = value / 60D;
                 unit = UNIT_MINUTES_PER_500_METERS;
+                break;
+            case UNIT_CELSIUS:
+                if (useFahrenheit) {
+                    value = TemperatureUtils.celsiusToFahrenheit(value);
+                    unit = UNIT_FAHRENHEIT;
+                }
+                break;
+            case UNIT_FAHRENHEIT:
+                if (!useFahrenheit) {
+                    value = TemperatureUtils.fahrenheitToCelsius(value);
+                    unit = UNIT_CELSIUS;
+                }
                 break;
             case UNIT_JOULE:
                 if (!fixedUnit && value > 10000) {

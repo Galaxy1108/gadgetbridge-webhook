@@ -74,6 +74,7 @@ public class SoundcoreSportX20DeviceSupport extends AbstractHeadphoneSerialDevic
         intentFilter.addAction(MultipointPairingActivity.ACTION_MULTIPOINT_GET_STATUS);
         intentFilter.addAction(MultipointPairingActivity.ACTION_MULTIPOINT_CONNECT_DEVICE);
         intentFilter.addAction(MultipointPairingActivity.ACTION_MULTIPOINT_DISCONNECT_DEVICE);
+        intentFilter.addAction(MultipointPairingActivity.ACTION_MULTIPOINT_FORGET_DEVICE);
         intentFilter.addAction(MultipointPairingActivity.ACTION_MULTIPOINT_START_PAIRING);
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(multipointReceiver, intentFilter);
         multipointReceiverRegistered = true;
@@ -118,6 +119,9 @@ public class SoundcoreSportX20DeviceSupport extends AbstractHeadphoneSerialDevic
                 case MultipointPairingActivity.ACTION_MULTIPOINT_DISCONNECT_DEVICE:
                     connectDevice(intent.getStringExtra(MultipointPairingActivity.EXTRA_DEVICE_ADDRESS), false);
                     break;
+                case MultipointPairingActivity.ACTION_MULTIPOINT_FORGET_DEVICE:
+                    forgetDevice(intent.getStringExtra(MultipointPairingActivity.EXTRA_DEVICE_ADDRESS));
+                    break;
                 default:
                     LOG.warn("Unknown multipoint action {}", action);
             }
@@ -149,10 +153,7 @@ public class SoundcoreSportX20DeviceSupport extends AbstractHeadphoneSerialDevic
         sendToDevice(mDeviceProtocol.encodePairedDevicesRequest());
     }
 
-    /**
-     * Forgets/unpairs a paired device. Placeholder: the MultipointPairingActivity does not yet
-     * expose a "forget device" action, but the command is implemented here for future use.
-     */
+    /** Forgets/unpairs a paired device. */
     private void forgetDevice(final String address) {
         if (address == null) {
             return;

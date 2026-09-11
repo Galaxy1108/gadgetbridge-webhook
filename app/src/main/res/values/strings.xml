@@ -62,6 +62,7 @@
     <string name="controlcenter_snackbar_requested_screenshot">Taking a screenshot of the device</string>
     <string name="controlcenter_calibrate_device">Calibrate Device</string>
     <string name="controlcenter_get_heartrate_measurement">Get heart rate measurement</string>
+    <string name="controlcenter_get_spo2_measurement">Get blood oxygen measurement</string>
     <string name="audio_recordings">Audio Recordings</string>
 
     <string name="accuracy">Accuracy</string>
@@ -2248,6 +2249,7 @@
     <string name="devicetype_watchxplus" translatable="false">Watch X Plus</string>
     <string name="devicetype_roidmi" translatable="false">Roidmi</string>
     <string name="devicetype_roidmi3" translatable="false">Roidmi 3</string>
+    <string name="devicetype_roidmi_f8" translatable="false">Roidmi F8 Cordless Vacuum Cleaner</string>
     <string name="devicetype_y5" translatable="false">Y5</string>
     <string name="devicetype_casioecbs100" translatable="false">Casio ECB-S100</string>
     <string name="devicetype_casiogb6900" translatable="false">Casio GB-6900</string>
@@ -4165,6 +4167,17 @@
     <string name="xiaomi_scooter_tire_pressure_reset_title">Reset reminder</string>
     <string name="xiaomi_scooter_tire_pressure_reset_summary">Click this button to restart the tire pressure maintenance timer.</string>
     <string name="xiaomi_scooter_tire_pressure_reset_confirmation">Reset the tire pressure maintenance reminder?</string>
+    <string name="pref_roidmi_f8_battery_temperature_title">Battery temperature</string>
+    <string name="pref_roidmi_f8_standard_gear_title">Standard gear</string>
+    <string name="pref_roidmi_f8_standard_gear_summary">Default power when starting to clean</string>
+    <string name="pref_roidmi_f8_dust_reminder_title">Dust full reminder</string>
+    <string name="pref_roidmi_f8_dust_reminder_summary">When off, disables the dust indicator and dust sensor</string>
+    <string name="pref_roidmi_f8_reset_filter_title">Reset filter used time</string>
+    <string name="pref_roidmi_f8_reset_filter_confirm">Reset the filter used time to zero?</string>
+    <string name="pref_roidmi_f8_filter_used_time_title">Filter used time (estimated)</string>
+    <string name="pref_roidmi_f8_standard_cleaning_time_title">Standard-mode cleaning time</string>
+    <string name="pref_roidmi_f8_high_cleaning_time_title">High-mode cleaning time</string>
+    <string name="pref_roidmi_f8_cleaning_time_title">Cumulative cleaning time</string>
     <string name="pref_title_lock_unlock">Lock</string>
     <string name="wifi_hotspot">Wi-Fi Hotspot</string>
     <string name="wifi_hotspot_summary">Control the Wi-Fi hotspot on the watch</string>
@@ -4903,7 +4916,9 @@
     <string name="huawei_extra_media_volume_title">Extra media volume</string>
     <string name="huawei_extra_media_volume_summary">Increase the maximum media volume. This may affect audio quality. May damage hearing.</string>
     <string name="maps">Maps</string>
+    <string name="map">Map</string>
     <string name="workout_charts">Workout Charts</string>
+    <string name="charts">Charts</string>
     <string name="maps_settings">Maps settings</string>
     <string name="maps_download_title">Download Maps</string>
     <string name="maps_download_summary">Click here to download map files. They should be saved to the folder selected in the preference below.</string>

@@ -206,9 +206,11 @@ public class GpxRouteFileConverter {
         courseFileDataRecords.add(lapRecordBuilder.build(0x03));
 
         courseFileDataRecords.add(getEventRecordData(timestamp, 0));
-        courseFileDataRecords.add(getEventRecordData(runningTs, 9));
 
         courseFileDataRecords.addAll(gpxPointDataRecords);
+
+        // Stop must be at the end, or some watches will freeze
+        courseFileDataRecords.add(getEventRecordData(runningTs, 9));
         courseFileDataRecords.addAll(gpxCoursePointDataRecords);
 
         return new FitFile(courseFileDataRecords);
