@@ -520,6 +520,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.roidmi.RoidmiF8Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sbm_67.SanitasSBM67Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sbm_67.SilverCrestSBM67Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.scannable.ScannableDeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenRunPro2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenSwimProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sinilink.SinilinkCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.smaq2oss.SMAQ2OSSCoordinator;
@@ -1027,6 +1028,7 @@ public enum DeviceType {
     SONY_WH_CH720N(SonyWHCH720NCoordinator.class),
     PIXEL_BUDS_A(PixelBudsACoordinator.class),
     SHOKZ_OPENSWIM_PRO(ShokzOpenSwimProCoordinator.class),
+    SHOKZ_OPENRUN_PRO_2(ShokzOpenRunPro2Coordinator.class),
     BM2_BATTERY_MONITOR(Bm2Coordinator.class),
     BM6_BATTERY_MONITOR(Bm6Coordinator.class),
     VICTRON_SMARTSHUNT(VictronSmartShuntCoordinator.class),

@@ -633,6 +633,12 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_MEDIA_PLAYBACK_MODE = "pref_media_playback_mode";
     public static final String PREF_SHOKZ_EQUALIZER_BLUETOOTH = "pref_shokz_equalizer_bluetooth";
     public static final String PREF_SHOKZ_EQUALIZER_MP3 = "pref_shokz_equalizer_mp3";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM = "pref_shokz_equalizer_custom";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_1 = "pref_shokz_equalizer_custom_band_1";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2 = "pref_shokz_equalizer_custom_band_2";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3 = "pref_shokz_equalizer_custom_band_3";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4 = "pref_shokz_equalizer_custom_band_4";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5 = "pref_shokz_equalizer_custom_band_5";
     public static final String PREF_SHOKZ_CONTROLS_LONG_PRESS_MULTI_FUNCTION = "shokz_controls_long_press_multi_function";
     public static final String PREF_SHOKZ_CONTROLS_SIMULTANEOUS_VOLUME_UP_DOWN = "shokz_controls_simultaneous_volume_up_down";
 

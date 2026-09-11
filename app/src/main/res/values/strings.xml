@@ -5093,6 +5093,7 @@
     <string name="cannot_open_help_url">Could not open URL</string>
     <string name="auth_settings">Authentication settings</string>
     <string name="devicetype_shokz_openswim_pro" translatable="false">Shokz OpenSwim Pro</string>
+    <string name="devicetype_shokz_openrun_pro_2" translatable="false">Shokz OpenRun Pro 2</string>
     <string name="devicetype_battery_monitor" translatable="false">Battery Monitor</string>
     <string name="devicetype_victron_smartshunt" translatable="false">Victron SmartShunt</string>
     <string name="devicetype_dji_osmo_action_4" translatable="false">DJI Osmo Action 4</string>
@@ -5106,6 +5107,11 @@
     <string name="media_source">Media source</string>
     <string name="mp3">MP3</string>
     <string name="media_source_switching_bluetooth_mp3">Switch media source (Bluetooth/MP3)</string>
+    <string name="shokz_equalizer_band_1">Band 1</string>
+    <string name="shokz_equalizer_band_2">Band 2</string>
+    <string name="shokz_equalizer_band_3">Band 3</string>
+    <string name="shokz_equalizer_band_4">Band 4</string>
+    <string name="shokz_equalizer_band_5">Band 5</string>
     <string name="shokz_controls_long_press_multi_function">Long-press the multi-function button</string>
     <string name="shokz_controls_simultaneous_volume_up_down">Long-press volume up and down simultaneously</string>
     <string name="track_name_required">Track name cannot be empty</string>
