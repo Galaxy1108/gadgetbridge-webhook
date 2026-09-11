@@ -1,5 +1,7 @@
 ### Changelog
 
+<!-- For contributors: do not modify this file - the project maintainers will update it as needed -->
+
 #### Next version (WIP)
 
 * Initial support for Bose NC 700
