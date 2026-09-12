@@ -16,9 +16,12 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.vivoactive;
 
+import androidx.annotation.NonNull;
+
 import java.util.regex.Pattern;
 
 import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public class GarminVivoActive3TCoordinator extends GarminVivoActive3Coordinator {
     @Override
@@ -36,5 +39,10 @@ public class GarminVivoActive3TCoordinator extends GarminVivoActive3Coordinator 
     @Override
     public int getDeviceNameResource() {
         return R.string.devicetype_garmin_vivoactive_3t;
+    }
+
+    @Override
+    public boolean supportsRacePrediction(@NonNull final GBDevice device) {
+        return false;
     }
 }

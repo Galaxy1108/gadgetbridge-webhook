@@ -93,6 +93,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Notifications
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Weather;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.ui.HuaweiStressCalibrationFragment;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
+import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgDataSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgDataSampleDao;
@@ -138,6 +139,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.datasync.Huaw
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.datasync.HuaweiDataSyncArterialStiffnessDetection;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.datasync.HuaweiDataSyncSleepApnea;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.p2p.HuaweiP2PAppIcon;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.p2p.HuaweiP2PBatteryService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.p2p.HuaweiP2PCalendarService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.p2p.HuaweiP2PCannedRepliesService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.p2p.HuaweiP2PContactsService;
@@ -1165,6 +1167,11 @@ public class HuaweiSupportProvider {
                             HuaweiP2PFitnessData p2PFitnessData = new HuaweiP2PFitnessData(huaweiP2PManager);
                             p2PFitnessData.register();
                         }
+
+                        if (HuaweiP2PBatteryService.getRegisteredInstance(huaweiP2PManager) == null) {
+                            HuaweiP2PBatteryService batteryService = new HuaweiP2PBatteryService(huaweiP2PManager);
+                            batteryService.register();
+                        }
                     }
                 }
             });
@@ -1283,7 +1290,7 @@ public class HuaweiSupportProvider {
     public void onSocketRead(byte[] data, int channel) {
         if (channel != ResponseManager.MAIN_CHANNEL)
             LOG.debug("Dual channel: received {} bytes on aux socket (channel {}): {}",
-                    data.length, channel, GB.hexdump(data));
+                    data.length, channel, GB.lazyHexdump(data));
         responseManager.handleData(data, channel);
     }
 
@@ -1929,7 +1936,7 @@ public class HuaweiSupportProvider {
     }
 
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING || (callSpec.command == CallSpec.CALL_OUTGOING && getDeviceState().supportsOutgoingCall())) {
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING || (callSpec.getCommand() == CallSpec.CALL_OUTGOING && getDeviceState().supportsOutgoingCall())) {
             SendNotificationRequest sendNotificationReq = new SendNotificationRequest(this);
             try {
                 sendNotificationReq.buildNotificationTLVFromCallSpec(callSpec);
@@ -1938,8 +1945,8 @@ public class HuaweiSupportProvider {
                 LOG.error("Failed to send start call notification", e);
             }
         } else if (
-                callSpec.command == CallSpec.CALL_ACCEPT ||
-                        callSpec.command == CallSpec.CALL_START) {
+                callSpec.getCommand() == CallSpec.CALL_ACCEPT ||
+                        callSpec.getCommand() == CallSpec.CALL_START) {
             byte type = getDeviceState().supportsNotificationsStartCall() ? Notifications.NotificationType.startCall : Notifications.NotificationType.stopNotification;
             StopNotificationRequest stopNotificationRequest = new StopNotificationRequest(this, type);
             try {
@@ -1948,8 +1955,8 @@ public class HuaweiSupportProvider {
                 LOG.error("Failed to send stop call notification", e);
             }
         } else if (
-                callSpec.command == CallSpec.CALL_REJECT ||
-                        callSpec.command == CallSpec.CALL_END
+                callSpec.getCommand() == CallSpec.CALL_REJECT ||
+                        callSpec.getCommand() == CallSpec.CALL_END
         ) {
             StopNotificationRequest stopNotificationRequest = new StopNotificationRequest(this, Notifications.NotificationType.stopNotification);
             try {
@@ -3177,10 +3184,13 @@ public class HuaweiSupportProvider {
                             track.addTrackPoint(activityPoint);
                         }
 
-                        AutoGpxExporter.doExport(getContext(), getDevice(), null, track);
-                        AutoFitExporter.doExport(getContext(), getDevice(), null, track);
+                        final BaseActivitySummary summary = new HuaweiWorkoutGbParser(getDevice(), getContext())
+                                .parseWorkout(databaseId);
 
-                        new HuaweiWorkoutGbParser(getDevice(), getContext()).parseWorkout(databaseId);
+                        if (summary != null) {
+                            AutoGpxExporter.doExport(getContext(), getDevice(), summary, track);
+                            AutoFitExporter.doExport(getContext(), getDevice(), summary, track);
+                        }
 
                         LOG.debug("Completed workout GPS parsing and inserting");
                         syncState.stopWorkoutGpsDownload();
@@ -3222,12 +3232,12 @@ public class HuaweiSupportProvider {
     }
 
     public void onSetCannedMessages(final CannedMessagesSpec cannedMessagesSpec) {
-        if (cannedMessagesSpec.type != CannedMessagesSpec.TYPE_GENERIC) {
-            LOG.warn("Got unsupported canned messages type: {}", cannedMessagesSpec.type);
+        if (cannedMessagesSpec.getType() != CannedMessagesSpec.TYPE_GENERIC) {
+            LOG.warn("Got unsupported canned messages type: {}", cannedMessagesSpec.getType());
             return;
         }
 
-        if (cannedMessagesSpec.cannedMessages.length == 0) {
+        if (cannedMessagesSpec.getCannedMessages().length == 0) {
             GB.toast(context, HuaweiSupportProvider.this.getContext().getString(R.string.canned_replies_not_empty), Toast.LENGTH_SHORT, GB.WARN);
             LOG.warn(HuaweiSupportProvider.this.getContext().getString(R.string.canned_replies_not_empty));
         }
@@ -3237,7 +3247,7 @@ public class HuaweiSupportProvider {
             LOG.warn("P2P canned replies service is not registered");
             return;
         }
-        cannedRepliesService.sendReplies(cannedMessagesSpec.cannedMessages);
+        cannedRepliesService.sendReplies(cannedMessagesSpec.getCannedMessages());
     }
 
     public void onFindDevice(boolean start) {

@@ -4,6 +4,7 @@ import android.os.Bundle
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
+import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getParcelableCompat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -13,12 +14,7 @@ class WeatherSpecDebugFragment : AbstractDebugFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.debug_preferences_empty, rootKey)
 
-        @Suppress("DEPRECATION")
-        val weatherSpec = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            arguments?.getParcelable("weatherSpec", WeatherSpec::class.java)!!
-        } else {
-            arguments?.getParcelable<WeatherSpec>("weatherSpec")!!
-        }
+        val weatherSpec = arguments?.getParcelableCompat<WeatherSpec>("weatherSpec")!!
         val day = arguments?.getBoolean("days", false)
         val hour = arguments?.getBoolean("hours", false)
 

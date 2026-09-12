@@ -741,8 +741,8 @@ public class ZeppOsSupport extends AbstractBluetoothDeviceSupport
             // Received when the app sends a notificaation
             case SleepAsAndroidAction.SHOW_NOTIFICATION:
                 NotificationSpec notificationSpec = new NotificationSpec();
-                notificationSpec.title = extras.getString("TITLE");
-                notificationSpec.body = extras.getString("TEXT");
+                notificationSpec.setTitle(extras.getString("TITLE"));
+                notificationSpec.setBody(extras.getString("TEXT"));
                 notificationService.sendNotification(notificationSpec);
                 break;
             // Received when the app updates an alarm (Snoozing included too)

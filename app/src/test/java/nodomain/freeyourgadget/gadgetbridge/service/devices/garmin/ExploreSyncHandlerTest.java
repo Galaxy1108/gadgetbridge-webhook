@@ -55,7 +55,7 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiExploreSyncService.S
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiExploreSyncService.SyncFinishedStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiExploreSyncService.SyncType;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiExploreSyncService.VersionStamp;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
 import nodomain.freeyourgadget.gadgetbridge.test.TestBase;
 
 /**
@@ -649,7 +649,7 @@ public class ExploreSyncHandlerTest extends TestBase {
     /** Bare-bones GarminSupport that records outgoing protobuf requests
      *  instead of dispatching them over BLE. */
     private static class RecordingGarminSupport extends GarminSupport {
-        final List<GdiSmartProto.Smart> outgoing = new ArrayList<>();
+        final List<Smart> outgoing = new ArrayList<>();
 
         @Override
         public BluetoothGattCharacteristic getCharacteristic(final UUID uuid) {
@@ -657,7 +657,7 @@ public class ExploreSyncHandlerTest extends TestBase {
         }
 
         @Override
-        void sendProtobufRequest(final String taskName, final GdiSmartProto.Smart payload) {
+        void sendProtobufRequest(final String taskName, final Smart payload) {
             outgoing.add(payload);
         }
 

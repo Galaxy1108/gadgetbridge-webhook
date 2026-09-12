@@ -337,6 +337,14 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
                 LOG.error("Error acquiring database for recording SpO2 samples", e);
             }
 
+            // show it on the device card until the device disconnects
+            getDevice().setExtraInfo(AbstractMoyoungDeviceCoordinator.EXTRA_SPO2, String.valueOf(percent));
+            getDevice().sendDeviceUpdateIntent(getContext());
+
+            broadcastSpo2Sample(percent);
+            // and let the dashboard and charts know there is a new value to show
+            GB.signalActivityDataFinish(getDevice());
+
             return true;
         }
         if (packetType == MoyoungConstants.CMD_TRIGGER_MEASURE_BLOOD_PRESSURE) {
@@ -542,6 +550,17 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
         return false;
     }
 
+    private void broadcastSpo2Sample(int percent) {
+        MoyoungSpo2Sample sample = new MoyoungSpo2Sample();
+        sample.setTimestamp(System.currentTimeMillis());
+        sample.setSpo2(percent);
+        Intent intent = new Intent(DeviceService.ACTION_REALTIME_SAMPLES)
+                .putExtra(GBDevice.EXTRA_DEVICE, getDevice())
+                .putExtra(DeviceService.EXTRA_REALTIME_SAMPLE, sample)
+                .putExtra(DeviceService.EXTRA_TIMESTAMP, sample.getTimestamp());
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+    }
+
     private void broadcastSample(MoyoungActivitySample sample) {
         Intent intent = new Intent(DeviceService.ACTION_REALTIME_SAMPLES)
                 .putExtra(GBDevice.EXTRA_DEVICE, getDevice())
@@ -610,10 +629,17 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
     }
 
     private void handleBatteryInfo(BatteryInfo info) {
-        LOG.warn("Battery info: {}", info);
-        batteryCmd.level = (short) info.getPercentCharged();
-        if (batteryCmd.state == BatteryState.UNKNOWN)
+        LOG.debug("Battery info: {}", info);
+        int level = info.getPercentCharged();
+        // Some Moyoung watches add 100 to the reported level while charging
+        // (i.e. values > 100). Detect charging and recover the real level.
+        if (level > 100) {
+            level -= 100;
+            batteryCmd.state = BatteryState.BATTERY_CHARGING;
+        } else {
             batteryCmd.state = BatteryState.BATTERY_NORMAL;
+        }
+        batteryCmd.level = (short) level;
         handleGBDeviceEvent(batteryCmd);
     }
 
@@ -648,28 +674,28 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.sender, notificationSpec.title);
+        final String senderOrTitle = StringUtils.getFirstOf(notificationSpec.getSender(), notificationSpec.getTitle());
 
         // Notifications are sent with both sender/title and message in 1 packet, separated by a ':',
         // so we have to make sure there is no ':' in the sender/title part
         String message = StringUtils.truncate(senderOrTitle, 32).replace(":", ";") + ":";
-        if (notificationSpec.subject != null) {
-            message += StringUtils.truncate(notificationSpec.subject, 128) + "\n\n";
+        if (notificationSpec.getSubject() != null) {
+            message += StringUtils.truncate(notificationSpec.getSubject(), 128) + "\n\n";
         }
-        if (notificationSpec.body != null) {
-            message += StringUtils.truncate(notificationSpec.body, 512);
+        if (notificationSpec.getBody() != null) {
+            message += StringUtils.truncate(notificationSpec.getBody(), 512);
         }
-        if (notificationSpec.body == null && notificationSpec.subject == null) {
+        if (notificationSpec.getBody() == null && notificationSpec.getSubject() == null) {
             message += " ";
         }
 
         // The notification is split at first : into sender and text
-        sendNotification(MoyoungConstants.notificationType(notificationSpec.type), message);
+        sendNotification(MoyoungConstants.notificationType(notificationSpec.getType()), message);
     }
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING)
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING)
             sendNotification(MoyoungConstants.NOTIFICATION_TYPE_CALL, NotificationUtils.getPreferredTextFor(callSpec));
         else
             sendNotification(MoyoungConstants.NOTIFICATION_TYPE_CALL_OFF_HOOK, "");
@@ -962,7 +988,7 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
     public void onSetMusicState(MusicStateSpec stateSpec) {
         try {
             TransactionBuilder builder = performInitialized("sendMusicState");
-            byte[] payload = new byte[]{(byte) (stateSpec.state == MusicStateSpec.STATE_PLAYING ? 0x01 : 0x00)};
+            byte[] payload = new byte[]{(byte) (stateSpec.getState() == MusicStateSpec.STATE_PLAYING ? 0x01 : 0x00)};
             sendPacket(builder, MoyoungPacketOut.buildPacket(getMtu(), MoyoungConstants.CMD_SET_MUSIC_STATE, payload));
             builder.queue();
         } catch (IOException e) {
@@ -975,12 +1001,12 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
         try {
             TransactionBuilder builder = performInitialized("sendMusicInfo");
 
-            byte[] artistBytes = musicSpec.artist.getBytes();
+            byte[] artistBytes = musicSpec.getArtist().getBytes();
             byte[] artistPayload = new byte[artistBytes.length + 1];
             artistPayload[0] = 1;
             System.arraycopy(artistBytes, 0, artistPayload, 1, artistBytes.length);
             sendPacket(builder, MoyoungPacketOut.buildPacket(getMtu(), MoyoungConstants.CMD_SET_MUSIC_INFO, artistPayload));
-            byte[] trackBytes = musicSpec.track.getBytes();
+            byte[] trackBytes = musicSpec.getTrack().getBytes();
             byte[] trackPayload = new byte[trackBytes.length + 1];
             trackPayload[0] = 0;
             System.arraycopy(trackBytes, 0, trackPayload, 1, trackBytes.length);
@@ -1245,16 +1271,8 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
         }
         try (DBHandler dbHandler = GBApplication.acquireDB()) {
             MoyoungHeartRateSampleProvider sampleProvider = new MoyoungHeartRateSampleProvider(getDevice(), dbHandler.getDaoSession());
-            Long userId = DBHelper.getUser(dbHandler.getDaoSession()).getId();
-            Long deviceId = DBHelper.getDevice(getDevice(), dbHandler.getDaoSession()).getId();
 
-            for (MoyoungHeartRateSample sample : hrSamples) {
-                sample.setDeviceId(deviceId);
-                sample.setUserId(userId);
-            }
-
-            LOG.debug("Will persist {} HR samples", hrSamples.size());
-            sampleProvider.addSamples(hrSamples);
+            sampleProvider.persistSamples(hrSamples, getContext());
         } catch (Exception e) {
             LOG.error("Error acquiring database for recording heart rate samples", e);
         }
@@ -1594,6 +1612,16 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
         triggerHeartRateTest(true);
     }
 
+    private void triggerSpo2Test(boolean start) {
+        try {
+            TransactionBuilder builder = performInitialized("spo2Test");
+            sendPacket(builder, MoyoungPacketOut.buildPacket(getMtu(), MoyoungConstants.CMD_TRIGGER_MEASURE_BLOOD_OXYGEN, new byte[]{start ? (byte) 0 : (byte) -1}));
+            builder.queue();
+        } catch (IOException e) {
+            LOG.error("Error sending blood oxygen test command: ", e);
+        }
+    }
+
     public void onAbortHeartRateTest() {
         triggerHeartRateTest(false);
     }
@@ -1707,6 +1735,10 @@ public class MoyoungDeviceSupport extends AbstractBTLESingleDeviceSupport {
 
         Prefs prefs = getDevicePrefs();
         switch (config) {
+            case AbstractMoyoungDeviceCoordinator.CONFIG_SPO2_MEASURE:
+                triggerSpo2Test(true);
+                break;
+
             case ActivityUser.PREF_USER_HEIGHT_CM:
             case ActivityUser.PREF_USER_WEIGHT_KG:
             case ActivityUser.PREF_USER_DATE_OF_BIRTH:

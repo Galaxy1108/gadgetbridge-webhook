@@ -627,7 +627,7 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
 
         val senderOrTitle = notificationSpec.sender.takeIf { !it.isNullOrBlank() } ?: notificationSpec.title
 
-        val payloadString = when {
+        val payloadString: String = when {
             StringUtils.isNotBlank(senderOrTitle) && StringUtils.isNotBlank(notificationSpec.body)
                 -> "${senderOrTitle}: ${notificationSpec.body}"
 
@@ -635,7 +635,7 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
             StringUtils.isNotBlank(notificationSpec.body) -> notificationSpec.body
 
             else -> "?"
-        }
+        }.toString()
 
         val builder = createTransactionBuilder("send notification")
         sendNotification(
@@ -697,14 +697,14 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
         }
 
         if (callSpec.command == CallSpec.CALL_INCOMING) {
-            val caller = when {
+            val caller: String = when {
                 StringUtils.isNotBlank(callSpec.name) && StringUtils.isNotBlank(callSpec.number)
                     -> "${callSpec.name}: ${callSpec.number}"
 
                 StringUtils.isNotBlank(callSpec.name) -> callSpec.name
                 StringUtils.isNotBlank(callSpec.name) -> callSpec.number
                 else -> "?"
-            }
+            }.toString()
 
             val builder = createTransactionBuilder("call incoming")
 
@@ -760,26 +760,28 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
     override fun onSetCannedMessages(cannedMessagesSpec: CannedMessagesSpec) {
         val builder = createTransactionBuilder("set canned messages")
 
-        for ((i, message) in cannedMessagesSpec.cannedMessages.withIndex()) {
-            if (i >= device.deviceCoordinator.getCannedRepliesSlotCount(device)) {
-                LOG.warn(
-                    "Got {} canned messages, over the limit of {}",
-                    cannedMessagesSpec.cannedMessages.size,
-                    device.deviceCoordinator.getCannedRepliesSlotCount(device)
-                )
-                break
-            }
+        cannedMessagesSpec.cannedMessages?.let {
+            for ((i, message) in it.withIndex()) {
+                if (i >= device.deviceCoordinator.getCannedRepliesSlotCount(device)) {
+                    LOG.warn(
+                        "Got {} canned messages, over the limit of {}",
+                        cannedMessagesSpec.cannedMessages!!.size,
+                        device.deviceCoordinator.getCannedRepliesSlotCount(device)
+                    )
+                    break
+                }
 
-            val messageBytes = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncate(message, 24).toByteArray()
-            val buf = ByteBuffer.allocate(5 + messageBytes.size).order(ByteOrder.BIG_ENDIAN)
-            buf.put(CMD_CANNED_MESSAGES)
-            buf.put(CANNED_MESSAGES_SET)
-            buf.put(cannedMessagesSpec.cannedMessages.size.toByte())
-            buf.put(i.toByte())
-            buf.put(messageBytes.size.toByte())
-            buf.put(messageBytes)
-            builder.write(UUID_CHARACTERISTIC_GLORYFIT_DATA_WRITE, *buf.array())
-            // TODO do we need to throttle?
+                val messageBytes = nodomain.freeyourgadget.gadgetbridge.util.StringUtils.truncate(message, 24).toByteArray()
+                val buf = ByteBuffer.allocate(5 + messageBytes.size).order(ByteOrder.BIG_ENDIAN)
+                buf.put(CMD_CANNED_MESSAGES)
+                buf.put(CANNED_MESSAGES_SET)
+                buf.put(cannedMessagesSpec.cannedMessages!!.size.toByte())
+                buf.put(i.toByte())
+                buf.put(messageBytes.size.toByte())
+                buf.put(messageBytes)
+                builder.write(UUID_CHARACTERISTIC_GLORYFIT_DATA_WRITE, *buf.array())
+                // TODO do we need to throttle?
+            }
         }
 
         builder.write(
@@ -903,9 +905,9 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
                 WEATHER_CURRENT,
                 mapToGloryFitCondition(weather.currentConditionCode),
                 0x00,
-                (weather.currentTemp - 273).toByte(),
-                (weather.todayMaxTemp - 273).toByte(),
-                (weather.todayMinTemp - 273).toByte(),
+                encodeTemperature(weather.currentTemp),
+                encodeTemperature(weather.todayMaxTemp),
+                encodeTemperature(weather.todayMinTemp),
                 0x00,
                 0x01,
                 0x00,
@@ -930,8 +932,8 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
         weather.forecasts.take(4).forEach { forecast ->
             forecasts1[i++] = mapToGloryFitCondition(forecast.conditionCode)
             forecasts1[i++] = 0x00
-            forecasts1[i++] = (forecast.maxTemp - 273).toByte()
-            forecasts1[i++] = (forecast.minTemp - 273).toByte()
+            forecasts1[i++] = encodeTemperature(forecast.maxTemp)
+            forecasts1[i++] = encodeTemperature(forecast.minTemp)
         }
         builder.write(
             UUID_CHARACTERISTIC_GLORYFIT_DATA_WRITE,
@@ -945,8 +947,8 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
         weather.forecasts.drop(4).take(2).forEach { forecast ->
             forecasts2[i++] = mapToGloryFitCondition(forecast.conditionCode)
             forecasts2[i++] = 0x00
-            forecasts2[i++] = (forecast.maxTemp - 273).toByte()
-            forecasts2[i++] = (forecast.minTemp - 273).toByte()
+            forecasts2[i++] = encodeTemperature(forecast.maxTemp)
+            forecasts2[i++] = encodeTemperature(forecast.minTemp)
         }
         builder.write(
             UUID_CHARACTERISTIC_GLORYFIT_DATA_WRITE,
@@ -1526,5 +1528,10 @@ class GloryFitSupport : AbstractBTLESingleDeviceSupport(LOG) {
         const val WEATHER_CONDITION_HAZE: Byte = 0x0b
         const val WEATHER_CONDITION_WINDY: Byte = 0x0c
         const val WEATHER_CONDITION_UNKNOWN: Byte = 0x0d
+
+        fun encodeTemperature(kelvin: Int): Byte {
+            val degC = kelvin - 273
+            return if (degC >= 0) degC.toByte() else (0x80 - degC).toByte()
+        }
     }
 }

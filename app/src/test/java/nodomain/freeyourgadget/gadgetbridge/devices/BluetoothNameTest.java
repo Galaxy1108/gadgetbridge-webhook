@@ -44,6 +44,7 @@ public class BluetoothNameTest extends TestBase {
             put("P8", DeviceType.WASPOS); // from wasp-os source
             put("P8DFU", DeviceType.WASPOS); // from wasp-os source
             put("P80", DeviceType.COLMI_P80);
+            put("i31", DeviceType.COLMI_I31);
             put("L 70", DeviceType.L70);
             put("V73", DeviceType.COLMI_V73); // #5715
             put("R05_9805", DeviceType.YAWELL_R05); // #3896
@@ -112,6 +113,7 @@ public class BluetoothNameTest extends TestBase {
             put("P22B1", DeviceType.P22B1);
             put("SBM67", DeviceType.SILVERCREST_SBM_67);
             put("BPM Smart", DeviceType.SANITAS_SBM_67);
+            put("BM69", DeviceType.BEURER_BM_69); // #6687
             put("Sinilink-APP", DeviceType.SINILINK); // #6040
             put("R11_0500", DeviceType.YAWELL_R11); // #4711
             put("Edge 2x", DeviceType.GARMIN_EDGE_25); // #5779
@@ -251,11 +253,17 @@ public class BluetoothNameTest extends TestBase {
             put("una watch 403795", null); // #6504
             put("UNA Watch403795", null); // #6504
             put("UNA Watch ", null); // #6504
+            put("ROIDMI Cleaner F1", DeviceType.ROIDMI_F8); // #6674
             put("Xiaomi Smart Band 10 Pro AB01", DeviceType.MIBAND10PRO); // #6248
             put("SmartShunt HQ2303UCHFV", DeviceType.VICTRON_SMARTSHUNT); // #6263
             put("Soundcore Life Tune", DeviceType.SOUNDCORE_LIFE_TUNE); // #6396
             put("Soundcore Life Tune XR", DeviceType.SOUNDCORE_LIFE_TUNE_XR); // #6396
             put("OsmoAction4-ABCD", DeviceType.DJI_OSMO_ACTION_4);
+            put("Jabra Evolve 65", DeviceType.JABRA_EVOLVE_65); // #6665
+            put("Jabra EVOLVE 65", DeviceType.JABRA_EVOLVE_65); // #6665
+            put("Jabra Evolve2 55", DeviceType.JABRA_EVOLVE2_55); // #6644
+            put("Jabra Evolve2 65", DeviceType.JABRA_EVOLVE2_65); // #6665
+            put("Jabra Evolve2 5", DeviceType.UNKNOWN); // #6644 - BLE Google FastPair
             put("Bose QC 35 II", DeviceType.BOSE_QC35);
             put("Bose NC 700 Headphones", DeviceType.BOSE_NC700);
             put("LE-Bose NC 700 Headphones", DeviceType.BOSE_NC700);

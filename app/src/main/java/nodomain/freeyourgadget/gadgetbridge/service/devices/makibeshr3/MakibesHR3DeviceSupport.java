@@ -190,7 +190,7 @@ public class MakibesHR3DeviceSupport extends AbstractBTLESingleDeviceSupport imp
 
         byte sender;
 
-        switch (notificationSpec.type) {
+        switch (notificationSpec.getType()) {
             case FACEBOOK:
             case FACEBOOK_MESSENGER:
                 sender = MakibesHR3Constants.ARG_SEND_NOTIFICATION_SOURCE_FACEBOOK;
@@ -221,11 +221,11 @@ public class MakibesHR3DeviceSupport extends AbstractBTLESingleDeviceSupport imp
 
         String message = "";
 
-        if (notificationSpec.title != null) {
-            message += (notificationSpec.title + ": ");
+        if (notificationSpec.getTitle() != null) {
+            message += (notificationSpec.getTitle() + ": ");
         }
 
-        message += notificationSpec.body;
+        message += notificationSpec.getBody();
 
         this.sendNotification(transactionBuilder,
                 sender, message);
@@ -306,9 +306,9 @@ public class MakibesHR3DeviceSupport extends AbstractBTLESingleDeviceSupport imp
     @Override
     public void onSetCallState(CallSpec callSpec) {
         TransactionBuilder transactionBuilder = this.createTransactionBuilder("callstate");
-        LOG.debug("callSpec " + callSpec.command);
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
-            this.sendNotification(transactionBuilder, MakibesHR3Constants.ARG_SEND_NOTIFICATION_SOURCE_CALL, callSpec.name);
+        LOG.debug("callSpec " + callSpec.getCommand());
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+            this.sendNotification(transactionBuilder, MakibesHR3Constants.ARG_SEND_NOTIFICATION_SOURCE_CALL, callSpec.getName());
         } else {
             this.sendNotification(transactionBuilder, MakibesHR3Constants.ARG_SEND_NOTIFICATION_SOURCE_STOP_CALL, "");
         }

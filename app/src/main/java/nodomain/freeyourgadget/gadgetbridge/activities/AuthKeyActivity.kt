@@ -17,6 +17,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper
 import nodomain.freeyourgadget.gadgetbridge.util.GB
+import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getParcelableCompat
 
 class AuthKeyActivity : AbstractGBActivity() {
     private lateinit var binding: ActivityAuthKeyBinding
@@ -29,12 +30,7 @@ class AuthKeyActivity : AbstractGBActivity() {
         binding = ActivityAuthKeyBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        @Suppress("DEPRECATION")
-        deviceCandidate = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(EXTRA_DEVICE_CANDIDATE, GBDeviceCandidate::class.java)
-        } else {
-            intent.getParcelableExtra(EXTRA_DEVICE_CANDIDATE)
-        }
+        deviceCandidate = intent.getParcelableCompat<GBDeviceCandidate>(EXTRA_DEVICE_CANDIDATE)
 
         deviceCandidate?.let { candidate ->
             coordinator = DeviceHelper.getInstance().resolveDeviceType(candidate).deviceCoordinator

@@ -163,9 +163,9 @@ public class TLW64Support extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        switch (notificationSpec.type) {
+        switch (notificationSpec.getType()) {
             case GENERIC_SMS:
-                showNotification(TLW64Constants.NOTIFICATION_SMS, notificationSpec.sender);
+                showNotification(TLW64Constants.NOTIFICATION_SMS, notificationSpec.getSender());
                 setVibration(1, 1);
                 break;
             case WECHAT:
@@ -258,8 +258,8 @@ public class TLW64Support extends AbstractBTLESingleDeviceSupport {
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-        if (callSpec.command == CallSpec.CALL_INCOMING) {
-            showNotification(TLW64Constants.NOTIFICATION_CALL, callSpec.name);
+        if (callSpec.getCommand() == CallSpec.CALL_INCOMING) {
+            showNotification(TLW64Constants.NOTIFICATION_CALL, callSpec.getName());
             setVibration(1, 30);
         } else {
             stopNotification();

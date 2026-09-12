@@ -94,49 +94,14 @@ public interface DeviceService extends EventHandler {
 
     String ACTION_SLEEP_AS_ANDROID = ".action.sleep_as_android";
     String EXTRA_SLEEP_AS_ANDROID_ACTION = "sleepasandroid_action";
-    String EXTRA_NOTIFICATION_BODY = "notification_body";
-    String EXTRA_NOTIFICATION_FLAGS = "notification_flags";
+    String EXTRA_NOTIFICATION_SPEC = "notification_spec";
     String EXTRA_NOTIFICATION_ID = "notification_id";
-    String EXTRA_NOTIFICATION_KEY = "notification_key";
-    String EXTRA_NOTIFICATION_PHONENUMBER = "notification_phonenumber";
-    String EXTRA_NOTIFICATION_SENDER = "notification_sender";
-    String EXTRA_NOTIFICATION_SOURCENAME = "notification_sourcename";
-    String EXTRA_NOTIFICATION_SOURCEAPPID = "notification_sourceappid";
-    String EXTRA_NOTIFICATION_SUBJECT = "notification_subject";
-    String EXTRA_NOTIFICATION_TITLE = "notification_title";
-    String EXTRA_NOTIFICATION_TYPE = "notification_type";
-    String EXTRA_NOTIFICATION_ACTIONS = "notification_actions";
-    String EXTRA_NOTIFICATION_ICONID = "notification_iconid";
-    String EXTRA_NOTIFICATION_ICONPACKAGEID = "notification_iconpackageid";
-    String NOTIFICATION_PICTURE_PATH = "notification_picture_path";
-    String EXTRA_NOTIFICATION_DNDSUPPRESSED = "notification_dndsuppressed";
-    String EXTRA_NOTIFICATION_CHANNEL_ID = "notification_channel_id";
-    String EXTRA_NOTIFICATION_CATEGORY = "notification_category";
     String EXTRA_FIND_START = "find_start";
     String EXTRA_VIBRATION_INTENSITY = "vibration_intensity";
-    String EXTRA_CALL_COMMAND = "call_command";
-    String EXTRA_CALL_PHONENUMBER = "call_phonenumber";
-    String EXTRA_CALL_DISPLAYNAME = "call_displayname";
-    String EXTRA_CALL_SOURCENAME = "call_sourcename";
-    String EXTRA_CALL_SOURCEAPPID = "call_sourceappid";
-    String EXTRA_CALL_KEY = "call_key";
-    String EXTRA_CALL_CHANNELID = "call_channel_id";
-    String EXTRA_CALL_CATEGORY = "call_category";
-    String EXTRA_CALL_ISVOIP = "call_is_voip";
-    String EXTRA_CALL_DNDSUPPRESSED = "call_dndsuppressed";
-    String EXTRA_CANNEDMESSAGES = "cannedmessages";
-    String EXTRA_CANNEDMESSAGES_TYPE = "cannedmessages_type";
-    String EXTRA_MUSIC_ARTIST = "music_artist";
-    String EXTRA_MUSIC_ALBUM = "music_album";
-    String EXTRA_MUSIC_TRACK = "music_track";
-    String EXTRA_MUSIC_DURATION = "music_duration";
-    String EXTRA_MUSIC_TRACKNR = "music_tracknr";
-    String EXTRA_MUSIC_TRACKCOUNT = "music_trackcount";
-    String EXTRA_MUSIC_STATE = "music_state";
-    String EXTRA_MUSIC_SHUFFLE = "music_shuffle";
-    String EXTRA_MUSIC_REPEAT = "music_repeat";
-    String EXTRA_MUSIC_POSITION = "music_position";
-    String EXTRA_MUSIC_RATE = "music_rate";
+    String EXTRA_CALL_SPEC = "call_spec";
+    String EXTRA_CANNEDMESSAGES_SPEC = "cannedmessages_spec";
+    String EXTRA_MUSIC_SPEC = "music_spec";
+    String EXTRA_MUSIC_STATE_SPEC = "music_state_spec";
     String EXTRA_PHONE_VOLUME = "phone_volume";
     String EXTRA_PHONE_RINGER_MODE = "ringer_mode";
     String EXTRA_NAVIGATION_INSTRUCTION = "navigation_instruction";
@@ -176,21 +141,9 @@ public interface DeviceService extends EventHandler {
      */
     @Deprecated
     String EXTRA_HEART_RATE_VALUE = "hr_value";
+    String EXTRA_CALENDAREVENT_SPEC = "calendarevent_spec";
     String EXTRA_CALENDAREVENT_ID = "calendarevent_id";
-    String EXTRA_CALENDAREVENT_EVENT_ID = "calendarevent_event_id";
     String EXTRA_CALENDAREVENT_TYPE = "calendarevent_type";
-    String EXTRA_CALENDAREVENT_TIMESTAMP = "calendarevent_timestamp";
-    String EXTRA_CALENDAREVENT_DURATION = "calendarevent_duration";
-    String EXTRA_CALENDAREVENT_ALLDAY = "calendarevent_allday";
-    String EXTRA_CALENDAREVENT_REMINDERS = "calendarevent_reminders";
-    String EXTRA_CALENDAREVENT_TITLE = "calendarevent_title";
-    String EXTRA_CALENDAREVENT_DESCRIPTION = "calendarevent_description";
-    String EXTRA_CALENDAREVENT_LOCATION = "calendarevent_location";
-    String EXTRA_CALENDAREVENT_CALNAME = "calendarevent_calname";
-    String EXTRA_CALENDAREVENT_CALENDAR_COLOR = "calendarevent_calendar_color";
-    String EXTRA_CALENDAREVENT_COLOR = "calendarevent_color";
-    String EXTRA_CALENDAREVENT_STATUS = "calendarevent_status";
-    String EXTRA_CALENDAREVENT_ATTENDING_STATUS = "calendarevent_attending_status";
 
     void connect();
 

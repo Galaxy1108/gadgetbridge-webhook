@@ -16,6 +16,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.multipoint.MultipointPair
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventBatteryInfo
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventUpdatePreferences
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventVersionInfo
+import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzCoordinator
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.AbstractHeadphoneBTBRDeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.TransactionBuilder
@@ -39,6 +40,11 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
     private var timeoutRetries = 0
     private val timeoutHandler = Handler(Looper.getMainLooper())
 
+    private val shokzCoordinator: ShokzCoordinator?
+        get() = gbDevice.deviceCoordinator as? ShokzCoordinator
+
+    private var lastMultipointDevices: List<MultipointDevice> = emptyList()
+
     init {
         addSupportedService(UUID_SERVICE_SHOKZ)
     }
@@ -61,18 +67,27 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
 
         builder.setDeviceState(GBDevice.State.INITIALIZING)
 
+        val supportsMp3 = shokzCoordinator?.supportsMp3() ?: true
+        val supportsControls = shokzCoordinator?.supportsControls() ?: true
+
         // Send the fw version request directly, but queue everything else, otherwise the device does not respond to all
         builder.write(*encodeCommand(ShokzCommand.FIRMWARE_GET))
 
         pendingMessage = ShokzMessage(ShokzCommand.FIRMWARE_GET)
         timeoutHandler.postDelayed({ onCommandTimeout() }, 2000L)
-        queueCommand(ShokzCommand.MEDIA_SOURCE_GET)
+        if (supportsMp3) {
+            queueCommand(ShokzCommand.MEDIA_SOURCE_GET)
+        }
         queueCommand(ShokzCommand.BATTERY_GET)
         queueCommand(ShokzCommand.EQUALIZER_GET)
         queueCommand(ShokzCommand.PLAYBACK_STATUS_GET)
         queueCommand(ShokzCommand.VOLUME_GET)
-        queueCommand(ShokzCommand.MP3_PLAYBACK_MODE_GET)
-        queueCommand(ShokzCommand.CONTROLS_GET)
+        if (supportsMp3) {
+            queueCommand(ShokzCommand.MP3_PLAYBACK_MODE_GET)
+        }
+        if (supportsControls) {
+            queueCommand(ShokzCommand.CONTROLS_GET)
+        }
         queueCommand(ShokzCommand.LANGUAGE_GET)
 
         return builder
@@ -129,8 +144,20 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
 
             val expectedCrc = CheckSums.crc16_maxim(payload, 0, payload.size)
             if (crc != expectedCrc) {
-                LOG.warn("Invalid CRC: got 0x{}, expected 0x{}", crc.toHexString(), expectedCrc.toHexString())
-                continue
+                if (isMultipointDevicesResponse(payload)) {
+                    // Known firmware quirk (confirmed on the OpenRun Pro 2): the CRC for this
+                    // response is wrong whenever there are more than 2 remembered multipoint
+                    // devices, even though the payload itself is otherwise well-formed and its
+                    // declared length matches what was actually sent. Accept it anyway rather
+                    // than losing the whole device list every time.
+                    LOG.warn(
+                        "Invalid CRC for multipoint devices response (known firmware quirk), processing anyway: got 0x{}, expected 0x{}",
+                        crc.toHexString(), expectedCrc.toHexString()
+                    )
+                } else {
+                    LOG.warn("Invalid CRC: got 0x{}, expected 0x{}", crc.toHexString(), expectedCrc.toHexString())
+                    continue
+                }
             }
 
             var sendNext: Boolean
@@ -154,6 +181,12 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             DeviceSettingsPreferenceConst.PREF_LANGUAGE -> setLanguage()
             DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_BLUETOOTH,
             DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_MP3 -> setEqualizer(config)
+
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_1,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5 -> setCustomEqualizer()
 
             DeviceSettingsPreferenceConst.PREF_MEDIA_SOURCE -> setMediaSource()
             DeviceSettingsPreferenceConst.PREF_MEDIA_PLAYBACK_MODE -> setMediaPlaybackMode()
@@ -187,23 +220,30 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
 
         LOG.info("Setting equalizer to {}", equalizer)
 
-        val args = when (equalizer) {
-            ShokzEqualizer.STANDARD,
-            ShokzEqualizer.SWIMMING -> {
-                byteArrayOf(
-                    equalizer.code.toByte(), 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00
-                )
-            }
-
-            ShokzEqualizer.VOCAL -> {
-                byteArrayOf(
-                    equalizer.code.toByte(), 0xfc.toByte(), 0x00, 0x03,
-                    0x02, 0x02, 0x00, 0x00
-                )
-            }
+        val args = if (equalizer == ShokzEqualizer.CUSTOM) {
+            customEqualizerArgs()
+        } else {
+            shokzCoordinator?.equalizerArgs(equalizer)
+                ?: byteArrayOf(equalizer.code.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
         }
         queueCommand(ShokzCommand.EQUALIZER_SET, args)
+    }
+
+    private fun setCustomEqualizer() {
+        LOG.info("Setting custom equalizer bands")
+        queueCommand(ShokzCommand.EQUALIZER_SET, customEqualizerArgs())
+    }
+
+    private fun customEqualizerArgs(): ByteArray {
+        val bands = intArrayOf(
+            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_1, 0),
+            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2, 0),
+            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3, 0),
+            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4, 0),
+            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5, 0),
+        )
+        return shokzCoordinator?.customEqualizerArgs(bands)
+            ?: byteArrayOf(ShokzEqualizer.CUSTOM.code.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
     }
 
     private fun setMediaSource() {
@@ -267,6 +307,14 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             ShokzCommand.CONTROLS_SET,
             byteArrayOf(controls.code.toByte(), 0x00, 0x00, 0x00)
         )
+    }
+
+    private fun isMultipointDevicesResponse(payload: ByteArray): Boolean {
+        if (payload.size < 32) return false
+        val buf = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
+        val group = buf.getInt(16)
+        val code = buf.getInt(28)
+        return group == ShokzCommand.MULTIPOINT_DEVICES_RET.group && code == ShokzCommand.MULTIPOINT_DEVICES_RET.code
     }
 
     private fun handlePayload(payload: ByteArray): Boolean {
@@ -419,15 +467,28 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
                 }
 
                 devicePrefs.getString(DeviceSettingsPreferenceConst.PREF_LANGUAGE, "en")
-                evaluateGBDeviceEvent(
-                    GBDeviceEventUpdatePreferences(
-                        when (mediaSource) {
-                            ShokzMediaSource.BLUETOOTH -> DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_BLUETOOTH
-                            ShokzMediaSource.MP3 -> DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_MP3
-                        },
-                        equalizer.name.lowercase()
-                    )
+                val equalizerEvent = GBDeviceEventUpdatePreferences().withPreference(
+                    when (mediaSource) {
+                        ShokzMediaSource.BLUETOOTH -> DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_BLUETOOTH
+                        ShokzMediaSource.MP3 -> DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_MP3
+                    },
+                    equalizer.name.lowercase()
                 )
+
+                if (equalizer == ShokzEqualizer.CUSTOM && buf.remaining() >= 5) {
+                    val bandKeys = listOf(
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_1,
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2,
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3,
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4,
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5,
+                    )
+                    for (bandKey in bandKeys) {
+                        equalizerEvent.withPreference(bandKey, buf.get().toInt())
+                    }
+                }
+
+                evaluateGBDeviceEvent(equalizerEvent)
             }
 
             ShokzCommand.PLAYBACK_STATUS_RET -> {
@@ -532,7 +593,7 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
                 evaluateGBDeviceEvent(
                     GBDeviceEventUpdatePreferences(
                         DeviceSettingsPreferenceConst.PREF_LANGUAGE,
-                        language.language
+                        language.language.code
                     )
                 )
             }
@@ -590,20 +651,39 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
 
             ShokzCommand.MULTIPOINT_DEVICES_RET -> {
                 buf.get() // 0
+                // Some devices (e.g. OpenRun Pro 2) report a device count that is larger than
+                // the number of entries actually present in the payload (it appears to reflect
+                // the number of supported multipoint slots rather than the current list), so
+                // this is bounded by the remaining bytes rather than trusting the count blindly.
                 val numDevices = buf.get().toInt() and 0xff
                 LOG.debug("Got {} multipoint devices", numDevices);
                 val devices = mutableListOf<MultipointDevice>()
-                repeat(numDevices) {
+                var i = 0
+                while (i < numDevices && buf.remaining() >= 9) {
                     val idx = buf.get().toInt() and 0xff
                     val macAddress = ByteArray(6)
                     buf.get(macAddress)
                     macAddress.reverse()
                     val connected = buf.get()
                     val nameLength = buf.get().toInt() and 0xff
+                    if (buf.remaining() < nameLength) {
+                        LOG.warn("Not enough bytes remaining for device {} name, stopping early", idx)
+                        break
+                    }
                     val nameBytes = ByteArray(nameLength)
                     buf.get(nameBytes)
-                    val name = String(nameBytes, Charsets.UTF_8)
+                    // The name field is a fixed-size buffer, only null-terminated (not
+                    // zero-padded) - anything after the first null byte can be stale memory.
+                    val name = String(nameBytes, Charsets.UTF_8).substringBefore('\u0000')
                     LOG.debug("Device {}: {} - {} ({})", idx, macAddress.toHexString(), name, connected)
+                    i++
+                    if (macAddress.all { it == 0.toByte() } || name.isEmpty()) {
+                        // Some devices (e.g. OpenRun Pro 2) send a garbled/misaligned tail for
+                        // the 3rd+ remembered device - rather than fail the whole list, entries
+                        // that don't look like a real device are just skipped.
+                        LOG.warn("Skipping implausible multipoint device entry {}", idx)
+                        continue
+                    }
                     devices.add(
                         MultipointDevice(
                             macAddress.joinToString(separator = ":") {
@@ -613,6 +693,9 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
                             connected.toInt() == 1
                         )
                     )
+                }
+                if (i < numDevices) {
+                    LOG.warn("Only parsed {} of {} reported multipoint devices", i, numDevices)
                 }
 
                 broadcastMultipointList(devices)
@@ -735,7 +818,21 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
                 }
 
                 MultipointPairingActivity.ACTION_MULTIPOINT_DISABLE -> {
-                    val macAddress = "02:00:00:00:00:00"  // TODO bluetoothAdapter.address
+                    // The device expects the local phone's own Bluetooth address here, which
+                    // Android does not expose directly (BluetoothAdapter#getAddress() always
+                    // returns a dummy value to apps). Since the local Bluetooth *name* is
+                    // readable, and the headset's own multipoint device list already reports
+                    // that same name alongside each device's real address, our own address is
+                    // found by matching the local adapter's name against that list - confirmed
+                    // against a real capture of the official Shokz app doing the same thing.
+                    val localName = getBluetoothAdapter()?.name
+                    val macAddress = lastMultipointDevices.find { it.name == localName }?.address
+                    if (macAddress == null) {
+                        LOG.warn("Could not determine own address (local name={}) to disable multipoint, aborting", localName)
+                        GB.toast("Could not disable multipoint, please try again", Toast.LENGTH_LONG, GB.WARN)
+                        requestPairedDevices()
+                        return
+                    }
                     LOG.debug("Disabling multipoint from mac address {}", macAddress)
                     val macAddressBytes = macAddress.replace(":", "").hexToByteArray()
                     macAddressBytes.reverse()
@@ -807,6 +904,9 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
         val intent = Intent(MultipointPairingActivity.ACTION_MULTIPOINT_STATUS_UPDATE).apply {
             putExtra(GBDevice.EXTRA_DEVICE, device)
             putExtra(MultipointPairingActivity.EXTRA_MULTIPOINT_ENABLED, enabled)
+            // Shokz devices support MULTIPOINT_OFF, so the UI switch should stay enabled to
+            // let the user turn multipoint back off (otherwise it locks itself once turned on).
+            putExtra(MultipointPairingActivity.EXTRA_MULTIPOINT_DISABLE_SUPPORTED, true)
         }
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
     }
@@ -820,6 +920,7 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
     }
 
     private fun broadcastMultipointList(devices: List<MultipointDevice>) {
+        lastMultipointDevices = devices
         val intent = Intent(MultipointPairingActivity.ACTION_MULTIPOINT_DEVICE_LIST).apply {
             putExtra(GBDevice.EXTRA_DEVICE, device)
             putParcelableArrayListExtra(

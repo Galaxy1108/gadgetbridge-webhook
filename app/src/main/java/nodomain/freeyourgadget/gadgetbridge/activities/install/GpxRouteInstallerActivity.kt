@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -27,6 +26,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.GenericItem
 import nodomain.freeyourgadget.gadgetbridge.model.ItemWithDetails
 import nodomain.freeyourgadget.gadgetbridge.util.GB
 import nodomain.freeyourgadget.gadgetbridge.util.gpx.model.GpxFile
+import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getParcelableArrayListCompat
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getParcelableCompat
 import nodomain.freeyourgadget.gadgetbridge.util.maps.MapsManager
 import org.slf4j.LoggerFactory
@@ -59,12 +59,7 @@ class GpxRouteInstallerActivity : AbstractGBActivity(), InstallActivity {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 GBDevice.ACTION_DEVICE_CHANGED -> {
-                    val changedDevice = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        intent.getParcelableExtra(GBDevice.EXTRA_DEVICE, GBDevice::class.java)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        intent.getParcelableExtra(GBDevice.EXTRA_DEVICE)
-                    }
+                    val changedDevice = intent.getParcelableCompat<GBDevice>(GBDevice.EXTRA_DEVICE)
 
                     if (changedDevice == null || changedDevice != device) {
                         return
@@ -171,12 +166,7 @@ class GpxRouteInstallerActivity : AbstractGBActivity(), InstallActivity {
         binding = ActivityInstallerGpxBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val intentDevice = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(GBDevice.EXTRA_DEVICE, GBDevice::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(GBDevice.EXTRA_DEVICE)
-        }
+        val intentDevice = intent.getParcelableCompat<GBDevice>(GBDevice.EXTRA_DEVICE)
         if (intentDevice == null) {
             GB.toast(this, "No device provided to GpxRouteInstallerActivity", Toast.LENGTH_LONG, GB.ERROR)
             finish()
@@ -185,12 +175,7 @@ class GpxRouteInstallerActivity : AbstractGBActivity(), InstallActivity {
         device = intentDevice
 
         details = if (savedInstanceState != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                savedInstanceState.getParcelableArrayList(ITEM_DETAILS, ItemWithDetails::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                savedInstanceState.getParcelableArrayList(ITEM_DETAILS)
-            } ?: ArrayList()
+            savedInstanceState.getParcelableArrayListCompat<ItemWithDetails>(ITEM_DETAILS) ?: ArrayList()
         } else {
             ArrayList()
         }
@@ -272,8 +257,8 @@ class GpxRouteInstallerActivity : AbstractGBActivity(), InstallActivity {
                 binding.trackNameInputLayout.error = null
             }
 
-            val includeNavigation = binding.tbtToggle.isChecked;
-            val includeStraightNavigation = binding.tbtStraightToggle.isChecked;
+            val includeNavigation = binding.tbtToggle.isChecked
+            val includeStraightNavigation = binding.tbtStraightToggle.isChecked
 
             setInstallEnabled(false)
             installHandler.onStartInstall(device)

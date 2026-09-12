@@ -1057,8 +1057,6 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         addPreferenceHandlerFor(PREF_MOYOUNG_WATCH_FACE);
         addPreferenceHandlerFor(PREF_MOYOUNG_DEVICE_VERSION);
 
-        addPreferenceHandlerFor(PREF_DUAL_DEVICE_SUPPORT);
-
         addPreferenceHandlerFor(PREF_DEVICE_LOGS_TOGGLE);
 
         addPreferenceHandlerFor(PREF_USER_FITNESS_GOAL);
@@ -1451,8 +1449,8 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                         }
                     }
                     CannedMessagesSpec cannedMessagesSpec = new CannedMessagesSpec();
-                    cannedMessagesSpec.type = CannedMessagesSpec.TYPE_REJECTEDCALLS;
-                    cannedMessagesSpec.cannedMessages = messages.toArray(new String[0]);
+                    cannedMessagesSpec.setType(CannedMessagesSpec.TYPE_REJECTEDCALLS);
+                    cannedMessagesSpec.setCannedMessages(messages.toArray(new String[0]));
                     GBApplication.deviceService(device).onSetCannedMessages(cannedMessagesSpec);
                     return true;
                 }
@@ -1481,8 +1479,8 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                         }
                     }
                     final CannedMessagesSpec cannedMessagesSpec = new CannedMessagesSpec();
-                    cannedMessagesSpec.type = CannedMessagesSpec.TYPE_GENERIC;
-                    cannedMessagesSpec.cannedMessages = messages.toArray(new String[0]);
+                    cannedMessagesSpec.setType(CannedMessagesSpec.TYPE_GENERIC);
+                    cannedMessagesSpec.setCannedMessages(messages.toArray(new String[0]));
                     GBApplication.deviceService().onSetCannedMessages(cannedMessagesSpec);
                     return true;
                 }

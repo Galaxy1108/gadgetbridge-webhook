@@ -216,7 +216,7 @@ public class XiaomiSupport extends AbstractBluetoothDeviceSupport {
     }
 
     public void handleCommandBytes(final byte[] plainValue) {
-        LOG.debug("Got command: {}", GB.hexdump(plainValue));
+        LOG.debug("Got command: {}", GB.lazyHexdump(plainValue));
 
         final XiaomiProto.Command cmd;
         try {
@@ -517,8 +517,8 @@ public class XiaomiSupport extends AbstractBluetoothDeviceSupport {
                 break;
             case SleepAsAndroidAction.SHOW_NOTIFICATION: {
                 NotificationSpec spec = new NotificationSpec();
-                spec.title = extras.getString("TITLE");
-                spec.body = extras.getString("TEXT");
+                spec.setTitle(extras.getString("TITLE"));
+                spec.setBody(extras.getString("TEXT"));
                 notificationService.onNotification(spec);
                 break;
             }

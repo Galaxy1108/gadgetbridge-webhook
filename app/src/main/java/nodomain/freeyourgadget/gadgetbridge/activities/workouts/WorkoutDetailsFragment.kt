@@ -48,6 +48,7 @@ import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.charts.ScatterChart
+import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.ScatterData
@@ -159,11 +160,20 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
     override fun onResume() {
         super.onResume()
 
-        currentWorkout?.summary?.activityKind?.let {
-            val activityKindName = ActivityKind.fromCode(it).getLabel(requireContext())
-            // Action bar title
-            (activity as? AppCompatActivity)?.supportActionBar?.title = activityKindName
+        updateActionBarTitle()
+    }
+
+    private fun updateActionBarTitle() {
+        workoutLabel()?.let {
+            (activity as? AppCompatActivity)?.supportActionBar?.title = it
         }
+    }
+
+    /** The workout's custom label, falling back to its sport/activity kind name. */
+    private fun workoutLabel(): String? {
+        val summary = currentWorkout?.summary ?: return null
+        return summary.name?.takeIf { it.isNotBlank() }
+            ?: summary.activityKind?.let { ActivityKind.fromCode(it).getLabel(requireContext()) }
     }
 
     private fun loadWorkoutData() {
@@ -470,6 +480,23 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                 lineChart.data = chart.chartData
             }
         }
+        // A metric may be split into several gapped segments (all sharing one label), which
+        // would otherwise each add their own auto-generated legend entry for the same metric.
+        val legendDataSet = chart.chartData.dataSets.firstOrNull()
+        if (legendDataSet != null) {
+            lineChart.legend.setCustom(
+                listOf(
+                    LegendEntry(
+                        legendDataSet.label,
+                        legendDataSet.form,
+                        legendDataSet.formSize,
+                        legendDataSet.formLineWidth,
+                        legendDataSet.formLineDashEffect,
+                        legendDataSet.color
+                    )
+                )
+            )
+        }
         lineChart.description.isEnabled = false
         lineChart.onChartGestureListener = object : OnChartGestureListener {
             override fun onChartLongPressed(me: MotionEvent?) {}
@@ -479,6 +506,9 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                 ChartDataRepository.chartData = allChartsData
                 val intent = Intent(requireContext(), WorkoutChartsActivity::class.java).apply {
                     putExtra(WorkoutChartsActivity.INIT_CHART_ID, chart.id)
+                    workoutLabel()?.let {
+                        putExtra(WorkoutChartsActivity.EXTRA_TITLE, "${getString(R.string.charts)} · $it")
+                    }
                 }
                 startActivity(intent)
             }
@@ -605,6 +635,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                         override fun onWorkoutUpdated() {
                             notifyWorkoutChanged()
                             updateWorkoutHeader(workout.summary)
+                            updateActionBarTitle()
                         }
                     })
                 }

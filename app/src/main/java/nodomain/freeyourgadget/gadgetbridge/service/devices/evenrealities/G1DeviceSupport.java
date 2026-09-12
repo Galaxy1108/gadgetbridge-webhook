@@ -884,7 +884,7 @@ public class G1DeviceSupport extends AbstractBTLEMultiDeviceSupport {
     public void onNotification(NotificationSpec notificationSpec) {
         // Rewrite the App Id to the fixed one used for all notifications. See the comment in
         // G1Constants.java for more information.
-        notificationSpec.sourceAppId = G1Constants.FIXED_NOTIFICATION_APP_ID.first;
+        notificationSpec.setSourceAppId(G1Constants.FIXED_NOTIFICATION_APP_ID.first);
         // Notifications are only sent to the left side.
         leftSide.send(new G1Communications.CommandNotificationSendControl(leftSide::send, notificationSpec));
     }

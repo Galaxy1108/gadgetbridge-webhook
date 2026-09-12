@@ -132,11 +132,6 @@ public class GBPrefs extends Prefs {
 
     public static final String NAVIGATION_APP_COMAPS = "navigation_app_comaps";
 
-    @Deprecated
-    public GBPrefs(Prefs prefs) {
-        this(prefs.getPreferences());
-    }
-
     public GBPrefs(final SharedPreferences sharedPrefs) {
         super(sharedPrefs);
     }

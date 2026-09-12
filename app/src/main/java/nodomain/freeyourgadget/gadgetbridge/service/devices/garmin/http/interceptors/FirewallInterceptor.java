@@ -16,7 +16,7 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.internet.InternetFirewall;
 import nodomain.freeyourgadget.gadgetbridge.internet.InternetRequestType;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttpService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.deviceevents.ProtobufResponseEvent;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.GarminHttpRequest;
@@ -144,7 +144,7 @@ public class FirewallInterceptor implements HttpInterceptor {
 
     private void sendHttpServiceRequest(@NonNull final GarminHttpRequest request,
                                         @NonNull final GdiHttpService.HttpService httpService) {
-        final GdiSmartProto.Smart smart = GdiSmartProto.Smart.newBuilder().setHttpService(httpService).build();
+        final Smart smart = Smart.newBuilder().setHttpService(httpService).build();
         deviceSupport.evaluateGBDeviceEvent(new ProtobufResponseEvent(
                 smart, request.getMessageRequestId()
         ));

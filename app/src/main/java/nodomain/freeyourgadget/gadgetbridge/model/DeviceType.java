@@ -36,6 +36,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.asteroidos.AsteroidOSDeviceC
 import nodomain.freeyourgadget.gadgetbridge.devices.atcbleoepl.ATCBLEOEPLCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.bandwpseries.BandWPSeriesDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.banglejs.BangleJSCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.beurer.BeurerBm69Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.binary_sensor.coordinator.BinarySensorCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.bm2.Bm2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.bm6.Bm6Coordinator;
@@ -65,6 +66,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.femometer.FemometerVinca2Dev
 import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.ak102.Ak102Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.ak75.Ak75ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.ak86.Ak86Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.colmi.ColmiI31Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitpro.FitProDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitpro.colacao.ColaCao21Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitpro.colacao.ColaCao23Coordinator;
@@ -100,7 +102,9 @@ import nodomain.freeyourgadget.gadgetbridge.devices.garmin.bike.GarminEdgeExplor
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.bike.GarminEdgeExploreCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.bike.GarminEdgeMtbCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminETrexSeCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminGpsmap66iCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminGpsmap66sCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminGpsmap66srCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminGpsmapH1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.gps.GarminInReachMini2;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.hrm.GarminHrm200Coordinator;
@@ -176,6 +180,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.Ga
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner30Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner35Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner45Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner45PlusCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner55Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner570Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.forerunner.GarminForerunner620Coordinator;
@@ -215,6 +220,8 @@ import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.instinct.Garm
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.lily.GarminLily2ActiveCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.lily.GarminLily2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.lily.GarminLilyCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix6Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix6XCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix8Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.swim.GarminSwim2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.tactix.GarminTactix7Coordinator;
@@ -273,6 +280,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.Y6Coordinat
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfitpro.watches.DM58Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gree.GreeAcCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.hama.fit6900.HamaFit6900DeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.GarettEvaCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.haylou.HaylouS35AncCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.hplus.EXRIZUK8Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.hplus.HPlusCoordinator;
@@ -418,6 +426,9 @@ import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportiGS630Coord
 import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportiGS630SCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportiGS800Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.itag.ITagCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.jabra.JabraEvolve255Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.jabra.JabraEvolve265Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.jabra.JabraEvolve65Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.jyou.BFH16DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.jyou.TeclastH30.TeclastH30Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.jyou.y5.Y5Coordinator;
@@ -458,6 +469,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.ITechActive3Coordina
 import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.KT80Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.KsixVentureCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.L70Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.MT55Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.MisirunC17Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.P22B1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.R50ProCoordinator;
@@ -504,9 +516,11 @@ import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.RedmiBuds6ProCoord
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.RedmiBuds8ActiveCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.roidmi.Roidmi1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.roidmi.Roidmi3Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.roidmi.RoidmiF8Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sbm_67.SanitasSBM67Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sbm_67.SilverCrestSBM67Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.scannable.ScannableDeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenRunPro2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenSwimProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sinilink.SinilinkCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.smaq2oss.SMAQ2OSSCoordinator;
@@ -585,6 +599,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS1
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS4Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi_scooters.XiaomiScooter5MaxCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.zeblaze.Beyond3ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xplora.XploraXmoveDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xwatch.XWatchCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.yawell.ring.ColmiR02Coordinator;
@@ -746,6 +761,7 @@ public enum DeviceType {
     WATCHXPLUS(WatchXPlusDeviceCoordinator.class),
     ROIDMI(Roidmi1Coordinator.class),
     ROIDMI3(Roidmi3Coordinator.class),
+    ROIDMI_F8(RoidmiF8Coordinator.class),
     CASIOECBS100(CasioECBS100DeviceCoordinator.class),
 
     CASIOGB6900(CasioGB6900DeviceCoordinator.class),
@@ -810,7 +826,9 @@ public enum DeviceType {
     GARMIN_EDGE_EXPLORE_820(GarminEdgeExplore820Coordinator.class),
     GARMIN_EDGE_EXPLORE_1000(GarminEdgeExplore1000Coordinator.class),
     GARMIN_EDGE_MTB(GarminEdgeMtbCoordinator.class),
+    GARMIN_GPSMAP_66I(GarminGpsmap66iCoordinator.class),
     GARMIN_GPSMAP_66S(GarminGpsmap66sCoordinator.class),
+    GARMIN_GPSMAP_66SR(GarminGpsmap66srCoordinator.class),
     GARMIN_GPSMAP_H1(GarminGpsmapH1Coordinator.class),
     GARMIN_ETREX_SE(GarminETrexSeCoordinator.class),
     GARMIN_ENDURO(GarminEnduroCoordinator.class),
@@ -866,6 +884,7 @@ public enum DeviceType {
     GARMIN_FORERUNNER_30(GarminForerunner30Coordinator.class),
     GARMIN_FORERUNNER_35(GarminForerunner35Coordinator.class),
     GARMIN_FORERUNNER_45(GarminForerunner45Coordinator.class),
+    GARMIN_FORERUNNER_45_PLUS(GarminForerunner45PlusCoordinator.class),
     GARMIN_FORERUNNER_55(GarminForerunner55Coordinator.class),
     GARMIN_FORERUNNER_165(GarminForerunner165Coordinator.class),
     GARMIN_FORERUNNER_165_MUSIC(GarminForerunner165MusicCoordinator.class),
@@ -899,6 +918,8 @@ public enum DeviceType {
     GARMIN_FORERUNNER_955(GarminForerunner955Coordinator.class),
     GARMIN_FORERUNNER_965(GarminForerunner965Coordinator.class),
     GARMIN_FORERUNNER_970(GarminForerunner970Coordinator.class),
+    GARMIN_QUATIX_6(GarminQuatix6Coordinator.class),
+    GARMIN_QUATIX_6X(GarminQuatix6XCoordinator.class),
     GARMIN_QUATIX_8(GarminQuatix8Coordinator.class),
     GARMIN_TACTIX_7(GarminTactix7Coordinator.class),
     GARMIN_TACTIX_8(GarminTactix8Coordinator.class),
@@ -1007,6 +1028,7 @@ public enum DeviceType {
     SONY_WH_CH720N(SonyWHCH720NCoordinator.class),
     PIXEL_BUDS_A(PixelBudsACoordinator.class),
     SHOKZ_OPENSWIM_PRO(ShokzOpenSwimProCoordinator.class),
+    SHOKZ_OPENRUN_PRO_2(ShokzOpenRunPro2Coordinator.class),
     BM2_BATTERY_MONITOR(Bm2Coordinator.class),
     BM6_BATTERY_MONITOR(Bm6Coordinator.class),
     VICTRON_SMARTSHUNT(VictronSmartShuntCoordinator.class),
@@ -1028,6 +1050,9 @@ public enum DeviceType {
     MOONDROP_SPACE_TRAVEL_2_ULTRA(MoondropSpaceTravel2UltraCoordinator.class),
     BOSE_QC35(QC35Coordinator.class),
     BOSE_NC700(NC700Coordinator.class),
+    JABRA_EVOLVE_65(JabraEvolve65Coordinator.class),
+    JABRA_EVOLVE2_55(JabraEvolve255Coordinator.class),
+    JABRA_EVOLVE2_65(JabraEvolve265Coordinator.class),
     ONEMORE_SONOFLOW(OneMoreSonoFlowCoordinator.class),
     HONORBAND3(HonorBand3Coordinator.class),
     HONORBAND4(HonorBand4Coordinator.class),
@@ -1132,6 +1157,7 @@ public enum DeviceType {
     COLMI_R12(ColmiR12Coordinator.class),
     H59(H59Coordinator.class),
     COLMI_I28_ULTRA(ColmiI28UltraCoordinator.class),
+    COLMI_I31(ColmiI31Coordinator.class),
     COLMI_P76(ColmiP76Coordinator.class),
     COLMI_P80(ColmiP80Coordinator.class),
     COLMI_V72(ColmiV72Coordinator.class),
@@ -1152,6 +1178,8 @@ public enum DeviceType {
     ZL02D(ZL02DCoordinator.class),
     R50PRO(R50ProCoordinator.class),
     RAINBUVVY_T97(RainbuvvyT97Coordinator.class),
+    MT55(MT55Coordinator.class),
+    GARETT_EVA(GarettEvaCoordinator.class),
     ADVAN_WATCH_SE1_AI(AdvanWatchSE1AICoordinator.class),
     B_AND_W_P_SERIES(BandWPSeriesDeviceCoordinator.class),
     EARFUN_AIR_S(EarFunAirSCoordinator.class),
@@ -1175,6 +1203,7 @@ public enum DeviceType {
     SOLARFLOW(SolarFlowDeviceCoordinator.class),
     SANITAS_SBM_67(SanitasSBM67Coordinator.class),
     SILVERCREST_SBM_67(SilverCrestSBM67Coordinator.class),
+    BEURER_BM_69(BeurerBm69Coordinator.class),
     BRAUN_BPW4500(BraunBPW4500DeviceCoordinator.class),
     IGPSPORT_BSC200(IGPSportBSC200Coordinator.class),
     IGPSPORT_BSC200S(IGPSportBSC200SCoordinator.class),
@@ -1187,6 +1216,7 @@ public enum DeviceType {
     IGPSPORT_BINAVI(IGPSportBiNaviCoordinator.class),
     OLLEE_WATCH_ONE(OlleeDeviceCoordinator.class),
     UNA_WATCH(UnaDeviceCoordinator.class),
+    ZEBLAZE_BEYOND_3_PRO(Beyond3ProCoordinator.class),
     TEST(TestDeviceCoordinator.class);
 
     private DeviceCoordinator coordinator;

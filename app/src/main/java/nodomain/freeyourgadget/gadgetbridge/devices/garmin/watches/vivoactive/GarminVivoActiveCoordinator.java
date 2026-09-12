@@ -82,4 +82,9 @@ public class GarminVivoActiveCoordinator extends GarminWatchCoordinator {
     public boolean supportsPai(@NonNull final GBDevice device) {
         return false;
     }
+
+    @Override
+    public boolean supportsRacePrediction(@NonNull final GBDevice device) {
+        return false;
+    }
 }

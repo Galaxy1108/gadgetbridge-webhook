@@ -28,7 +28,5 @@ class NC700Coordinator : AbstractBoseCoordinator() {
         return R.string.devicetype_bose_nc700
     }
 
-    override fun getMaxAnc(): Int {
-        return 10
-    }
+    override val deviceConfig = BoseDeviceConfig.NC700
 }

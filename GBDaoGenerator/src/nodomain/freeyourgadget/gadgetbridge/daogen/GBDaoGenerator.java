@@ -81,6 +81,7 @@ public class GBDaoGenerator {
     private static final String SAMPLE_STRESS = "stress";
     private static final String SAMPLE_TEMPERATURE = "temperature";
     private static final String SAMPLE_WEIGHT_KG = "weightKg";
+    private static final String SAMPLE_IMPEDANCE_OHM = "impedanceOhm";
     private static final String SAMPLE_BLOOD_PRESSURE_SYSTOLIC = "bpSystolic";
     private static final String SAMPLE_BLOOD_PRESSURE_DIASTOLIC = "bpDiastolic";
     private static final String TIMESTAMP_FROM = "timestampFrom";
@@ -109,7 +110,7 @@ public class GBDaoGenerator {
             outputDir.mkdirs();
         }
 
-        final Schema schema = new Schema(138, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(140, MAIN_PACKAGE + ".entities");
 
         final List<Entity> sampleProvidersToGenerate = new LinkedList<>();
         final List<Entity> batterySampleProvidersToGenerate = new LinkedList<>();
@@ -191,6 +192,7 @@ public class GBDaoGenerator {
         addGarminActivitySample(schema, user, device);
         sampleProvidersToGenerate.add(addGarminStressSample(schema, user, device));
         sampleProvidersToGenerate.add(addGarminBodyEnergySample(schema, user, device));
+        sampleProvidersToGenerate.add(addGarminSolarChargeSample(schema, user, device));
         sampleProvidersToGenerate.add(addGarminSpo2Sample(schema, user, device));
         sampleProvidersToGenerate.add(addGarminSleepStageSample(schema, user, device));
         addGarminEventSample(schema, user, device);
@@ -1167,6 +1169,14 @@ public class GBDaoGenerator {
         return stressSample;
     }
 
+    private static Entity addGarminSolarChargeSample(Schema schema, Entity user, Entity device) {
+        Entity solarChargeSample = addEntity(schema, "GarminSolarChargeSample");
+        addCommonTimeSampleProperties("AbstractSolarChargeSample", solarChargeSample, user, device);
+        solarChargeSample.addFloatProperty("percent").notNull().codeBeforeGetter(OVERRIDE);
+        solarChargeSample.addLongProperty("gain").notNull().codeBeforeGetter(OVERRIDE);
+        return solarChargeSample;
+    }
+
     private static Entity addGarminSpo2Sample(Schema schema, Entity user, Entity device) {
         Entity spo2sample = addEntity(schema, "GarminSpo2Sample");
         addCommonTimeSampleProperties("AbstractSpo2Sample", spo2sample, user, device);
@@ -1442,6 +1452,7 @@ public class GBDaoGenerator {
 
     private static Entity addMoyoungSpo2Sample(Schema schema, Entity user, Entity device) {
         Entity spo2sample = addEntity(schema, "MoyoungSpo2Sample");
+        spo2sample.implementsSerializable();
         addCommonTimeSampleProperties("AbstractSpo2Sample", spo2sample, user, device);
         spo2sample.addIntProperty("spo2").notNull().codeBeforeGetter(OVERRIDE);
         return spo2sample;
@@ -2466,6 +2477,12 @@ public class GBDaoGenerator {
         Entity sample = addEntity(schema, "MiScaleWeightSample");
         addCommonTimeSampleProperties("AbstractWeightSample", sample, user, device);
         sample.addFloatProperty(SAMPLE_WEIGHT_KG).notNull().codeBeforeGetter(OVERRIDE);
+        // Raw BLE impedance (Ohms) from the Body Composition Measurement characteristic (0x2A9C),
+        // present only on devices with a Body Composition Service (e.g. MIBFS). Null when the
+        // scale has no impedance sensor, or the reading did not carry one. Body fat/muscle/water
+        // etc. are derived from this plus a user profile, not stored raw (formula-dependent,
+        // see https://codeberg.org/Freeyourgadget/Gadgetbridge/issues/6393).
+        sample.addIntProperty(SAMPLE_IMPEDANCE_OHM).codeBeforeGetter(OVERRIDE);
         return sample;
     }
 
@@ -2539,6 +2556,8 @@ public class GBDaoGenerator {
         Entity sample = addEntity(schema, "GenericWeightSample");
         addCommonTimeSampleProperties("AbstractWeightSample", sample, user, device);
         sample.addFloatProperty(SAMPLE_WEIGHT_KG).notNull().codeBeforeGetter(OVERRIDE);
+        // Raw bio-impedance in Ohms, for scales that report it (see MiScaleWeightSample).
+        sample.addIntProperty(SAMPLE_IMPEDANCE_OHM).codeBeforeGetter(OVERRIDE);
         return sample;
     }
 

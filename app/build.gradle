@@ -6,7 +6,6 @@ import java.nio.file.Files
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.kaitai)
 }
 
@@ -30,7 +29,19 @@ final def getVersionCode = { ->
 tasks.register("buildGitChangelog"){
     final def changelogFile = new File("${project.rootDir}/app/build/generated/res/changelog/xml/changelog_git.xml")
 
-    inputs.file(project.rootProject.file(".git/HEAD"))
+    def gitFile = project.rootProject.file('.git')
+    def gitHead = null
+
+    if (gitFile.directory) {
+        gitHead = new File(gitFile, 'HEAD')
+    } else if (gitFile.file) {
+        def gitDir = gitFile.text.trim().replaceFirst(/^gitdir:\s*/, '')
+        gitHead = new File(gitDir).with {
+            isAbsolute() ? new File(it, 'HEAD') : new File(gitFile.parentFile, it.path + '/HEAD')
+        }
+    }
+
+    inputs.file(gitHead)
     outputs.file(changelogFile)
 
     doLast {
@@ -378,6 +389,9 @@ dependencies {
 
     // Android Health Connect
     implementation libs.androidx.health.connect.client
+
+    // Protocol Buffer specifications
+    implementation project(':GBProtobufGenerator')
 }
 
 preBuild.dependsOn(":GBDaoGenerator:genSources")
@@ -400,21 +414,6 @@ tasks.register('cleanGenerated', Delete) {
 }
 
 tasks.clean.dependsOn(tasks.cleanGenerated)
-
-protobuf {
-    protoc {
-        artifact = libs.protoc.get()
-    }
-    generateProtoTasks {
-        all().each { final task ->
-            task.builtins {
-                java {
-                    option 'lite'
-                }
-            }
-        }
-    }
-}
 
 kaitai {
     javaPackage = "nodomain.freeyourgadget.gadgetbridge.kaitai"

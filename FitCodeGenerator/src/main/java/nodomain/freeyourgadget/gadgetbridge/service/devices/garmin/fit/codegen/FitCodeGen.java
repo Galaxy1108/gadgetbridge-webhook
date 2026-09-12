@@ -1172,7 +1172,19 @@ public enum FitCodeGen {
         }
     }
 
-    record FitDevice(int manufacturer, int product, String name, String type) implements Comparable<FitDevice> {
+    static class FitDevice implements Comparable<FitDevice> {
+        int manufacturer;
+        int product;
+        String name;
+        String type;
+
+        FitDevice (int manufacturer, int product, String name, String type) {
+            this.manufacturer = manufacturer;
+            this.product = product;
+            this.name = name;
+            this.type = type;
+        }
+
         @Override
         public int compareTo(FitDevice o) {
             int cmp = Integer.compare(manufacturer, o.manufacturer);
