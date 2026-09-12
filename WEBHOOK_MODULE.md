@@ -11,6 +11,7 @@
 | `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/webhook/WebhookConfig.kt` | 配置读写（走 GB 统一 SharedPreferences，键前缀 `webhook_`） |
 | `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/webhook/WebhookUploader.kt` | 核心：读库 → JSON → POST；每设备游标，服务端确认才推进 |
 | `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/webhook/WebhookWorker.kt` | WorkManager Worker |
+| `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/webhook/WebhookDeviceSync.kt` | 上传前先让设备同步一次（默认开启，60 分钟限频；仅对已连接且空闲的设备发起） |
 | `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/webhook/WebhookScheduler.kt` | 周期调度 + 同步完成立即触发（2 分钟限频） |
 | `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/webhook/WebhookSettingsActivity.kt` | 设置界面（Activity + Fragment） |
 | `app/src/main/res/xml/webhook_settings.xml` | 设置界面布局 |

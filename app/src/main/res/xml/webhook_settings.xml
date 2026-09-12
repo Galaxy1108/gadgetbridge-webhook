@@ -39,6 +39,15 @@
             app:iconSpaceReserved="false" />
 
         <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:dependency="webhook_enabled"
+            android:icon="@drawable/ic_refresh"
+            android:key="webhook_pre_sync"
+            android:layout="@layout/preference_checkbox"
+            android:title="@string/webhook_pref_pre_sync"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:dependency="webhook_enabled"
             android:icon="@drawable/ic_lock_open"

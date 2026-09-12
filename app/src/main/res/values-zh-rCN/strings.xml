@@ -4886,6 +4886,8 @@
     <string name="webhook_pref_interval_summary">每 %1$d 分钟上传一次</string>
     <string name="webhook_pref_allow_insecure">允许不安全的连接</string>
     <string name="webhook_pref_allow_insecure_summary">允许 http:// 或自签名证书（不推荐）</string>
+    <string name="webhook_pref_pre_sync">上传前先同步设备</string>
+    <string name="webhook_pref_pre_sync_summary">每次上传前先让手环同步一次新数据（最长 %1$d 分钟一次）；同步完成后会自动再上传一次</string>
     <string name="webhook_pref_data_types">上传的数据</string>
     <string name="webhook_pref_data_types_summary">选择要上传的数据类别</string>
     <string name="webhook_pref_data_types_summary_all">全部数据类别均已上传</string>

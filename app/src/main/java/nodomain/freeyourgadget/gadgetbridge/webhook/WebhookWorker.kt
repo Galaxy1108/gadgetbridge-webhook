@@ -33,6 +33,11 @@ class WebhookWorker(
 ) : Worker(context, workerParams) {
 
     override fun doWork(): Result {
+        // Ask the device for fresh data first: the upload below runs against the
+        // local database, which many bands only fill when the phone asks them to.
+        // The sync finishes later and triggers an immediate upload of its own.
+        WebhookDeviceSync.syncIfStale()
+
         // Large backlog: notify the user so they can manually choose the upload
         // range (the automatic upload keeps the 7-day cap).
         val backlogDays = WebhookUploader.estimateBacklogDays()

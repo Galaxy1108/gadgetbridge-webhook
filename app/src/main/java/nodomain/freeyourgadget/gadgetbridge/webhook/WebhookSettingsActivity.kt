@@ -128,6 +128,7 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
                 true
             }
             updateIntervalSummary(WebhookConfig.getIntervalMinutes())
+            updatePreSyncSummary()
 
             updateStatusRows()
         }
@@ -198,6 +199,11 @@ class WebhookSettingsActivity : AbstractSettingsActivityV2() {
                 getString(R.string.webhook_pref_interval_summary, WebhookConfig.DEFAULT_INTERVAL_MINUTES)
             }
             findPreference<Preference>(WebhookConfig.PREF_INTERVAL_MINUTES)?.summary = summary
+        }
+
+        private fun updatePreSyncSummary() {
+            findPreference<Preference>(WebhookConfig.PREF_PRE_SYNC)?.summary =
+                getString(R.string.webhook_pref_pre_sync_summary, WebhookConfig.PRE_SYNC_MIN_INTERVAL_MINUTES)
         }
 
         private fun updateDataTypesSummary() {

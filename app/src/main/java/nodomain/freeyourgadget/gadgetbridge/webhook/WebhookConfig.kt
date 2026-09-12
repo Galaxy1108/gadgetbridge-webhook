@@ -34,6 +34,12 @@ object WebhookConfig {
     const val PREF_INTERVAL_MINUTES = "webhook_interval_minutes"
     const val PREF_ALLOW_INSECURE = "webhook_allow_insecure"
 
+    /** Ask the device to sync before uploading, so the upload contains fresh data. */
+    const val PREF_PRE_SYNC = "webhook_pre_sync"
+
+    /** Epoch millis of the last pre-upload sync request (throttling). */
+    const val PREF_PRE_SYNC_LAST = "webhook_pre_sync_last_time"
+
     /** Settings screen only: "upload now" button (not persisted). */
     const val PREF_RUN_NOW = "webhook_run_now"
 
@@ -103,6 +109,12 @@ object WebhookConfig {
     const val PREF_LAST_IMMEDIATE = "webhook_last_immediate"
 
     const val DEFAULT_INTERVAL_MINUTES = 15
+
+    /** Minimum gap between pre-upload sync requests, to keep BLE traffic (and battery
+     *  drain on the band) reasonable. */
+    const val PRE_SYNC_MIN_INTERVAL_MINUTES = 60
+
+    const val PRE_SYNC_MIN_INTERVAL_MS = PRE_SYNC_MIN_INTERVAL_MINUTES * 60 * 1000L
 
     /** Minimum gap between sync-triggered uploads, to avoid hammering the server. */
     const val MIN_IMMEDIATE_INTERVAL_MS = 2 * 60 * 1000L
@@ -177,6 +189,17 @@ object WebhookConfig {
         GBApplication.getPrefs().getInt(PREF_INTERVAL_MINUTES, DEFAULT_INTERVAL_MINUTES).coerceAtLeast(1)
 
     fun allowInsecure(): Boolean = GBApplication.getPrefs().getBoolean(PREF_ALLOW_INSECURE, false)
+
+    /** Whether to nudge the device for a sync before uploading (default: on). */
+    fun isPreSyncEnabled(): Boolean = GBApplication.getPrefs().getBoolean(PREF_PRE_SYNC, true)
+
+    fun getPreSyncLast(): Long = GBApplication.getPrefs().getLong(PREF_PRE_SYNC_LAST, 0)
+
+    fun setPreSyncLast(timestampMillis: Long) {
+        GBApplication.getPrefs().preferences.edit {
+            putLong(PREF_PRE_SYNC_LAST, timestampMillis)
+        }
+    }
 
     /**
      * Enabled data categories. When the preference was never set, everything is enabled.
