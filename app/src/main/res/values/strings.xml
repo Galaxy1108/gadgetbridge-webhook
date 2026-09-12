@@ -5567,6 +5567,7 @@
 
     <!-- Webhook upload module (fork) -->
     <string name="webhook_pref_title">Webhook upload</string>
+    <string name="webhook_pref_summary">Send health data to your own server</string>
     <string name="pref_header_webhook">Webhook upload</string>
     <string name="webhook_pref_category_general">General</string>
     <string name="webhook_pref_binding_code">Binding code</string>

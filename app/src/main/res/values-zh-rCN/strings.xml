@@ -4870,6 +4870,7 @@
 
     <!-- Webhook upload module (fork) -->
     <string name="webhook_pref_title">Webhook 上传</string>
+    <string name="webhook_pref_summary">把健康数据上传到你自己的服务器</string>
     <string name="pref_header_webhook">Webhook 上传</string>
     <string name="webhook_pref_category_general">通用</string>
     <string name="webhook_pref_binding_code">绑定码</string>

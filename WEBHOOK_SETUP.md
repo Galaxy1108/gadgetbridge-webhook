@@ -13,10 +13,10 @@
 打开 App：
 
 1. 底部/侧边进入 **设置（Settings）**
-2. 找到 **自动化（Automation）**
+2. 找到 **外部集成（External integrations）**
 3. 打开 **Webhook 上传**
 
-或者：在主界面点右上角菜单 → 设置 → 自动化 → Webhook 上传。
+或者：在主界面点右上角菜单 → 设置 → 外部集成 → Webhook 上传。
 
 > 入口藏得比较深，一次找不到可以搜索设置页里的"Webhook"。
 

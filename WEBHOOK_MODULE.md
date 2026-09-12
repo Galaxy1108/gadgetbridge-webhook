@@ -16,7 +16,7 @@
 | `app/src/main/res/xml/webhook_settings.xml` | 设置界面布局 |
 | `WEBHOOK_MODULE.md` | 本文档 |
 
-## 对上游文件的改动（6 处钩子点，合并时注意）
+## 对上游文件的改动（合并时注意）
 
 1. `app/src/main/AndroidManifest.xml`
    - INTERNET 权限：上游 `tools:node="remove"` 改为保留（本模块需要直连 HTTPS）。
@@ -27,17 +27,23 @@
 3. `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/util/GB.java`
    - `signalActivityDataFinish()` 中加一行 `WebhookScheduler.INSTANCE.scheduleImmediate(GBApplication.getContext());`
      （小米 / 华米 / Casio / Garmin 等同步完成都会走到此函数 → 近实时上传）
-4. `app/src/main/res/xml/automations_settings.xml`
-   - 新增 `pref_header_webhook` 分类，含指向 `WebhookSettingsActivity` 的入口。
+4. `app/src/main/res/xml/preferences.xml`
+   - 在「外部集成」(`pref_screen_external_integrations`) 内新增指向 `WebhookSettingsActivity` 的入口
+     （图标 `ic_file_upload`，标题 `webhook_pref_title`）。
 5. `app/src/main/res/values/strings.xml` 与 `values-zh-rCN/strings.xml`
-   - 追加 `webhook_*`、`pref_header_webhook` 字符串（纯增量）。
+   - 追加 `webhook_*` 字符串（纯增量）。
 6. `app/build.gradle` — mainline flavor 增加 `applicationIdSuffix ".webhook"`
    （安装包名 = `nodomain.freeyourgadget.gadgetbridge.webhook`：保持官方命名主体，
    仅后缀标识 fork，可与官方版并存安装；`@string/applicationId` 由 AGP 自动生成，无需手改）。
-7. `app/src/main/java/nodomain/freeyourgadget/gadgetbridge/activities/DashboardFragment.java`
-   — 不再把 `dashboard_data`（当天全部仪表盘数据）写入/读回 saved state：
-   大数据超过 Binder 事务上限会抛 `TransactionTooLargeException`（687KB 实测触发）；
-   代价仅是旋转屏幕后仪表盘异步重载。
+
+## 已废弃的钩子（合并后可忽略）
+
+- `app/src/main/res/xml/automations_settings.xml`：Webhook 入口原先挂在「自动化」页，
+  已迁移到「外部集成」页，该文件不再有本模块改动。
+- `activities/DashboardFragment.java`：曾为规避 `TransactionTooLargeException` 而不再把
+  `dashboard_data` 写入 saved state。上游已把仪表盘重构为 `DashboardFragment.kt` +
+  `DashboardViewModel`，Bundle 里只存 `KEY_DAY`，该改动不再需要。
+- `pref_header_webhook` 字符串保留但已无引用（历史入口的分类标题）。
 
 ## 与上游合并
 

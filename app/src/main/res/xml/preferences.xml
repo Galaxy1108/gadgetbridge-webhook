@@ -414,6 +414,15 @@
             android:key="pref_category_online_fitness_trackers"
             android:title="@string/prefs_online_fitness_trackers_title"
             android:summary="@string/prefs_online_fitness_trackers_summary" />
+
+        <Preference
+            android:icon="@drawable/ic_file_upload"
+            android:title="@string/webhook_pref_title"
+            android:summary="@string/webhook_pref_summary">
+            <intent
+                android:targetClass="nodomain.freeyourgadget.gadgetbridge.webhook.WebhookSettingsActivity"
+                android:targetPackage="@string/applicationId" />
+        </Preference>
     </PreferenceScreen>
 
     <Preference
