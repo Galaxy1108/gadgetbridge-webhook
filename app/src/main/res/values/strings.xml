@@ -2506,6 +2506,26 @@
     <string name="metric_garmin_met_max_vo2">MET Max VO₂</string>
     <string name="metric_garmin_running_lactate_threshold_power">Running Lactate Threshold Power</string>
     <string name="metric_garmin_training_readiness">Training Readiness</string>
+    <string name="p_trainingreadiness" translatable="false">trainingreadiness</string>
+    <string name="training_readiness_zone_prime">Prime</string>
+    <string name="training_readiness_zone_prime_desc">Best possible</string>
+    <string name="training_readiness_zone_high">High</string>
+    <string name="training_readiness_zone_high_desc">Ready for challenges</string>
+    <string name="training_readiness_zone_moderate">Moderate</string>
+    <string name="training_readiness_zone_moderate_desc">Good to go</string>
+    <string name="training_readiness_zone_low">Low</string>
+    <string name="training_readiness_zone_low_desc">Time to slow down</string>
+    <string name="training_readiness_zone_poor">Poor</string>
+    <string name="training_readiness_zone_poor_desc">Let your body recover</string>
+    <string name="training_readiness_last_updated">Last updated at %1$s</string>
+    <string name="training_readiness_factor_sleep_3_nights">Sleep (3 nights)</string>
+    <string name="training_readiness_factor_stress_3_days">Stress (3 days)</string>
+    <string name="training_readiness_recovery_fully_recovered">Fully Recovered</string>
+    <string name="training_readiness_recovery_recovering">Recovering</string>
+    <string name="sleep_score_excellent">Excellent</string>
+    <string name="sleep_score_good">Good</string>
+    <string name="sleep_score_fair">Fair</string>
+    <string name="sleep_score_poor">Poor</string>
     <string name="menuitem_race_predictor">Race Predictor</string>
     <string name="p_raceprediction" translatable="false">raceprediction</string>
     <string name="menuitem_solar_charging">Solar Charging</string>
@@ -5073,6 +5093,7 @@
     <string name="cannot_open_help_url">Could not open URL</string>
     <string name="auth_settings">Authentication settings</string>
     <string name="devicetype_shokz_openswim_pro" translatable="false">Shokz OpenSwim Pro</string>
+    <string name="devicetype_shokz_openrun_pro_2" translatable="false">Shokz OpenRun Pro 2</string>
     <string name="devicetype_battery_monitor" translatable="false">Battery Monitor</string>
     <string name="devicetype_victron_smartshunt" translatable="false">Victron SmartShunt</string>
     <string name="devicetype_dji_osmo_action_4" translatable="false">DJI Osmo Action 4</string>
@@ -5086,6 +5107,11 @@
     <string name="media_source">Media source</string>
     <string name="mp3">MP3</string>
     <string name="media_source_switching_bluetooth_mp3">Switch media source (Bluetooth/MP3)</string>
+    <string name="shokz_equalizer_band_1">Band 1</string>
+    <string name="shokz_equalizer_band_2">Band 2</string>
+    <string name="shokz_equalizer_band_3">Band 3</string>
+    <string name="shokz_equalizer_band_4">Band 4</string>
+    <string name="shokz_equalizer_band_5">Band 5</string>
     <string name="shokz_controls_long_press_multi_function">Long-press the multi-function button</string>
     <string name="shokz_controls_simultaneous_volume_up_down">Long-press volume up and down simultaneously</string>
     <string name="track_name_required">Track name cannot be empty</string>

@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.devices.GenericMetricSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.SleepAsAndroidFeature;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.GarminCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.GarminCapability;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
+import nodomain.freeyourgadget.gadgetbridge.model.MetricSample;
 
 public abstract class GarminWatchCoordinator extends GarminCoordinator {
 
@@ -112,6 +114,12 @@ public abstract class GarminWatchCoordinator extends GarminCoordinator {
     public boolean supportsRacePrediction(@NonNull final GBDevice device) {
         // Not all devices support it, but support is broad.
         return true;
+    }
+
+    @Override
+    public boolean supportsTrainingReadiness(@NonNull final GBDevice device) {
+        // Not all devices support it, but support is broad.
+        return GenericMetricSampleProvider.supportsMetrics(device, MetricSample.Metric.GARMIN_TRAINING_READINESS);
     }
 
     @Override

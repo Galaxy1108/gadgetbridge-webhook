@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    <!-- For contributors: do not modify this file - the project maintainers will update it as needed -->
     <release version="0.93.0" versioncode="252">
       <change>Initial support for AK75 Pro, AK86, AK102 (TopStep / FitCloud)</change>
       <change>Initial support for DM58 (GloryFit Pro)</change>
