@@ -2259,6 +2259,7 @@
     <string name="devicetype_casiogbd200" translatable="false">Casio GBD-200</string>
     <string name="devicetype_mismartscale" translatable="false">Mi Smart Scale 2</string>
     <string name="devicetype_micompositionscale" translatable="false">Mi Body Composition Scale 2</string>
+    <string name="devicetype_qnscale" translatable="false">QN-Scale (Chipsea CS20)</string>
     <string name="devicetype_itag" translatable="false">iTag</string>
     <string name="devicetype_idasen" translatable="false">IKEA Idasen Desk</string>
     <string name="devicetype_bfh16" translatable="false">BFH-16</string>
@@ -2354,6 +2355,8 @@
     <string name="devicetype_huawei_watchgt4" translatable="false">Huawei Watch GT 4</string>
     <string name="devicetype_huawei_watchgt5" translatable="false">Huawei Watch GT 5 (Pro)</string>
     <string name="devicetype_huawei_watchgt6" translatable="false">Huawei Watch GT 6 (Pro)</string>
+    <string name="devicetype_huawei_watchgt7" translatable="false">Huawei Watch GT 7</string>
+    <string name="devicetype_huawei_watchgt7pro" translatable="false">Huawei Watch GT 7 Pro</string>
     <string name="devicetype_huawei_watchgtrunner" translatable="false">Huawei Watch GT Runner</string>
     <string name="devicetype_huawei_watchgtrunner2" translatable="false">Huawei Watch GT Runner 2</string>
     <string name="devicetype_huawei_watchgtcyber" translatable="false">Huawei Watch GT Cyber</string>
@@ -5107,6 +5110,7 @@
     <string name="media_source">Media source</string>
     <string name="mp3">MP3</string>
     <string name="media_source_switching_bluetooth_mp3">Switch media source (Bluetooth/MP3)</string>
+    <string name="shokz_equalizer_volume_boost">Volume Boost</string>
     <string name="shokz_equalizer_band_1">Band 1</string>
     <string name="shokz_equalizer_band_2">Band 2</string>
     <string name="shokz_equalizer_band_3">Band 3</string>
@@ -5618,4 +5622,5 @@
     <string name="gpx_include_navigation">Include turn-by-turn navigation</string>
     <string name="gpx_include_navigation_straight">Include \'Continue straight\' instructions</string>
     <string name="gpx_roundabout_exit">Exit %1$d</string>
+    <string name="pref_title_connect_to_this_device_when_another_device_connects">Connect to this device when another device connects</string>
 </resources>
