@@ -442,11 +442,19 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
             .getString(WorkoutUploader.PREF_ENDURAIN_SERVER, null)
         val wandererServer = GBApplication.getPrefs().preferences
             .getString(WorkoutUploader.PREF_WANDERER_SERVER, null)
-        val endurainReady = endurainServer != null && endurainVm.endurainTokenManager.isLoggedIn()
-        val wandererReady = wandererServer != null && WandererTokenManager(requireContext()).isLoggedIn()
-        overflowMenu?.findItem(R.id.activity_action_upload_to_endurain)?.isVisible = endurainReady
-        overflowMenu?.findItem(R.id.activity_action_upload_to_wanderer)?.isVisible = hasGpx && wandererReady
-        overflowMenu?.findItem(R.id.activity_action_upload_status)?.isVisible = endurainReady || wandererReady
+        viewLifecycleOwner.lifecycleScope.launch {
+            val enduranVisible = withContext(Dispatchers.IO) {
+                endurainServer != null && endurainVm.endurainTokenManager.isLoggedIn()
+            }
+            val wandererVisible = withContext(Dispatchers.IO) {
+                hasGpx && wandererServer != null && WandererTokenManager(requireContext()).isLoggedIn()
+            }
+            overflowMenu?.findItem(R.id.activity_action_upload_to_endurain)?.isVisible = enduranVisible
+            overflowMenu?.findItem(R.id.activity_action_upload_to_wanderer)?.isVisible = wandererVisible
+            overflowMenu?.findItem(R.id.activity_action_upload_status)?.isVisible = enduranVisible || wandererVisible
+
+        }
+
     }
 
     /**
