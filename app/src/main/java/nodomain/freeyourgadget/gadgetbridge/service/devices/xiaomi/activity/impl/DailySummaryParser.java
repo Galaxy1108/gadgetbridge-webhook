@@ -27,7 +27,6 @@ import java.nio.ByteOrder;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
-import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.GenericTrainingLoadAcuteSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.XiaomiDailySummarySampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
@@ -108,20 +107,17 @@ public class DailySummaryParser extends XiaomiActivityParser {
         try (DBHandler handler = GBApplication.acquireDB()) {
             final DaoSession session = handler.getDaoSession();
 
-            sample.setDevice(DBHelper.getDevice(device, session));
-            sample.setUser(DBHelper.getUser(session));
-
             final XiaomiDailySummarySampleProvider sampleProvider = new XiaomiDailySummarySampleProvider(device, session);
-            sampleProvider.addSample(sample);
+            if (!sampleProvider.persistSamples(sample, context)) {
+                return false;
+            }
 
-            persistTrainingLoad(device, session, sample);
+            return persistTrainingLoad(context, device, session, sample);
         } catch (final Exception e) {
             GB.toast(context, "Error saving daily summary", Toast.LENGTH_LONG, GB.ERROR);
             LOG.error("Error saving daily summary", e);
             return false;
         }
-
-        return true;
     }
 
     /**
@@ -131,16 +127,14 @@ public class DailySummaryParser extends XiaomiActivityParser {
      * {@code XiaomiCoordinator#getTrainingLoadStatus}. A slot the band did not report stays null,
      * so a genuine 0 for a rest week is still stored.
      */
-    private void persistTrainingLoad(final GBDevice device, final DaoSession session, final XiaomiDailySummarySample sample) {
+    private boolean persistTrainingLoad(final Context context, final GBDevice device, final DaoSession session, final XiaomiDailySummarySample sample) {
         if (sample.getTrainingLoadWeek() == null) {
-            return;
+            return true;
         }
         final GenericTrainingLoadAcuteSample acute = new GenericTrainingLoadAcuteSample();
         acute.setTimestamp(sample.getTimestamp());
-        acute.setDevice(sample.getDevice());
-        acute.setUser(sample.getUser());
         acute.setValue(sample.getTrainingLoadWeek());
-        new GenericTrainingLoadAcuteSampleProvider(device, session).addSample(acute);
+        return new GenericTrainingLoadAcuteSampleProvider(device, session).persistSamples(acute, context);
     }
 
     /**
