@@ -4963,7 +4963,7 @@
     <string name="body_composition_kcal">%1$d 卡</string>
     <string name="body_composition_ohm">%1$d 欧姆</string>
     <string name="pref_title_chart_weight_body_composition">人体成分值</string>
-    <string name="pref_summary_chart_weight_body_composition">体重秤提供时显示在体重图表下方的值</string>
+    <string name="pref_summary_chart_weight_body_composition">体重图表下方显示的值。BMI 仅需体重和身高；其他指标需要使用报告阻抗的体重秤</string>
     <string name="minutes_40">40 分钟</string>
     <string name="mandarin">普通话</string>
     <string name="cantonese">广东方言</string>
@@ -5017,4 +5017,9 @@
     <string name="shokz_equalizer_band_5">频段 5</string>
     <string name="shokz_equalizer_volume_boost">音量增强</string>
     <string name="pref_title_connect_to_this_device_when_another_device_connects">另一台设备连接时连接到此设备</string>
+    <string name="alarm_add">添加闹铃</string>
+    <string name="alarm_max_slots_reached">达到了最大闹铃数</string>
+    <string name="alarm_show_unused">显示未使用的闹铃</string>
+    <string name="body_composition_bmi_value">%1$.1f</string>
+    <string name="devicetype_wearfit_hk_generic">Wearfit HK (常规)</string>
 </resources>
