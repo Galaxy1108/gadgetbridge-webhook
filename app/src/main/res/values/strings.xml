@@ -973,6 +973,9 @@
     <string name="alarm_smart_wakeup_interval">Smart wakeup interval:</string>
     <string name="alarm_smart_wakeup_interval_default">5 minutes</string>
     <string name="alarm_snooze">Snooze</string>
+    <string name="alarm_add">Add alarm</string>
+    <string name="alarm_max_slots_reached">Maximum number of alarms reached</string>
+    <string name="alarm_show_unused">Show unused alarms</string>
     <string name="user_feedback_miband_set_alarms_failed">There was an error setting the alarms, please try again.</string>
     <string name="user_feedback_miband_set_alarms_ok">Alarms sent to device.</string>
     <string name="user_feedback_set_settings_ok">Settings sent to device.</string>
@@ -3647,11 +3650,12 @@
     <string name="body_composition_bone_mass">Bone</string>
     <string name="body_composition_bmr">BMR</string>
     <string name="body_composition_impedance">Impedance</string>
+    <string name="body_composition_bmi_value">%1$.1f</string>
     <string name="body_composition_percent">%1$.1f %%</string>
     <string name="body_composition_kcal">%1$d kcal</string>
     <string name="body_composition_ohm">%1$d Ω</string>
     <string name="pref_title_chart_weight_body_composition">Body composition values</string>
-    <string name="pref_summary_chart_weight_body_composition">Values shown below the weight chart, when the scale provides them</string>
+    <string name="pref_summary_chart_weight_body_composition">Values shown below the weight chart. BMI only needs the weight and your height; the others need a scale that reports impedance</string>
     <string name="redmi_buds_5_pro_anc_balanced">Balanced</string>
     <string name="redmi_buds_5_pro_anc_light">Light</string>
     <string name="redmi_buds_5_pro_anc_deep">Deep</string>
@@ -4569,6 +4573,7 @@
     <string name="pref_auto_reply_calls_title">Automatically answer phone calls</string>
     <string name="pref_auto_reply_calls_delay_summary">Number of seconds after which the call is automatically picked up</string>
     <string name="pref_auto_reply_calls_delay_title">Automatic Answer Delay</string>
+    <string name="devicetype_wearfit_hk_generic">Wearfit HK (Generic)</string>
     <string name="pref_speak_notifications_aloud_summary">Notifications will be read aloud through the headphones</string>
     <string name="pref_speak_notifications_aloud_title">Speak Notifications Aloud</string>
     <string name="pref_speak_notifications_focus_exclusive_title">Pause audio of other applications</string>
