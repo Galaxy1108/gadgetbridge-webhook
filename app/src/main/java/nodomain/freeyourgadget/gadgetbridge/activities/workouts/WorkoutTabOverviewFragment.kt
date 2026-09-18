@@ -121,10 +121,14 @@ class WorkoutTabOverviewFragment : Fragment(), WorkoutTabScreenshotProvider {
     private fun updateGpsMap(workout: Workout) {
         if (!workoutHasGps(workout)) {
             binding.gpsFragmentHolder.visibility = View.GONE
+            // The details table draws its own top border - if we don't have a map, hide
+            // the separator.
+            binding.headerSeparator.visibility = View.GONE
             return
         }
 
         binding.gpsFragmentHolder.visibility = View.VISIBLE
+        binding.headerSeparator.visibility = View.VISIBLE
         gpsFragment?.setTrackData(workout.summary, getGBDevice(workout.summary.device))
     }
 
