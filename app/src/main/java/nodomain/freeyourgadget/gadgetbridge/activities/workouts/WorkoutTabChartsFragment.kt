@@ -3,6 +3,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.workouts
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -12,6 +13,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
@@ -43,7 +45,6 @@ import nodomain.freeyourgadget.gadgetbridge.util.GridTableBuilder
 import org.apache.commons.lang3.tuple.Pair
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.iterator
 
 class WorkoutTabChartsFragment : Fragment(), WorkoutTabScreenshotProvider {
     private lateinit var viewModel: WorkoutViewModel
@@ -165,12 +166,15 @@ class WorkoutTabChartsFragment : Fragment(), WorkoutTabScreenshotProvider {
             chartsLayout.addView(chartTitle)
         }
 
-        // Basic avg/max info for this chart's metric, shown above it.
-        CHART_STAT_KEYS[chart.group]?.let { statKeys ->
-            val statEntries = groupedEntries[chart.group].orEmpty().filter { (key, _) -> key in statKeys }
-            if (statEntries.isNotEmpty()) {
-                addStatRow(chartsLayout, statEntries)
-            }
+        // Basic info for this chart's metric, shown above it. Its table draws its own border.
+        // Therefore, we only need a separator when there's no basic info to display.
+        val statEntries = CHART_STAT_KEYS[chart.group]?.let { statKeys ->
+            groupedEntries[chart.group].orEmpty().filter { (key, _) -> key in statKeys }
+        }.orEmpty()
+        if (statEntries.isNotEmpty()) {
+            addStatRow(chartsLayout, statEntries)
+        } else if (includeHeader) {
+            chartsLayout.addView(createSeparator())
         }
 
         val chartsFragmentHolder = FrameLayout(requireContext()).apply {
@@ -252,13 +256,20 @@ class WorkoutTabChartsFragment : Fragment(), WorkoutTabScreenshotProvider {
 
         chartsLayout.addView(chartsFragmentHolder)
 
-        // Heart rate zones go directly under the heart rate chart.
-        if (chart.group == ActivitySummaryEntries.GROUP_HEART_RATE) {
-            val zoneEntries = groupedEntries[ActivitySummaryEntries.GROUP_HEART_RATE_ZONES].orEmpty()
-            if (zoneEntries.isNotEmpty()) {
-                addSectionHeader(chartsLayout, R.string.workout_time_in_zones)
-                addStatRow(chartsLayout, zoneEntries)
-            }
+        // Heart rate zones go directly under the heart rate chart. The zones table is a grid
+        // with its own separators. Everything else ends in a plain view, so it gets a separator
+        // to break it from the next chart.
+        val zoneEntries = if (chart.group == ActivitySummaryEntries.GROUP_HEART_RATE) {
+            groupedEntries[ActivitySummaryEntries.GROUP_HEART_RATE_ZONES].orEmpty()
+        } else {
+            emptyList()
+        }
+        if (zoneEntries.isNotEmpty()) {
+            chartsLayout.addView(createSeparator())
+            addSectionHeader(chartsLayout, R.string.workout_time_in_zones)
+            addStatRow(chartsLayout, zoneEntries)
+        } else {
+            chartsLayout.addView(createSeparator())
         }
     }
 
@@ -278,6 +289,19 @@ class WorkoutTabChartsFragment : Fragment(), WorkoutTabScreenshotProvider {
     private fun dpToPx(dp: Int): Int {
         val density = resources.displayMetrics.density
         return (dp * density).toInt()
+    }
+
+    private fun createSeparator(): View {
+        return View(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                (1 * resources.displayMetrics.density).toInt()
+            )
+
+            val typedValue = TypedValue()
+            context?.theme?.resolveAttribute(R.attr.row_separator, typedValue, true)
+            setBackgroundColor(ContextCompat.getColor(requireContext(), typedValue.resourceId))
+        }
     }
 
     private fun addStatRow(chartsLayout: LinearLayout, entries: List<Pair<String, ActivitySummaryEntry>>) {

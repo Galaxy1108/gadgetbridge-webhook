@@ -8,8 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
         <!-- Dynamic charts, provided by the device -->
         <LinearLayout
@@ -27,6 +26,11 @@
             android:orientation="vertical"
             android:visibility="gone">
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/row_separator" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,10 +40,20 @@
                 android:text="@string/heart_rate"
                 android:textSize="18sp" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/row_separator" />
+
             <FrameLayout
                 android:id="@+id/charts_fragment_holder"
                 android:layout_width="match_parent"
                 android:layout_height="300dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/row_separator" />
 
         </LinearLayout>
 
