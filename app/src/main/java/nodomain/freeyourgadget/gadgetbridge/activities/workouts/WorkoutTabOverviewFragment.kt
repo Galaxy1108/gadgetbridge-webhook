@@ -85,6 +85,7 @@ class WorkoutTabOverviewFragment : Fragment(), WorkoutTabScreenshotProvider {
         viewModel.getWorkout(workoutId).distinctUntilChanged().observe(viewLifecycleOwner) { workout ->
             workout ?: return@observe
             latestWorkout = workout
+            workoutValueFormatter.setActivityKind(ActivityKind.fromCode(workout.summary.activityKind))
             renderWorkout(workout)
         }
         viewModel.showRawData.observe(viewLifecycleOwner) { showRawData ->

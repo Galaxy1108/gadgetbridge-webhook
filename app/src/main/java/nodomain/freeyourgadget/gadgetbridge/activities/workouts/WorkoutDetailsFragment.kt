@@ -126,7 +126,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
         // metric. There are only a handful of tabs, so keeping them all resident is cheap.
         viewPager.offscreenPageLimit = WorkoutTab.entries.size
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = tabsPagerAdapter.titleAt(position)
+            tab.text = getString(tabsPagerAdapter.titleResAt(position))
         }.attach()
 
         loadWorkoutData()

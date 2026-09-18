@@ -11,6 +11,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutValueForm
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.entries.ActivitySummaryEntry
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.entries.ActivitySummaryGroup
 import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentWorkoutTabLapsBinding
+import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries
 import nodomain.freeyourgadget.gadgetbridge.model.workout.Workout
 import nodomain.freeyourgadget.gadgetbridge.model.workout.WorkoutViewModel
@@ -51,6 +52,7 @@ class WorkoutTabLapsFragment : Fragment(), WorkoutTabScreenshotProvider {
         viewModel.getWorkout(workoutId).distinctUntilChanged().observe(viewLifecycleOwner) { workout ->
             workout ?: return@observe
             latestWorkout = workout
+            workoutValueFormatter.setActivityKind(ActivityKind.fromCode(workout.summary.activityKind))
             renderWorkout(workout)
         }
         viewModel.showRawData.observe(viewLifecycleOwner) { showRawData ->

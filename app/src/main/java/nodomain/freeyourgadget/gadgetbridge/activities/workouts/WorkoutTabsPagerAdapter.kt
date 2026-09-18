@@ -1,16 +1,18 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.workouts
 
 import android.os.Bundle
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import nodomain.freeyourgadget.gadgetbridge.R
 
-enum class WorkoutTab(val label: String) {
-    OVERVIEW("Overview"),
-    CHARTS("Charts"),
-    LAPS("Laps"),
-    DETAILS("Details"),
+enum class WorkoutTab(@StringRes val labelRes: Int) {
+    OVERVIEW(R.string.workout_tab_overview),
+    CHARTS(R.string.charts),
+    LAPS(R.string.laps),
+    DETAILS(R.string.workout_tab_details),
 }
 
 private val BASE_TABS = listOf(WorkoutTab.OVERVIEW, WorkoutTab.CHARTS, WorkoutTab.DETAILS)
@@ -35,12 +37,17 @@ class WorkoutTabsPagerAdapter(
     fun setLapsTab(show: Boolean) {
         val newTabs = if (show) TABS_WITH_LAPS else BASE_TABS
         if (newTabs != tabs) {
+            val removedTabs = tabs - newTabs.toSet()
             tabs = newTabs
+            for (removedTab in removedTabs) {
+                fragmentsByItemId.remove(removedTab.ordinal.toLong())
+            }
             notifyDataSetChanged()
         }
     }
 
-    fun titleAt(position: Int): String = tabs[position].label
+    @StringRes
+    fun titleResAt(position: Int): Int = tabs[position].labelRes
 
     override fun getItemCount(): Int = tabs.size
 
