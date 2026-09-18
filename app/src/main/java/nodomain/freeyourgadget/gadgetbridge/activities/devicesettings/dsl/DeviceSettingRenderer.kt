@@ -341,7 +341,14 @@ object DeviceSettingRenderer {
                 }
 
                 is SeekBarSetting -> {
-                    SeekBarPreference(context).apply {
+                    object: SeekBarPreference(context){
+                        override fun onSetInitialValue(defaultValue: Any?) {
+                            super.onSetInitialValue(defaultValue)
+                            if (setting.valueFormat != 0) {
+                                summary = context.getString(setting.valueFormat, value * setting.scale)
+                            }
+                        }
+                    }.apply {
                         key = setting.key
                         setTitle(setting.title)
                         if (setting.summary != 0) setSummary(setting.summary)
@@ -351,10 +358,6 @@ object DeviceSettingRenderer {
                         setDefaultValue(setting.defaultValue)
                         showSeekBarValue = setting.showValue
                         seekBarIncrement = setting.step
-
-                        if (setting.valueFormat != 0) {
-                            summary = context.getString(setting.valueFormat, value * setting.scale)
-                        }
 
                         setOnPreferenceChangeListener { pref, newValue ->
                             val raw = newValue as Int
@@ -369,13 +372,32 @@ object DeviceSettingRenderer {
                                 summary = context.getString(setting.valueFormat, snapped * setting.scale)
                             }
 
-                            if (snapped != raw) {
-                                (pref as SeekBarPreference).value = snapped
-                            }
-
                             handler.notifyPreferenceChanged(setting.key)
                             postRefresh()
-                            true
+
+                            if (snapped != raw) {
+                                (pref as SeekBarPreference).value = snapped
+                                false
+                            } else {
+                                true
+                            }
+                        }
+
+                        if (setting.onSharedPreferenceChanged != null) {
+                            val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPrefs, changedKey ->
+                                if (changedKey == setting.key) {
+                                    val newValue = sharedPrefs.getInt(changedKey, setting.defaultValue)
+                                    mainHandler.post {
+                                        value = newValue
+                                        if (setting.valueFormat != 0) {
+                                            summary = context.getString(setting.valueFormat, newValue * setting.scale)
+                                        }
+                                        setting.onSharedPreferenceChanged.invoke(newValue)
+                                    }
+                                }
+                            }
+                            spListeners.add(listener)
+                            sp.registerOnSharedPreferenceChangeListener(listener)
                         }
                     }
                 }

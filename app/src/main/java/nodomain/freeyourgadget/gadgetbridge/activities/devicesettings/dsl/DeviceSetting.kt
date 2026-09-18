@@ -129,6 +129,7 @@ data class SeekBarSetting(
     @StringRes val valueFormat: Int = 0,
     val dependency: String? = null,
     override val visibleWhen: ((Prefs) -> Boolean)? = null,
+    val onSharedPreferenceChanged: ((Int) -> Unit)? = null,
     override val connectedOnly: Boolean = true,
 ) : DeviceSetting()
 

@@ -217,6 +217,7 @@ class DeviceSettingsScope {
         @StringRes valueFormat: Int = 0,
         dependency: String? = null,
         connectedOnly: Boolean = true,
+        onSharedPreferenceChanged: ((Int) -> Unit)? = null,
         visibleWhen: ((Prefs) -> Boolean)? = null,
     ) {
         items.add(
@@ -234,6 +235,7 @@ class DeviceSettingsScope {
                 valueFormat = valueFormat,
                 dependency = dependency,
                 connectedOnly = connectedOnly,
+                onSharedPreferenceChanged = onSharedPreferenceChanged,
                 visibleWhen = visibleWhen,
             )
         )
