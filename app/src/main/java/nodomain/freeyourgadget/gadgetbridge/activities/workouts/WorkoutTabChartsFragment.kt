@@ -134,7 +134,7 @@ class WorkoutTabChartsFragment : Fragment(), WorkoutTabScreenshotProvider {
     private fun workoutLabel(): String? {
         val summary = latestWorkout?.summary ?: return null
         return summary.name?.takeIf { it.isNotBlank() }
-            ?: summary.activityKind?.let { ActivityKind.fromCode(it).getLabel(requireContext()) }
+            ?: summary.activityKind.let { ActivityKind.fromCode(it).getLabel(requireContext()) }
     }
 
     @Suppress("KotlinConstantConditions")

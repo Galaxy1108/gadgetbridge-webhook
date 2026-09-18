@@ -148,7 +148,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
     private fun workoutLabel(): String? {
         val summary = currentWorkout?.summary ?: return null
         return summary.name?.takeIf { it.isNotBlank() }
-            ?: summary.activityKind?.let { ActivityKind.fromCode(it).getLabel(requireContext()) }
+            ?: summary.activityKind.let { ActivityKind.fromCode(it).getLabel(requireContext()) }
     }
 
     private fun loadWorkoutData() {

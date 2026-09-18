@@ -34,6 +34,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.GridTableBuilder
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.tuple.Pair
 import java.io.File
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -207,10 +208,14 @@ class WorkoutTabOverviewFragment : Fragment(), WorkoutTabScreenshotProvider {
             // Date
             binding.activitydate.apply {
                 val timeString = if (DateTimeUtils.isSameDay(startTime, endTime)) {
+                    val endTimeCal = Calendar.getInstance().apply { time = endTime }
                     context.getString(
                         R.string.date_placeholders__start_time__end_time,
                         DateTimeUtils.formatDateTimeRelative(context, startTime),
-                        DateTimeUtils.formatTime(endTime.hours, endTime.minutes)
+                        DateTimeUtils.formatTime(
+                            endTimeCal.get(Calendar.HOUR_OF_DAY),
+                            endTimeCal.get(Calendar.MINUTE)
+                        )
                     )
                 } else {
                     context.getString(
