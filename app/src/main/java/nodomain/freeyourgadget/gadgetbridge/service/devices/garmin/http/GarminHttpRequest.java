@@ -92,6 +92,9 @@ public class GarminHttpRequest {
 
     public byte[] getBodyToSend() {
         if (rawRequest != null) {
+            if (rawRequest.hasBody()) {
+                return rawRequest.getBody().getBytes(StandardCharsets.UTF_8);
+            }
             return rawRequest.getRawBody().toByteArray();
         } else {
             final byte[] webRequestBodyBytes = webRequest.getBody().toByteArray();
