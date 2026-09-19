@@ -24,6 +24,8 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
@@ -64,6 +66,7 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.Chan
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ChangeResponse;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.Date;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.EntryState;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.MenuEntry;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.RowType;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenDefinition;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenEntry;
@@ -249,6 +252,8 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
             LOG.error("Activity is null");
             return;
         }
+
+        activity.invalidateOptionsMenu();
 
         final PreferenceScreen prefScreen = findPreference(GarminPreferences.PREF_GARMIN_REALTIME_SETTINGS);
         if (prefScreen == null) {
@@ -796,6 +801,48 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
 
         if (!previousWasVisible && lastSeenCategory != null) {
             lastSeenCategory.setVisible(false);
+        }
+    }
+
+    void populateMenu(final Menu menu) {
+        if (screenDefinition == null) {
+            return;
+        }
+
+        final boolean debug = GBApplication.getDevicePrefs(device).getBoolean(PREF_DEBUG, BuildConfig.DEBUG);
+
+        for (final MenuEntry menuEntry : screenDefinition.getMenuEntryList()) {
+            final MenuItem menuItem = menu.add(Menu.NONE, Menu.NONE, Menu.NONE, menuEntry.getLabel().getText());
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+
+            boolean supported = true;
+
+            if (menuEntry.hasTarget()) {
+                switch (menuEntry.getTarget().getType()) {
+                    case TYPE_SUBSCREEN: // subscreen
+                    case TYPE_SUBSCREEN_OPTIONS: // subscreen with options for a specific preference
+                        menuItem.setOnMenuItemClickListener(item -> {
+                            final Intent newIntent = new Intent(requireContext(), GarminRealtimeSettingsActivity.class);
+                            newIntent.putExtra(GBDevice.EXTRA_DEVICE, device);
+                            newIntent.putExtra(GarminRealtimeSettingsActivity.EXTRA_SCREEN_ID, menuEntry.getTarget().getSubscreen());
+                            requireActivity().startActivityForResult(newIntent, 0);
+                            return true;
+                        });
+                        break;
+                    default:
+                        LOG.info("unknown menu target type {}", menuEntry.getTarget().getType());
+                        supported = false;
+                        break;
+                }
+            } else {
+                LOG.info("Menu entry {} has no target", menuEntry.getLabel().getText());
+                supported = false;
+            }
+
+            if (!supported) {
+                menuItem.setEnabled(false);
+                menuItem.setVisible(debug);
+            }
         }
     }
 
