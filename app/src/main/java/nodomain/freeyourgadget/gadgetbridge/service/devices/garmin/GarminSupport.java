@@ -1509,7 +1509,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                                             ScreenDefinitionRequest.newBuilder()
                                                     .setScreenId(screenId)
                                                     .setUnk2(0)
-                                                    .setLanguage(localeString.length() == 5 ? localeString : "en_US")
+                                                    .setLocale(localeString.length() == 5 ? localeString : "en_US")
                                     )
                             ).build());
 
