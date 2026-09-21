@@ -210,15 +210,25 @@ message Target {
         ACTIVITY_UNK_57 = 57;
         ACTIVITY_UNK_58 = 58;
         ACTIVITY_UNK_59 = 59;
+        ACTIVITY_UNK_60 = 60;
+        ACTIVITY_UNK_61 = 61;
+        ACTIVITY_UNK_62 = 62;
+        ACTIVITY_UNK_63 = 63;
+        ACTIVITY_UNK_64 = 64;
+        ACTIVITY_UNK_65 = 65;
+        ACTIVITY_UNK_66 = 66;
+        ACTIVITY_UNK_67 = 67;
+        ACTIVITY_UNK_68 = 68;
+        ACTIVITY_UNK_69 = 69;
     }
 
     enum Type {
         TYPE_SUBSCREEN = 0;
         TYPE_LIST = 1;
-        TYPE_TIME = 2;
+        TYPE_DURATION = 2;
         TYPE_TIME_OF_DAY = 3;
         TYPE_FLOAT = 4;
-        TYPE_NUMBER = 5;
+        TYPE_INTEGER = 5;
         TYPE_ACTIVITY = 6;
         TYPE_HIDDEN = 7;
         TYPE_UNK_8 = 8;
@@ -243,9 +253,19 @@ message Target {
         TYPE_UNK_27 = 27;
         TYPE_UNK_28 = 28;
         TYPE_UNK_29 = 29;
+        TYPE_UNK_30 = 30;
+        TYPE_UNK_31 = 31;
+        TYPE_UNK_32 = 32;
+        TYPE_UNK_33 = 33;
+        TYPE_UNK_34 = 34;
+        TYPE_UNK_35 = 35;
+        TYPE_UNK_36 = 36;
+        TYPE_UNK_37 = 37;
+        TYPE_UNK_38 = 38;
+        TYPE_UNK_39 = 39;
     }
 
-  message TimeOptions {
+  message DurationOptions {
     optional uint32 minSeconds = 1;
     optional uint32 maxSeconds = 2;
     optional uint32 stepSize = 3;
@@ -266,9 +286,9 @@ message Target {
   optional uint32 subscreen = 2; // when 0
   optional Activity activity = 3; // when 6
   optional TargetOptions options = 4; // when 1
-  optional TimeOptions timeOptions = 5;
+  optional DurationOptions durationOptions = 5;
   optional FloatOptions floatOptions = 7;
-  optional TargetNumberPicker numberPicker = 8;
+  optional IntegerPicker integerPicker = 8;
   optional CIQ ciq = 11;
 }
 
@@ -297,7 +317,7 @@ message TargetOptionEntry {
   optional Message7 unk7 = 7;
 }
 
-message TargetNumberPicker {
+message IntegerPicker {
   optional uint32 min = 1;
   optional uint32 max = 2;
   optional uint32 step = 3; // maybe? 1 on weight
@@ -347,10 +367,10 @@ message Switch {
 message Summary {
   optional Label title = 1;
   optional ValueList valueList = 2;
-  optional ValueTimestamp valueTimestamp = 3;
-  optional ValueTime valueTime = 4;
+  optional ValueDuration valueDuration = 3;
+  optional ValueTimeOfDay valueTimeOfDay = 4;
   optional ValueFloat valueFloat = 5;
-  optional ValueNumber valueNumber = 6;
+  optional ValueInteger valueInteger = 6;
   optional ValueDate valueDate = 8;
   optional ValueHeight valueHeight = 10;
 }
@@ -359,13 +379,13 @@ message ValueList {
   optional uint32 index = 1;
 }
 
-message ValueTime {
+message ValueTimeOfDay {
   optional uint32 seconds = 1;
   optional Label formatted = 2;
   optional uint32 timeFormat = 3; // 0 12h, 1 24h
 }
 
-message ValueTimestamp {
+message ValueDuration {
   optional uint32 seconds = 1;
   optional Label formatted = 2;
   optional Label titel = 3;
@@ -378,9 +398,9 @@ message ValueFloat {
   optional Label uom = 4;
 }
 
-message ValueNumber {
+message ValueInteger {
   optional uint32 value = 1;
-  optional Label subtitle = 2;
+  optional Label formatted = 2;
   optional Label title = 3;
   optional Label unit = 4;
 }
@@ -409,8 +429,10 @@ message ChangeRequest {
   optional uint32 entryId = 2;
   optional Switch switch = 3;
   optional Option option = 4;
-  optional Time time = 6;
-  optional Number number = 8;
+  optional Time duration = 5;
+  optional Time timeOfDay = 6;
+  optional FloatValue floatValue = 7;
+  optional IntegerValue integerValue = 8;
   optional Position position = 11;
   optional NewDate newDate = 12;
   optional Text text = 14;
@@ -425,7 +447,7 @@ message ChangeRequest {
   message Time {
     optional uint32 seconds = 1;
   }
-  message Number {
+  message IntegerValue {
     optional uint32 value = 1;
   }
   message Position {
@@ -441,6 +463,9 @@ message ChangeRequest {
   message Height {
     optional uint32 value = 1;
     optional uint32 unit = 2;
+  }
+  message FloatValue {
+    optional float value = 1;
   }
 }
 
@@ -617,7 +642,7 @@ enum RowType {
     ROW_HELP_AND_INFO = 13;
     ROW_SORTABLE_AND_DELETEABLE = 15;
     ROW_TEXT = 16;
-    ROW_UNK_17 = 17;
+    ROW_ICON = 17;
     ROW_SINGLE_ACTION = 18;
     ROW_EMPTY = 19;
     ROW_UNK_20 = 20;
@@ -630,4 +655,14 @@ enum RowType {
     ROW_UNK_27 = 27;
     ROW_UNK_28 = 28;
     ROW_UNK_29 = 29;
+    ROW_UNK_30 = 30;
+    ROW_UNK_31 = 31;
+    ROW_UNK_32 = 32;
+    ROW_UNK_33 = 33;
+    ROW_UNK_34 = 34;
+    ROW_UNK_35 = 35;
+    ROW_UNK_36 = 36;
+    ROW_UNK_37 = 37;
+    ROW_UNK_38 = 38;
+    ROW_UNK_39 = 39;
 }

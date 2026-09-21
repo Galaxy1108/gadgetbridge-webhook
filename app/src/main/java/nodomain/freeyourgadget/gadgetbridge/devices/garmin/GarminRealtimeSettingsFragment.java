@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.widget.EditText;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -75,13 +76,17 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.Sett
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.SortEntry;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.Summary;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.TargetOptionEntry;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ValueFloat;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ValueList;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ValueInteger;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ValueDuration;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.XDatePreference;
 import nodomain.freeyourgadget.gadgetbridge.util.XTimePreference;
+import nodomain.freeyourgadget.gadgetbridge.util.preferences.MinMaxFloatWatcher;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.MinMaxTextWatcher;
 
 public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
@@ -370,11 +375,11 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                     case TYPE_TIME_OF_DAY: // time
                         pref = new XTimePreference(activity, null);
                         ((XTimePreference) pref).setValue(
-                                Objects.requireNonNull(state).getSummary().getValueTime().getSeconds() / 3600,
-                                (Objects.requireNonNull(state).getSummary().getValueTime().getSeconds() % 3600) / 60
+                                Objects.requireNonNull(state).getSummary().getValueTimeOfDay().getSeconds() / 3600,
+                                (Objects.requireNonNull(state).getSummary().getValueTimeOfDay().getSeconds() % 3600) / 60
                         );
-                        if (state.getSummary().getValueTime().hasTimeFormat()) {
-                            final int timeFormat = state.getSummary().getValueTime().getTimeFormat();
+                        if (state.getSummary().getValueTimeOfDay().hasTimeFormat()) {
+                            final int timeFormat = state.getSummary().getValueTimeOfDay().getTimeFormat();
                             switch (timeFormat) {
                                 case 0: // 12h
                                     ((XTimePreference) pref).setFormat(XTimePreference.Format.FORMAT_12H);
@@ -396,46 +401,28 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                     ChangeRequest.newBuilder()
                                             .setScreenId(screenId)
                                             .setEntryId(entry.getId())
-                                            .setTime(ChangeRequest.Time.newBuilder()
+                                            .setTimeOfDay(ChangeRequest.Time.newBuilder()
                                                     .setSeconds(hour * 3600 + minute * 60)
                                             )
                             );
                             return true;
                         });
                         break;
-                    case TYPE_NUMBER: // number picker
-                        pref = new EditTextPreference(activity);
-                        ((EditTextPreference) pref).setText(String.valueOf(state.getSummary().getValueNumber().getValue()));
-                        ((EditTextPreference) pref).setSummary(state.getSummary().getValueNumber().getSubtitle().getText());
-
-                        ((EditTextPreference) pref).setOnBindEditTextListener(p -> {
-                            p.setInputType(InputType.TYPE_CLASS_NUMBER);
-                            int minValue = Integer.MIN_VALUE;
-                            int maxValue = Integer.MAX_VALUE;
-                            if (entry.getTarget().getNumberPicker().hasMin()) {
-                                minValue = entry.getTarget().getNumberPicker().getMin();
-                            }
-                            if (entry.getTarget().getNumberPicker().hasMax()) {
-                                maxValue = entry.getTarget().getNumberPicker().getMax();
-                            }
-                            p.addTextChangedListener(new MinMaxTextWatcher(p, minValue, maxValue));
-                            p.setSelection(p.getText().length());
-                        });
-                        ((EditTextPreference) pref).setOnPreferenceChangeListener((preference, newValue) -> {
-                            final int newValueInt = Integer.parseInt(newValue.toString());
-
-                            pref.setEnabled(false);
-                            sendChangeRequest(
-                                    ChangeRequest.newBuilder()
-                                            .setScreenId(screenId)
-                                            .setEntryId(entry.getId())
-                                            .setNumber(ChangeRequest.Number.newBuilder()
-                                                    .setValue(newValueInt)
-                                            )
-                            );
-                            return true;
-                        });
+                    case TYPE_INTEGER: {
+                        final IntegerPicker integerPicker = new IntegerPicker(entry, screenId);
+                        pref = integerPicker.createPreference(activity, state);
                         break;
+                    }
+                    case TYPE_FLOAT: {
+                        final FloatPicker floatPicker = new FloatPicker(entry, screenId);
+                        pref = floatPicker.createPreference(activity, state);
+                        break;
+                    }
+                    case TYPE_DURATION: {
+                        final DurationPicker durationPicker = new DurationPicker(entry, screenId);
+                        pref = durationPicker.createPreference(activity, state);
+                        break;
+                    }
                     case TYPE_ACTIVITY: // activity
                         switch (entry.getTarget().getActivity()) {
                             case ACTIVITY_GARMIN_PAY:
@@ -843,6 +830,159 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                 menuItem.setEnabled(false);
                 menuItem.setVisible(debug);
             }
+        }
+    }
+
+    private final class IntegerPicker implements EditTextPreference.OnBindEditTextListener, Preference.OnPreferenceChangeListener {
+        private final ScreenEntry integerEntry;
+        private final int integerScreenId;
+
+        private IntegerPicker(@NonNull ScreenEntry integerEntry, int integerScreenId) {
+            this.integerEntry = integerEntry;
+            this.integerScreenId = integerScreenId;
+        }
+
+        @Override
+        public void onBindEditText(@NonNull EditText editText) {
+            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+            int minValue = Integer.MIN_VALUE;
+            int maxValue = Integer.MAX_VALUE;
+            if (integerEntry.getTarget().getIntegerPicker().hasMin()) {
+                minValue = integerEntry.getTarget().getIntegerPicker().getMin();
+            }
+            if (integerEntry.getTarget().getIntegerPicker().hasMax()) {
+                maxValue = integerEntry.getTarget().getIntegerPicker().getMax();
+            }
+            editText.addTextChangedListener(new MinMaxTextWatcher(editText, minValue, maxValue));
+            editText.setSelection(editText.getText().length());
+        }
+
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, @NonNull Object newValue) {
+            final int newValueInt = Integer.parseInt(newValue.toString());
+
+            preference.setEnabled(false);
+            sendChangeRequest(
+                    ChangeRequest.newBuilder()
+                            .setScreenId(integerScreenId)
+                            .setEntryId(integerEntry.getId())
+                            .setIntegerValue(ChangeRequest.IntegerValue.newBuilder()
+                                    .setValue(newValueInt)
+                            )
+            );
+            return true;
+        }
+
+        Preference createPreference(FragmentActivity activity, EntryState state) {
+            final EditTextPreference preference = new EditTextPreference(activity);
+            final ValueInteger summaryValue = state.getSummary().getValueInteger();
+            preference.setText(String.valueOf(summaryValue.getValue()));
+            preference.setSummary(summaryValue.getFormatted().getText());
+            preference.setOnBindEditTextListener(this);
+            preference.setOnPreferenceChangeListener(this);
+            return preference;
+        }
+    }
+
+    private final class DurationPicker implements EditTextPreference.OnBindEditTextListener, Preference.OnPreferenceChangeListener {
+        private final ScreenEntry durationEntry;
+        private final int durationScreenId;
+
+        private DurationPicker(@NonNull ScreenEntry durationEntry, int durationScreenId) {
+            this.durationEntry = durationEntry;
+            this.durationScreenId = durationScreenId;
+        }
+
+        @Override
+        public void onBindEditText(@NonNull EditText editText) {
+            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+            int minValue = 0;
+            int maxValue = Integer.MAX_VALUE;
+            if (durationEntry.getTarget().getDurationOptions().hasMinSeconds()) {
+                minValue = durationEntry.getTarget().getDurationOptions().getMinSeconds();
+            }
+            if (durationEntry.getTarget().getDurationOptions().hasMaxSeconds()) {
+                maxValue = durationEntry.getTarget().getDurationOptions().getMaxSeconds();
+            }
+            editText.addTextChangedListener(new MinMaxTextWatcher(editText, minValue, maxValue));
+            editText.setSelection(editText.getText().length());
+        }
+
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, @NonNull Object newValue) {
+            final int newSeconds = Integer.parseInt(newValue.toString());
+
+            preference.setEnabled(false);
+            sendChangeRequest(
+                    ChangeRequest.newBuilder()
+                            .setScreenId(durationScreenId)
+                            .setEntryId(durationEntry.getId())
+                            .setDuration(ChangeRequest.Time.newBuilder()
+                                    .setSeconds(newSeconds)
+                            )
+            );
+            return true;
+        }
+
+        Preference createPreference(FragmentActivity activity, EntryState state) {
+            final EditTextPreference preference = new EditTextPreference(activity);
+            final ValueDuration summaryValue = state.getSummary().getValueDuration();
+            preference.setText(String.valueOf(summaryValue.getSeconds()));
+            preference.setSummary(summaryValue.getFormatted().getText());
+            preference.setOnBindEditTextListener(this);
+            preference.setOnPreferenceChangeListener(this);
+            return preference;
+        }
+    }
+
+    private final class FloatPicker implements EditTextPreference.OnBindEditTextListener, Preference.OnPreferenceChangeListener {
+        private final ScreenEntry floatEntry;
+        private final int floatScreenId;
+
+        private FloatPicker(@NonNull ScreenEntry floatEntry, int floatScreenId) {
+            this.floatEntry = floatEntry;
+            this.floatScreenId = floatScreenId;
+        }
+
+        @Override
+        public void onBindEditText(@NonNull EditText editText) {
+            editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            float minValue = Float.MIN_VALUE;
+            float maxValue = Float.MAX_VALUE;
+            if (floatEntry.getTarget().getFloatOptions().hasMinValue()) {
+                minValue = floatEntry.getTarget().getFloatOptions().getMinValue();
+            }
+            if (floatEntry.getTarget().getFloatOptions().hasMaxValue()) {
+                maxValue = floatEntry.getTarget().getFloatOptions().getMaxValue();
+            }
+            editText.addTextChangedListener(new MinMaxFloatWatcher(editText, minValue, maxValue));
+            editText.setSelection(editText.getText().length());
+        }
+
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, @NonNull Object newValue) {
+            final float newFloat = Float.parseFloat(newValue.toString());
+
+            preference.setEnabled(false);
+            sendChangeRequest(
+                    ChangeRequest.newBuilder()
+                            .setScreenId(floatScreenId)
+                            .setEntryId(floatEntry.getId())
+                            .setFloatValue(ChangeRequest.FloatValue.newBuilder()
+                                    .setValue(newFloat)
+                            )
+            );
+            return true;
+        }
+
+        EditTextPreference createPreference(FragmentActivity activity, EntryState state) {
+            final EditTextPreference preference = new EditTextPreference(activity);
+            final ValueFloat summaryValue = state.getSummary().getValueFloat();
+            preference.setText(String.valueOf(summaryValue.getValue()));
+            preference.setSummary(summaryValue.getFormatted().getText());
+            preference.setOnBindEditTextListener(this);
+            preference.setOnPreferenceChangeListener(this);
+            return preference;
         }
     }
 
