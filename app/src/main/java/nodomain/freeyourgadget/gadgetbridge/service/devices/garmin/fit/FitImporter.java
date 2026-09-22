@@ -98,6 +98,8 @@ import nodomain.freeyourgadget.gadgetbridge.model.MetricSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.FileType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminUtils;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Event;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.EventType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.HrvStatus;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.SleepStage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.exception.FitParseException;
@@ -976,14 +978,14 @@ public class FitImporter {
 
             final GarminEventSample sampleFallAsleep = new GarminEventSample();
             sampleFallAsleep.setTimestamp(asleepTimeMillis);
-            sampleFallAsleep.setEvent(74); // sleep
-            sampleFallAsleep.setEventType(0); // sleep start
+            sampleFallAsleep.setEvent(Event.DETECT_SLEEP); // sleep
+            sampleFallAsleep.setEventType(EventType.START); // sleep start
             sampleFallAsleep.setData(-1L); // in actual samples they're a garmin epoch, this way we can identify them
 
             final GarminEventSample sampleWakeUp = new GarminEventSample();
             sampleWakeUp.setTimestamp(wakeTimeMillis);
-            sampleWakeUp.setEvent(74); // sleep
-            sampleWakeUp.setEventType(1); // sleep end
+            sampleWakeUp.setEvent(Event.DETECT_SLEEP); // sleep
+            sampleWakeUp.setEventType(EventType.STOP); // sleep end
             sampleWakeUp.setData(-1L); // in actual samples they're a garmin epoch, this way we can identify them
 
             persistAbstractSamples(List.of(sampleFallAsleep, sampleWakeUp), sampleProvider);
