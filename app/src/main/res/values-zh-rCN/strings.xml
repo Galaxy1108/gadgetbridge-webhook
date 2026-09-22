@@ -5047,4 +5047,22 @@
     <string name="pref_endurain_replace_on_track_change_title">轨迹更改时替换锻炼</string>
     <string name="pref_endurain_replace_on_track_change_summary">更改已上传锻炼的轨迹意味着删除活动并再次上传，它因而获得新地址。 不会影响在 Endurain 上编辑的活动。</string>
     <string name="workout_time_in_zones">区域内时间</string>
+    <string name="devicetype_ls2_4x">LS2-4X</string>
+    <string name="title_activity_cardo_control">Cardo 控制</string>
+    <string name="cardo_card_fm_radio">FM 收音机</string>
+    <string name="cardo_control_enable_radio">启用收音机</string>
+    <string name="cardo_control_fm_autotune">自动将电台调谐到预设</string>
+    <string name="cardo_control_fm_confirm_autotune">真要继续吗？之前设置的电台将被覆盖。</string>
+    <string name="cardo_control_fm_preset_title">调谐预设</string>
+    <string name="cardo_control_fm_preset_not_set">清空预设 %1$d</string>
+    <string name="cardo_control_fm_frequency_title">频段</string>
+    <string name="cardo_control_fm_frequency_subtitle">%1$.1f MHz</string>
+    <string name="cardo_control_fm_scan_down">向下扫描</string>
+    <string name="cardo_control_fm_scan_up">向上扫描</string>
+    <string name="cardo_control_fm_scan_stop">停止扫描</string>
+    <string name="cardo_control_fm_seek_down">向下搜寻</string>
+    <string name="cardo_control_fm_seek_up">向上搜寻</string>
+    <string name="cardo_control_volume">音量</string>
+    <string name="cardo_card_voice_prompts">语音提示</string>
+    <string name="cardo_control_enable_voice_prompts">开启语音提示</string>
 </resources>
