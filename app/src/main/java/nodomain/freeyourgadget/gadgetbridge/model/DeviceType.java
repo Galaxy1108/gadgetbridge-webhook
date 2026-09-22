@@ -284,6 +284,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.hama.fit6900.HamaFit6900Devi
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweiwatchgt7.HuaweiWatchGT7Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweiwatchgt7.HuaweiWatchGT7ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.C20ProCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.ColmiP81Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moyoung.GarettEvaCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.haylou.HaylouS35AncCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.hplus.EXRIZUK8Coordinator;
@@ -1173,6 +1174,7 @@ public enum DeviceType {
     COLMI_I31(ColmiI31Coordinator.class),
     COLMI_P76(ColmiP76Coordinator.class),
     COLMI_P80(ColmiP80Coordinator.class),
+    COLMI_P81(ColmiP81Coordinator.class),
     COLMI_V72(ColmiV72Coordinator.class),
     COLMI_V73(ColmiV73Coordinator.class),
     COLMI_V76(ColmiV76Coordinator.class),
