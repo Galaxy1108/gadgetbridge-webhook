@@ -47,6 +47,6 @@ public class MoyoungWeatherToday {
         }
         pm25 = null;
         lunar_or_festival = StringUtils.pad("", 4);
-        city = StringUtils.pad(weatherSpec.getLocation().substring(0, 4), 4);
+        city = StringUtils.pad(StringUtils.truncate(weatherSpec.getLocation(), 4), 4);
     }
 }
