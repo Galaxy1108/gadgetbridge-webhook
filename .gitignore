@@ -41,6 +41,7 @@ proguard/
 *.pfx
 *.secret
 *.token
+.DS_Store
 .env
 .env.*
 config.json
