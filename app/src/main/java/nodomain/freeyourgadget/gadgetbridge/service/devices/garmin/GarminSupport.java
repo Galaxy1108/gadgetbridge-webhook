@@ -576,6 +576,16 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             requestBatteryUpdate();
         }
 
+        if (newSyncProtocol() && !getDevicePrefs().getBoolean("garmin_legacy_sync_flush", true)) {
+            // #6700 - Some firmwares will freeze on the legacy sync request
+            LOG.warn("Legacy sync flush is disabled - requesting file list directly");
+            sendProtobufRequest("directly request file list",
+                Smart.newBuilder().setFileSyncService(
+                    protocolBufferHandler.getFileSyncServiceHandler().requestFileList()
+                ).build());
+            return;
+        }
+
         if (this.supportedFileTypeList.isEmpty() && !newSyncProtocol()) {
             LOG.warn("No known supported file types");
             return;

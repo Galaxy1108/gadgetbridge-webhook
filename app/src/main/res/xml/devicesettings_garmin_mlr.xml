@@ -2,6 +2,15 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <SwitchPreferenceCompat
         android:defaultValue="true"
+        android:icon="@drawable/ic_download"
+        android:dependency="new_sync_protocol"
+        android:key="garmin_legacy_sync_flush"
+        android:layout="@layout/preference_checkbox"
+        android:summary="Use the legacy sync protocol to flush data before sync. Disable this if your watch freezes when syncing. Might result in delayed data."
+        android:title="Legacy flush on sync" />
+
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
         android:icon="@drawable/ic_bolt"
         android:key="garmin_mlr"
         android:layout="@layout/preference_checkbox"

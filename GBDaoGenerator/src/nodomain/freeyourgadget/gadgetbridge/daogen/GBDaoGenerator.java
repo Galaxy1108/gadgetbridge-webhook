@@ -1208,8 +1208,11 @@ public class GBDaoGenerator {
     private static Entity addGarminEventSample(Schema schema, Entity user, Entity device) {
         Entity sleepStageSample = addEntity(schema, "GarminEventSample");
         addCommonTimeSampleProperties("AbstractTimeSample", sleepStageSample, user, device);
-        sleepStageSample.addIntProperty("event").notNull().primaryKey();
-        sleepStageSample.addIntProperty("eventType");
+
+        sleepStageSample.addIntProperty("event").notNull().primaryKey()
+                .codeBeforeSetter("public void setEvent(nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Event eventEnum) {\n\t\tsetEvent(eventEnum.num);\n\t}\n");
+        sleepStageSample.addIntProperty("eventType")
+                .codeBeforeSetter("public void setEventType(@Nullable nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.EventType eventTypeEnum) {\n\t\tsetEventType(eventTypeEnum == null ? null : eventTypeEnum.num);\n\t}\n");
         sleepStageSample.addLongProperty("data");
         return sleepStageSample;
     }
