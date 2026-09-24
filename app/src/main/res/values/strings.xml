@@ -2263,6 +2263,7 @@
     <string name="devicetype_mismartscale" translatable="false">Mi Smart Scale 2</string>
     <string name="devicetype_micompositionscale" translatable="false">Mi Body Composition Scale 2</string>
     <string name="devicetype_qnscale" translatable="false">QN-Scale (Chipsea CS20)</string>
+    <string name="devicetype_onebyone_scale" translatable="false">1byone Health Scale</string>
     <string name="devicetype_itag" translatable="false">iTag</string>
     <string name="devicetype_idasen" translatable="false">IKEA Idasen Desk</string>
     <string name="devicetype_bfh16" translatable="false">BFH-16</string>
@@ -2318,6 +2319,7 @@
     <string name="devicetype_soundcore_aerofit2" translatable="false">Soundcore AeroFit 2</string>
     <string name="devicetype_soundcore_sport_x20" translatable="false">Soundcore Sport X20</string>
     <string name="devicetype_haylou_s35_anc" translatable="false">Haylou S35 ANC</string>
+    <string name="devicetype_sennheiser_momentum_in_ear_wireless" translatable="false">Sennheiser MOMENTUM In-Ear Wireless</string>
     <string name="devicetype_pixel_buds_a_series" translatable="false">Pixel Buds A-Series</string>
     <string name="devicetype_moondrop_space_travel" translatable="false">Moondrop Space Travel</string>
     <string name="devicetype_moondrop_space_travel_2" translatable="false">Moondrop Space Travel 2</string>
@@ -3284,8 +3286,10 @@
     <string name="swim_style_butterfly">Butterfly</string>
     <string name="swim_style_drill">Drill</string>
     <string name="swim_style_mixed">Mixed</string>
+    <string name="exercise_category_banded_exercises">Banded exercises</string>
     <string name="exercise_category_bench_press">Bench press</string>
     <string name="exercise_category_calf_raise">Calf raise</string>
+    <string name="exercise_category_cardio_sensors">Cardio sensors</string>
     <string name="exercise_category_carry">Carry</string>
     <string name="exercise_category_chop">Chop</string>
     <string name="exercise_category_core">Core</string>
@@ -3295,16 +3299,25 @@
     <string name="exercise_category_hip_stability">Hip stability</string>
     <string name="exercise_category_hip_swing">Hip swing</string>
     <string name="exercise_category_hyperextension">Hyperextension</string>
+    <string name="exercise_category_indoor_row">Indoor row</string>
+    <string name="exercise_category_ladder">Ladder</string>
     <string name="exercise_category_lateral_raise">Lateral raise</string>
     <string name="exercise_category_leg_curl">Leg curl</string>
     <string name="exercise_category_leg_raise">Leg raise</string>
     <string name="exercise_category_lunge">Lunge</string>
+    <string name="exercise_category_move">Move</string>
     <string name="exercise_category_olympic_lift">Olympic lift</string>
     <string name="exercise_category_plyo">Plyo</string>
+    <string name="exercise_category_pose">Pose</string>
+    <string name="exercise_category_sandbag">Sandbag</string>
     <string name="exercise_category_shoulder_press">Shoulder press</string>
     <string name="exercise_category_shoulder_stability">Shoulder stability</string>
     <string name="exercise_category_shrug">Shrug</string>
+    <string name="exercise_category_sled">Sled</string>
+    <string name="exercise_category_sledge_hammer">Sledgehammer</string>
     <string name="exercise_category_squat">Squat</string>
+    <string name="exercise_category_suspension">Suspension</string>
+    <string name="exercise_category_tire">Tire</string>
     <string name="exercise_category_total_body">Total body</string>
     <string name="exercise_category_triceps_extension">Triceps extension</string>
 
@@ -5628,4 +5641,13 @@
     <string name="cardo_control_volume">Volume</string>
     <string name="cardo_card_voice_prompts">Voice Prompts</string>
     <string name="cardo_control_enable_voice_prompts">Enable Voice Prompts</string>
+
+    <string name="sennheiser_momentum_led_title">Status light</string>
+    <string name="sennheiser_momentum_led_summary">Let the light on the neckband show its status</string>
+    <string name="sennheiser_momentum_voice_prompts_title">Voice prompts</string>
+    <string name="sennheiser_momentum_voice_prompts_summary">Announce power, pairing, connection and battery in the earphones</string>
+    <string name="sennheiser_momentum_voice_answer_title">Answer calls by voice</string>
+    <string name="sennheiser_momentum_voice_answer_summary">Accept or reject an incoming call by saying yes or no</string>
+    <string name="sennheiser_momentum_swap_volume_buttons_title">Swap volume buttons</string>
+    <string name="sennheiser_momentum_swap_volume_buttons_summary">Reverse the direction of the volume + and - buttons</string>
 </resources>

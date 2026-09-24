@@ -16,12 +16,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.devices.redmibuds;
 
+import androidx.annotation.NonNull;
+
+import java.util.List;
 import java.util.regex.Pattern;
 
 import nodomain.freeyourgadget.gadgetbridge.R;
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettings;
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen;
+import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsAmbientSoundCycle;
+import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsAmbientSoundMode;
+import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsGestureAction;
+import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsLongGestureAction;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public class RedmiBuds6LiteCoordinator extends AbstractRedmiBudsCoordinator {
@@ -32,25 +36,86 @@ public class RedmiBuds6LiteCoordinator extends AbstractRedmiBudsCoordinator {
 
     @Override
     protected Pattern getSupportedDeviceName() {
-        // Matches the base name and any user-renamed variants, e.g. "Mahmoud's Redmi
-        // Buds 6 Lite"
         return Pattern.compile(".*Redmi Buds 6 Lite.*");
     }
 
     @Override
-    public DeviceSpecificSettings getDeviceSpecificSettings(final GBDevice device) {
-        final DeviceSpecificSettings deviceSpecificSettings = new DeviceSpecificSettings();
-        deviceSpecificSettings.addRootScreen(R.xml.devicesettings_redmibuds6lite_headphones);
-        deviceSpecificSettings.addRootScreen(R.xml.devicesettings_redmibuds6lite_gestures);
-        deviceSpecificSettings.addRootScreen(R.xml.devicesettings_redmibuds6lite_sound);
-        deviceSpecificSettings.addSubScreen(
-                DeviceSpecificSettingsScreen.CALLS_AND_NOTIFICATIONS,
-                R.xml.devicesettings_headphones);
-        return deviceSpecificSettings;
+    public boolean supportsFindDevice(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @NonNull
+    @Override
+    public List<RedmiBudsAmbientSoundMode> getAmbientSoundModes() {
+        return List.of(RedmiBudsAmbientSoundMode.values());
     }
 
     @Override
-    public DeviceSpecificSettingsCustomizer getDeviceSpecificSettingsCustomizer(final GBDevice device) {
-        return new RedmiBudsSettingsCustomizer(device);
+    public boolean getSupportsCustomEqualizer() {
+        return true;
+    }
+
+    @NonNull
+    @Override
+    public List<RedmiBudsGestureAction> getSingleTapActions() {
+        return List.of(
+            RedmiBudsGestureAction.NONE,
+            RedmiBudsGestureAction.PLAY_PAUSE,
+            RedmiBudsGestureAction.PREVIOUS_TRACK,
+            RedmiBudsGestureAction.NEXT_TRACK,
+            RedmiBudsGestureAction.VOLUME_UP,
+            RedmiBudsGestureAction.VOLUME_DOWN
+        );
+    }
+
+    @NonNull
+    @Override
+    public List<RedmiBudsGestureAction> getTapActions() {
+        return List.of(
+            RedmiBudsGestureAction.NONE,
+            RedmiBudsGestureAction.PLAY_PAUSE,
+            RedmiBudsGestureAction.PREVIOUS_TRACK,
+            RedmiBudsGestureAction.NEXT_TRACK,
+            RedmiBudsGestureAction.VOLUME_UP,
+            RedmiBudsGestureAction.VOLUME_DOWN
+        );
+    }
+
+    @NonNull
+    @Override
+    public RedmiBudsGestureAction getDefaultDoubleTapAction() {
+        return RedmiBudsGestureAction.NONE;
+    }
+
+    @NonNull
+    @Override
+    public RedmiBudsGestureAction getDefaultTripleTapActionLeft() {
+        return RedmiBudsGestureAction.NONE;
+    }
+
+    @NonNull
+    @Override
+    public RedmiBudsGestureAction getDefaultTripleTapActionRight() {
+        return RedmiBudsGestureAction.NONE;
+    }
+
+    @NonNull
+    @Override
+    public List<RedmiBudsLongGestureAction> getLongPressActions() {
+        return List.of(
+            RedmiBudsLongGestureAction.VOICE_ASSISTANT,
+            RedmiBudsLongGestureAction.AMBIENT_SOUND_CONTROL
+        );
+    }
+
+    @NonNull
+    @Override
+    public List<RedmiBudsAmbientSoundCycle> getAmbientSoundCycles() {
+        return List.of(RedmiBudsAmbientSoundCycle.values());
+    }
+
+    @Override
+    public boolean getSupportsAutoAnswer() {
+        return true;
     }
 }

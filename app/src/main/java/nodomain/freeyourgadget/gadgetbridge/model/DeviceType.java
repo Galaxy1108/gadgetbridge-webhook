@@ -454,6 +454,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.mijia_lywsd.MijiaMhoC303Coor
 import nodomain.freeyourgadget.gadgetbridge.devices.mijia_lywsd.MijiaXmwsdj04Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.miscale.MiCompositionScaleCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.miscale.MiSmartScaleCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.onebyone.OneByoneScaleCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moondrop.MoondropSpaceTravel2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moondrop.MoondropSpaceTravel2UltraCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.moondrop.MoondropSpaceTravelCoordinator;
@@ -528,6 +529,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.roidmi.RoidmiF8Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sbm_67.SanitasSBM67Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sbm_67.SilverCrestSBM67Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.scannable.ScannableDeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.sennheiser.SennheiserMomentumInEarWirelessCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenRunPro2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenSwimProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sinilink.SinilinkCoordinator;
@@ -781,6 +783,7 @@ public enum DeviceType {
     CASIOGMWB5000(CasioGMWB5000DeviceCoordinator.class),
     MISMARTSCALE(MiSmartScaleCoordinator.class),
     MICOMPOSITIONSCALE(MiCompositionScaleCoordinator.class),
+    ONEBYONE_SCALE(OneByoneScaleCoordinator.class),
     BFH16(BFH16DeviceCoordinator.class),
     MAKIBESHR3(MakibesHR3Coordinator.class),
     OVTOUCH26(OVTouch26Coordinator.class),
@@ -1201,6 +1204,7 @@ public enum DeviceType {
     EARFUN_AIR_S(EarFunAirSCoordinator.class),
     EARFUN_AIR_PRO_4(EarFunAirPro4Coordinator.class),
     EARFUN_FREE_PRO_3(EarFunFreePro3Coordinator.class),
+    SENNHEISER_MOMENTUM_IN_EAR_WIRELESS(SennheiserMomentumInEarWirelessCoordinator.class),
     SCANNABLE(ScannableDeviceCoordinator.class),
     CYCLING_SENSOR(CyclingSensorCoordinator.class),
     BLE_GATT_CLIENT(BleGattClientCoordinator.class),
