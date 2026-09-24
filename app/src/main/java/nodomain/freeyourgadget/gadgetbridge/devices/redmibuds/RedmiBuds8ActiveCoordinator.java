@@ -9,7 +9,7 @@ import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsEqualizerPreset;
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsGestureAction;
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsLongGestureAction;
-import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsFindEarbuds;
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public class RedmiBuds8ActiveCoordinator extends AbstractRedmiBudsCoordinator {
     @Override
@@ -46,7 +46,12 @@ public class RedmiBuds8ActiveCoordinator extends AbstractRedmiBudsCoordinator {
     }
 
     @Override
-    public boolean getSupportsFindEarbuds() {
+    public boolean supportsFindDevice(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
+    public boolean supportsFindDevicePerEarbud(@NonNull final GBDevice device) {
         return true;
     }
 

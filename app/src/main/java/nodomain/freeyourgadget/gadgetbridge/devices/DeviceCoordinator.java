@@ -843,6 +843,14 @@ public interface DeviceCoordinator {
     boolean supportsFindDevice(@NonNull final GBDevice device);
 
     /**
+     * Indicates whether the "find device" function can be sent to a single
+     * earbud, so that the user can choose between each or both of them.
+     */
+    default boolean supportsFindDevicePerEarbud(@NonNull final GBDevice device) {
+        return false;
+    }
+
+    /**
      * Indicates whether the device supports displaying music information
      * like artist, title, album, play state etc.
      */

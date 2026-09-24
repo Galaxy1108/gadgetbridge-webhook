@@ -494,7 +494,6 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_8K = "pref_redmi_buds_equalizer_band_8k";
     public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_12K = "pref_redmi_buds_equalizer_band_12k";
     public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_16K = "pref_redmi_buds_equalizer_band_16k";
-    public static final String PREF_REDMI_BUDS_FIND_EARBUDS = "pref_redmi_buds_find_earbuds";
 
     public static final String PREF_SONY_AUDIO_CODEC = "pref_sony_audio_codec";
     public static final String PREF_SONY_PROTOCOL_VERSION = "pref_protocol_version";

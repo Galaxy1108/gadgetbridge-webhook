@@ -53,6 +53,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.Contact;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceService;
+import nodomain.freeyourgadget.gadgetbridge.model.FindDeviceTarget;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NavigationInfoSpec;
@@ -406,8 +407,14 @@ public class GBDeviceService implements DeviceService {
 
     @Override
     public void onFindDevice(boolean start) {
+        onFindDevice(start, FindDeviceTarget.ALL);
+    }
+
+    @Override
+    public void onFindDevice(final boolean start, @NonNull final FindDeviceTarget target) {
         Intent intent = createIntent().setAction(ACTION_FIND_DEVICE)
-                .putExtra(EXTRA_FIND_START, start);
+                .putExtra(EXTRA_FIND_START, start)
+                .putExtra(EXTRA_FIND_TARGET, target);
         invokeService(intent);
     }
 
