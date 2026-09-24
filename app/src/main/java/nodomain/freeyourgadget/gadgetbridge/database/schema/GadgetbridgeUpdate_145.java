@@ -22,7 +22,7 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.database.DBUpdateScript;
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao;
 
-public class GadgetbridgeUpdate_144 implements DBUpdateScript {
+public class GadgetbridgeUpdate_145 implements DBUpdateScript {
     @Override
     public void upgradeSchema(final SQLiteDatabase db) {
         if (!DBHelper.existsColumn(BaseActivitySummaryDao.TABLENAME, BaseActivitySummaryDao.Properties.OverrideActivityKind.columnName, db)) {
