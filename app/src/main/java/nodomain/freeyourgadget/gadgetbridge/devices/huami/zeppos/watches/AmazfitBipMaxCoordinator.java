@@ -37,7 +37,10 @@ public class AmazfitBipMaxCoordinator extends ZeppOsCoordinator {
 
     @Override
     public List<String> getDeviceBluetoothNames() {
-        return Collections.singletonList("Amazfit BIP Max");
+        return Arrays.asList(
+            "Amazfit Bip Max",
+            "Amazfit BIP Max"
+        );
     }
 
     @Override
