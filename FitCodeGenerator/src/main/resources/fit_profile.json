@@ -2408,6 +2408,8 @@
         {"num":35,"name":"dive_sounds","base":"ENUM"},
         {"num":36,"name":"last_stop_multiple","base":"UINT8","scale":10},
         {"num":37,"name":"no_fly_time_mode","base":"ENUM"},
+        {"num":38,"name":"subwave_location","base":"ENUM"},
+        {"num":39,"name":"subwave_messaging","base":"ENUM"},
         {"num":41,"name":"hot_key_1","base":"ENUM"},
         {"num":42,"name":"hot_key_2","base":"ENUM"},
         {"num":43,"name":"hot_key_3","base":"ENUM"},
@@ -2418,6 +2420,9 @@
         {"num":48,"name":"hot_key_8","base":"ENUM"},
         {"num":49,"name":"hot_key_9","base":"ENUM"},
         {"num":50,"name":"screen_brightness","base":"ENUM"},
+        {"num":53,"name":"always_on_display_brightness","base":"ENUM"},
+        {"num":55,"name":"pool_length","base":"UINT16"},
+        {"num":56,"name":"pool_unit","base":"ENUM"},
         {"num":57,"name":"deco_lockout","base":"ENUM"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":254,"name":"message_index","base":"UINT16"}
@@ -2450,6 +2455,7 @@
         {"num":9,"name":"trigger_on_ascent","base":"ENUM","type":"BOOLEAN"},
         {"num":10,"name":"repeating","base":"ENUM","type":"BOOLEAN"},
         {"num":11,"name":"speed","base":"SINT32","scale":1000,"UOM":"MILES_PER_SECOND"},
+        {"num":13,"name":"intensity","base":"ENUM"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -3025,6 +3031,37 @@
         {"num":14,"name":"interruptions_score","base":"UINT8"},
         {"num":15,"name":"average_stress_during_sleep","base":"UINT16","scale":100},
         {"num":16,"name":"unk_16","base":"ENUM"}
+      ]
+    },
+    {
+      "num": 352,
+      "name": "POWER_GUIDE",
+      "fields": [
+        {"num":1,"name":"name","base":"STRING","stringLen":50},
+        {"num":2,"name":"splits","base":"UINT16"},
+        {"num":4,"name":"created","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
+        {"num":7,"name":"effort_target","base":"FLOAT32"},
+        {"num":8,"name":"air_factor","base":"FLOAT32"},
+        {"num":9,"name":"rolling_resistance","base":"FLOAT32"},
+        {"num":10,"name":"rider_weight","base":"UINT16","scale":100,"UOM":"KILOGRAM"},
+        {"num":11,"name":"equipment_weight","base":"UINT16","scale":100,"UOM":"KILOGRAM"},
+        {"num":14,"name":"duration_target","base":"UINT32","scale":1000,"UOM":"SECONDS"},
+        {"num":15,"name":"ftp_target","base":"FLOAT32","UOM":"PERCENT"}
+      ]
+    },
+    {
+      "num": 353,
+      "name": "POWER_GUIDE_SPLIT",
+      "fields": [
+        {"num":1,"name":"power_target","base":"UINT32"},
+        {"num":2,"name":"distance","base":"UINT32","scale":100,"UOM":"METER"},
+        {"num":3,"name":"duration_target","base":"UINT32","scale":1000,"UOM":"SECONDS"},
+        {"num":6,"name":"start_latitude","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
+        {"num":7,"name":"start_longitude","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
+        {"num":8,"name":"end_latitude","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
+        {"num":9,"name":"end_longitude","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
+        {"num":10,"name":"elevation_change","base":"SINT32","scale":100,"UOM":"METER"},
+        {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
     {
@@ -4601,7 +4638,14 @@
         {"num":10,"name":"POWER_LAP"},
         {"num":11,"name":"SWIM_STROKE"},
         {"num":12,"name":"SPEED_LAP"},
-        {"num":13,"name":"HEART_RATE_LAP"}
+        {"num":13,"name":"HEART_RATE_LAP"},
+        {"num":14,"name":"INHALE_DURATION"},
+        {"num":15,"name":"INHALE_HOLD_DURATION"},
+        {"num":16,"name":"EXHALE_DURATION"},
+        {"num":17,"name":"EXHALE_HOLD_DURATION"},
+        {"num":21,"name":"TIME"},
+        {"num":22,"name":"DISTANCE"},
+        {"num":23,"name":"REPEATS"}
       ]
     },
     {
