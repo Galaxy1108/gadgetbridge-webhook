@@ -5065,4 +5065,23 @@
     <string name="cardo_control_volume">音量</string>
     <string name="cardo_card_voice_prompts">语音提示</string>
     <string name="cardo_control_enable_voice_prompts">开启语音提示</string>
+    <string name="exercise_category_banded_exercises">弹力带训练</string>
+    <string name="exercise_category_cardio_sensors">心率传感器</string>
+    <string name="exercise_category_indoor_row">室内划船</string>
+    <string name="exercise_category_ladder">爬梯</string>
+    <string name="exercise_category_sandbag">沙包</string>
+    <string name="exercise_category_sled">雪橇</string>
+    <string name="exercise_category_sledge_hammer">大锤</string>
+    <string name="exercise_category_tire">轮胎</string>
+    <string name="sennheiser_momentum_led_title">状态灯</string>
+    <string name="sennheiser_momentum_led_summary">让颈带上的灯显示其状态</string>
+    <string name="sennheiser_momentum_voice_prompts_title">语音提示</string>
+    <string name="sennheiser_momentum_voice_prompts_summary">在耳机中告知电源、配对、连接和电量信息</string>
+    <string name="sennheiser_momentum_voice_answer_title">语音应答来电</string>
+    <string name="sennheiser_momentum_voice_answer_summary">说 yes 或 no 来接听或拒接来电</string>
+    <string name="sennheiser_momentum_swap_volume_buttons_title">交换音量按钮</string>
+    <string name="sennheiser_momentum_swap_volume_buttons_summary">颠倒音量 + 和 - 按钮方向</string>
+    <string name="exercise_category_pose">姿势</string>
+    <string name="exercise_category_suspension">悬停</string>
+    <string name="exercise_category_move">移动</string>
 </resources>
