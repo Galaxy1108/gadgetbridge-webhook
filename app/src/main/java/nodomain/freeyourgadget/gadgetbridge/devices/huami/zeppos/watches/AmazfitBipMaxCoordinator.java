@@ -30,12 +30,6 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public class AmazfitBipMaxCoordinator extends ZeppOsCoordinator {
     @Override
-    public boolean isExperimental() {
-        // untested
-        return true;
-    }
-
-    @Override
     public ConnectionType getConnectionType() {
         // unconfirmed
         return ConnectionType.BOTH;
@@ -43,7 +37,7 @@ public class AmazfitBipMaxCoordinator extends ZeppOsCoordinator {
 
     @Override
     public List<String> getDeviceBluetoothNames() {
-        return Collections.singletonList("Amazfit Bip Max");
+        return Collections.singletonList("Amazfit BIP Max");
     }
 
     @Override

@@ -185,6 +185,7 @@ public class BluetoothNameTest extends TestBase {
             put("EPIX", DeviceType.GARMIN_EPIX); // matrix
             put("Amazfit GTR", DeviceType.AMAZFITGTR); // #3809 / #2442
             put("Amazfit Bip 3", DeviceType.AMAZFITBIP3); // #3627
+            put("Amazfit BIP Max", DeviceType.AMAZFITBIPMAX); // #6848
             put("Xiaomi Band 8 Active 0C09", DeviceType.MIBAND8ACTIVE); // #3614
             put("UAT-4261", DeviceType.GARMIN_VENU_3S); // #3602
             put("Forerunner 970", DeviceType.GARMIN_FORERUNNER_970); // #6320
