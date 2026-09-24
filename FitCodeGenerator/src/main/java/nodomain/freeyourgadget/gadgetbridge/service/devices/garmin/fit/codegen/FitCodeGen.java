@@ -159,12 +159,9 @@ public enum FitCodeGen {
 
             public enum FieldDefinitions {
                 ALARM,
-                ARRAY,
                 BOOLEAN,
                 DAY_OF_WEEK,
                 FILE_TYPE,
-                HR_TIME_IN_ZONE,
-                HR_ZONE_HIGH_BOUNDARY,
                 TEMPERATURE,
                 TIMESTAMP,
                 COORDINATE,
@@ -466,8 +463,6 @@ public enum FitCodeGen {
                 fieldFit.base = fieldJson.getString("base");
                 if (fieldFit.arrayLen < 0) {
                     fieldFit.arrayLen = -1;
-                } else {
-                    fieldFit.type = "ARRAY";
                 }
                 if (fieldFit.stringLen <= 0) {
                     fieldFit.stringLen = -1;
@@ -529,7 +524,8 @@ public enum FitCodeGen {
                 // TODO: offset - add support for non-int in Java stage
                 // TODO: scale - add support for non-int in Java stage
                 // TODO: support - add support for string arrays in Java stage
-                int size = field.stringLen > 0 ? field.stringLen : (field.arrayLen >= 0 ? field.arrayLen : 0);
+                // TODO: dynamically calculate string size in Java stage
+                int size = field.stringLen > 0 ? field.stringLen : 0;
                 final Number scale;
                 {
                     final long longScale = Math.round(field.scale);
@@ -803,9 +799,14 @@ public enum FitCodeGen {
         );
 
         for (final FitField primitive : nativeFITMessage.getFieldDefinitionPrimitives()) {
-            if ("STRING".equals(primitive.base) && primitive.stringLen <= 0 && primitive.arrayLen < 0) {
-                // Without a stringLen/arrayLen we can't encode the field, and it would silently
+            if ("STRING".equals(primitive.base) && primitive.stringLen <= 0) {
+                // Without a stringLen we can't encode the field, and it would silently
                 // default to 1 byte (only the null terminator). Don't generate the setter.
+                continue;
+            }
+            if ("STRING[]".equals(primitive.base)) {
+                // Encoding String arrays is not supported by the current code.
+                // Don't generate the setter.
                 continue;
             }
 
@@ -853,11 +854,15 @@ public enum FitCodeGen {
     }
 
     private static FieldClass getFieldType(final FitField primitive) {
+        if (primitive.arrayLen >= 0) {
+            FitField base = new FitField(primitive);
+            base.arrayLen = -1;
+            FieldClass baseClass = getFieldType(base);
+            return new FieldClass(baseClass.CanonicalName + "[]", true);
+        }
         if (primitive.getType() != null) {
             return switch (primitive.getType()) {
                 case "ALARM" -> new FieldClass(LocalTime.class);
-                case "ARRAY" ->
-                        primitive.getBase().contentEquals("STRING") ? new FieldClass(String[].class) : new FieldClass(Number[].class);
                 case "BOOLEAN" -> new FieldClass(Boolean.class);
                 case "DAY_OF_WEEK" -> new FieldClass(DayOfWeek.class);
                 case "ExerciseCategory" ->
@@ -1017,6 +1022,8 @@ public enum FitCodeGen {
             o.endArray();
 
             o.endObject();
+            o.flush();
+            writer.append('\n');
         }
     }
 
@@ -1035,7 +1042,7 @@ public enum FitCodeGen {
                 o.value(f.scale);
             }
         }
-        if (f.type != null && !"ARRAY".contentEquals(f.type)) {
+        if (f.type != null) {
             o.name("type").value(f.type);
         }
         if (0 != f.offset) {
@@ -1076,6 +1083,18 @@ public enum FitCodeGen {
             offset = 0;
             arrayLen = -1;
             stringLen = -1;
+        }
+
+        FitField(FitField master) {
+            num = master.num;
+            name = master.name;
+            type = master.type;;
+            base = master.base;
+            scale = master.scale;
+            offset = master.offset;
+            arrayLen = master.arrayLen;
+            stringLen = master.stringLen;
+            UOM = master.UOM;;
         }
 
         @Override

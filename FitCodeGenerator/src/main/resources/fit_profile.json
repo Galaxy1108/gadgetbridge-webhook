@@ -2254,11 +2254,11 @@
       "fields": [
         {"num":0,"name":"reference_message","base":"UINT16"},
         {"num":1,"name":"reference_index","base":"UINT16"},
-        {"num":2,"name":"time_in_zone","base":"UINT32","type":"HR_TIME_IN_ZONE"},
+        {"num":2,"name":"time_in_zone","base":"UINT32","scale":1000,"arrayLen":0,"UOM":"SECONDS"},
         {"num":3,"name":"time_in_speed_zone","base":"UINT32","scale":1000,"arrayLen":0,"UOM":"SECONDS"},
         {"num":4,"name":"time_in_cadence_zone","base":"UINT32","scale":1000,"arrayLen":0,"UOM":"SECONDS"},
         {"num":5,"name":"time_in_power_zone","base":"UINT32","scale":1000,"arrayLen":0,"UOM":"SECONDS"},
-        {"num":6,"name":"hr_zone_high_boundary","base":"UINT8","type":"HR_ZONE_HIGH_BOUNDARY","UOM":"BEATS_PER_MINUTE"},
+        {"num":6,"name":"hr_zone_high_boundary","base":"UINT8","arrayLen":0,"UOM":"BEATS_PER_MINUTE"},
         {"num":7,"name":"speed_zone_high_boundary","base":"UINT16","scale":1000,"arrayLen":0,"UOM":"METER_PER_SECOND"},
         {"num":8,"name":"cadence_zone_high_boundary","base":"UINT8","arrayLen":0,"UOM":"REVOLUTIONS_PER_MINUTE"},
         {"num":9,"name":"power_zone_high_boundary","base":"UINT16","arrayLen":0,"UOM":"WATT"},
@@ -3489,6 +3489,16 @@
       "fields": [
         {"num":0,"name":"status","base":"ENUM"},
         {"num":2,"name":"alert_time","base":"UINT16"}
+      ]
+    },
+    {
+      "num": 467,
+      "name": "RECORD_HIGH_RES",
+      "fields": [
+        {"num":1,"name":"latitudes","base":"SINT32","type":"COORDINATE","arrayLen":0,"UOM":"SEMICIRCLES"},
+        {"num":2,"name":"longitudes","base":"SINT32","type":"COORDINATE","arrayLen":0,"UOM":"SEMICIRCLES"},
+        {"num":4,"name":"time_offset","base":"UINT16","UOM":"MILLISECONDS"},
+        {"num":253,"name":"timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"}
       ]
     },
     {

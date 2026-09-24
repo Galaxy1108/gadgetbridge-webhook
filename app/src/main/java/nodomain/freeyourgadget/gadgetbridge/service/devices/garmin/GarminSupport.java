@@ -1240,10 +1240,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 .setNumber(1)
                 .build());
 
-        final List<Number> deviceSettingsTimes = new ArrayList<>();
-        final List<Number> deviceSettingsMode = new ArrayList<>();
-        final List<Number> deviceSettingsEnabled = new ArrayList<>();
-        final List<Number> deviceSettingsRepeat = new ArrayList<>();
+        final List<Integer> deviceSettingsTimes = new ArrayList<>();
+        final List<Integer> deviceSettingsMode = new ArrayList<>();
+        final List<Integer> deviceSettingsEnabled = new ArrayList<>();
+        final List<Long> deviceSettingsRepeat = new ArrayList<>();
 
         int numberEnabledAlarms = 0;
         for (Alarm alarm : alarms) {
@@ -1298,10 +1298,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         if (numberEnabledAlarms > 0) {
             final FitDeviceSettings.Builder deviceSettingsBuilder = new FitDeviceSettings.Builder()
-                    .setAlarmsTime(deviceSettingsTimes.toArray(new Number[0]))
-                    .setAlarmsMode(deviceSettingsMode.toArray(new Number[0]))
-                    .setAlarmsEnabled(deviceSettingsEnabled.toArray(new Number[0]))
-                    .setAlarmsRepeat(deviceSettingsRepeat.toArray(new Number[0]));
+                    .setAlarmsTime(deviceSettingsTimes.toArray(new Integer[0]))
+                    .setAlarmsMode(deviceSettingsMode.toArray(new Integer[0]))
+                    .setAlarmsEnabled(deviceSettingsEnabled.toArray(new Integer[0]))
+                    .setAlarmsRepeat(deviceSettingsRepeat.toArray(new Long[0]));
 
             dataRecords.add(deviceSettingsBuilder.build());
         }
