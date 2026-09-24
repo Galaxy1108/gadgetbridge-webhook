@@ -1780,7 +1780,8 @@ public class GBDaoGenerator {
         summary.addStringProperty("name").codeBeforeGetter(OVERRIDE);
         summary.addDateProperty("startTime").notNull().codeBeforeGetter(OVERRIDE);
         summary.addDateProperty("endTime").notNull().codeBeforeGetter(OVERRIDE);
-        summary.addIntProperty("activityKind").notNull().codeBeforeGetter(OVERRIDE);
+        summary.addBooleanProperty("overrideActivityKind");
+        summary.addIntProperty("activityKind").notNull().codeBeforeGetter(OVERRIDE).codeInSetter("if (!getOverrideActivityKind()) { this.activityKind = activityKind; }");
 
         summary.addIntProperty("baseLongitude").javaDocGetterAndSetter("Temporary, bip-specific");
         summary.addIntProperty("baseLatitude").javaDocGetterAndSetter("Temporary, bip-specific");
