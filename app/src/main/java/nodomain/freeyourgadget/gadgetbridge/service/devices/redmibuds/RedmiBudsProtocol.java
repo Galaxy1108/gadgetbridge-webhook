@@ -247,23 +247,28 @@ public class RedmiBudsProtocol extends GBDeviceProtocol {
         return new Message(MessageType.PHONE_REQUEST, Opcode.ANC, sequenceNumber++, new byte[]{0x02, 0x04, mode}).encode();
     }
 
-
     public byte[] encodeFindEarbuds() {
         final Prefs prefs = getDevicePrefs();
-        final byte state, earbud, code = RedmiBudsPrefs.getCode(prefs, PREF_REDMI_BUDS_FIND_EARBUDS, RedmiBudsFindEarbuds.OFF);
-        if (code == (byte) 0x00) {
-            // off
-            state = code;
-            // both earbuds
-            earbud = (byte) 0x03;
-        } else {
-            // on
-            state = (byte) 0x01;
-            // earbud left|right|both
-            earbud = code;
+        final byte code = RedmiBudsPrefs.getCode(prefs, PREF_REDMI_BUDS_FIND_EARBUDS, RedmiBudsFindEarbuds.OFF);
+
+        final byte[] stopFind = new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++, 
+            new byte[]{0x04, 0x00, 0x09, 0x00, 0x03}).encode();
+
+        if (code == (byte) 0x00) // return OFF
+            return stopFind;
+
+        // else turn OFF find and start a new find
+        final byte[] startFind = new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++, 
+            new byte[]{0x04, 0x00, 0x09, 0x01, code}).encode();
+
+        final ByteArrayOutputStream messages = new ByteArrayOutputStream();
+        try {
+            messages.write(stopFind);
+            messages.write(startFind);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++,
-                new byte[]{0x04, 0x00, 0x09, state, earbud}).encode();
+        return messages.toByteArray();
     }
 
     public void decodeGetConfig(byte[] configPayload) {
