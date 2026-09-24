@@ -34,6 +34,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.SettingsRenderHost
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
+import nodomain.freeyourgadget.gadgetbridge.util.XDatePreference
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.GBSimpleSummaryProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -507,6 +508,31 @@ object DeviceSettingRenderer {
                     }
                 }
 
+                is DateSetting -> {
+                    XDatePreference(context, null).apply {
+                        key = setting.key
+                        setTitle(setting.title)
+                        if (setting.icon != 0) setIcon(setting.icon)
+                        setMinDate(setting.minDate)
+                        setMaxDate(setting.maxDate)
+                        setDefaultValue(setting.defaultValue)
+
+                        val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPrefs, changedKey ->
+                            if (changedKey == setting.key) {
+                                val newValue = sharedPrefs.getString(changedKey, setting.defaultValue)
+                                    ?: setting.defaultValue
+                                mainHandler.post {
+                                    handler.notifyPreferenceChanged(setting.key)
+                                    postRefresh()
+                                    setting.onSharedPreferenceChanged?.invoke(newValue)
+                                }
+                            }
+                        }
+                        spListeners.add(listener)
+                        sp.registerOnSharedPreferenceChangeListener(listener)
+                    }
+                }
+
                 is XmlScreenSetting -> {
                     // Inflate the root XML entry at the correct position so it appears in the
                     // order declared in the DSL rather than being appended at the end.
@@ -526,6 +552,7 @@ object DeviceSettingRenderer {
                 is TextSetting -> setting.dependency
                 is ActionSetting -> setting.dependency
                 is InfoSetting -> setting.dependency
+                is DateSetting -> setting.dependency
             }
             if (dependency != null) pref.dependency = dependency
 

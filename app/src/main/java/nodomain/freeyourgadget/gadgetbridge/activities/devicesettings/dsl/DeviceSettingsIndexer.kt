@@ -87,6 +87,9 @@ object DeviceSettingsIndexer {
                         indexSingle(context, searchConfiguration, item.key, item.title, item.summary, breadcrumbs, null)
                     }
 
+                is DateSetting ->
+                    indexSingle(context, searchConfiguration, item.key, item.title, 0, breadcrumbs, null)
+
                 // Indexed from its own XML resource instead, see DeviceSpecificSettingsFragment.
                 is XmlScreenSetting -> {}
             }

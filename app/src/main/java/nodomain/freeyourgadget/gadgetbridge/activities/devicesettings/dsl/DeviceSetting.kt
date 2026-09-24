@@ -219,6 +219,24 @@ data class MultiSelectSetting(
 ) : DeviceSetting()
 
 /**
+ * A date setting, backed by a custom DialogPreference (e.g. XDatePreference) that persists the
+ * value as a "yyyy-MM-dd" string.
+ */
+data class DateSetting(
+    override val key: String,
+    @StringRes val title: Int,
+    @StringRes val summary: Int = 0,
+    @DrawableRes val icon: Int = 0,
+    val defaultValue: String = "",
+    val minDate: Long = 0L,
+    val maxDate: Long = Long.MAX_VALUE,
+    val dependency: String? = null,
+    override val visibleWhen: ((Prefs) -> Boolean)? = null,
+    override val connectedOnly: Boolean = true,
+    val onSharedPreferenceChanged: ((String) -> Unit)? = null,
+) : DeviceSetting()
+
+/**
  * Legacy wrapper for an existing DeviceSpecificSettingsScreen and its XML sub-screens, so
  * that a migrating coordinator can delegate remaining XML screens while providing model nodes for
  * others.
