@@ -224,11 +224,6 @@ public class TestDeviceCoordinator extends AbstractDeviceCoordinator {
     }
 
     @Override
-    public TimeSampleProvider<? extends RestingMetabolicRateSample> getRestingMetabolicRateProvider(final GBDevice device, final DaoSession session) {
-        return supportsActiveCalories(device) ? new TestRestingMetabolicRateSampleProvider() : super.getRestingMetabolicRateProvider(device, session);
-    }
-
-    @Override
     public TimeSampleProvider<? extends PaiSample> getPaiSampleProvider(final GBDevice device, final DaoSession session) {
         return supportsPai(device) ? new TestPaiSampleProvider() : super.getPaiSampleProvider(device, session);
     }
