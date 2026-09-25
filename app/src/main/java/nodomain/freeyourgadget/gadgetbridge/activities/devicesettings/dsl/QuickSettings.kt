@@ -42,6 +42,10 @@ data class QuickSettingDescriptor(
     val type: QuickSettingType,
     /** Title of the closest ancestor [ScreenSetting]/[CategorySetting], or 0 if top-level. */
     @param:StringRes val category: Int = 0,
+    /** The setting can only be changed while the device is connected. */
+    val connectedOnly: Boolean = true,
+    /** Value of a [QuickSettingType.TOGGLE] setting while nothing is stored. */
+    val defaultValue: Boolean = false,
 )
 
 /**
@@ -90,6 +94,8 @@ object QuickSettings {
                         icon = setting.icon,
                         type = QuickSettingType.TOGGLE,
                         category = categoryTitle,
+                        connectedOnly = setting.connectedOnly,
+                        defaultValue = setting.defaultValue,
                     )
                 )
 
@@ -102,6 +108,7 @@ object QuickSettings {
                         icon = setting.icon,
                         type = QuickSettingType.LIST,
                         category = categoryTitle,
+                        connectedOnly = setting.connectedOnly,
                     )
                 )
 
@@ -121,9 +128,10 @@ object QuickSettings {
         return listFor(device).firstOrNull { it.key == key }
     }
 
-    /** Returns the current stored boolean value for a TOGGLE setting (defaults to false). */
-    fun currentBool(address: String, key: String): Boolean =
-        GBApplication.getDeviceSpecificSharedPrefs(address).getBoolean(key, false)
+    /** Returns the current boolean value of a TOGGLE setting, or its declared default. */
+    fun currentBool(descriptor: QuickSettingDescriptor): Boolean =
+        GBApplication.getDeviceSpecificSharedPrefs(descriptor.deviceAddress)
+            .getBoolean(descriptor.key, descriptor.defaultValue)
 
     /**
      * Returns the resolved display label for the current LIST value, or null if it cannot be
@@ -163,7 +171,7 @@ object QuickSettings {
         val devicePrefs = GBApplication.getDeviceSpecificSharedPrefs(device.address)
         return when (descriptor.type) {
             QuickSettingType.TOGGLE -> {
-                val newValue = !devicePrefs.getBoolean(descriptor.key, false)
+                val newValue = !devicePrefs.getBoolean(descriptor.key, descriptor.defaultValue)
                 devicePrefs.edit { putBoolean(descriptor.key, newValue) }
                 GBApplication.deviceService(device).onSendConfiguration(descriptor.key)
                 newValue
