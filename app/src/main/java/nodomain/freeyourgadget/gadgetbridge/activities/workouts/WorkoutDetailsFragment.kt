@@ -207,7 +207,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                 currentWorkout?.let { workout ->
                     workoutValueFormatter.setActivityKind(ActivityKind.fromCode(workout.summary.activityKind))
                     workoutViewModel.setWorkout(workout, workoutId)
-                    tabsPagerAdapter.setLapsTab(hasLaps(workout))
+                    tabsPagerAdapter.setOptionalTabs(hasCharts(workout), hasLaps(workout))
 
                     showLoading(false)
                 } ?: run {
@@ -235,6 +235,10 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
         binding.tabsViewPager.visibility = View.GONE
         binding.errorMessage.visibility = View.VISIBLE
         binding.errorMessage.text = message
+    }
+
+    private fun hasCharts(workout: Workout): Boolean {
+        return workout.charts.isNotEmpty() || gbDevice.deviceCoordinator.supportsHeartRateMeasurement(gbDevice)
     }
 
     /** Whether the workout has laps/intervals data (cardio-type workouts), and so gets a Laps tab. */
