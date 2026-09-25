@@ -616,6 +616,12 @@ public class DeviceSettingsPreferenceConst {
 
     public static final String PREF_MEDIA_SOURCE = "pref_media_source";
     public static final String PREF_MEDIA_PLAYBACK_MODE = "pref_media_playback_mode";
+    public static final String PREF_EIGHTBITDO_DISABLE_SLEEP = "eightbitdo_disable_sleep";
+    public static final String PREF_EIGHTBITDO_REALTIME_BUTTONS = "eightbitdo_realtime_buttons";
+    public static final String PREF_EIGHTBITDO_KEYMAP_PREFIX = "eightbitdo_keymap_";
+    public static final String PREF_EIGHTBITDO_SCREEN_KEYMAP = "eightbitdo_screen_keymap";
+    public static final String PREF_EIGHTBITDO_KEYMAP_RESET = "eightbitdo_keymap_reset";
+
     public static final String PREF_SHOKZ_EQUALIZER_BLUETOOTH = "pref_shokz_equalizer_bluetooth";
     public static final String PREF_SHOKZ_EQUALIZER_MP3 = "pref_shokz_equalizer_mp3";
     public static final String PREF_SHOKZ_EQUALIZER_CUSTOM = "pref_shokz_equalizer_custom";

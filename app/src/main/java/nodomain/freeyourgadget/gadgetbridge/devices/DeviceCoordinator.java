@@ -172,6 +172,7 @@ public interface DeviceCoordinator {
         SCOOTER,
         CAMERA,
         VACUUM,
+        GAMEPAD,
     }
 
     /**

@@ -34,6 +34,7 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.mobeta.android.dslv.DragSortListPreference
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.SettingsRenderHost
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
@@ -178,6 +179,21 @@ object DeviceSettingRenderer {
             val entryValues = pref.entryValues.orEmpty()
             val selected = entryValues.indices
                 .filter { entryValues[it].toString() in pref.values }
+                .map { entries[it] }
+            if (selected.isEmpty()) context.getString(R.string.not_set) else selected.joinToString(", ")
+        }
+
+    /**
+     * Summary provider used by [SortableListSetting] when no static [SortableListSetting.summary] is given:
+     * a comma-delimited list of the selected entries' labels, in the selected order.
+     */
+    private fun sortableListSummaryProvider(context: Context) =
+        Preference.SummaryProvider<DragSortListPreference> { pref ->
+            val entries = pref.entries.orEmpty()
+            val entryValues = pref.entryValues.orEmpty().map { it.toString() }
+            val selected = DragSortListPreference.decodeValue(pref.value).orEmpty()
+                .map { entryValues.indexOf(it.toString()) }
+                .filter { it >= 0 }
                 .map { entries[it] }
             if (selected.isEmpty()) context.getString(R.string.not_set) else selected.joinToString(", ")
         }
@@ -368,6 +384,31 @@ object DeviceSettingRenderer {
                         setOnPreferenceChangeListener { _, _ ->
                             handler.notifyPreferenceChanged(setting.key)
                             postRefresh()
+                            true
+                        }
+                    }
+                }
+
+                is SortableListSetting -> {
+                    DragSortListPreference(context, null).apply {
+                        key = setting.key
+                        setTitle(setting.title)
+                        setDialogTitle(setting.title)
+                        if (setting.icon != 0) setIcon(setting.icon)
+                        applyEntries(this, setting.entries, context)
+                        setDefaultValue(setting.defaultValue.toTypedArray<CharSequence>())
+                        if (setting.summary != 0) {
+                            setSummary(setting.summary)
+                        } else {
+                            summaryProvider = sortableListSummaryProvider(context)
+                        }
+                        setOnPreferenceChangeListener { _, newValue ->
+                            // DragSortListPreference also calls the listener from onSetInitialValue
+                            val joined = (newValue as Array<*>).joinToString(",")
+                            if (joined != prefs.getString(setting.key, setting.defaultValue.joinToString(","))) {
+                                handler.notifyPreferenceChanged(setting.key)
+                                postRefresh()
+                            }
                             true
                         }
                     }
@@ -642,6 +683,7 @@ object DeviceSettingRenderer {
                 is SwitchSetting -> setting.dependency
                 is ListSetting -> setting.dependency
                 is MultiSelectSetting -> setting.dependency
+                is SortableListSetting -> setting.dependency
                 is SeekBarSetting -> setting.dependency
                 is TextSetting -> setting.dependency
                 is ActionSetting -> setting.dependency

@@ -245,6 +245,22 @@ data class MultiSelectSetting(
 ) : DeviceSetting()
 
 /**
+ * An ordered multi-select list setting, equivalent to DragSortListPreference. The stored value
+ * is the selected entry values in the chosen order, comma separated.
+ */
+data class SortableListSetting(
+    override val key: String,
+    @StringRes val title: Int,
+    @StringRes val summary: Int = 0,
+    @DrawableRes val icon: Int = 0,
+    val entries: List<ListEntry>,
+    val defaultValue: List<String> = emptyList(),
+    val dependency: String? = null,
+    override val visibleWhen: ((Prefs) -> Boolean)? = null,
+    override val connectedOnly: Boolean = true,
+) : DeviceSetting()
+
+/**
  * A date setting, backed by a custom DialogPreference (e.g. XDatePreference) that persists the
  * value as a "yyyy-MM-dd" string.
  */

@@ -210,6 +210,32 @@ class DeviceSettingsScope {
         )
     }
 
+    fun sortableList(
+        key: String,
+        @StringRes title: Int,
+        @StringRes summary: Int = 0,
+        @DrawableRes icon: Int = 0,
+        entries: List<ListEntry>,
+        defaultValue: List<String> = emptyList(),
+        dependency: String? = null,
+        connectedOnly: Boolean = true,
+        visibleWhen: ((Prefs) -> Boolean)? = null,
+    ) {
+        items.add(
+            SortableListSetting(
+                key = key,
+                title = title,
+                summary = summary,
+                icon = icon,
+                entries = entries,
+                defaultValue = defaultValue,
+                dependency = dependency,
+                connectedOnly = connectedOnly,
+                visibleWhen = visibleWhen,
+            )
+        )
+    }
+
     fun seekbar(
         key: String,
         @StringRes title: Int,

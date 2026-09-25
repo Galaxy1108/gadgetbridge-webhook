@@ -5189,7 +5189,30 @@
     <string name="devicetype_victron_smartshunt" translatable="false">Victron SmartShunt</string>
     <string name="devicetype_dji_osmo_action_4" translatable="false">DJI Osmo Action 4</string>
     <string name="devicetype_sinilink" translatable="false">Sinilink</string>
+    <string name="devicetype_eightbitdo_micro" translatable="false">8BitDo Micro</string>
     <string name="devicetype_onetouch" translatable="false">OneTouch Glucose Meter</string>
+    <string name="eightbitdo_keyboard_mapping">Key mapping</string>
+    <string name="eightbitdo_keymap_reset_title">Reset to defaults</string>
+    <string name="eightbitdo_keymap_reset_confirmation">Reset the key mapping of all buttons to the factory defaults?</string>
+    <string name="eightbitdo_disable_sleep">Disable sleep</string>
+    <string name="eightbitdo_realtime_buttons_title">Log pressed buttons</string>
+    <string name="eightbitdo_realtime_buttons_summary">Enable the realtime button stream (writes pressed buttons to logs)</string>
+    <string name="eightbitdo_button_a" translatable="false">A</string>
+    <string name="eightbitdo_button_b" translatable="false">B</string>
+    <string name="eightbitdo_button_x" translatable="false">X</string>
+    <string name="eightbitdo_button_y" translatable="false">Y</string>
+    <string name="eightbitdo_button_l1" translatable="false">L1</string>
+    <string name="eightbitdo_button_r1" translatable="false">R1</string>
+    <string name="eightbitdo_button_l2" translatable="false">L2</string>
+    <string name="eightbitdo_button_r2" translatable="false">R2</string>
+    <string name="eightbitdo_button_minus">Minus (Select)</string>
+    <string name="eightbitdo_button_plus">Plus (Start)</string>
+    <string name="eightbitdo_button_star">Star</string>
+    <string name="eightbitdo_button_heart">Heart (Home)</string>
+    <string name="eightbitdo_button_up">Up</string>
+    <string name="eightbitdo_button_down">Down</string>
+    <string name="eightbitdo_button_left">Left</string>
+    <string name="eightbitdo_button_right">Right</string>
     <string name="equalizer_preset_standard">Standard</string>
     <string name="media_playback_mode">Playback mode</string>
     <string name="media_playback_mode_normal">Normal</string>

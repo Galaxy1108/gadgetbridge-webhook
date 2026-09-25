@@ -74,6 +74,12 @@ object DeviceSettingsIndexer {
                         entriesLabel(resolveMultiSelectEntries(item, prefs), context)
                     )
 
+                is SortableListSetting ->
+                    indexSingle(
+                        context, searchConfiguration, item.key, title(context, item.title), item.summary, breadcrumbs,
+                        entriesLabel(item.entries, context)
+                    )
+
                 is SeekBarSetting ->
                     indexSingle(context, searchConfiguration, item.key, title(context, item.title), item.summary, breadcrumbs, null)
 

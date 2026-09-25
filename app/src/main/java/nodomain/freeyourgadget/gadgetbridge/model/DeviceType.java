@@ -62,6 +62,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.domyos.DomyosT540Coordinator
 import nodomain.freeyourgadget.gadgetbridge.devices.earfun.EarFunAirPro4Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.earfun.EarFunAirSCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.earfun.EarFunFreePro3Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.eightbitdo.EightBitDoMicroCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.evenrealities.G1DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.femometer.FemometerVinca2DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.fitcloud.ak102.Ak102Coordinator;
@@ -1245,6 +1246,7 @@ public enum DeviceType {
     QN_SCALE(QnScaleCoordinator.class),
     CARDO_LS24X(Ls24xDeviceCoordinator.class),
     F8SCALE(F8ScaleCoordinator.class),
+    EIGHTBITDO_MICRO(EightBitDoMicroCoordinator.class),
     TEST(TestDeviceCoordinator.class);
 
     private DeviceCoordinator coordinator;
