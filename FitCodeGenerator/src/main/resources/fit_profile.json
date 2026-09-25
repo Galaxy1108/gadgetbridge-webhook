@@ -3744,7 +3744,8 @@
         {"num":23,"name":"SWISS_BALL_DUMBBELL_CHEST_PRESS"},
         {"num":24,"name":"TRIPLE_STOP_BARBELL_BENCH_PRESS"},
         {"num":25,"name":"WIDE_GRIP_BARBELL_BENCH_PRESS"},
-        {"num":26,"name":"ALTERNATING_DUMBBELL_CHEST_PRESS"}
+        {"num":26,"name":"ALTERNATING_DUMBBELL_CHEST_PRESS"},
+        {"num":27,"name":"DECLINE_BARBELL_BENCH_PRESS"}
       ]
     },
     {
@@ -4122,7 +4123,8 @@
         {"num":82,"name":"WEIGHTED_TOES_TO_BAR"},
         {"num":83,"name":"CRUNCH"},
         {"num":84,"name":"STRAIGHT_LEG_CRUNCH_WITH_BALL"},
-        {"num":86,"name":"LEG_CLIMB_CRUNCH"}
+        {"num":86,"name":"LEG_CLIMB_CRUNCH"},
+        {"num":87,"name":"RUCK_FLUTTER_KICKS"}
       ]
     },
     {
@@ -4207,7 +4209,8 @@
         {"num":21,"name":"KETTLEBELL_SUMO_DEADLIFT"},
         {"num":23,"name":"ROMANIAN_DEADLIFT"},
         {"num":24,"name":"SINGLE_LEG_ROMANIAN_DEADLIFT_CIRCUIT"},
-        {"num":25,"name":"STRAIGHT_LEG_DEADLIFT"}
+        {"num":25,"name":"STRAIGHT_LEG_DEADLIFT"},
+        {"num":26,"name":"RUCK_DEADLIFT"}
       ]
     },
     {
@@ -5412,7 +5415,9 @@
         {"num":87,"name":"WEIGHTED_CURTSY_LUNGE"},
         {"num":88,"name":"WEIGHTED_SHIFTING_SIDE_LUNGE"},
         {"num":89,"name":"WEIGHTED_SIDE_LUNGE_AND_PRESS"},
-        {"num":90,"name":"WEIGHTED_SIDE_LUNGE_JUMP_OFF"}
+        {"num":90,"name":"WEIGHTED_SIDE_LUNGE_JUMP_OFF"},
+        {"num":91,"name":"OVERHEAD_RUCK_LUNGE"},
+        {"num":92,"name":"BACK_RUCK_LUNGE"}
       ]
     },
     {
@@ -5544,7 +5549,10 @@
         {"num":25,"name":"DUMBBELL_SNATCH"},
         {"num":26,"name":"MEDICINE_BALL_CLEAN"},
         {"num":27,"name":"CLEAN_AND_PRESS"},
-        {"num":28,"name":"SNATCH"}
+        {"num":28,"name":"SNATCH"},
+        {"num":30,"name":"POWER_SNATCH_BLOCKS"},
+        {"num":31,"name":"HIGH_PULL_BLOCKS"},
+        {"num":32,"name":"HIGH_PULL_TRAP_BAR"}
       ]
     },
     {
@@ -5728,7 +5736,9 @@
         {"num":34,"name":"BOX_JUMP_OVERS"},
         {"num":35,"name":"BOX_JUMP_OVERS_OVER_THE_BOX"},
         {"num":36,"name":"STAR_JUMP_SQUATS"},
-        {"num":37,"name":"JUMP_SQUAT"}
+        {"num":37,"name":"JUMP_SQUAT"},
+        {"num":38,"name":"JUMP_TRAP_BAR"},
+        {"num":39,"name":"BARBELL_SPLIT_JUMPS"}
       ]
     },
     {
@@ -6054,7 +6064,9 @@
         {"num":49,"name":"TRX_INVERTED_ROW"},
         {"num":50,"name":"WEIGHTED_INVERTED_ROW"},
         {"num":51,"name":"WEIGHTED_TRX_INVERTED_ROW"},
-        {"num":52,"name":"DUMBBELL_ROW_WHEELCHAIR"}
+        {"num":52,"name":"DUMBBELL_ROW_WHEELCHAIR"},
+        {"num":53,"name":"BENCH_PULL"},
+        {"num":54,"name":"RUCK_BENT_OVER_ROW"}
       ]
     },
     {
@@ -6134,7 +6146,10 @@
         {"num":28,"name":"DUMBBELL_FRONT_RAISE"},
         {"num":29,"name":"DUMBBELL_CURL_TO_OVERHEAD_PRESS_WHEELCHAIR"},
         {"num":30,"name":"ARNOLD_PRESS_WHEELCHAIR"},
-        {"num":31,"name":"OVERHEAD_DUMBBELL_PRESS_WHEELCHAIR"}
+        {"num":31,"name":"OVERHEAD_DUMBBELL_PRESS_WHEELCHAIR"},
+        {"num":32,"name":"KNEELING_LANDMINE_PRESS"},
+        {"num":33,"name":"STANDING_LANDMINE_PRESS"},
+        {"num":34,"name":"RUCK_PRESS"}
       ]
     },
     {
@@ -6385,7 +6400,13 @@
         {"num":98,"name":"SQUAT_AMERICAN_SWING"},
         {"num":100,"name":"AIR_SQUAT"},
         {"num":101,"name":"DUMBBELL_THRUSTERS"},
-        {"num":102,"name":"OVERHEAD_BARBELL_SQUAT"}
+        {"num":102,"name":"OVERHEAD_BARBELL_SQUAT"},
+        {"num":103,"name":"BARBELL_HALF_SQUAT"},
+        {"num":104,"name":"BELT_SQUAT"},
+        {"num":105,"name":"SAFETY_BAR_SQUAT"},
+        {"num":106,"name":"BACK_RUCK_SQUAT"},
+        {"num":107,"name":"OVERHEAD_RUCK_SQUAT"},
+        {"num":108,"name":"FRONT_RUCK_SQUAT"}
       ]
     },
     {
