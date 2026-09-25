@@ -27,6 +27,7 @@ import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.Dev
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_REDMI_BUDS_NOISE_CANCELLING_STRENGTH;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_REDMI_BUDS_TRANSPARENCY_STRENGTH;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_REDMI_BUDS_WEARING_DETECTION;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_REDMI_BUDS_FIND_EARBUDS;
 import static nodomain.freeyourgadget.gadgetbridge.util.GB.hexdump;
 
 import android.content.SharedPreferences.Editor;
@@ -65,6 +66,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsPos
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsPrefs;
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsTapType;
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsTransparencyStrength;
+import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsFindEarbuds;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice.State;
 import nodomain.freeyourgadget.gadgetbridge.model.BatteryState;
@@ -137,6 +139,9 @@ public class RedmiBudsProtocol extends GBDeviceProtocol {
 
             case PREF_REDMI_BUDS_EQUALIZER_PRESET:
                 return encodeSetEqualizerPreset();
+
+            case PREF_REDMI_BUDS_FIND_EARBUDS:
+                return encodeFindEarbuds();
         }
 
         for (final RedmiBudsTapType tapType : RedmiBudsTapType.values()) {
@@ -242,10 +247,28 @@ public class RedmiBudsProtocol extends GBDeviceProtocol {
         return new Message(MessageType.PHONE_REQUEST, Opcode.ANC, sequenceNumber++, new byte[]{0x02, 0x04, mode}).encode();
     }
 
-    @Override
-    public byte[] encodeFindDevice(final boolean start) {
-        return new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++,
-                new byte[] { 0x04, 0x00, 0x09, start ? (byte) 0x01 : (byte) 0x00, (byte) 0x03 }).encode();
+    public byte[] encodeFindEarbuds() {
+        final Prefs prefs = getDevicePrefs();
+        final byte code = RedmiBudsPrefs.getCode(prefs, PREF_REDMI_BUDS_FIND_EARBUDS, RedmiBudsFindEarbuds.OFF);
+
+        final byte[] stopFind = new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++, 
+            new byte[]{0x04, 0x00, 0x09, 0x00, 0x03}).encode();
+
+        if (code == (byte) 0x00) // return OFF
+            return stopFind;
+
+        // else turn OFF find and start a new find
+        final byte[] startFind = new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++, 
+            new byte[]{0x04, 0x00, 0x09, 0x01, code}).encode();
+
+        final ByteArrayOutputStream messages = new ByteArrayOutputStream();
+        try {
+            messages.write(stopFind);
+            messages.write(startFind);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return messages.toByteArray();
     }
 
     public void decodeGetConfig(byte[] configPayload) {

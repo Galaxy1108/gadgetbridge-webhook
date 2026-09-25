@@ -12,6 +12,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSett
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_REDMI_BUDS_NOISE_CANCELLING_STRENGTH
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_REDMI_BUDS_TRANSPARENCY_STRENGTH
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_REDMI_BUDS_WEARING_DETECTION
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_REDMI_BUDS_FIND_EARBUDS
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsScope
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec
@@ -30,6 +31,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsNoi
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsPosition
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsTapType
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsTransparencyStrength
+import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsFindEarbuds
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.BatteryConfig
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
@@ -71,6 +73,10 @@ abstract class AbstractRedmiBudsCoordinator : AbstractBLClassicDeviceCoordinator
     open val supportsCustomEqualizer: Boolean get() = false
 
     open val supportsAdaptiveSound: Boolean get() = false
+
+    open val supportsFindEarbuds: Boolean get() = false
+
+    open val findEarbuds: List<RedmiBudsFindEarbuds> get() = RedmiBudsFindEarbuds.entries.toList()
 
     open val supportsWearingDetection: Boolean get() = false
 
@@ -252,7 +258,7 @@ abstract class AbstractRedmiBudsCoordinator : AbstractBLClassicDeviceCoordinator
     }
 
     private fun DeviceSettingsScope.system() {
-        if (!supportsWearingDetection && !supportsAutoAnswer && !supportsDoubleConnection &&
+        if (!supportsWearingDetection && !supportsAutoAnswer && !supportsDoubleConnection && !supportsFindEarbuds &&
             singleTapActions.isEmpty() && tapActions.isEmpty() && longPressActions.isEmpty()
         ) {
             return
@@ -290,6 +296,21 @@ abstract class AbstractRedmiBudsCoordinator : AbstractBLClassicDeviceCoordinator
                     title = R.string.redmi_buds_5_pro_double_connection,
                     summary = R.string.redmi_buds_5_pro_double_connection_description,
                     defaultValue = false,
+                )
+            }
+
+            if (supportsFindEarbuds && !findEarbuds.isEmpty()) {
+                enumList<RedmiBudsFindEarbuds>(
+                    key = PREF_REDMI_BUDS_FIND_EARBUDS,
+                    title = R.string.earfun_find_headphones,
+                    icon = R.drawable.ic_action_find_lost_device,
+                    defaultValue = RedmiBudsFindEarbuds.OFF,
+                    filter = { it in findEarbuds },
+                )
+
+                info(
+                    key = "pref_freebuds_find_headphones_hint",
+                    title = R.string.earfun_find_headphones_hint,
                 )
             }
         }

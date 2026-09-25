@@ -3608,6 +3608,7 @@
     <string name="battery_case">Battery case</string>
     <string name="left_earbud">Left earbud</string>
     <string name="right_earbud">Right earbud</string>
+    <string name="both_earbuds">Both earbuds</string>
     <string name="audio_codec">Audio Codec</string>
     <string name="pref_title_touch_voice_assistant">Voice Assistant</string>
     <string name="pref_title_touch_anc">Active Noise Cancelling</string>

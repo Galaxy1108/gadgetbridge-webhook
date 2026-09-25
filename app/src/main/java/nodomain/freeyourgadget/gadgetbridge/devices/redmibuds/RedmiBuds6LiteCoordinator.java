@@ -26,7 +26,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsAmb
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsAmbientSoundMode;
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsGestureAction;
 import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsLongGestureAction;
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
+import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsFindEarbuds;
 
 public class RedmiBuds6LiteCoordinator extends AbstractRedmiBudsCoordinator {
     @Override
@@ -40,7 +40,7 @@ public class RedmiBuds6LiteCoordinator extends AbstractRedmiBudsCoordinator {
     }
 
     @Override
-    public boolean supportsFindDevice(@NonNull final GBDevice device) {
+    public boolean getSupportsFindEarbuds() {
         return true;
     }
 
