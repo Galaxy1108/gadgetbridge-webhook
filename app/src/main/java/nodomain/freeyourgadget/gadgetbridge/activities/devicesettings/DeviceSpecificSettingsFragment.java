@@ -1745,6 +1745,16 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                                 xmlScreen.getScreen(),
                                 xmlScreen.getSubScreens().stream().mapToInt(Integer::intValue).toArray()
                         );
+                    } else if (item instanceof ScreenSetting screenSetting && !screenSetting.getXmlSubScreens().isEmpty()) {
+                        final DeviceSpecificSettingsScreen enumScreen = DeviceSpecificSettingsScreen.fromKey(screenSetting.getKey());
+                        if (enumScreen != null) {
+                            deviceSpecificSettings.addRootScreen(
+                                    enumScreen,
+                                    screenSetting.getXmlSubScreens().stream().mapToInt(Integer::intValue).toArray()
+                            );
+                        } else {
+                            LOG.warn("Screen {} declares xml sub-screens but is not a known screen", screenSetting.getKey());
+                        }
                     }
                 }
                 deviceSpecificSettings.addConnectedPreferences(modelSpec.collectConnectedKeys());

@@ -5237,6 +5237,8 @@
     <string name="huawei_send_gps_and_time_title">Send GPS and Time to device</string>
     <string name="huawei_send_gps_and_time_summary">Send GPS and Time to device for weather and search stars optimization. Location should be set in the settings</string>
     <string name="garmin_mlr_protocol">Multi-Link Reliable Protocol</string>
+    <string name="garmin_legacy_sync_flush_title" translatable="false">Legacy flush on sync</string>
+    <string name="garmin_legacy_sync_flush_summary" translatable="false">Use the legacy sync protocol to flush data before sync. Disable this if your watch freezes when syncing. Might result in delayed data.</string>
     <string name="feature_exploresync_title">ExploreSync Protocol</string>
     <string name="feature_exploresync_summary">Sync activity GPS tracks using the ExploreSync protocol. Should only be used if the device does not provide FIT files.</string>
     <string name="feature_experimental_unstable">Experimental, might be unstable</string>

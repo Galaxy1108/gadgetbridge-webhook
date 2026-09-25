@@ -17,11 +17,14 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.text.InputFilter
 import android.text.InputFilter.LengthFilter
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.MultiSelectListPreference
@@ -34,6 +37,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.SettingsRenderHost
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
+import nodomain.freeyourgadget.gadgetbridge.util.UriUtils
 import nodomain.freeyourgadget.gadgetbridge.util.XDatePreference
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.GBSimpleSummaryProvider
 import org.slf4j.Logger
@@ -78,6 +82,7 @@ object DeviceSettingRenderer {
         val dynamicEntryPairs = mutableListOf<Pair<ListPreference, (Prefs) -> List<ListEntry>>>()
         val dynamicMultiEntryPairs = mutableListOf<Pair<MultiSelectListPreference, (Prefs) -> List<ListEntry>>>()
         val categoryMemberPairs = mutableListOf<Pair<PreferenceCategory, MutableList<Preference>>>()
+        val summaryPairs = mutableListOf<Pair<Preference, (Context, Prefs) -> CharSequence?>>()
         val spListeners = mutableListOf<SharedPreferences.OnSharedPreferenceChangeListener>()
         val mainHandler = Handler(Looper.getMainLooper())
         val sp: SharedPreferences = prefs.preferences
@@ -95,6 +100,7 @@ object DeviceSettingRenderer {
             dynamicMultiEntryPairs.forEach { (pref, provider) ->
                 applyEntries(pref, provider(livePrefs), context)
             }
+            summaryPairs.forEach { (pref, provider) -> pref.summary = provider(context, livePrefs) }
             categoryMemberPairs.forEach { (cat, members) ->
                 cat.isVisible = members.isNotEmpty() && members.any { it.isVisible }
             }
@@ -116,6 +122,7 @@ object DeviceSettingRenderer {
             dynamicEntryPairs,
             dynamicMultiEntryPairs,
             categoryMemberPairs,
+            summaryPairs,
             spListeners,
             mainHandler,
             sp,
@@ -125,8 +132,16 @@ object DeviceSettingRenderer {
         // Initial visibility passes - individual predicates first, then category membership
         visibilityPairs.forEach { (pref, predicate) -> pref.isVisible = predicate(prefs) }
         enabledPairs.forEach { (pref, predicate) -> pref.isEnabled = predicate(prefs) }
+        summaryPairs.forEach { (pref, provider) -> pref.summary = provider(handler.context, prefs) }
         categoryMemberPairs.forEach { (cat, members) ->
             cat.isVisible = members.isNotEmpty() && members.any { it.isVisible }
+        }
+
+        if (summaryPairs.isNotEmpty()) {
+            // A summaryProvider can read any preference, so refresh on every write.
+            val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> postRefresh() }
+            spListeners.add(listener)
+            sp.registerOnSharedPreferenceChangeListener(listener)
         }
 
         return DeviceSettingsRefreshHandle(sp, spListeners, refreshRunnable)
@@ -177,6 +192,7 @@ object DeviceSettingRenderer {
         dynamicEntryPairs: MutableList<Pair<ListPreference, (Prefs) -> List<ListEntry>>>,
         dynamicMultiEntryPairs: MutableList<Pair<MultiSelectListPreference, (Prefs) -> List<ListEntry>>>,
         categoryMemberPairs: MutableList<Pair<PreferenceCategory, MutableList<Preference>>>,
+        summaryPairs: MutableList<Pair<Preference, (Context, Prefs) -> CharSequence?>>,
         spListeners: MutableList<SharedPreferences.OnSharedPreferenceChangeListener>,
         mainHandler: Handler,
         sp: SharedPreferences,
@@ -193,7 +209,9 @@ object DeviceSettingRenderer {
                 is CategorySetting -> {
                     val category = PreferenceCategory(context).apply {
                         key = setting.key
-                        setTitle(setting.title)
+                        if (setting.titleText != null) title = setting.titleText else setTitle(setting.title)
+                        if (setting.icon != 0) setIcon(setting.icon)
+                        isIconSpaceReserved = setting.iconSpaceReserved
                     }
                     parent.addPreference(category)
                     renderItems(
@@ -206,6 +224,7 @@ object DeviceSettingRenderer {
                         dynamicEntryPairs,
                         dynamicMultiEntryPairs,
                         categoryMemberPairs,
+                        summaryPairs,
                         spListeners,
                         mainHandler,
                         sp,
@@ -243,6 +262,7 @@ object DeviceSettingRenderer {
                         dynamicEntryPairs,
                         dynamicMultiEntryPairs,
                         categoryMemberPairs,
+                        summaryPairs,
                         spListeners,
                         mainHandler,
                         sp,
@@ -268,6 +288,7 @@ object DeviceSettingRenderer {
                         }
                         if (setting.icon != 0) setIcon(setting.icon)
                         setDefaultValue(setting.defaultValue)
+                        isEnabled = setting.enabled
                         disableDependentsState = setting.disableDependentsState
                         if (setting.confirmationMessage != 0) {
                             setOnPreferenceChangeListener { preference, newValue ->
@@ -462,8 +483,13 @@ object DeviceSettingRenderer {
                 is ActionSetting -> {
                     Preference(context).apply {
                         key = setting.key
-                        if (setting.title != 0) setTitle(setting.title)
-                        if (setting.summary != 0) setSummary(setting.summary)
+                        if (setting.titleText != null) title = setting.titleText
+                        else if (setting.title != 0) setTitle(setting.title)
+                        if (setting.summaryProvider != null) {
+                            summaryPairs.add(this to setting.summaryProvider)
+                        } else if (setting.summary != 0) {
+                            setSummary(setting.summary)
+                        }
                         if (setting.icon != 0) setIcon(setting.icon)
                         isPersistent = false
                         isEnabled = setting.enabled
@@ -490,21 +516,32 @@ object DeviceSettingRenderer {
                 is InfoSetting -> {
                     Preference(context).apply {
                         key = setting.key
-                        setTitle(setting.title)
+                        if (setting.titleText != null) title = setting.titleText
+                        else if (setting.title != 0) setTitle(setting.title)
                         if (setting.icon != 0) setIcon(setting.icon)
+                        isIconSpaceReserved = setting.iconSpaceReserved
                         isPersistent = false
                         val pref = this
-                        pref.summary = prefs.getString(setting.key, setting.defaultValue)
-                        val listener =
-                            SharedPreferences.OnSharedPreferenceChangeListener { sharedPrefs, changedKey ->
-                                if (changedKey == setting.key) {
-                                    val newValue = sharedPrefs.getString(changedKey, setting.defaultValue)
-                                        ?: setting.defaultValue
-                                    mainHandler.post { pref.summary = newValue }
-                                }
+                        when {
+                            setting.summaryProvider != null ->
+                                summaryPairs.add(pref to setting.summaryProvider)
+
+                            setting.summary != 0 -> setSummary(setting.summary)
+
+                            else -> {
+                                pref.summary = prefs.getString(setting.key, setting.defaultValue)
+                                val listener =
+                                    SharedPreferences.OnSharedPreferenceChangeListener { sharedPrefs, changedKey ->
+                                        if (changedKey == setting.key) {
+                                            val newValue = sharedPrefs.getString(changedKey, setting.defaultValue)
+                                                ?: setting.defaultValue
+                                            mainHandler.post { pref.summary = newValue }
+                                        }
+                                    }
+                                spListeners.add(listener)
+                                sp.registerOnSharedPreferenceChangeListener(listener)
                             }
-                        spListeners.add(listener)
-                        sp.registerOnSharedPreferenceChangeListener(listener)
+                        }
                     }
                 }
 
@@ -533,6 +570,63 @@ object DeviceSettingRenderer {
                     }
                 }
 
+                is FilePickerSetting -> {
+                    val mimeTypes = setting.mimeTypes.toTypedArray()
+                    // The launcher must be registered before the fragment is started, so it is
+                    // created here rather than on click.
+                    val launcher = handler.registerForActivityResult(
+                        ActivityResultContracts.OpenMultipleDocuments()
+                    ) { uris: List<Uri> ->
+                        if (uris.isNotEmpty()) {
+                            setting.onPicked(handler.context, handler.device, uris)
+                        }
+                    }
+
+                    Preference(context).apply {
+                        key = setting.key
+                        setTitle(setting.title)
+                        if (setting.summary != 0) setSummary(setting.summary)
+                        if (setting.icon != 0) setIcon(setting.icon)
+                        isPersistent = false
+                        setOnPreferenceClickListener {
+                            launcher.launch(mimeTypes)
+                            true
+                        }
+                    }
+                }
+
+                is FolderPickerSetting -> {
+                    val folderPref = Preference(context)
+                    val launcher = handler.registerForActivityResult(
+                        ActivityResultContracts.OpenDocumentTree()
+                    ) { uri: Uri? ->
+                        if (uri != null) {
+                            if (setting.persistUriPermission) {
+                                handler.context.contentResolver.takePersistableUriPermission(
+                                    uri,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                )
+                            }
+                            sp.edit().putString(setting.key, uri.toString()).apply()
+                            folderPref.summary = UriUtils.resolveLocationSummary(handler.context, uri.toString())
+                            setting.onPicked?.invoke(handler.context, handler.device, uri)
+                            postRefresh()
+                        }
+                    }
+
+                    folderPref.apply {
+                        key = setting.key
+                        setTitle(setting.title)
+                        if (setting.icon != 0) setIcon(setting.icon)
+                        isPersistent = false
+                        summary = UriUtils.resolveLocationSummary(context, prefs.getString(setting.key, ""))
+                        setOnPreferenceClickListener {
+                            launcher.launch(null)
+                            true
+                        }
+                    }
+                }
+
                 is XmlScreenSetting -> {
                     // Inflate the root XML entry at the correct position so it appears in the
                     // order declared in the DSL rather than being appended at the end.
@@ -553,6 +647,8 @@ object DeviceSettingRenderer {
                 is ActionSetting -> setting.dependency
                 is InfoSetting -> setting.dependency
                 is DateSetting -> setting.dependency
+                is FilePickerSetting -> setting.dependency
+                is FolderPickerSetting -> setting.dependency
             }
             if (dependency != null) pref.dependency = dependency
 

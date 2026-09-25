@@ -99,6 +99,12 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_CALENDAR_SYNC_COLOR_BLACKLIST = "calendar_sync_color_blacklist";
     public static final String PREF_CALENDAR_SYNC_EVENT_REMINDERS = "calendar_sync_event_reminders";
     public static final String PREF_TIME_SYNC = "time_sync";
+    public static final String PREF_KEEP_ACTIVITY_DATA_ON_DEVICE = "keep_activity_data_on_device";
+    public static final String PREF_FETCH_UNKNOWN_FILES = "fetch_unknown_files";
+    public static final String PREF_INSTALL_UNSUPPORTED_FILES = "install_unsupported_files";
+    public static final String PREF_NEW_SYNC_PROTOCOL = "new_sync_protocol";
+    public static final String PREF_IMPORT_ACTIVITY_FILES = "import_activity_files";
+    public static final String PREF_REPROCESS_ACTIVITY_FILES = "reprocess_activity_files";
     public static final String PREF_USE_CUSTOM_DEVICEICON = "use_custom_deviceicon";
     public static final String PREF_BUTTON_1_FUNCTION_SHORT = "button_1_function_short";
     public static final String PREF_BUTTON_2_FUNCTION_SHORT = "button_2_function_short";
