@@ -151,6 +151,8 @@ abstract class AbstractDeviceTileService : TileService() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         tile.subtitle = getString(R.string.qs_tile_not_connected, device.aliasOrName)
                     }
+                } else if (!descriptor.visible) {
+                    tile.state = Tile.STATE_UNAVAILABLE
                 }
             }
         }

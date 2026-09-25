@@ -44,6 +44,12 @@ data class QuickSettingDescriptor(
     @param:StringRes val category: Int = 0,
     /** The setting can only be changed while the device is connected. */
     val connectedOnly: Boolean = true,
+    /**
+     * Whether the setting itself and the parent group are currently visible. Resolved against
+     * the device preferences when the descriptor is built. A hidden setting is still listed, so
+     * that a tile can be assigned to it, but it cannot be changed.
+     */
+    val visible: Boolean = true,
     /** Value of a [QuickSettingType.TOGGLE] setting while nothing is stored. */
     val defaultValue: Boolean = false,
 )
@@ -62,9 +68,8 @@ object QuickSettings {
 
     /**
      * Returns all [QuickSettingDescriptor]s for [device] by recursively walking the coordinator's
-     * [DeviceSettingsSpec]. Nodes whose [DeviceSetting.visibleWhen] evaluates to false against the
-     * current device SharedPreferences are excluded. Returns an empty list for devices without a
-     * DSL spec.
+     * [DeviceSettingsSpec]. A node hidden by [DeviceSetting.visibleWhen] is still returned, with
+     * [QuickSettingDescriptor.visible] false. Returns an empty list for devices without a DSL spec.
      */
     fun listFor(device: GBDevice): List<QuickSettingDescriptor> {
         val spec = device.deviceCoordinator.getDeviceSettings(device) ?: return emptyList()
@@ -80,11 +85,13 @@ object QuickSettings {
         prefs: Prefs,
         out: MutableList<QuickSettingDescriptor>,
         @StringRes categoryTitle: Int = 0,
+        parentVisible: Boolean = true,
     ) {
         for (setting in items) {
+            val visible = parentVisible && setting.visibleWhen?.invoke(prefs) != false
             when (setting) {
-                is ScreenSetting -> collectNodes(device, setting.children, prefs, out, setting.title)
-                is CategorySetting -> collectNodes(device, setting.children, prefs, out, setting.title)
+                is ScreenSetting -> collectNodes(device, setting.children, prefs, out, setting.title, visible)
+                is CategorySetting -> collectNodes(device, setting.children, prefs, out, setting.title, visible)
                 is SwitchSetting -> out.add(
                     QuickSettingDescriptor(
                         deviceAddress = device.address,
@@ -95,6 +102,7 @@ object QuickSettings {
                         type = QuickSettingType.TOGGLE,
                         category = categoryTitle,
                         connectedOnly = setting.connectedOnly,
+                        visible = visible,
                         defaultValue = setting.defaultValue,
                     )
                 )
@@ -109,6 +117,7 @@ object QuickSettings {
                         type = QuickSettingType.LIST,
                         category = categoryTitle,
                         connectedOnly = setting.connectedOnly,
+                        visible = visible,
                     )
                 )
 
@@ -158,7 +167,8 @@ object QuickSettings {
      *   If [cycleValues] is non-empty, only those values participate in the cycle (values not
      *   present in the full entry list are silently skipped).
      *
-     * After both, onSendConfiguration is called.
+     * After both, onSendConfiguration is called. Does nothing, and returns null, while the setting
+     * is not supposed to be currently visible ([DeviceSetting.visibleWhen]).
      *
      * @return the new boolean state for [QuickSettingType.TOGGLE], or null for [QuickSettingType.LIST].
      */
@@ -168,6 +178,9 @@ object QuickSettings {
         descriptor: QuickSettingDescriptor,
         cycleValues: List<String> = emptyList(),
     ): Boolean? {
+        if (!descriptor.visible) {
+            return null
+        }
         val devicePrefs = GBApplication.getDeviceSpecificSharedPrefs(device.address)
         return when (descriptor.type) {
             QuickSettingType.TOGGLE -> {
