@@ -99,7 +99,6 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledAppsService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.GdiSettingsService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.InitRequest;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenDefinitionRequest;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenStateRequest;
@@ -573,6 +572,20 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             return;
         }
 
+        if (dataTypes == RecordedDataTypes.TYPE_SYNC) {
+            requestBatteryUpdate();
+        }
+
+        if (newSyncProtocol() && !getDevicePrefs().getBoolean("garmin_legacy_sync_flush", true)) {
+            // #6700 - Some firmwares will freeze on the legacy sync request
+            LOG.warn("Legacy sync flush is disabled - requesting file list directly");
+            sendProtobufRequest("directly request file list",
+                Smart.newBuilder().setFileSyncService(
+                    protocolBufferHandler.getFileSyncServiceHandler().requestFileList()
+                ).build());
+            return;
+        }
+
         if (this.supportedFileTypeList.isEmpty() && !newSyncProtocol()) {
             LOG.warn("No known supported file types");
             return;
@@ -643,8 +656,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 Smart.newBuilder().setInstalledAppsService(
                         GdiInstalledAppsService.InstalledAppsService.newBuilder().setDeleteAppRequest(
                                 GdiInstalledAppsService.InstalledAppsService.DeleteAppRequest.newBuilder()
-                                        .setStoreAppId(app.getStoreAppId())
+                                        .setNativeAppId(app.getNativeAppId())
                                         .setAppType(app.getType())
+                                        .setStoreAppId(app.getStoreAppId())
                         )
                 ).build());
     }
@@ -869,7 +883,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         //following is needed for vivomove style
         sendOutgoingMessage("set sync ready", new SystemEventMessage(SystemEventMessage.GarminSystemEventType.SYNC_READY, 0));
 
-        enableBatteryLevelUpdate();
+        requestBatteryUpdate();
 
 
         gbDevice.setUpdateState(GBDevice.State.INITIALIZED, getContext());
@@ -1051,7 +1065,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         }
     }
 
-    private void enableBatteryLevelUpdate() {
+    private void requestBatteryUpdate() {
         sendProtobufRequest("enable battery updates", Smart.newBuilder()
                 .setDeviceStatusService(
                         GdiDeviceStatus.DeviceStatusService.newBuilder()
@@ -1226,10 +1240,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 .setNumber(1)
                 .build());
 
-        final List<Number> deviceSettingsTimes = new ArrayList<>();
-        final List<Number> deviceSettingsMode = new ArrayList<>();
-        final List<Number> deviceSettingsEnabled = new ArrayList<>();
-        final List<Number> deviceSettingsRepeat = new ArrayList<>();
+        final List<Integer> deviceSettingsTimes = new ArrayList<>();
+        final List<Integer> deviceSettingsMode = new ArrayList<>();
+        final List<Integer> deviceSettingsEnabled = new ArrayList<>();
+        final List<Long> deviceSettingsRepeat = new ArrayList<>();
 
         int numberEnabledAlarms = 0;
         for (Alarm alarm : alarms) {
@@ -1284,10 +1298,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         if (numberEnabledAlarms > 0) {
             final FitDeviceSettings.Builder deviceSettingsBuilder = new FitDeviceSettings.Builder()
-                    .setAlarmsTime(deviceSettingsTimes.toArray(new Number[0]))
-                    .setAlarmsMode(deviceSettingsMode.toArray(new Number[0]))
-                    .setAlarmsEnabled(deviceSettingsEnabled.toArray(new Number[0]))
-                    .setAlarmsRepeat(deviceSettingsRepeat.toArray(new Number[0]));
+                    .setAlarmsTime(deviceSettingsTimes.toArray(new Integer[0]))
+                    .setAlarmsMode(deviceSettingsMode.toArray(new Integer[0]))
+                    .setAlarmsEnabled(deviceSettingsEnabled.toArray(new Integer[0]))
+                    .setAlarmsRepeat(deviceSettingsRepeat.toArray(new Long[0]));
 
             dataRecords.add(deviceSettingsBuilder.build());
         }
@@ -1505,7 +1519,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                                             ScreenDefinitionRequest.newBuilder()
                                                     .setScreenId(screenId)
                                                     .setUnk2(0)
-                                                    .setLanguage(localeString.length() == 5 ? localeString : "en_US")
+                                                    .setLocale(localeString.length() == 5 ? localeString : "en_US")
                                     )
                             ).build());
 

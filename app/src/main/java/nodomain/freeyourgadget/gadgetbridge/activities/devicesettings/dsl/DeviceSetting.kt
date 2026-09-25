@@ -26,6 +26,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.SettingsRenderHost
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 
 /**
@@ -62,6 +63,7 @@ data class ScreenSetting(
     @StringRes val summary: Int = 0,
     @DrawableRes val icon: Int = 0,
     override val visibleWhen: ((Prefs) -> Boolean)? = null,
+    val enabled: ((Prefs) -> Boolean)? = null,
     override val connectedOnly: Boolean = true,
     override val children: List<DeviceSetting> = emptyList(),
 ) : GroupSetting()
@@ -122,9 +124,13 @@ data class SeekBarSetting(
     val min: Int = 0,
     val max: Int,
     val defaultValue: Int,
+    val step: Int = 1,
+    val scale: Double = 1.0,
     val showValue: Boolean = true,
+    @StringRes val valueFormat: Int = 0,
     val dependency: String? = null,
     override val visibleWhen: ((Prefs) -> Boolean)? = null,
+    val onSharedPreferenceChanged: ((Int) -> Unit)? = null,
     override val connectedOnly: Boolean = true,
 ) : DeviceSetting()
 
@@ -192,7 +198,7 @@ data class ActionSetting(
     @StringRes val confirmationMessage: Int = 0,
     override val visibleWhen: ((Prefs) -> Boolean)? = null,
     override val connectedOnly: Boolean = true,
-    val onClick: ((SettingsRenderHost) -> Boolean)? = null,
+    val onClick: ((Context, GBDevice?) -> Boolean)? = null,
 ) : DeviceSetting()
 
 /**
@@ -210,6 +216,24 @@ data class MultiSelectSetting(
     val dependency: String? = null,
     override val visibleWhen: ((Prefs) -> Boolean)? = null,
     override val connectedOnly: Boolean = true,
+) : DeviceSetting()
+
+/**
+ * A date setting, backed by a custom DialogPreference (e.g. XDatePreference) that persists the
+ * value as a "yyyy-MM-dd" string.
+ */
+data class DateSetting(
+    override val key: String,
+    @StringRes val title: Int,
+    @StringRes val summary: Int = 0,
+    @DrawableRes val icon: Int = 0,
+    val defaultValue: String = "",
+    val minDate: Long = 0L,
+    val maxDate: Long = Long.MAX_VALUE,
+    val dependency: String? = null,
+    override val visibleWhen: ((Prefs) -> Boolean)? = null,
+    override val connectedOnly: Boolean = true,
+    val onSharedPreferenceChanged: ((String) -> Unit)? = null,
 ) : DeviceSetting()
 
 /**

@@ -65,6 +65,8 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreferenceCompat;
 
+import com.bytehamster.lib.preferencesearch.SearchConfiguration;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +91,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.app_specific_notification
 import nodomain.freeyourgadget.gadgetbridge.activities.audiorecordings.AudioRecordingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSetting;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingRenderer;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsIndexer;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsRefreshHandle;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.ScreenSetting;
@@ -282,6 +285,9 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
             if (modelSpec != null) {
                 modelManagedKeys = modelSpec.collectAllKeys();
                 setPreferenceScreen(getPreferenceManager().createPreferenceScreen(requireContext()));
+                // Declares the (invisible) "searchPreference" preference that getSearchConfiguration()
+                // looks up, so that this device's settings can be searched - see indexModelSettings().
+                addPreferencesFromResource(R.xml.devicesettings_search);
                 final Prefs prefs = new Prefs(getPreferenceManager().getSharedPreferences());
                 modelVisibilityRefresh = DeviceSettingRenderer.INSTANCE.render(
                         modelSpec.getItems(),
@@ -310,6 +316,7 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                     }
                     addPreferencesFromResource(screen);
                 }
+                indexModelSettings(modelSpec, prefs);
             } else {
                 boolean first = true;
                 for (int setting : deviceSpecificSettings.getRootScreens()) {
@@ -384,6 +391,32 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                     pref.setEnabled(device.isInitialized());
                 }
             }
+        }
+    }
+
+    /**
+     * Indexes this device's settings for search: the model spec's own nodes (via {@link DeviceSettingsIndexer},
+     * which honours {@code visibleWhen}), plus the generic and {@link XmlScreenSetting} XML screens registered
+     * for this device, with added breadcrumbs for the title of their owning root screen.
+     */
+    private void indexModelSettings(final DeviceSettingsSpec modelSpec, final Prefs prefs) {
+        final SearchConfiguration searchConfiguration = getSearchConfiguration();
+        if (searchConfiguration == null) {
+            return;
+        }
+
+        DeviceSettingsIndexer.INSTANCE.index(requireContext(), searchConfiguration, modelSpec.getItems(), prefs);
+
+        for (final int screen : deviceSpecificSettings.getAllScreens()) {
+            if (DeviceSpecificSettingsScreen.fromXml(screen) != null) {
+                // Title-only root placeholder, e.g. devicesettings_root_connection.xml - nothing
+                // to search for in it.
+                continue;
+            }
+            final String rootScreenKey = deviceSpecificSettings.getRootScreenForSubScreen(screen);
+            final DeviceSpecificSettingsScreen rootScreen = rootScreenKey != null
+                    ? DeviceSpecificSettingsScreen.fromKey(rootScreenKey) : null;
+            index(screen, rootScreen != null ? rootScreen.getTitle() : 0);
         }
     }
 
@@ -952,59 +985,6 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         addPreferenceHandlerFor(SHORTCUT_CARDS_SORTABLE);
 
         addPreferenceHandlerFor(PREF_WATCHFACE);
-
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_AMBIENT_SOUND_CONTROL);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_NOISE_CANCELLING_STRENGTH);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_TRANSPARENCY_STRENGTH);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_ADAPTIVE_NOISE_CANCELLING);
-//        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_PERSONALIZED_NOISE_CANCELLING);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_SINGLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_SINGLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_DOUBLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_DOUBLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_TRIPLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_TRIPLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_LONG_TAP_MODE_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_LONG_TAP_MODE_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_LONG_TAP_SETTINGS_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_CONTROL_LONG_TAP_SETTINGS_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_WEARING_DETECTION);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_AUTO_REPLY_PHONECALL);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_DOUBLE_CONNECTION);
-//        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_SURROUND_SOUND);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_ADAPTIVE_SOUND);
-//        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_SURROUND_SOUND_MODE);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_PRESET);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_62);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_125);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_250);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_500);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_1k);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_2k);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_4k);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_8k);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_12k);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_16k);
-
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_CONTROL_SINGLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_CONTROL_SINGLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_CONTROL_DOUBLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_CONTROL_DOUBLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_CONTROL_TRIPLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_CONTROL_TRIPLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_CONTROL_LONG_TAP_MODE_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_CONTROL_LONG_TAP_MODE_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_6_ACTIVE_EQUALIZER_PRESET);
-
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_SINGLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_SINGLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_DOUBLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_DOUBLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_TRIPLE_TAP_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_TRIPLE_TAP_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_LONG_TAP_MODE_LEFT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_LONG_TAP_MODE_RIGHT);
-        addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_EQUALIZER_PRESET);
 
         addPreferenceHandlerFor(PREF_SONY_AMBIENT_SOUND_CONTROL_BUTTON_MODE);
         addPreferenceHandlerFor(PREF_SONY_AMBIENT_SOUND_LEVEL);
@@ -1741,7 +1721,14 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         }
     }
 
-    static DeviceSpecificSettingsFragment newInstance(GBDevice device, DeviceSettingsActivity.MENU_ENTRY_POINTS applicationSpecificSettings) {
+    /**
+     * Builds the set of root/sub XML preference screens for a device: the generic screens
+     * (authentication, connection, battery, activity info, developer, experimental) that are
+     * unconditionally added alongside the coordinator's own settings, plus - for coordinators
+     * not yet migrated to {@link DeviceCoordinator#getDeviceSettings} - the legacy
+     * {@link DeviceCoordinator#getDeviceSpecificSettings} screens.
+     */
+    static DeviceSpecificSettings buildDeviceSpecificSettings(GBDevice device, DeviceSettingsActivity.MENU_ENTRY_POINTS applicationSpecificSettings) {
         final DeviceCoordinator coordinator = device.getDeviceCoordinator();
 
         final DeviceSpecificSettings deviceSpecificSettings = new DeviceSpecificSettings();
@@ -1871,6 +1858,13 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                 }
             }
         }
+
+        return deviceSpecificSettings;
+    }
+
+    static DeviceSpecificSettingsFragment newInstance(GBDevice device, DeviceSettingsActivity.MENU_ENTRY_POINTS applicationSpecificSettings) {
+        final DeviceCoordinator coordinator = device.getDeviceCoordinator();
+        final DeviceSpecificSettings deviceSpecificSettings = buildDeviceSpecificSettings(device, applicationSpecificSettings);
 
         final DeviceSpecificSettingsCustomizer deviceSpecificSettingsCustomizer = coordinator.getDeviceSpecificSettingsCustomizer(device);
         final String settingsFileSuffix = device.getAddress();

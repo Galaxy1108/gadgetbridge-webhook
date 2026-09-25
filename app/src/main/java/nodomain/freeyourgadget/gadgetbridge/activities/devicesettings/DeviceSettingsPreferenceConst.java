@@ -465,60 +465,35 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_GALAXY_BUDS_TOUCH_RIGHT_SWITCH_ADAPTIVE="pref_galaxy_buds_touch_right_switch_adaptive";
     public static final String PREF_GALAXY_BUDS_TOUCH_RIGHT_SWITCH_OFF="pref_galaxy_buds_touch_right_switch_off";
 
-    public static final String PREF_REDMI_BUDS_5_PRO_AMBIENT_SOUND_CONTROL="pref_redmi_buds_5_pro_ambient_sound_control";
-    public static final String PREF_REDMI_BUDS_5_PRO_NOISE_CANCELLING_STRENGTH="pref_redmi_buds_5_pro_noise_cancelling_strength";
-    public static final String PREF_REDMI_BUDS_5_PRO_TRANSPARENCY_STRENGTH="pref_redmi_buds_5_pro_transparency_strength";
-    public static final String PREF_REDMI_BUDS_5_PRO_ADAPTIVE_NOISE_CANCELLING="pref_redmi_buds_5_pro_adaptive_noise_cancelling";
-//    public static final String PREF_REDMI_BUDS_5_PRO_PERSONALIZED_NOISE_CANCELLING="pref_redmi_buds_5_pro_personalized_noise_cancelling";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_SINGLE_TAP_LEFT="pref_redmi_buds_5_pro_control_single_tap_left";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_SINGLE_TAP_RIGHT="pref_redmi_buds_5_pro_control_single_tap_right";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_DOUBLE_TAP_LEFT="pref_redmi_buds_5_pro_control_double_tap_left";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_DOUBLE_TAP_RIGHT="pref_redmi_buds_5_pro_control_double_tap_right";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_TRIPLE_TAP_LEFT="pref_redmi_buds_5_pro_control_triple_tap_left";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_TRIPLE_TAP_RIGHT="pref_redmi_buds_5_pro_control_triple_tap_right";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_LONG_TAP_MODE_LEFT ="pref_redmi_buds_5_pro_control_long_tap_mode_left";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_LONG_TAP_MODE_RIGHT ="pref_redmi_buds_5_pro_control_long_tap_mode_right";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_LONG_TAP_SETTINGS_LEFT ="pref_redmi_buds_5_pro_control_long_tap_settings_left";
-    public static final String PREF_REDMI_BUDS_5_PRO_CONTROL_LONG_TAP_SETTINGS_RIGHT ="pref_redmi_buds_5_pro_control_long_tap_settings_right";
-    public static final String PREF_REDMI_BUDS_5_PRO_WEARING_DETECTION="pref_redmi_buds_5_pro_wearing_detection";
-    public static final String PREF_REDMI_BUDS_5_PRO_AUTO_REPLY_PHONECALL="pref_redmi_buds_5_pro_auto_reply_phonecall";
-    public static final String PREF_REDMI_BUDS_5_PRO_DOUBLE_CONNECTION="pref_redmi_buds_5_pro_double_connection";
-//    public static final String PREF_REDMI_BUDS_5_PRO_SURROUND_SOUND="pref_redmi_buds_5_pro_surround_sound";
-//    public static final String PREF_REDMI_BUDS_5_PRO_SURROUND_SOUND_MODE="pref_redmi_buds_5_pro_surround_sound_mode";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_PRESET="pref_redmi_buds_5_pro_equalizer_preset";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_62="pref_redmi_buds_5_pro_equalizer_band_62";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_125="pref_redmi_buds_5_pro_equalizer_band_125";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_250="pref_redmi_buds_5_pro_equalizer_band_250";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_500="pref_redmi_buds_5_pro_equalizer_band_500";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_1k="pref_redmi_buds_5_pro_equalizer_band_1k";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_2k="pref_redmi_buds_5_pro_equalizer_band_2k";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_4k="pref_redmi_buds_5_pro_equalizer_band_4k";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_8k="pref_redmi_buds_5_pro_equalizer_band_8k";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_12k="pref_redmi_buds_5_pro_equalizer_band_12k";
-    public static final String PREF_REDMI_BUDS_5_PRO_EQUALIZER_BAND_16k="pref_redmi_buds_5_pro_equalizer_band_16k";
-    public static final String PREF_REDMI_BUDS_5_PRO_ADAPTIVE_SOUND="pref_redmi_buds_5_pro_adaptive_sound";
-
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_CONTROL_SINGLE_TAP_LEFT="pref_redmi_buds_6_active_control_single_tap_left";
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_CONTROL_SINGLE_TAP_RIGHT="pref_redmi_buds_6_active_control_single_tap_right";
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_CONTROL_DOUBLE_TAP_LEFT="pref_redmi_buds_6_active_control_double_tap_left";
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_CONTROL_DOUBLE_TAP_RIGHT="pref_redmi_buds_6_active_control_double_tap_right";
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_CONTROL_TRIPLE_TAP_LEFT="pref_redmi_buds_6_active_control_triple_tap_left";
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_CONTROL_TRIPLE_TAP_RIGHT="pref_redmi_buds_6_active_control_triple_tap_right";
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_CONTROL_LONG_TAP_MODE_LEFT="pref_redmi_buds_6_active_control_long_tap_mode_left";
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_CONTROL_LONG_TAP_MODE_RIGHT="pref_redmi_buds_6_active_control_long_tap_mode_right";
-    public static final String PREF_REDMI_BUDS_6_ACTIVE_EQUALIZER_PRESET="pref_redmi_buds_6_active_equalizer_preset";
-
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_SINGLE_TAP_LEFT="pref_redmi_buds_8_active_control_single_tap_left";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_SINGLE_TAP_RIGHT="pref_redmi_buds_8_active_control_single_tap_right";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_DOUBLE_TAP_LEFT="pref_redmi_buds_8_active_control_double_tap_left";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_DOUBLE_TAP_RIGHT="pref_redmi_buds_8_active_control_double_tap_right";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_TRIPLE_TAP_LEFT="pref_redmi_buds_8_active_control_triple_tap_left";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_TRIPLE_TAP_RIGHT="pref_redmi_buds_8_active_control_triple_tap_right";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_LONG_TAP_MODE_LEFT="pref_redmi_buds_8_active_control_long_tap_mode_left";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_LONG_TAP_MODE_RIGHT="pref_redmi_buds_8_active_control_long_tap_mode_right";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_LONG_TAP_SETTINGS_LEFT ="pref_redmi_buds_8_active_control_long_tap_settings_left";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_CONTROL_LONG_TAP_SETTINGS_RIGHT ="pref_redmi_buds_8_active_control_long_tap_settings_right";
-    public static final String PREF_REDMI_BUDS_8_ACTIVE_EQUALIZER_PRESET="pref_redmi_buds_8_active_equalizer_preset";
+    public static final String PREF_REDMI_BUDS_AMBIENT_SOUND_CONTROL = "pref_redmi_buds_ambient_sound_control";
+    public static final String PREF_REDMI_BUDS_NOISE_CANCELLING_STRENGTH = "pref_redmi_buds_noise_cancelling_strength";
+    public static final String PREF_REDMI_BUDS_TRANSPARENCY_STRENGTH = "pref_redmi_buds_transparency_strength";
+    public static final String PREF_REDMI_BUDS_ADAPTIVE_NOISE_CANCELLING = "pref_redmi_buds_adaptive_noise_cancelling";
+    public static final String PREF_REDMI_BUDS_CONTROL_SINGLE_TAP_LEFT = "pref_redmi_buds_control_single_tap_left";
+    public static final String PREF_REDMI_BUDS_CONTROL_SINGLE_TAP_RIGHT = "pref_redmi_buds_control_single_tap_right";
+    public static final String PREF_REDMI_BUDS_CONTROL_DOUBLE_TAP_LEFT = "pref_redmi_buds_control_double_tap_left";
+    public static final String PREF_REDMI_BUDS_CONTROL_DOUBLE_TAP_RIGHT = "pref_redmi_buds_control_double_tap_right";
+    public static final String PREF_REDMI_BUDS_CONTROL_TRIPLE_TAP_LEFT = "pref_redmi_buds_control_triple_tap_left";
+    public static final String PREF_REDMI_BUDS_CONTROL_TRIPLE_TAP_RIGHT = "pref_redmi_buds_control_triple_tap_right";
+    public static final String PREF_REDMI_BUDS_CONTROL_LONG_TAP_MODE_LEFT = "pref_redmi_buds_control_long_tap_mode_left";
+    public static final String PREF_REDMI_BUDS_CONTROL_LONG_TAP_MODE_RIGHT = "pref_redmi_buds_control_long_tap_mode_right";
+    public static final String PREF_REDMI_BUDS_CONTROL_LONG_TAP_SETTINGS_LEFT = "pref_redmi_buds_control_long_tap_settings_left";
+    public static final String PREF_REDMI_BUDS_CONTROL_LONG_TAP_SETTINGS_RIGHT = "pref_redmi_buds_control_long_tap_settings_right";
+    public static final String PREF_REDMI_BUDS_WEARING_DETECTION = "pref_redmi_buds_wearing_detection";
+    public static final String PREF_REDMI_BUDS_AUTO_REPLY_PHONECALL = "pref_redmi_buds_auto_reply_phonecall";
+    public static final String PREF_REDMI_BUDS_DOUBLE_CONNECTION = "pref_redmi_buds_double_connection";
+    public static final String PREF_REDMI_BUDS_ADAPTIVE_SOUND = "pref_redmi_buds_adaptive_sound";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_PRESET = "pref_redmi_buds_equalizer_preset";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_62 = "pref_redmi_buds_equalizer_band_62";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_125 = "pref_redmi_buds_equalizer_band_125";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_250 = "pref_redmi_buds_equalizer_band_250";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_500 = "pref_redmi_buds_equalizer_band_500";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_1K = "pref_redmi_buds_equalizer_band_1k";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_2K = "pref_redmi_buds_equalizer_band_2k";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_4K = "pref_redmi_buds_equalizer_band_4k";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_8K = "pref_redmi_buds_equalizer_band_8k";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_12K = "pref_redmi_buds_equalizer_band_12k";
+    public static final String PREF_REDMI_BUDS_EQUALIZER_BAND_16K = "pref_redmi_buds_equalizer_band_16k";
 
     public static final String PREF_SONY_AUDIO_CODEC = "pref_sony_audio_codec";
     public static final String PREF_SONY_PROTOCOL_VERSION = "pref_protocol_version";
@@ -583,6 +558,11 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_HAYLOU_S35_ANC_LDAC_MODE = "pref_haylou_s35_anc_ldac_mode";
     public static final String PREF_HAYLOU_S35_ANC_MULTIPOINT = "pref_haylou_s35_anc_multipoint";
     public static final String PREF_HAYLOU_S35_ANC_EQ_PRESET = "pref_haylou_s35_anc_eq_preset";
+
+    public static final String PREF_SENNHEISER_MOMENTUM_LED = "pref_sennheiser_momentum_led";
+    public static final String PREF_SENNHEISER_MOMENTUM_VOICE_PROMPTS = "pref_sennheiser_momentum_voice_prompts";
+    public static final String PREF_SENNHEISER_MOMENTUM_VOICE_ANSWER = "pref_sennheiser_momentum_voice_answer";
+    public static final String PREF_SENNHEISER_MOMENTUM_SWAP_VOLUME_BUTTONS = "pref_sennheiser_momentum_swap_volume_buttons";
 
     public static final String PREF_SONY_AMBIENT_SOUND_CONTROL_BUTTON_MODE = "pref_sony_ambient_sound_control_button_mode";
     public static final String PREF_SONY_FOCUS_VOICE = "pref_sony_focus_voice";
@@ -843,6 +823,18 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_XIAOMI_SCOOTER_TIRE_PRESSURE_INTERVAL_DAYS = "xiaomi_scooter_tire_pressure_interval_days";
     public static final String PREF_XIAOMI_SCOOTER_TIRE_PRESSURE_REMAINING_DAYS = "xiaomi_scooter_tire_pressure_remaining_days";
     public static final String PREF_XIAOMI_SCOOTER_TIRE_PRESSURE_RESET = "xiaomi_scooter_tire_pressure_reset";
+
+    public static final String PREF_XIAOMI_HIPEE_P1_SET_STANDARD_POSTURE = "xiaomi_hipee_p1_set_standard_posture";
+    public static final String PREF_XIAOMI_HIPEE_P1_CANCEL_STANDARD_POSTURE = "xiaomi_hipee_p1_cancel_standard_posture";
+    public static final String PREF_XIAOMI_HIPEE_P1_STANDARD_POSTURE_STATUS = "xiaomi_hipee_p1_standard_posture_status";
+    public static final String PREF_XIAOMI_HIPEE_P1_VIEW_LIVE_POSTURE = "xiaomi_hipee_p1_view_live_posture";
+    public static final String PREF_XIAOMI_HIPEE_P1_LONG_VIBRATION = "xiaomi_hipee_p1_long_vibration";
+    public static final String PREF_XIAOMI_HIPEE_P1_REMINDER_ANGLE = "xiaomi_hipee_p1_reminder_angle";
+    public static final String PREF_XIAOMI_HIPEE_P1_EXERCISE_REMINDER_ANGLE = "xiaomi_hipee_p1_exercise_reminder_angle";
+    public static final String PREF_XIAOMI_HIPEE_P1_SEDENTARY_REMINDER = "xiaomi_hipee_p1_sedentary_reminder";
+    public static final String PREF_XIAOMI_HIPEE_P1_DELAY_REMINDER = "xiaomi_hipee_p1_delay_reminder";
+    public static final String PREF_XIAOMI_HIPEE_P1_DOUBLE_REMINDER = "xiaomi_hipee_p1_double_reminder";
+    public static final String PREF_XIAOMI_HIPEE_P1_DOUBLE_REMINDER_INTERVAL = "xiaomi_hipee_p1_double_reminder_interval";
 
     // Roidmi F8 Cordless Vacuum Cleaner
     public static final String PREF_ROIDMI_F8_BATTERY_TEMPERATURE = "pref_roidmi_f8_battery_temperature";

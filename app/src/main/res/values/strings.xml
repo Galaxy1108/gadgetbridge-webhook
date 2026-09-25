@@ -973,6 +973,9 @@
     <string name="alarm_smart_wakeup_interval">Smart wakeup interval:</string>
     <string name="alarm_smart_wakeup_interval_default">5 minutes</string>
     <string name="alarm_snooze">Snooze</string>
+    <string name="alarm_add">Add alarm</string>
+    <string name="alarm_max_slots_reached">Maximum number of alarms reached</string>
+    <string name="alarm_show_unused">Show unused alarms</string>
     <string name="user_feedback_miband_set_alarms_failed">There was an error setting the alarms, please try again.</string>
     <string name="user_feedback_miband_set_alarms_ok">Alarms sent to device.</string>
     <string name="user_feedback_set_settings_ok">Settings sent to device.</string>
@@ -1891,6 +1894,7 @@
     <string name="activity_summaries">Sport Activities</string>
     <string name="activity_summary_detail">Sport Activity Detail</string>
     <string name="activity_summary_edit_name_title">Edit label</string>
+    <string name="activity_summary_edit_type_title">Edit type</string>
     <string name="activity_summary_detail_select_gpx_track">Select GPX track</string>
     <string name="activity_summary_detail_clear_gpx_track">Clear GPX track</string>
     <string name="activity_summary_detail_editing_gpx_track">Editing linked GPX track</string>
@@ -2260,6 +2264,8 @@
     <string name="devicetype_mismartscale" translatable="false">Mi Smart Scale 2</string>
     <string name="devicetype_micompositionscale" translatable="false">Mi Body Composition Scale 2</string>
     <string name="devicetype_qnscale" translatable="false">QN-Scale (Chipsea CS20)</string>
+    <string name="devicetype_xiaomi_hipee_p1" translatable="false">Xiaomi Hipee Smart Posture Corrector P1</string>
+    <string name="devicetype_onebyone_scale" translatable="false">1byone Health Scale</string>
     <string name="devicetype_itag" translatable="false">iTag</string>
     <string name="devicetype_idasen" translatable="false">IKEA Idasen Desk</string>
     <string name="devicetype_bfh16" translatable="false">BFH-16</string>
@@ -2305,6 +2311,7 @@
     <string name="devicetype_sony_wi_sp600n" translatable="false">Sony WI-SP600N</string>
     <string name="devicetype_sony_linkbuds" translatable="false">Sony LinkBuds</string>
     <string name="devicetype_sony_linkbuds_s" translatable="false">Sony LinkBuds S</string>
+    <string name="devicetype_sony_reon_pocket_pro" translatable="false">Sony Reon Pocket Pro</string>
     <string name="devicetype_soundbrenner_core" translatable="false">Soundbrenner Core</string>
     <string name="devicetype_soundcore_liberty3_pro" translatable="false">Soundcore Liberty 3 Pro</string>
     <string name="devicetype_soundcore_liberty4_nc" translatable="false">Soundcore Liberty 4 NC</string>
@@ -2315,6 +2322,7 @@
     <string name="devicetype_soundcore_aerofit2" translatable="false">Soundcore AeroFit 2</string>
     <string name="devicetype_soundcore_sport_x20" translatable="false">Soundcore Sport X20</string>
     <string name="devicetype_haylou_s35_anc" translatable="false">Haylou S35 ANC</string>
+    <string name="devicetype_sennheiser_momentum_in_ear_wireless" translatable="false">Sennheiser MOMENTUM In-Ear Wireless</string>
     <string name="devicetype_pixel_buds_a_series" translatable="false">Pixel Buds A-Series</string>
     <string name="devicetype_moondrop_space_travel" translatable="false">Moondrop Space Travel</string>
     <string name="devicetype_moondrop_space_travel_2" translatable="false">Moondrop Space Travel 2</string>
@@ -2386,6 +2394,7 @@
     <string name="devicetype_redmi_buds_5_pro" translatable="false">Redmi Buds 5 Pro</string>
     <string name="devicetype_redmi_buds_6_active" translatable="false">Redmi Buds 6 Active</string>
     <string name="devicetype_redmi_buds_6" translatable="false">Redmi Buds 6</string>
+    <string name="devicetype_redmi_buds_6_lite" translatable="false">Redmi Buds 6 Lite</string>
     <string name="devicetype_redmi_buds_6_pro" translatable="false">Redmi Buds 6 Pro</string>
     <string name="devicetype_redmi_buds_8_active" translatable="false">Redmi Buds 8 Active</string>
     <string name="devicetype_redmi_smart_band_2" translatable="false">Redmi Smart Band 2</string>
@@ -2422,6 +2431,7 @@
     <string name="devicetype_itech_active_3" translatable="false">iTECH Active 3</string>
     <string name="devicetype_zl02d" translatable="false">ZL02D</string>
     <string name="devicetype_colmi_p80" translatable="false">Colmi P80</string>
+    <string name="devicetype_colmi_p81" translatable="false">Colmi P81</string>
     <string name="devicetype_blackview_r60" translatable="false">Blackview R60</string>
     <string name="devicetype_misirun_c17" translatable="false">Misirun C17</string>
     <string name="devicetype_c20" translatable="false">C20</string>
@@ -2486,6 +2496,7 @@
     <string name="devicetype_coospo_h9z" translatable="false">Coospo H9Z</string>
     <string name="devicetype_solarflow">SolarFlow</string>
     <string name="devicetype_braun_bpw4500" translatable="false">Braun iCheck 7 BPW4500</string>
+    <string name="devicetype_ls2_4x">LS2-4X</string>
     <!-- Menus on the smart device -->
     <string name="menuitem_nothing">Nothing</string>
     <string name="menuitem_status">Status</string>
@@ -3204,6 +3215,8 @@
     <!-- activity summary groups-->
     <string name="Strokes">Strokes</string>
     <string name="swimming_stroke">Stroke</string>
+    <string name="workout_step">Step</string>
+    <string name="workout_time_in_zones">Time in zones</string>
     <string name="Jumps">Jumps</string>
     <string name="Swimming">Swimming</string>
     <string name="Distance">Distance</string>
@@ -3276,8 +3289,10 @@
     <string name="swim_style_butterfly">Butterfly</string>
     <string name="swim_style_drill">Drill</string>
     <string name="swim_style_mixed">Mixed</string>
+    <string name="exercise_category_banded_exercises">Banded exercises</string>
     <string name="exercise_category_bench_press">Bench press</string>
     <string name="exercise_category_calf_raise">Calf raise</string>
+    <string name="exercise_category_cardio_sensors">Cardio sensors</string>
     <string name="exercise_category_carry">Carry</string>
     <string name="exercise_category_chop">Chop</string>
     <string name="exercise_category_core">Core</string>
@@ -3287,16 +3302,25 @@
     <string name="exercise_category_hip_stability">Hip stability</string>
     <string name="exercise_category_hip_swing">Hip swing</string>
     <string name="exercise_category_hyperextension">Hyperextension</string>
+    <string name="exercise_category_indoor_row">Indoor row</string>
+    <string name="exercise_category_ladder">Ladder</string>
     <string name="exercise_category_lateral_raise">Lateral raise</string>
     <string name="exercise_category_leg_curl">Leg curl</string>
     <string name="exercise_category_leg_raise">Leg raise</string>
     <string name="exercise_category_lunge">Lunge</string>
+    <string name="exercise_category_move">Move</string>
     <string name="exercise_category_olympic_lift">Olympic lift</string>
     <string name="exercise_category_plyo">Plyo</string>
+    <string name="exercise_category_pose">Pose</string>
+    <string name="exercise_category_sandbag">Sandbag</string>
     <string name="exercise_category_shoulder_press">Shoulder press</string>
     <string name="exercise_category_shoulder_stability">Shoulder stability</string>
     <string name="exercise_category_shrug">Shrug</string>
+    <string name="exercise_category_sled">Sled</string>
+    <string name="exercise_category_sledge_hammer">Sledgehammer</string>
     <string name="exercise_category_squat">Squat</string>
+    <string name="exercise_category_suspension">Suspension</string>
+    <string name="exercise_category_tire">Tire</string>
     <string name="exercise_category_total_body">Total body</string>
     <string name="exercise_category_triceps_extension">Triceps extension</string>
 
@@ -3647,11 +3671,12 @@
     <string name="body_composition_bone_mass">Bone</string>
     <string name="body_composition_bmr">BMR</string>
     <string name="body_composition_impedance">Impedance</string>
+    <string name="body_composition_bmi_value">%1$.1f</string>
     <string name="body_composition_percent">%1$.1f %%</string>
     <string name="body_composition_kcal">%1$d kcal</string>
     <string name="body_composition_ohm">%1$d Ω</string>
     <string name="pref_title_chart_weight_body_composition">Body composition values</string>
-    <string name="pref_summary_chart_weight_body_composition">Values shown below the weight chart, when the scale provides them</string>
+    <string name="pref_summary_chart_weight_body_composition">Values shown below the weight chart. BMI only needs the weight and your height; the others need a scale that reports impedance</string>
     <string name="redmi_buds_5_pro_anc_balanced">Balanced</string>
     <string name="redmi_buds_5_pro_anc_light">Light</string>
     <string name="redmi_buds_5_pro_anc_deep">Deep</string>
@@ -3746,6 +3771,37 @@
     <string name="sony_equalizer_preset_manual">Manual</string>
     <string name="sony_equalizer_preset_custom_1">Custom 1</string>
     <string name="sony_equalizer_preset_custom_2">Custom 2</string>
+    <string name="sony_reon_pocket_toggle_auto_cooling">Toggle auto-cooling mode</string>
+    <string name="sony_reon_pocket_toggle_heat_cold">Toggle heat/cold mode</string>
+    <string name="sony_reon_pocket_mode_heat">Heat</string>
+    <string name="sony_reon_pocket_mode_cold">Cold</string>
+    <string name="sony_reon_pocket_mode_auto">Auto</string>
+    <string name="sony_reon_pocket_auto_start_stop_title">Auto Start/Stop</string>
+    <string name="sony_reon_pocket_auto_start_stop_summary">Automatically start and stop cooling when the device is worn</string>
+    <string name="sony_reon_pocket_intensity_title">Intensity</string>
+    <string name="sony_reon_pocket_intensity_summary">Cooling/heating intensity in smart mode</string>
+    <string name="sony_reon_pocket_manual_power_title">Manual power</string>
+    <string name="sony_reon_pocket_manual_power_summary">Manual cooling/heating power (0 = stop)</string>
+    <string name="sony_reon_pocket_cycle_power">Power level</string>
+    <string name="sony_reon_pocket_pairing_required">Put device in pairing mode (hold SMART button for 15 seconds) and reconnect.</string>
+    <string name="sony_reon_pocket_tag_title">Reon Tag</string>
+    <string name="sony_reon_pocket_tag_address_title">Tag address</string>
+    <string name="sony_reon_pocket_tag_serial_title">Tag serial</string>
+    <string name="sony_reon_pocket_tag_address_summary">No tag registered</string>
+    <string name="sony_reon_pocket_tag_register_title">Register tag</string>
+    <string name="sony_reon_pocket_tag_register_summary">Scan for a nearby Reon Tag (RNPT-1) and register it</string>
+    <string name="sony_reon_pocket_tag_scanning">Scanning for Reon Tag…</string>
+    <string name="sony_reon_pocket_tag_scan_failed">Tag scan failed</string>
+    <string name="sony_reon_pocket_tag_not_found">No Reon Tag found nearby</string>
+    <string name="sony_reon_pocket_tag_registered">Reon Tag registered: %1$s</string>
+    <string name="sony_reon_pocket_tag_unregister_title">Unregister tag</string>
+    <string name="sony_reon_pocket_tag_unregister_summary">Remove the currently registered tag</string>
+    <string name="sony_reon_pocket_tag_unregister_confirmation">Unregister the Reon Tag?</string>
+    <string name="sony_reon_pocket_panel_temperature_title">Surface temperature</string>
+    <string name="sony_reon_pocket_heat_dissipation_title">Exhaust temperature</string>
+    <string name="sony_reon_pocket_tag_temperature_title">Tag temperature</string>
+    <string name="sony_reon_pocket_tag_humidity_title">Tag humidity</string>
+    <string name="sony_reon_pocket_tag_battery_title">Tag battery</string>
     <string name="pref_header_sony_equalizer_bands">Bands</string>
     <string name="pref_header_sony_equalizer_preset_custom_1">Custom Preset 1</string>
     <string name="pref_header_sony_equalizer_preset_custom_2">Custom Preset 2</string>
@@ -3973,6 +4029,7 @@
     <string name="devicetype_jabra_evolve2_55" translatable="false">Jabra Evolve2 55</string>
     <string name="devicetype_jabra_evolve2_65" translatable="false">Jabra Evolve2 65</string>
     <string name="devicetype_onemore_sonoflow" translatable="false">1MORE SonoFlow</string>
+    <string name="devicetype_onemore_sonoflow_se" translatable="false">1MORE SonoFlow SE</string>
     <string name="devicetype_sony_wena3" translatable="false">Sony Wena 3</string>
     <string name="devicetype_withings_steel_hr" translatable="false">Withings Steel HR</string>
     <string name="pref_button_action_disabled">Disabled</string>
@@ -4191,6 +4248,30 @@
     <string name="xiaomi_scooter_tire_pressure_reset_title">Reset reminder</string>
     <string name="xiaomi_scooter_tire_pressure_reset_summary">Click this button to restart the tire pressure maintenance timer.</string>
     <string name="xiaomi_scooter_tire_pressure_reset_confirmation">Reset the tire pressure maintenance reminder?</string>
+    <string name="mi_hipee_p1_history">Raw posture history</string>
+    <string name="mi_hipee_p1_position">Position</string>
+    <string name="mi_hipee_p1_history_forward">Forward (humpback)</string>
+    <string name="mi_hipee_p1_history_leftward">Leftward</string>
+    <string name="mi_hipee_p1_history_rightward">Rightward</string>
+    <string name="mi_hipee_p1_history_hour_details">Forward: %1$d, leftward: %2$d, rightward: %3$d</string>
+    <string name="mi_hipee_p1_history_total_corrections">Total corrections</string>
+    <string name="mi_hipee_p1_history_marker_forward">Forward (humpback): %1$d</string>
+    <string name="mi_hipee_p1_history_marker_leftward">Leftward: %1$d</string>
+    <string name="mi_hipee_p1_history_marker_rightward">Rightward: %1$d</string>
+    <string name="mi_hipee_p1_history_marker_no_corrections">No corrections</string>
+    <string name="mi_hipee_p1_set_standard_posture">Set standard posture</string>
+    <string name="mi_hipee_p1_view_live_posture">View live posture</string>
+    <string name="mi_hipee_p1_reminder_angle">Reminder angle</string>
+    <string name="mi_hipee_p1_long_vibration">Long vibration</string>
+    <string name="mi_hipee_p1_exercise_reminder_angle">Exercise reminder angle</string>
+    <string name="mi_hipee_p1_sedentary_reminder">Sedentary reminder</string>
+    <string name="mi_hipee_p1_delay_reminder">Delay reminder</string>
+    <string name="mi_hipee_p1_double_reminder">Double reminder</string>
+    <string name="mi_hipee_p1_double_reminder_interval">Double reminder interval</string>
+    <string name="mi_hipee_p1_pairing_confirmation">Press the device button to confirm pairing</string>
+    <string name="mi_hipee_p1_set_standard_posture_instruction">Set in correct posture and remain still</string>
+    <string name="mi_hipee_p1_standard_posture_set">Standard posture set</string>
+    <string name="mi_hipee_p1_standard_posture_rejected">Standard posture rejected (code 0x%1$02x)</string>
     <string name="pref_roidmi_f8_battery_temperature_title">Battery temperature</string>
     <string name="pref_roidmi_f8_standard_gear_title">Standard gear</string>
     <string name="pref_roidmi_f8_standard_gear_summary">Default power when starting to clean</string>
@@ -4569,6 +4650,7 @@
     <string name="pref_auto_reply_calls_title">Automatically answer phone calls</string>
     <string name="pref_auto_reply_calls_delay_summary">Number of seconds after which the call is automatically picked up</string>
     <string name="pref_auto_reply_calls_delay_title">Automatic Answer Delay</string>
+    <string name="devicetype_wearfit_hk_generic">Wearfit HK (Generic)</string>
     <string name="pref_speak_notifications_aloud_summary">Notifications will be read aloud through the headphones</string>
     <string name="pref_speak_notifications_aloud_title">Speak Notifications Aloud</string>
     <string name="pref_speak_notifications_focus_exclusive_title">Pause audio of other applications</string>
@@ -4632,6 +4714,7 @@
     <string name="battery_polling_failed_start">Failed to start the battery polling</string>
 
     <string name="none">None</string>
+    <string name="no_delay">No delay</string>
     <string name="garmin_agps_url_i">AGPS %1$d URL</string>
     <string name="no_folder_selected">No folder selected</string>
     <string name="folder_is_empty">Folder is empty</string>
@@ -4943,6 +5026,8 @@
     <string name="map">Map</string>
     <string name="workout_charts">Workout Charts</string>
     <string name="charts">Charts</string>
+    <string name="workout_tab_overview">Overview</string>
+    <string name="workout_tab_details">Details</string>
     <string name="maps_settings">Maps settings</string>
     <string name="maps_download_title">Download Maps</string>
     <string name="maps_download_summary">Click here to download map files. They should be saved to the folder selected in the preference below.</string>
@@ -5461,6 +5546,29 @@
     <string name="activity_detail_upload_to_wanderer">Upload GPX to Wanderer</string>
     <string name="select_at_least_option">Please select at least %1$d option</string>
 
+    <!-- Auto-upload to online fitness trackers -->
+    <string name="pref_endurain_auto_upload_title">Auto-upload to Endurain</string>
+    <string name="pref_endurain_auto_upload_summary">Automatically upload newly synced workouts to Endurain</string>
+    <string name="pref_wanderer_auto_upload_title">Auto-upload to Wanderer</string>
+    <string name="pref_wanderer_auto_upload_summary">Automatically upload newly synced workouts with a GPS track to Wanderer</string>
+    <string name="auto_upload_failed_notification_title">Workout upload failed</string>
+    <string name="auto_upload_timed_out">Upload timed out</string>
+    <string name="auto_upload_failed_endurain">Endurain upload failed: %1$s</string>
+    <string name="auto_upload_failed_wanderer">Wanderer upload failed: %1$s</string>
+    <string name="auto_upload_endurain_remote_edited">The workout changed, but the activity on Endurain was edited there and was left untouched</string>
+    <string name="workout_upload_status_title">Upload status</string>
+    <string name="workout_upload_status_uploaded">Uploaded</string>
+    <string name="workout_upload_status_partial">Partly uploaded</string>
+    <string name="workout_upload_status_pending">Waiting for upload</string>
+    <string name="workout_upload_status_failed">Upload failed</string>
+    <string name="workout_upload_status_not_uploaded">Not uploaded</string>
+    <string name="workout_upload_status_no_track">Not uploaded, the workout has no GPS track</string>
+    <string name="workout_upload_status_disabled">Auto-upload off</string>
+    <string name="workout_upload_status_remote_id">Activity %1$s</string>
+    <string name="workout_upload_status_open">View activity</string>
+    <string name="pref_endurain_replace_on_track_change_title">Replace workouts when the track changes</string>
+    <string name="pref_endurain_replace_on_track_change_summary">Changing the track of an uploaded workout means deleting the activity and uploading it again, so it gets a new address. Activities you edited on Endurain are left untouched.</string>
+
     <!-- Workout summary section headers -->
     <string name="goals">Goals</string>
     <string name="predictions">Predictions</string>
@@ -5624,4 +5732,32 @@
     <string name="gpx_include_navigation_straight">Include \'Continue straight\' instructions</string>
     <string name="gpx_roundabout_exit">Exit %1$d</string>
     <string name="pref_title_connect_to_this_device_when_another_device_connects">Connect to this device when another device connects</string>
+
+    <!-- Strings related to Cardo Devices -->
+    <string name="title_activity_cardo_control">Cardo Control</string>
+    <string name="cardo_card_fm_radio">FM Radio</string>
+    <string name="cardo_control_enable_radio">Enable Radio</string>
+    <string name="cardo_control_fm_autotune">Auto tune stations to presets</string>
+    <string name="cardo_control_fm_confirm_autotune">Do you really want to proceed? Previously set stations will be overwritten.</string>
+    <string name="cardo_control_fm_preset_title">Tune Presets</string>
+    <string name="cardo_control_fm_preset_not_set">Empty Preset %1$d</string>
+    <string name="cardo_control_fm_frequency_title">Frequency</string>
+    <string name="cardo_control_fm_frequency_subtitle">%1$.1f MHz</string>
+    <string name="cardo_control_fm_scan_down">Scan DOWN</string>
+    <string name="cardo_control_fm_scan_up">Scan UP</string>
+    <string name="cardo_control_fm_scan_stop">Stop Scanning</string>
+    <string name="cardo_control_fm_seek_down">Seek DOWN</string>
+    <string name="cardo_control_fm_seek_up">Seek UP</string>
+    <string name="cardo_control_volume">Volume</string>
+    <string name="cardo_card_voice_prompts">Voice Prompts</string>
+    <string name="cardo_control_enable_voice_prompts">Enable Voice Prompts</string>
+
+    <string name="sennheiser_momentum_led_title">Status light</string>
+    <string name="sennheiser_momentum_led_summary">Let the light on the neckband show its status</string>
+    <string name="sennheiser_momentum_voice_prompts_title">Voice prompts</string>
+    <string name="sennheiser_momentum_voice_prompts_summary">Announce power, pairing, connection and battery in the earphones</string>
+    <string name="sennheiser_momentum_voice_answer_title">Answer calls by voice</string>
+    <string name="sennheiser_momentum_voice_answer_summary">Accept or reject an incoming call by saying yes or no</string>
+    <string name="sennheiser_momentum_swap_volume_buttons_title">Swap volume buttons</string>
+    <string name="sennheiser_momentum_swap_volume_buttons_summary">Reverse the direction of the volume + and - buttons</string>
 </resources>
