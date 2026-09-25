@@ -5141,4 +5141,5 @@
     <string name="mi_hipee_p1_standard_posture_rejected">标准姿态被拒绝（代码 0x%1$02x）</string>
     <string name="no_delay">无延迟</string>
     <string name="mi_hipee_p1_standard_posture_set">已设置标准姿态</string>
+    <string name="both_earbuds">两个耳机</string>
 </resources>
