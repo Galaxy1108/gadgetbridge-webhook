@@ -352,6 +352,36 @@ class DeviceSettingsScope {
         )
     }
 
+    fun date(
+        key: String,
+        @StringRes title: Int,
+        @StringRes summary: Int = 0,
+        @DrawableRes icon: Int = 0,
+        defaultValue: String = "",
+        minDate: Long = 0L,
+        maxDate: Long = Long.MAX_VALUE,
+        dependency: String? = null,
+        connectedOnly: Boolean = true,
+        visibleWhen: ((Prefs) -> Boolean)? = null,
+        onSharedPreferenceChanged: ((String) -> Unit)? = null,
+    ) {
+        items.add(
+            DateSetting(
+                key = key,
+                title = title,
+                summary = summary,
+                icon = icon,
+                defaultValue = defaultValue,
+                minDate = minDate,
+                maxDate = maxDate,
+                dependency = dependency,
+                connectedOnly = connectedOnly,
+                visibleWhen = visibleWhen,
+                onSharedPreferenceChanged = onSharedPreferenceChanged,
+            )
+        )
+    }
+
     fun externalSettings(
         key: String,
         @StringRes title: Int,

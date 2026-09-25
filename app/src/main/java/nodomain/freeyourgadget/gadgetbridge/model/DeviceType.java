@@ -554,6 +554,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.sony.headphones.coordinators
 import nodomain.freeyourgadget.gadgetbridge.devices.sony.headphones.coordinators.SonyWHULT900NCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sony.headphones.coordinators.SonyWIC100Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sony.headphones.coordinators.SonyWISP600NCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.sony.reonpocket.SonyReonPocketProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sony.wena3.SonyWena3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sonyswr12.SonySWR12DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.soundbrenner.SoundbrennerCoordinator;
@@ -609,6 +610,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS1
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS1ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.XiaomiWatchS4Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi_hipee.XiaomiHipeeP1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi_scooters.XiaomiScooter5MaxCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.zeblaze.Beyond3ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xplora.XploraXmoveDeviceCoordinator;
@@ -1039,6 +1041,7 @@ public enum DeviceType {
     SONY_WF_C700N(SonyWFC700NCoordinator.class),
     SONY_WF_C710N(SonyWFC710NCoordinator.class),
     SONY_WH_CH720N(SonyWHCH720NCoordinator.class),
+    SONY_REON_POCKET_PRO(SonyReonPocketProCoordinator.class),
     PIXEL_BUDS_A(PixelBudsACoordinator.class),
     SHOKZ_OPENSWIM_PRO(ShokzOpenSwimProCoordinator.class),
     SHOKZ_OPENRUN_PRO_2(ShokzOpenRunPro2Coordinator.class),
@@ -1155,6 +1158,7 @@ public enum DeviceType {
     REALME_BUDS_AIR_6_PRO(RealmeBudsAir6ProCoordinator.class),
     SOFLOW_SO6(SoFlowCoordinator.class),
     XIAOMI_SCOOTER_5_MAX(XiaomiScooter5MaxCoordinator.class),
+    XIAOMI_HIPEE_P1(XiaomiHipeeP1Coordinator.class),
     WITHINGS_STEEL_HR(WithingsSteelHRDeviceCoordinator.class),
     SONY_WENA_3(SonyWena3Coordinator.class),
     FEMOMETER_VINCA2(FemometerVinca2DeviceCoordinator.class),

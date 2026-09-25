@@ -71,6 +71,7 @@ public class BluetoothNameTest extends TestBase {
             put("WF-C710N", DeviceType.SONY_WF_C710N);
             put("John's WF-C710N", DeviceType.SONY_WF_C710N);
             put("LE_WF-C710N", null);
+            put("RNP-P1", DeviceType.SONY_REON_POCKET_PRO); // #6668
             put("MOMENTUM M2 IEBT", DeviceType.SENNHEISER_MOMENTUM_IN_EAR_WIRELESS);
             put("MOMENTUM M2 AEBT", null); // the over-ear MOMENTUM Wireless, not tested
             put("Polar H10 96C0B12D", DeviceType.POLARH10);
@@ -184,6 +185,8 @@ public class BluetoothNameTest extends TestBase {
             put("EPIX", DeviceType.GARMIN_EPIX); // matrix
             put("Amazfit GTR", DeviceType.AMAZFITGTR); // #3809 / #2442
             put("Amazfit Bip 3", DeviceType.AMAZFITBIP3); // #3627
+            put("Amazfit Bip Max", DeviceType.AMAZFITBIPMAX); // #6667
+            put("Amazfit BIP Max", DeviceType.AMAZFITBIPMAX); // #6848
             put("Xiaomi Band 8 Active 0C09", DeviceType.MIBAND8ACTIVE); // #3614
             put("UAT-4261", DeviceType.GARMIN_VENU_3S); // #3602
             put("Forerunner 970", DeviceType.GARMIN_FORERUNNER_970); // #6320
@@ -261,6 +264,7 @@ public class BluetoothNameTest extends TestBase {
             put("una watch 403795", null); // #6504
             put("UNA Watch403795", null); // #6504
             put("UNA Watch ", null); // #6504
+            put("Hi-JZ-12CUT0073A8", DeviceType.XIAOMI_HIPEE_P1); // #6812
             put("ROIDMI Cleaner F1", DeviceType.ROIDMI_F8); // #6674
             put("Xiaomi Smart Band 10 Pro AB01", DeviceType.MIBAND10PRO); // #6248
             put("SmartShunt HQ2303UCHFV", DeviceType.VICTRON_SMARTSHUNT); // #6263

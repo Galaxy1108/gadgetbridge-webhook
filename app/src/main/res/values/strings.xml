@@ -1894,6 +1894,7 @@
     <string name="activity_summaries">Sport Activities</string>
     <string name="activity_summary_detail">Sport Activity Detail</string>
     <string name="activity_summary_edit_name_title">Edit label</string>
+    <string name="activity_summary_edit_type_title">Edit type</string>
     <string name="activity_summary_detail_select_gpx_track">Select GPX track</string>
     <string name="activity_summary_detail_clear_gpx_track">Clear GPX track</string>
     <string name="activity_summary_detail_editing_gpx_track">Editing linked GPX track</string>
@@ -2263,6 +2264,7 @@
     <string name="devicetype_mismartscale" translatable="false">Mi Smart Scale 2</string>
     <string name="devicetype_micompositionscale" translatable="false">Mi Body Composition Scale 2</string>
     <string name="devicetype_qnscale" translatable="false">QN-Scale (Chipsea CS20)</string>
+    <string name="devicetype_xiaomi_hipee_p1" translatable="false">Xiaomi Hipee Smart Posture Corrector P1</string>
     <string name="devicetype_onebyone_scale" translatable="false">1byone Health Scale</string>
     <string name="devicetype_itag" translatable="false">iTag</string>
     <string name="devicetype_idasen" translatable="false">IKEA Idasen Desk</string>
@@ -2309,6 +2311,7 @@
     <string name="devicetype_sony_wi_sp600n" translatable="false">Sony WI-SP600N</string>
     <string name="devicetype_sony_linkbuds" translatable="false">Sony LinkBuds</string>
     <string name="devicetype_sony_linkbuds_s" translatable="false">Sony LinkBuds S</string>
+    <string name="devicetype_sony_reon_pocket_pro" translatable="false">Sony Reon Pocket Pro</string>
     <string name="devicetype_soundbrenner_core" translatable="false">Soundbrenner Core</string>
     <string name="devicetype_soundcore_liberty3_pro" translatable="false">Soundcore Liberty 3 Pro</string>
     <string name="devicetype_soundcore_liberty4_nc" translatable="false">Soundcore Liberty 4 NC</string>
@@ -3768,6 +3771,37 @@
     <string name="sony_equalizer_preset_manual">Manual</string>
     <string name="sony_equalizer_preset_custom_1">Custom 1</string>
     <string name="sony_equalizer_preset_custom_2">Custom 2</string>
+    <string name="sony_reon_pocket_toggle_auto_cooling">Toggle auto-cooling mode</string>
+    <string name="sony_reon_pocket_toggle_heat_cold">Toggle heat/cold mode</string>
+    <string name="sony_reon_pocket_mode_heat">Heat</string>
+    <string name="sony_reon_pocket_mode_cold">Cold</string>
+    <string name="sony_reon_pocket_mode_auto">Auto</string>
+    <string name="sony_reon_pocket_auto_start_stop_title">Auto Start/Stop</string>
+    <string name="sony_reon_pocket_auto_start_stop_summary">Automatically start and stop cooling when the device is worn</string>
+    <string name="sony_reon_pocket_intensity_title">Intensity</string>
+    <string name="sony_reon_pocket_intensity_summary">Cooling/heating intensity in smart mode</string>
+    <string name="sony_reon_pocket_manual_power_title">Manual power</string>
+    <string name="sony_reon_pocket_manual_power_summary">Manual cooling/heating power (0 = stop)</string>
+    <string name="sony_reon_pocket_cycle_power">Power level</string>
+    <string name="sony_reon_pocket_pairing_required">Put device in pairing mode (hold SMART button for 15 seconds) and reconnect.</string>
+    <string name="sony_reon_pocket_tag_title">Reon Tag</string>
+    <string name="sony_reon_pocket_tag_address_title">Tag address</string>
+    <string name="sony_reon_pocket_tag_serial_title">Tag serial</string>
+    <string name="sony_reon_pocket_tag_address_summary">No tag registered</string>
+    <string name="sony_reon_pocket_tag_register_title">Register tag</string>
+    <string name="sony_reon_pocket_tag_register_summary">Scan for a nearby Reon Tag (RNPT-1) and register it</string>
+    <string name="sony_reon_pocket_tag_scanning">Scanning for Reon Tag…</string>
+    <string name="sony_reon_pocket_tag_scan_failed">Tag scan failed</string>
+    <string name="sony_reon_pocket_tag_not_found">No Reon Tag found nearby</string>
+    <string name="sony_reon_pocket_tag_registered">Reon Tag registered: %1$s</string>
+    <string name="sony_reon_pocket_tag_unregister_title">Unregister tag</string>
+    <string name="sony_reon_pocket_tag_unregister_summary">Remove the currently registered tag</string>
+    <string name="sony_reon_pocket_tag_unregister_confirmation">Unregister the Reon Tag?</string>
+    <string name="sony_reon_pocket_panel_temperature_title">Surface temperature</string>
+    <string name="sony_reon_pocket_heat_dissipation_title">Exhaust temperature</string>
+    <string name="sony_reon_pocket_tag_temperature_title">Tag temperature</string>
+    <string name="sony_reon_pocket_tag_humidity_title">Tag humidity</string>
+    <string name="sony_reon_pocket_tag_battery_title">Tag battery</string>
     <string name="pref_header_sony_equalizer_bands">Bands</string>
     <string name="pref_header_sony_equalizer_preset_custom_1">Custom Preset 1</string>
     <string name="pref_header_sony_equalizer_preset_custom_2">Custom Preset 2</string>
@@ -4214,6 +4248,30 @@
     <string name="xiaomi_scooter_tire_pressure_reset_title">Reset reminder</string>
     <string name="xiaomi_scooter_tire_pressure_reset_summary">Click this button to restart the tire pressure maintenance timer.</string>
     <string name="xiaomi_scooter_tire_pressure_reset_confirmation">Reset the tire pressure maintenance reminder?</string>
+    <string name="mi_hipee_p1_history">Raw posture history</string>
+    <string name="mi_hipee_p1_position">Position</string>
+    <string name="mi_hipee_p1_history_forward">Forward (humpback)</string>
+    <string name="mi_hipee_p1_history_leftward">Leftward</string>
+    <string name="mi_hipee_p1_history_rightward">Rightward</string>
+    <string name="mi_hipee_p1_history_hour_details">Forward: %1$d, leftward: %2$d, rightward: %3$d</string>
+    <string name="mi_hipee_p1_history_total_corrections">Total corrections</string>
+    <string name="mi_hipee_p1_history_marker_forward">Forward (humpback): %1$d</string>
+    <string name="mi_hipee_p1_history_marker_leftward">Leftward: %1$d</string>
+    <string name="mi_hipee_p1_history_marker_rightward">Rightward: %1$d</string>
+    <string name="mi_hipee_p1_history_marker_no_corrections">No corrections</string>
+    <string name="mi_hipee_p1_set_standard_posture">Set standard posture</string>
+    <string name="mi_hipee_p1_view_live_posture">View live posture</string>
+    <string name="mi_hipee_p1_reminder_angle">Reminder angle</string>
+    <string name="mi_hipee_p1_long_vibration">Long vibration</string>
+    <string name="mi_hipee_p1_exercise_reminder_angle">Exercise reminder angle</string>
+    <string name="mi_hipee_p1_sedentary_reminder">Sedentary reminder</string>
+    <string name="mi_hipee_p1_delay_reminder">Delay reminder</string>
+    <string name="mi_hipee_p1_double_reminder">Double reminder</string>
+    <string name="mi_hipee_p1_double_reminder_interval">Double reminder interval</string>
+    <string name="mi_hipee_p1_pairing_confirmation">Press the device button to confirm pairing</string>
+    <string name="mi_hipee_p1_set_standard_posture_instruction">Set in correct posture and remain still</string>
+    <string name="mi_hipee_p1_standard_posture_set">Standard posture set</string>
+    <string name="mi_hipee_p1_standard_posture_rejected">Standard posture rejected (code 0x%1$02x)</string>
     <string name="pref_roidmi_f8_battery_temperature_title">Battery temperature</string>
     <string name="pref_roidmi_f8_standard_gear_title">Standard gear</string>
     <string name="pref_roidmi_f8_standard_gear_summary">Default power when starting to clean</string>
@@ -4656,6 +4714,7 @@
     <string name="battery_polling_failed_start">Failed to start the battery polling</string>
 
     <string name="none">None</string>
+    <string name="no_delay">No delay</string>
     <string name="garmin_agps_url_i">AGPS %1$d URL</string>
     <string name="no_folder_selected">No folder selected</string>
     <string name="folder_is_empty">Folder is empty</string>

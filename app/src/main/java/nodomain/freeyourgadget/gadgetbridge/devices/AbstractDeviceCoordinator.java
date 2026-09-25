@@ -227,6 +227,7 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     public final void deleteDevice(final GBDevice gbDevice, boolean deleteFiles) throws GBException {
         LOG.info("Will try to delete device: {}", gbDevice.getName());
         if (gbDevice.isConnected() || gbDevice.isConnecting()) {
+            prepareDeviceForDeletion(gbDevice);
             GBApplication.deviceService(gbDevice).disconnect();
         }
         Prefs prefs = getPrefs();
@@ -267,6 +268,12 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
         if (deleteFiles) {
             deleteDeviceFiles(gbDevice);
         }
+    }
+
+    /**
+     * Hook for devices that need to send a final command while still connected.
+     */
+    protected void prepareDeviceForDeletion(@NonNull final GBDevice gbDevice) throws GBException {
     }
 
     protected void deleteBy(final AbstractDao<?, ?> dao, final Property property, final Object value) {

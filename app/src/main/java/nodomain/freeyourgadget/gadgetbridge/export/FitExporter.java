@@ -1250,7 +1250,7 @@ public class FitExporter {
         final Long zAnaer = readSeconds(data, ActivitySummaryEntries.HR_ZONE_ANAEROBIC);
         final Long zMax   = readSeconds(data, ActivitySummaryEntries.HR_ZONE_EXTREME);
         if (zWarm != null || zEasy != null || zAer != null || zAnaer != null || zMax != null) {
-            b.setTimeInHrZone(new Number[]{
+            b.setTimeInHrZone(new Double[]{
                     nz(zWarm), nz(zEasy), nz(zAer), nz(zAnaer), nz(zMax)
             });
         }
@@ -1717,10 +1717,10 @@ public class FitExporter {
         return a != null ? a : b;
     }
 
-    /// Coerces a nullable Long to a non-null Number (0 for null). Used by setTimeInHrZone
+    /// Coerces a nullable Long to a non-null Double (0 for null). Used by setTimeInHrZone
     /// where individual array slots cannot be null but missing zones should encode as 0.
-    private static Number nz(@Nullable final Long v) {
-        return v != null ? v : 0L;
+    private static Double nz(@Nullable final Long v) {
+        return v != null ? v.doubleValue() : 0.0;
     }
 
     /// Maps a Xiaomi-band SWIM_STYLE byte to the FIT swim_stroke enum.
