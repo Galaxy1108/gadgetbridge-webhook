@@ -257,18 +257,11 @@ public class RedmiBudsProtocol extends GBDeviceProtocol {
             return stopFind;
         }
 
-        final byte earbuds;
-        switch (target) {
-            case LEFT:
-                earbuds = FIND_EARBUDS_LEFT;
-                break;
-            case RIGHT:
-                earbuds = FIND_EARBUDS_RIGHT;
-                break;
-            default:
-                earbuds = FIND_EARBUDS_BOTH;
-                break;
-        }
+        final byte earbuds = switch (target) {
+            case LEFT -> FIND_EARBUDS_LEFT;
+            case RIGHT -> FIND_EARBUDS_RIGHT;
+            default -> FIND_EARBUDS_BOTH;
+        };
 
         final byte[] startFind = new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++,
             new byte[]{0x04, 0x00, 0x09, 0x01, earbuds}).encode();
