@@ -240,10 +240,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     public void dispose() {
         synchronized (ConnectionMonitor) {
             LOG.info("Garmin dispose()");
-            // Clear any in-flight transfer notification; otherwise a disconnect
-            // mid-sync leaves the progress notification pinned indefinitely.
-            transferNotification.finish();
-            isBusyFetching = false;
+            resetFileSyncState();
             if (sleepAsAndroidSender != null) {
                 sleepAsAndroidSender.stopTracking();
             }
@@ -311,6 +308,8 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     @Override
     protected TransactionBuilder initializeDevice(final TransactionBuilder builder) {
         builder.setDeviceState(GBDevice.State.INITIALIZING);
+
+        resetFileSyncState();
 
         if (getDevicePrefs().getBoolean(PREF_ALLOW_HIGH_MTU, true)) {
             builder.requestMtu(515);
@@ -920,6 +919,15 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 evaluateGBDeviceEvent(notificationSubscriptionDeviceEvent);
                 return;
         }
+    }
+
+    private void resetFileSyncState() {
+        // Clear any in-flight transfer notification; otherwise a disconnect
+        // mid-sync leaves the progress notification pinned indefinitely.
+        transferNotification.finish();
+        isBusyFetching = false;
+        currentlyDownloading = null;
+        filesToDownload.clear();
     }
 
     private void processDownloadQueue() {
