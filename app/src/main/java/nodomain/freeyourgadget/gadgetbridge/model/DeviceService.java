@@ -139,11 +139,6 @@ public interface DeviceService extends EventHandler {
     String EXTRA_REALTIME_SAMPLE = "realtime_sample";
     String EXTRA_TIMESTAMP = "timestamp";
 
-    /**
-     * Use EXTRA_REALTIME_SAMPLE instead
-     */
-    @Deprecated
-    String EXTRA_HEART_RATE_VALUE = "hr_value";
     String EXTRA_CALENDAREVENT_SPEC = "calendarevent_spec";
     String EXTRA_CALENDAREVENT_ID = "calendarevent_id";
     String EXTRA_CALENDAREVENT_TYPE = "calendarevent_type";
