@@ -139,6 +139,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppos.service
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppos.services.ZeppOsWifiService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppos.services.ZeppOsWorkoutService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppos.services.ZeppOsWorldClocksService;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppos.workouts.ZeppOsWorkoutTemplateUploader;
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
@@ -458,6 +459,11 @@ public class ZeppOsSupport extends AbstractBluetoothDeviceSupport
     public void onSetContacts(ArrayList<? extends Contact> contacts) {
         //noinspection unchecked
         contactsService.setContacts((List<Contact>) contacts);
+    }
+
+    @Override
+    public void onSyncWorkoutTemplate(final long templateId) {
+        ZeppOsWorkoutTemplateUploader.INSTANCE.upload(getContext(), fileTransferService, templateId);
     }
 
     @Override
