@@ -5142,4 +5142,21 @@
     <string name="no_delay">无延迟</string>
     <string name="mi_hipee_p1_standard_posture_set">已设置标准姿态</string>
     <string name="both_earbuds">两个耳机</string>
+    <string name="activity_detail_share_raw_gps">分享原始 GPS</string>
+    <string name="eightbitdo_keyboard_mapping">按键映射</string>
+    <string name="eightbitdo_keymap_reset_title">重置为默认</string>
+    <string name="eightbitdo_keymap_reset_confirmation">重置所有按钮的按键映射为出厂默认吗？</string>
+    <string name="eightbitdo_disable_sleep">禁用休眠</string>
+    <string name="eightbitdo_realtime_buttons_title">记录按的按钮</string>
+    <string name="eightbitdo_realtime_buttons_summary">启用实时按钮流（将按的按钮写入日志）</string>
+    <string name="eightbitdo_button_minus">- (Select)</string>
+    <string name="eightbitdo_button_plus">+ (Start)</string>
+    <string name="eightbitdo_button_star">Star</string>
+    <string name="eightbitdo_button_heart">Heart (Home)</string>
+    <string name="eightbitdo_button_up">Up</string>
+    <string name="eightbitdo_button_down">Down</string>
+    <string name="eightbitdo_button_left">Left</string>
+    <string name="eightbitdo_button_right">Right</string>
+    <string name="f8_prefs_users">用户</string>
+    <string name="f8_prefs_active_user_title">活跃用户</string>
 </resources>
