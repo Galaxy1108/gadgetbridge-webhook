@@ -70,6 +70,7 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.appmanager.config.DynamicAppConfig;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
+import nodomain.freeyourgadget.gadgetbridge.database.repository.WorkoutTemplateRepository;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEvent;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventAppInfo;
 import nodomain.freeyourgadget.gadgetbridge.devices.PendingFileProvider;
@@ -94,6 +95,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.model.weather.Weather;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutTemplate;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService;
@@ -132,6 +134,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDeviceSettings;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitFileId;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitWeather;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.workouts.GarminWorkoutFitEncoder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.CurrentTimeRequestMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.DownloadRequestMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.GFDIMessage;
@@ -1540,6 +1543,47 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                                     )
                             ).build());
         }
+    }
+
+    @Override
+    public void onSyncWorkoutTemplate(final long templateId) {
+        final WorkoutTemplate template = WorkoutTemplateRepository.INSTANCE.load(templateId);
+        if (template == null) {
+            LOG.error("Workout template {} not found", templateId);
+            return;
+        }
+
+        final FitFile fitFile = GarminWorkoutFitEncoder.INSTANCE.encode(
+                template,
+                GarminTimeUtils.javaMillisToGarminTimestamp(System.currentTimeMillis())
+        );
+        if (fitFile == null) {
+            LOG.error("Failed to encode workout template {} as a fit file", templateId);
+            WorkoutTemplateRepository.INSTANCE.markSyncFailed(templateId, "FIT encoding failed");
+            return;
+        }
+
+        // The hash is saved before the upload, so an edit made during the upload shows as out of date
+        final int contentHash = WorkoutTemplateRepository.INSTANCE.contentHash(template);
+        WorkoutTemplateRepository.INSTANCE.markSyncPending(templateId);
+
+        communicator.sendMessage(
+                "upload workout template " + templateId,
+                fileTransferHandler.initiateUpload(
+                        fitFile.getOutgoingMessage(),
+                        FileType.FILETYPE.WORKOUTS,
+                        success -> {
+                            if (success) {
+                                WorkoutTemplateRepository.INSTANCE.markSynced(templateId, null, contentHash);
+                            } else {
+                                WorkoutTemplateRepository.INSTANCE.markSyncFailed(
+                                        templateId,
+                                        getContext().getString(R.string.workout_template_sync_failed_transfer)
+                                );
+                            }
+                        }
+                ).getOutgoingMessage()
+        );
     }
 
     @Override

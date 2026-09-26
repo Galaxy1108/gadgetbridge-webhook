@@ -961,12 +961,16 @@
         {"num":9,"name":"duration_type","base":"ENUM"},
         {"num":10,"name":"duration_value","base":"UINT32"},
         {"num":11,"name":"sub_sport","base":"ENUM"},
+        {"num":12,"name":"num_sessions","base":"UINT16"},
+        {"num":13,"name":"transitions","base":"ENUM"},
         {"num":14,"name":"pool_length","base":"UINT16","scale":100,"UOM":"METER"},
         {"num":15,"name":"pool_length_unit","base":"ENUM"},
         {"num":17,"name":"notes","base":"STRING","stringLen":201},
         {"num":20,"name":"workout_index","base":"UINT16"},
         {"num":21,"name":"time","base":"UINT32","scale":1000,"UOM":"SECONDS"},
         {"num":22,"name":"distance","base":"UINT32","scale":100,"UOM":"METER"},
+        {"num":23,"name":"time_flag","base":"ENUM"},
+        {"num":24,"name":"distance_flag","base":"ENUM"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -995,6 +999,7 @@
         {"num":22,"name":"secondary_custom_target_value_high","base":"UINT32"},
         {"num":26,"name":"exercise_weight_percent","base":"UINT16"},
         {"num":27,"name":"exercise_weight_type","base":"UINT8"},
+        {"num":30,"name":"swim_drill_type","base":"ENUM","type":"WktSwimDrill"},
         {"num":31,"name":"workout_index","base":"UINT16"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
@@ -5169,7 +5174,8 @@
         {"num":3,"name":"COOLDOWN"},
         {"num":4,"name":"RECOVERY"},
         {"num":5,"name":"INTERVAL"},
-        {"num":6,"name":"OTHER"}
+        {"num":6,"name":"OTHER"},
+        {"num":7,"name":"MAIN"}
       ]
     },
     {
@@ -6599,7 +6605,10 @@
         {"num":2,"name":"BREASTSTROKE","label":"R.string.breaststroke"},
         {"num":3,"name":"BUTTERFLY","label":"R.string.swim_style_butterfly"},
         {"num":4,"name":"DRILL","label":"R.string.swim_style_drill"},
-        {"num":5,"name":"MIXED","label":"R.string.swim_style_mixed"}
+        {"num":5,"name":"MIXED","label":"R.string.swim_style_mixed"},
+        {"num":6,"name":"IM","label":"R.string.workout_swim_stroke_individual_medley"},
+        {"num":7,"name":"IM_BY_ROUND","label":"R.string.workout_swim_stroke_im_by_round"},
+        {"num":8,"name":"REVERSE_IM_ORDER","label":"R.string.workout_swim_stroke_reverse_im_order"}
       ]
     },
     {
@@ -6877,7 +6886,8 @@
         {"num":27,"name":"REPEAT_UNTIL_TRAINING_PEAKS_TSS"},
         {"num":28,"name":"REPETITION_TIME"},
         {"num":29,"name":"REPS"},
-        {"num":31,"name":"TIME_ONLY"}
+        {"num":31,"name":"TIME_ONLY"},
+        {"num":32,"name":"CSS_REPETITION_TIME"}
       ]
     },
     {
@@ -6901,9 +6911,19 @@
         {"num":15,"name":"INHALE_HOLD_DURATION"},
         {"num":16,"name":"EXHALE_DURATION"},
         {"num":17,"name":"EXHALE_HOLD_DURATION"},
+        {"num":19,"name":"SWIM_CSS_OFFSET"},
+        {"num":20,"name":"SWIM_EFFORT"},
         {"num":21,"name":"TIME"},
         {"num":22,"name":"DISTANCE"},
         {"num":23,"name":"REPEATS"}
+      ]
+    },
+    {
+      "name": "WktSwimDrill",
+      "entries": [
+        {"num":0,"name":"KICK"},
+        {"num":1,"name":"PULL"},
+        {"num":2,"name":"DRILL"}
       ]
     },
     {
