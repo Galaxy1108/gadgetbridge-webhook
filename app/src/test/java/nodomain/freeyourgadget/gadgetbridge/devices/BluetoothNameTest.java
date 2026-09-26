@@ -122,6 +122,9 @@ public class BluetoothNameTest extends TestBase {
             put("BPM Smart", DeviceType.SANITAS_SBM_67);
             put("BM69", DeviceType.BEURER_BM_69); // #6687
             put("Sinilink-APP", DeviceType.SINILINK); // #6040
+            put("80EL", DeviceType.EIGHTBITDO_MICRO);
+            put("8BitDo Micro gamepad", null);
+            put("8BitDo Micro", null);
             put("R11_0500", DeviceType.YAWELL_R11); // #4711
             put("Edge 2x", DeviceType.GARMIN_EDGE_25); // #5779
             put("Edge 130", DeviceType.GARMIN_EDGE_130); // matrix
@@ -281,6 +284,7 @@ public class BluetoothNameTest extends TestBase {
             put("LE-Bose NC 700 Headphones", DeviceType.BOSE_NC700);
             put("UCS LS2", DeviceType.CARDO_LS24X);
             put("Health Scale", DeviceType.ONEBYONE_SCALE); // LeFu / 1byone / Veeway, #6695
+            put("F8", DeviceType.F8SCALE); // #5748
         }};
 
         for (Map.Entry<String, DeviceType> e : bluetoothNameToExpectedType.entrySet()) {

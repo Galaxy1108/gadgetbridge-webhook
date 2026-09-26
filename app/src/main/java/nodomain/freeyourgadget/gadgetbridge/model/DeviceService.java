@@ -98,6 +98,7 @@ public interface DeviceService extends EventHandler {
     String EXTRA_NOTIFICATION_SPEC = "notification_spec";
     String EXTRA_NOTIFICATION_ID = "notification_id";
     String EXTRA_FIND_START = "find_start";
+    String EXTRA_FIND_TARGET = "find_target";
     String EXTRA_VIBRATION_INTENSITY = "vibration_intensity";
     String EXTRA_CALL_SPEC = "call_spec";
     String EXTRA_CANNEDMESSAGES_SPEC = "cannedmessages_spec";
