@@ -276,6 +276,9 @@ public class DeviceActionHandler {
                 final ArrayList<? extends Contact> contacts = (ArrayList<? extends Contact>) intentCopy.getSerializableExtra(EXTRA_CONTACTS);
                 deviceSupport.onSetContacts(contacts);
                 break;
+            case ACTION_SYNC_WORKOUT_TEMPLATE:
+                deviceSupport.onSyncWorkoutTemplate(intentCopy.getLongExtra(EXTRA_WORKOUT_TEMPLATE_ID, -1));
+                break;
             case ACTION_ENABLE_REALTIME_STEPS: {
                 final boolean enable = intentCopy.getBooleanExtra(EXTRA_BOOLEAN_ENABLE, false);
                 deviceSupport.onEnableRealtimeSteps(enable);

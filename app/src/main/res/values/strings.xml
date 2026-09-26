@@ -1504,6 +1504,7 @@
     <string name="activity_db_management_empty_db_warning">Warning! By pushing this button you will wipe your database and start from scratch.</string>
     <string name="persisting_samples_failed">Error saving samples: %1$s</string>
     <string name="cancel">Cancel</string>
+    <string name="clear_current_selection">Clear</string>
     <string name="delete">Delete</string>
     <string name="delete_device_and_retain_files">Keep Files</string>
     <string name="ok">OK</string>
@@ -1733,6 +1734,7 @@
     <string name="activity_type_handcycling">Handcycling</string>
     <string name="activity_type_e_bike">E-Bike</string>
     <string name="activity_type_e_scooter">E-Scooter</string>
+    <string name="activity_type_custom">Custom</string>
     <string name="activity_type_bike_commute">Bike Commute</string>
     <string name="activity_type_handcycling_indoor">Handcycling Indoor</string>
     <string name="activity_type_transition">Transition</string>
@@ -5741,7 +5743,6 @@
     <string name="f8_prefs_users">Users</string>
     <string name="f8_prefs_active_user_title">Active User</string>
 
-    <!-- UGREEN HiTune Max 5c -->
     <string name="devicetype_ugreen_hitune_max_5c" translatable="false">UGREEN HiTune Max 5c</string>
     <string name="ugreen_anc_mode_medium">Medium</string>
     <string name="ugreen_equalizer_treble">Treble</string>
@@ -5749,4 +5750,163 @@
     <string name="ugreen_spatial_audio_summary">Enable immersive spatial sound effect</string>
     <string name="ugreen_high_quality">Hi-Res Audio Decoding</string>
     <string name="ugreen_high_quality_summary">Enable high-resolution audio decoding (LDAC)</string>
+
+    <string name="pref_workout_templates_title">Workout templates</string>
+    <string name="pref_workout_templates_summary">Create and manage structured workouts</string>
+    <string name="workout_template_add">Add workout template</string>
+    <string name="workout_template_list_empty">No workout templates</string>
+    <string name="workout_template_step_invalid">This step has a problem</string>
+    <string name="workout_template_delete_confirm">Delete \"%1$s\"? This cannot be undone.</string>
+    <string name="workout_template_copy_name">%1$s (copy)</string>
+    <string name="workout_template_no_sports_supported">This device does not support any workout sport.</string>
+    <string name="workout_template_name_hint">Name</string>
+    <string name="workout_template_pool_length_custom_hint">Custom pool length</string>
+    <string name="workout_template_transitions_between_multisport_legs">Add transitions between legs</string>
+    <string name="workout_template_add_step">Add step</string>
+    <string name="workout_template_add_repeat">Add repeat group</string>
+    <string name="workout_template_add_step_inside">Add step to group</string>
+    <string name="workout_template_multisport_leg_add">Add leg</string>
+    <string name="workout_template_multisport_leg_delete">Delete leg</string>
+    <string name="workout_template_edit_step">Edit step</string>
+    <string name="workout_template_delete_step">Delete step</string>
+    <string name="workout_template_repeat_title">Repeat ×%1$d</string>
+    <string name="workout_template_multisport_leg_title">Leg</string>
+    <string name="workout_template_validation_title">Can\'t save this workout</string>
+    <string name="workout_template_validation_snackbar">This workout has errors - fix the highlighted step to save it.</string>
+    <string name="workout_template_discard_title">Discard changes?</string>
+    <string name="workout_template_discard_message">This workout template has unsaved changes. If you leave now, they will be lost.</string>
+    <string name="workout_template_discard">Discard</string>
+    <string name="workout_template_keep_editing">Keep editing</string>
+    <string name="workout_template_save_failed">Could not save this workout template.</string>
+    <string name="workout_template_unsupported">Not supported by this device</string>
+
+    <plurals name="workout_template_step_count">
+        <item quantity="one">%d step</item>
+        <item quantity="other">%d steps</item>
+    </plurals>
+
+    <string name="workout_sync_status_not_synced">Not synced</string>
+    <string name="workout_sync_status_synced">Synced</string>
+    <string name="workout_sync_status_out_of_date">Out of date</string>
+    <string name="workout_sync_status_in_progress">Sending…</string>
+    <string name="workout_sync_status_failed">Sync failed</string>
+    <string name="workout_template_sync">Send to device</string>
+    <string name="workout_template_sync_started">Sending \"%1$s\" to the device</string>
+    <string name="workout_template_sync_failed_transfer">File transfer failed</string>
+
+    <string name="workout_step_type_warmup">Warm up</string>
+    <string name="workout_step_type_recover">Recover</string>
+    <string name="workout_step_type_rest">Rest</string>
+    <string name="workout_step_type_cooldown">Cool down</string>
+    <string name="workout_step_type_main">Main</string>
+    <string name="workout_step_type_swim">Swim</string>
+
+    <string name="workout_duration_hr_above">Heart rate above</string>
+    <string name="workout_duration_hr_below">Heart rate below</string>
+    <string name="workout_duration_power_above">Power above</string>
+    <string name="workout_duration_power_below">Power below</string>
+    <string name="workout_duration_button_press">Button press</string>
+    <string name="workout_duration_swimming_send_off_time">Send-off time</string>
+    <string name="workout_duration_swimming_css_send_off_time">CSS send-off time</string>
+
+    <string name="workout_target_none">No target</string>
+    <string name="workout_target_hr_zone">Heart rate zone</string>
+    <string name="workout_target_hr_range">Heart rate range</string>
+    <string name="workout_target_bike_power_zone">Power zone</string>
+    <string name="workout_target_bike_power_range">Power range</string>
+    <string name="workout_target_power_ftp_range">% of FTP range</string>
+    <string name="workout_target_stroke_rate">Stroke rate</string>
+    <string name="workout_target_effort">Effort</string>
+    <string name="workout_target_css_offset">CSS offset</string>
+
+    <string name="workout_hr_zone_1">Zone 1 - Warm-up</string>
+    <string name="workout_hr_zone_2">Zone 2 - Easy</string>
+    <string name="workout_hr_zone_3">Zone 3 - Aerobic</string>
+    <string name="workout_hr_zone_4">Zone 4 - Anaerobic</string>
+    <string name="workout_hr_zone_5">Zone 5 - Maximum</string>
+
+    <string name="workout_power_zone_1">Zone 1</string>
+    <string name="workout_power_zone_2">Zone 2</string>
+    <string name="workout_power_zone_3">Zone 3</string>
+    <string name="workout_power_zone_4">Zone 4</string>
+    <string name="workout_power_zone_5">Zone 5</string>
+    <string name="workout_power_zone_6">Zone 6</string>
+    <string name="workout_power_zone_7">Zone 7</string>
+
+    <string name="workout_weight_body_weight">Body weight</string>
+    <string name="workout_weight_percent_1rm">% of 1RM</string>
+    <string name="workout_weight_rm">Rep max (RM)</string>
+
+    <string name="workout_swim_stroke_choice">Choice</string>
+    <string name="workout_swim_stroke_individual_medley">Individual medley</string>
+    <string name="workout_swim_stroke_im_by_round">IM by round</string>
+    <string name="workout_swim_stroke_reverse_im_order">Reverse IM order</string>
+
+    <string name="workout_swim_drill_kick">Kick</string>
+    <string name="workout_swim_drill_pull">Pull</string>
+
+    <string name="workout_equipment_fins">Fins</string>
+    <string name="workout_equipment_kickboard">Kickboard</string>
+    <string name="workout_equipment_paddles">Paddles</string>
+    <string name="workout_equipment_pull_buoy">Pull buoy</string>
+    <string name="workout_equipment_snorkel">Snorkel</string>
+
+    <string name="workout_effort_ascending">Ascending</string>
+    <string name="workout_effort_descending">Descending</string>
+    <string name="workout_effort_recovery">Recovery</string>
+    <string name="workout_effort_hard">Hard</string>
+    <string name="workout_effort_very_hard">Very hard</string>
+    <string name="workout_effort_all_out">All out</string>
+
+    <string name="workout_pool_length_unspecified">Unspecified</string>
+    <string name="workout_pool_length_25m">25 m</string>
+    <string name="workout_pool_length_25yd">25 yd</string>
+    <string name="workout_pool_length_50m">50 m</string>
+    <string name="workout_pool_length_33_1_3m">33 1/3 m</string>
+    <string name="workout_pool_length_33_1_3yd">33 1/3 yd</string>
+
+    <string name="workout_field_step_type">Step type</string>
+    <string name="workout_field_secondary_target">Secondary target</string>
+    <string name="workout_field_action_name">Action name</string>
+    <string name="workout_field_yoga_pose">Pose</string>
+    <string name="workout_field_pilates_move">Move</string>
+    <string name="workout_field_equipment">Equipment</string>
+    <string name="workout_field_unit">Unit</string>
+    <string name="workout_field_minimum">Min</string>
+    <string name="workout_field_maximum">Max</string>
+
+    <string name="workout_unit_suffix_watt">W</string>
+    <string name="workout_unit_suffix_steps_per_minute">per min</string>
+    <string name="workout_unit_suffix_seconds">s</string>
+    <string name="workout_unit_suffix_per_100m">per 100m</string>
+    <string name="workout_unit_suffix_per_km">per km</string>
+
+    <string name="workout_error_sport_not_supported">This device does not support this sport.</string>
+    <string name="workout_error_name_required">Enter a name.</string>
+    <string name="workout_error_name_too_long">The name is too long.</string>
+    <string name="workout_error_note_too_long">The note is too long.</string>
+    <string name="workout_error_no_steps">Add at least one step.</string>
+    <string name="workout_error_too_many_steps">Too many steps for this device.</string>
+    <string name="workout_error_repeat_not_supported">This device does not support repeat groups.</string>
+    <string name="workout_error_repeat_count_out_of_range">A repeat count is out of range.</string>
+    <string name="workout_error_empty_group">A group has no steps.</string>
+    <string name="workout_error_nested_repeat_not_supported">A repeat group cannot contain another repeat group.</string>
+    <string name="workout_error_leg_not_supported">This device does not support this sport as a multisport leg.</string>
+    <string name="workout_error_step_type_not_supported">A step type is not supported by this device.</string>
+    <string name="workout_error_duration_not_supported">A duration type is not supported by this device.</string>
+    <string name="workout_error_target_not_supported">A target is not supported by this device.</string>
+    <string name="workout_error_secondary_target_not_supported">A secondary target is not supported by this device.</string>
+    <string name="workout_error_secondary_target_conflict">The primary and secondary targets are in conflict.</string>
+    <string name="workout_error_min_above_max">Min must not be above max.</string>
+    <string name="workout_error_value_out_of_range">Value is out of range.</string>
+    <string name="workout_error_exercise_not_supported">An exercise is not supported by this device.</string>
+
+    <string name="workout_exercise_picker_title">Choose an exercise</string>
+    <string name="workout_exercise_picker_search_hint">Search exercises</string>
+    <string name="workout_exercise_picker_empty">No exercises match</string>
+    <string name="workout_exercise_picker_filter_title">Filter exercises</string>
+    <plurals name="workout_exercise_picker_filter_count">
+        <item quantity="one">%d exercise</item>
+        <item quantity="other">%d exercises</item>
+    </plurals>
 </resources>
