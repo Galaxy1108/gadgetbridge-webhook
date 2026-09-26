@@ -947,7 +947,6 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_BETTER_AUDIO_QUALITY);
         addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_ADAPTIVE_VOLUME);
         addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_EXTRA_MEDIA_VOLUME);
-        addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_FIND_HEADPHONES);
 
 
         addPreferenceHandlerFor(PREF_GALAXY_BUDS_AMBIENT_VOICE_FOCUS);
@@ -1746,6 +1745,16 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                                 xmlScreen.getScreen(),
                                 xmlScreen.getSubScreens().stream().mapToInt(Integer::intValue).toArray()
                         );
+                    } else if (item instanceof ScreenSetting screenSetting && !screenSetting.getXmlSubScreens().isEmpty()) {
+                        final DeviceSpecificSettingsScreen enumScreen = DeviceSpecificSettingsScreen.fromKey(screenSetting.getKey());
+                        if (enumScreen != null) {
+                            deviceSpecificSettings.addRootScreen(
+                                    enumScreen,
+                                    screenSetting.getXmlSubScreens().stream().mapToInt(Integer::intValue).toArray()
+                            );
+                        } else {
+                            LOG.warn("Screen {} declares xml sub-screens but is not a known screen", screenSetting.getKey());
+                        }
                     }
                 }
                 deviceSpecificSettings.addConnectedPreferences(modelSpec.collectConnectedKeys());

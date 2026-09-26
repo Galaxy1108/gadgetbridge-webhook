@@ -44,6 +44,11 @@ public class RedmiBuds6LiteCoordinator extends AbstractRedmiBudsCoordinator {
         return true;
     }
 
+    @Override
+    public boolean supportsFindDevicePerEarbud(@NonNull final GBDevice device) {
+        return true;
+    }
+
     @NonNull
     @Override
     public List<RedmiBudsAmbientSoundMode> getAmbientSoundModes() {

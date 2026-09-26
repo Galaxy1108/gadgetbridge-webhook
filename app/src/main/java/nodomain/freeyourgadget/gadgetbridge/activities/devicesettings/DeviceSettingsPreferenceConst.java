@@ -99,6 +99,12 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_CALENDAR_SYNC_COLOR_BLACKLIST = "calendar_sync_color_blacklist";
     public static final String PREF_CALENDAR_SYNC_EVENT_REMINDERS = "calendar_sync_event_reminders";
     public static final String PREF_TIME_SYNC = "time_sync";
+    public static final String PREF_KEEP_ACTIVITY_DATA_ON_DEVICE = "keep_activity_data_on_device";
+    public static final String PREF_FETCH_UNKNOWN_FILES = "fetch_unknown_files";
+    public static final String PREF_INSTALL_UNSUPPORTED_FILES = "install_unsupported_files";
+    public static final String PREF_NEW_SYNC_PROTOCOL = "new_sync_protocol";
+    public static final String PREF_IMPORT_ACTIVITY_FILES = "import_activity_files";
+    public static final String PREF_REPROCESS_ACTIVITY_FILES = "reprocess_activity_files";
     public static final String PREF_USE_CUSTOM_DEVICEICON = "use_custom_deviceicon";
     public static final String PREF_BUTTON_1_FUNCTION_SHORT = "button_1_function_short";
     public static final String PREF_BUTTON_2_FUNCTION_SHORT = "button_2_function_short";
@@ -413,7 +419,6 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_HUAWEI_FREEBUDS_ADAPTIVE_VOLUME = "pref_freebuds_adaptive_volume_mode";
     public static final String PREF_HUAWEI_FREEBUDS_ADAPTIVE_VOLUME_APPLIED = "pref_freebuds_adaptive_volume_mode_applied";
     public static final String PREF_HUAWEI_FREEBUDS_EXTRA_MEDIA_VOLUME = "pref_freebuds_extra_media_volume";
-    public static final String PREF_HUAWEI_FREEBUDS_FIND_HEADPHONES = "pref_freebuds_find_headphones";
 
     public static final String PREF_GALAXY_BUDS_AMBIENT_MODE = "pref_galaxy_buds_ambient_mode";
     public static final String PREF_GALAXY_BUDS_AMBIENT_VOICE_FOCUS = "pref_galaxy_buds_ambient_voice_focus";
@@ -611,6 +616,12 @@ public class DeviceSettingsPreferenceConst {
 
     public static final String PREF_MEDIA_SOURCE = "pref_media_source";
     public static final String PREF_MEDIA_PLAYBACK_MODE = "pref_media_playback_mode";
+    public static final String PREF_EIGHTBITDO_DISABLE_SLEEP = "eightbitdo_disable_sleep";
+    public static final String PREF_EIGHTBITDO_REALTIME_BUTTONS = "eightbitdo_realtime_buttons";
+    public static final String PREF_EIGHTBITDO_KEYMAP_PREFIX = "eightbitdo_keymap_";
+    public static final String PREF_EIGHTBITDO_SCREEN_KEYMAP = "eightbitdo_screen_keymap";
+    public static final String PREF_EIGHTBITDO_KEYMAP_RESET = "eightbitdo_keymap_reset";
+
     public static final String PREF_SHOKZ_EQUALIZER_BLUETOOTH = "pref_shokz_equalizer_bluetooth";
     public static final String PREF_SHOKZ_EQUALIZER_MP3 = "pref_shokz_equalizer_mp3";
     public static final String PREF_SHOKZ_EQUALIZER_CUSTOM = "pref_shokz_equalizer_custom";

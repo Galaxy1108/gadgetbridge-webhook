@@ -46,6 +46,7 @@ import nodomain.freeyourgadget.gadgetbridge.capabilities.HeartRateCapability;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.BarcodeFormat;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.password.PasswordCapabilityImpl;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.widgets.WidgetManager;
+import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary;
 import nodomain.freeyourgadget.gadgetbridge.entities.CyclingSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
@@ -171,6 +172,7 @@ public interface DeviceCoordinator {
         SCOOTER,
         CAMERA,
         VACUUM,
+        GAMEPAD,
     }
 
     /**
@@ -581,6 +583,20 @@ public interface DeviceCoordinator {
     ActivityTrackProvider getActivityTrackProvider(@NonNull final GBDevice device, @NonNull final Context context);
 
     /**
+     * Returns the raw per-sample file the device sent for a workout, as stored on disk, or null
+     * when there is none. May query the database, so call it off the main thread.
+     */
+    @Nullable
+    File getWorkoutRawDetailsFile(@NonNull final GBDevice device, @NonNull final BaseActivitySummary summary);
+
+    /**
+     * Returns the raw GPS track file for devices that send it apart from the details file, or
+     * null. May query the database, so call it off the main thread.
+     */
+    @Nullable
+    File getWorkoutRawGpsFile(@NonNull final GBDevice device, @NonNull final BaseActivitySummary summary);
+
+    /**
      * Returns true if this device/coordinator supports installing files like firmware,
      * watchfaces, gps, resources, fonts...
      *
@@ -841,6 +857,14 @@ public interface DeviceCoordinator {
      * making some sound or lighting up
      */
     boolean supportsFindDevice(@NonNull final GBDevice device);
+
+    /**
+     * Indicates whether the "find device" function can be sent to a single
+     * earbud, so that the user can choose between each or both of them.
+     */
+    default boolean supportsFindDevicePerEarbud(@NonNull final GBDevice device) {
+        return false;
+    }
 
     /**
      * Indicates whether the device supports displaying music information

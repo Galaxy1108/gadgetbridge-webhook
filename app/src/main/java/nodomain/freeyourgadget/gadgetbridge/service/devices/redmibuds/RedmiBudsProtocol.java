@@ -31,6 +31,7 @@ import static nodomain.freeyourgadget.gadgetbridge.util.GB.hexdump;
 
 import android.content.SharedPreferences.Editor;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.slf4j.Logger;
@@ -68,6 +69,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.redmibuds.prefs.RedmiBudsTra
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice.State;
 import nodomain.freeyourgadget.gadgetbridge.model.BatteryState;
+import nodomain.freeyourgadget.gadgetbridge.model.FindDeviceTarget;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.redmibuds.protocol.Authentication;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.redmibuds.protocol.Message;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.redmibuds.protocol.MessageType;
@@ -86,6 +88,10 @@ public class RedmiBudsProtocol extends GBDeviceProtocol {
         Config.EAR_DETECTION, Config.DOUBLE_CONNECTION, Config.AUTO_ANSWER,
         Config.ADAPTIVE_SOUND, Config.EQ_PRESET, Config.EQ_CURVE
     );
+
+    private static final byte FIND_EARBUDS_LEFT = 0x01;
+    private static final byte FIND_EARBUDS_RIGHT = 0x02;
+    private static final byte FIND_EARBUDS_BOTH = 0x03;
 
     /// Index of the first equalizer band level in an EQ_CURVE payload.
     private static final int EQ_CURVE_FIRST_LEVEL = 12;
@@ -243,9 +249,31 @@ public class RedmiBudsProtocol extends GBDeviceProtocol {
     }
 
     @Override
-    public byte[] encodeFindDevice(final boolean start) {
-        return new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++,
-                new byte[] { 0x04, 0x00, 0x09, start ? (byte) 0x01 : (byte) 0x00, (byte) 0x03 }).encode();
+    public byte[] encodeFindDevice(final boolean start, @NonNull final FindDeviceTarget target) {
+        final byte[] stopFind = new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++,
+            new byte[]{0x04, 0x00, 0x09, 0x00, FIND_EARBUDS_BOTH}).encode();
+
+        if (!start) {
+            return stopFind;
+        }
+
+        final byte earbuds = switch (target) {
+            case LEFT -> FIND_EARBUDS_LEFT;
+            case RIGHT -> FIND_EARBUDS_RIGHT;
+            default -> FIND_EARBUDS_BOTH;
+        };
+
+        final byte[] startFind = new Message(MessageType.PHONE_REQUEST, Opcode.SET_CONFIG, sequenceNumber++,
+            new byte[]{0x04, 0x00, 0x09, 0x01, earbuds}).encode();
+
+        final ByteArrayOutputStream messages = new ByteArrayOutputStream();
+        try {
+            messages.write(stopFind);
+            messages.write(startFind);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+        return messages.toByteArray();
     }
 
     public void decodeGetConfig(byte[] configPayload) {
