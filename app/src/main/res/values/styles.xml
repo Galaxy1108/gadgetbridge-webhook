@@ -247,7 +247,7 @@
         <item name="datestep_primary_caption">?attr/colorOnPrimary</item>
         <item name="datestep_label">?attr/colorOnSurface</item>
 
-        <item name="toolbar_bg">?attr/colorSurfaceContainer</item>
+        <item name="toolbar_bg">?attr/colorSurface</item>
         <item name="bar_shade">@drawable/bar_shade_light</item>
         <item name="android:windowContentOverlay">?attr/bar_shade</item>
         <item name="toolbar_title">?attr/colorOnSurface</item>
@@ -308,7 +308,7 @@
         <item name="datestep_primary_caption">?attr/colorOnPrimary</item>
         <item name="datestep_label">?attr/colorOnSurface</item>
 
-        <item name="toolbar_bg">?attr/colorSurfaceContainer</item>
+        <item name="toolbar_bg">?attr/colorSurface</item>
         <item name="bar_shade">@drawable/bar_shade_dark</item>
         <item name="android:windowContentOverlay">?attr/bar_shade</item>
         <item name="toolbar_title">?attr/colorOnSurface</item>

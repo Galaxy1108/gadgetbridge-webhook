@@ -53,8 +53,7 @@
     <attr name="toolbar_subtitle" format="color" />
     <attr name="toolbar_icon" format="color" />
 
-    <!-- Main screen's top toolbar / bottom nav bar background - the fragment background in the
-         static themes, colorSurfaceContainer (Material 3's navigation bar color) in Dynamic. -->
+    <!-- Main screen's top toolbar / bottom nav bar background -->
     <attr name="main_bar_bg" format="color" />
     <attr name="bar_shade" format="reference" />
 

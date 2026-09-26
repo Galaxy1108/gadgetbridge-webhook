@@ -250,7 +250,7 @@ public class ControlCenterv2 extends AppCompatActivity
                 this, drawer, toolbar, R.string.controlcenter_navigation_drawer_open, R.string.controlcenter_navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-        // Every theme defines its own toolbar_bg (colorSurfaceContainer for Dynamic, black for AMOLED)
+        // Every theme defines its own toolbar_bg
         // Not TypedValue.data: the Dynamic surface colors are color state list resources (lStar),
         // for which data is not a color. MaterialColors resolves those too.
         toolbar.setBackgroundColor(MaterialColors.getColor(toolbar, R.attr.toolbar_bg));
