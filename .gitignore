@@ -74,3 +74,5 @@ app/release/output-metadata.json
 app/.cxx/
 .attach_pid*
 *.patch
+
+__pycache__/

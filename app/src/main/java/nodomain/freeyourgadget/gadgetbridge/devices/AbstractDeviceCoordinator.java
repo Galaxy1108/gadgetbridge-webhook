@@ -69,6 +69,7 @@ import nodomain.freeyourgadget.gadgetbridge.capabilities.password.PasswordCapabi
 import nodomain.freeyourgadget.gadgetbridge.capabilities.widgets.WidgetManager;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
+import nodomain.freeyourgadget.gadgetbridge.database.repository.WorkoutTemplateRepository;
 import nodomain.freeyourgadget.gadgetbridge.entities.AlarmDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.BatteryCurrentSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.BatteryLevelDao;
@@ -258,6 +259,7 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
                 deleteBy(session.getHealthConnectSyncStateDao(), HealthConnectSyncStateDao.Properties.DeviceId, device.getId());
                 deleteBy(session.getHealthConnectSleepSessionDao(), HealthConnectSleepSessionDao.Properties.DeviceId, device.getId());
                 deleteBy(session.getInternetFirewallRuleDao(), InternetFirewallRuleDao.Properties.DeviceId, device.getId());
+                WorkoutTemplateRepository.INSTANCE.deleteByDevice(session, device.getId());
                 session.getDeviceDao().delete(device);
             } else {
                 LOG.info("device to delete not found in db: {}", gbDevice);

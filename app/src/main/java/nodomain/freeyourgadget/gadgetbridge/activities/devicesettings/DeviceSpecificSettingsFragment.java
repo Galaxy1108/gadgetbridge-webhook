@@ -86,6 +86,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.AbstractPreferenceFragmen
 import nodomain.freeyourgadget.gadgetbridge.activities.CalendarSelectionActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.ConfigureContacts;
 import nodomain.freeyourgadget.gadgetbridge.activities.ConfigureWorldClocks;
+import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.WorkoutTemplateListActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.NotificationsAppIconUploadActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.app_specific_notifications.AppSpecificNotificationSettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.audiorecordings.AudioRecordingsActivity;
@@ -1390,6 +1391,19 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     final Intent intent = new Intent(getContext(), ConfigureWorldClocks.class);
+                    intent.putExtra(GBDevice.EXTRA_DEVICE, device);
+                    startActivity(intent);
+                    return true;
+                }
+            });
+        }
+
+        final Preference workoutTemplates = findPreference(PREF_WORKOUT_TEMPLATES);
+        if (workoutTemplates != null) {
+            workoutTemplates.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    final Intent intent = new Intent(getContext(), WorkoutTemplateListActivity.class);
                     intent.putExtra(GBDevice.EXTRA_DEVICE, device);
                     startActivity(intent);
                     return true;

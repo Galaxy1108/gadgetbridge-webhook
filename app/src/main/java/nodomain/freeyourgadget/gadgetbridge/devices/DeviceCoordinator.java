@@ -42,6 +42,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.charts.DeviceChartsProvid
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettings;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.WorkoutTemplateSpec;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.HeartRateCapability;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.BarcodeFormat;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.password.PasswordCapabilityImpl;
@@ -1002,6 +1003,15 @@ public interface DeviceCoordinator {
      */
     @Nullable
     default DeviceSettingsSpec getDeviceSettings(@NonNull final GBDevice device) {
+        return null;
+    }
+
+    /**
+     * The workout template capabilities of this device: sports, step types, durations, targets
+     * and fields.
+     */
+    @Nullable
+    default WorkoutTemplateSpec getWorkoutTemplateSpec(@NonNull final GBDevice device) {
         return null;
     }
 

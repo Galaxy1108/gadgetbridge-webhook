@@ -439,6 +439,14 @@ public class ServiceDeviceSupport implements DeviceSupport {
     }
 
     @Override
+    public void onSyncWorkoutTemplate(final long templateId) {
+        if (checkBusy("sync workout template")) {
+            return;
+        }
+        delegate.onSyncWorkoutTemplate(templateId);
+    }
+
+    @Override
     public void onSetLoyaltyCards(final ArrayList<LoyaltyCard> cards) {
         if (checkBusy("set loyalty cards")) {
             return;

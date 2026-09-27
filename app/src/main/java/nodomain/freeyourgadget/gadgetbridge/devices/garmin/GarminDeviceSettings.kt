@@ -18,6 +18,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.compon
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.sendAppNotifications
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.timeSync
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.workoutSendGpsToBand
+import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.WorkoutTemplateListActivity
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.actions.GarminSendWaypointActivity
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.FitAsyncProcessor
@@ -41,6 +42,16 @@ fun garminDeviceSettings(
             title = R.string.realtime_settings,
             icon = R.drawable.ic_settings,
             activityClass = GarminRealtimeSettingsActivity::class.java,
+        )
+    }
+
+    if (coordinator.supports(device, GarminCapability.WORKOUT_DOWNLOAD)) {
+        externalSettings(
+            key = DeviceSettingsPreferenceConst.PREF_WORKOUT_TEMPLATES,
+            title = R.string.pref_workout_templates_title,
+            summary = R.string.pref_workout_templates_summary,
+            icon = R.drawable.ic_activity_unknown_small,
+            activityClass = WorkoutTemplateListActivity::class.java,
         )
     }
 
