@@ -5221,7 +5221,7 @@
     <string name="workout_target_none">无目标</string>
     <string name="workout_target_hr_zone">心率范围</string>
     <string name="workout_target_hr_range">心率范围</string>
-    <string name="workout_target_bike_power_zone">功率范围</string>
+    <string name="workout_target_bike_power_zone">动力区域</string>
     <string name="workout_target_bike_power_range">功率范围</string>
     <string name="workout_target_power_ftp_range">FTP 区间百分比</string>
     <string name="workout_target_stroke_rate">划船速率</string>
