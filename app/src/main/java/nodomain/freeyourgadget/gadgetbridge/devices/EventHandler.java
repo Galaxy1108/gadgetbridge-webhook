@@ -67,6 +67,13 @@ public interface EventHandler {
 
     void onSetContacts(ArrayList<? extends Contact> contacts);
 
+    /**
+     * Sends the workout template with the given id to the device.
+     *
+     * @param templateId the id of the WorkoutTemplate row
+     */
+    void onSyncWorkoutTemplate(long templateId);
+
     void onSetCallState(CallSpec callSpec);
 
     void onSetCannedMessages(@NonNull CannedMessagesSpec cannedMessagesSpec);

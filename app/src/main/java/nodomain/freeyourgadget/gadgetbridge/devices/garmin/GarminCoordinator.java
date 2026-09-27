@@ -88,6 +88,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityTrackProvider;
+import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.WorkoutTemplateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.BodyEnergySample;
 import nodomain.freeyourgadget.gadgetbridge.model.SolarChargeSample;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
@@ -316,6 +317,12 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
                 super.getSupportedDebugSettings(device),
                 R.xml.devicesettings_debug_drop_packets
         );
+    }
+
+    @Nullable
+    @Override
+    public WorkoutTemplateSpec getWorkoutTemplateSpec(@NonNull final GBDevice device) {
+        return GarminWorkoutTemplateSpec.INSTANCE.build(this, device);
     }
 
     @Override

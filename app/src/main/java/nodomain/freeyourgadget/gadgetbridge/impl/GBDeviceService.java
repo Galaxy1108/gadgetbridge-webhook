@@ -274,6 +274,13 @@ public class GBDeviceService implements DeviceService {
     }
 
     @Override
+    public void onSyncWorkoutTemplate(final long templateId) {
+        Intent intent = createIntent().setAction(ACTION_SYNC_WORKOUT_TEMPLATE)
+                .putExtra(EXTRA_WORKOUT_TEMPLATE_ID, templateId);
+        invokeService(intent);
+    }
+
+    @Override
     public void onSetMusicInfo(@NonNull MusicSpec musicSpec) {
         final MusicSpec withRtlFix = musicSpec.withRtlFix();
         Intent intent = createIntent().setAction(ACTION_SETMUSICINFO)
