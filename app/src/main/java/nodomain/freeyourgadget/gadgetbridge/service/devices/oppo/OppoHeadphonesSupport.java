@@ -147,54 +147,57 @@ public class OppoHeadphonesSupport extends AbstractHeadphoneBTBRDeviceSupport {
                 break;
             }
 
-            final int nextPacketPosition = packetBuffer.position() + totalLength;
-
-            final short zero = packetBuffer.getShort();
-            if (zero != 0 && zero != 4) {
-                // 0 on oppo, 4 on realme?
-                // 8 on realme buds t200?
-                LOG.warn("Unexpected bytes: {}, expected 0 or 4", zero);
-            }
-
-            final short code = packetBuffer.getShort();
-            final OppoCommand command = OppoCommand.fromCode(code);
-            if (command == null) {
-                LOG.warn("Unknown command code 0x{}", OppoUtils.numberToHex(code, 4));
-                packetBuffer.position(nextPacketPosition);
-                continue;
-            }
-
-            final int seq = packetBuffer.get();
-            final int payloadLength = packetBuffer.getShort() & 0xFFFF;
-            final int expectedPayloadLength = totalLength - 7;
-            if (payloadLength != expectedPayloadLength) {
-                LOG.error("Unexpected payload length: {}, expected {}", payloadLength, expectedPayloadLength);
-                packetBuffer.position(nextPacketPosition);
-                continue;
-            }
-
-            final byte[] payload = new byte[payloadLength];
-            packetBuffer.get(payload);
-
-            boolean sendNext;
-            try {
-                handleCommand(command, payload);
-                if (pendingMessage != null) {
-                    sendNext = (pendingMessage.command().getCode() | CMD_MASK_RESPONSE) == command.getCode();
-                } else {
-                    sendNext = false;
-                }
-            } catch (Exception e) {
-                LOG.error("Failed to handle command", e);
-                sendNext = true;
-            }
-
-            if (sendNext) {
-                sendNextCommand();
-            }
+            final byte[] packet = new byte[totalLength];
+            packetBuffer.get(packet);
+            handlePacket(packet);
         }
 
         packetBuffer.compact();
+    }
+
+    protected void handlePacket(final byte[] packet) {
+        final ByteBuffer buf = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
+        final short zero = buf.getShort();
+        if (zero != 0 && zero != 4) {
+            // 0 on oppo, 4 on realme?
+            // 8 on realme buds t200?
+            LOG.warn("Unexpected bytes: {}, expected 0 or 4", zero);
+        }
+
+        final short code = buf.getShort();
+        final OppoCommand command = OppoCommand.fromCode(code);
+        if (command == null) {
+            LOG.warn("Unknown command code 0x{}", OppoUtils.numberToHex(code, 4));
+            return;
+        }
+
+        final int seq = buf.get();
+        final int payloadLength = buf.getShort() & 0xFFFF;
+        final int expectedPayloadLength = buf.capacity() - 7;
+        if (payloadLength != expectedPayloadLength) {
+            LOG.error("Unexpected payload length: {}, expected {}", payloadLength, expectedPayloadLength);
+            return;
+        }
+
+        final byte[] payload = new byte[payloadLength];
+        buf.get(payload);
+
+        boolean sendNext;
+        try {
+            handleCommand(command, payload);
+            if (pendingMessage != null) {
+                sendNext = (pendingMessage.command().getCode() | CMD_MASK_RESPONSE) == command.getCode();
+            } else {
+                sendNext = false;
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to handle command", e);
+            sendNext = true;
+        }
+
+        if (sendNext) {
+            sendNextCommand();
+        }
     }
 
     @Override
