@@ -451,7 +451,7 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
             showInNotification.setLayoutResource(R.layout.preference_checkbox);
             showInNotification.setKey(PREF_BATTERY_SHOW_IN_NOTIFICATION + batteryConfig.getBatteryIndex());
             showInNotification.setTitle(R.string.show_in_notification);
-            showInNotification.setIconSpaceReserved(false);
+            showInNotification.setIcon(R.drawable.ic_message_outline);
             showInNotification.setDefaultValue(true);
             batteryScreen.addPreference(showInNotification);
 
@@ -460,14 +460,14 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
             notifyLowEnabled.setKey(PREF_BATTERY_NOTIFY_LOW_ENABLED + batteryConfig.getBatteryIndex());
             notifyLowEnabled.setTitle(R.string.battery_low_notify_enabled);
             notifyLowEnabled.setDefaultValue(true);
-            notifyLowEnabled.setIconSpaceReserved(false);
+            notifyLowEnabled.setIcon(R.drawable.ic_battery_alert);
             batteryScreen.addPreference(notifyLowEnabled);
 
             final EditTextPreference notifyLowThreshold = new EditTextPreference(requireContext());
             notifyLowThreshold.setKey(PREF_BATTERY_NOTIFY_LOW_THRESHOLD + batteryConfig.getBatteryIndex());
             notifyLowThreshold.setTitle(R.string.battery_low_threshold);
             notifyLowThreshold.setDialogTitle(R.string.battery_low_threshold);
-            notifyLowThreshold.setIconSpaceReserved(false);
+            notifyLowThreshold.setIcon(R.drawable.ic_battery_empty);
             notifyLowThreshold.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 editText.addTextChangedListener(new MinMaxTextWatcher(editText, 0, 100, true));
@@ -485,14 +485,14 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
             notifyFullEnabled.setKey(PREF_BATTERY_NOTIFY_FULL_ENABLED + batteryConfig.getBatteryIndex());
             notifyFullEnabled.setTitle(R.string.battery_full_notify_enabled);
             notifyFullEnabled.setDefaultValue(true);
-            notifyFullEnabled.setIconSpaceReserved(false);
+            notifyFullEnabled.setIcon(R.drawable.ic_battery_status_good);
             batteryScreen.addPreference(notifyFullEnabled);
 
             final EditTextPreference notifyFullThreshold = new EditTextPreference(requireContext());
             notifyFullThreshold.setKey(PREF_BATTERY_NOTIFY_FULL_THRESHOLD + batteryConfig.getBatteryIndex());
             notifyFullThreshold.setTitle(R.string.battery_full_threshold);
             notifyFullThreshold.setDialogTitle(R.string.battery_full_threshold);
-            notifyFullThreshold.setIconSpaceReserved(false);
+            notifyFullThreshold.setIcon(R.drawable.ic_battery_full);
             notifyFullThreshold.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 editText.addTextChangedListener(new MinMaxTextWatcher(editText, 0, 100, true));
@@ -518,14 +518,14 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
             pollingToggle.setKey(PREF_BATTERY_POLLING_ENABLE);
             pollingToggle.setTitle(R.string.pref_battery_polling_enable);
             pollingToggle.setDefaultValue(true);
-            pollingToggle.setIconSpaceReserved(false);
+            pollingToggle.setIcon(R.drawable.ic_question_exchange);
             batteryScreen.addPreference(pollingToggle);
 
             final EditTextPreference pollingInterval = new EditTextPreference(requireContext());
             pollingInterval.setKey(PREF_BATTERY_POLLING_INTERVAL);
             pollingInterval.setTitle(R.string.pref_battery_polling_interval);
             pollingInterval.setDialogTitle(R.string.pref_battery_polling_interval);
-            pollingInterval.setIconSpaceReserved(false);
+            pollingInterval.setIcon(R.drawable.ic_timer);
             pollingInterval.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 // Max is set to 8 days, which should be more than enough
