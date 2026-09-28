@@ -5323,4 +5323,29 @@
     <string name="workout_error_name_required">Wprowadź nazwę.</string>
     <string name="workout_error_name_too_long">Nazwa jest za długa.</string>
     <string name="workout_error_note_too_long">Notatka jest za długa.</string>
+    <string name="workout_error_no_steps">Dodaj co najmniej jeden krok.</string>
+    <string name="workout_error_too_many_steps">Zbyt wiele czynności jak na to urządzenie.</string>
+    <string name="workout_error_repeat_not_supported">To urządzenie nie obsługuje grup powtórzeń.</string>
+    <string name="workout_error_repeat_count_out_of_range">Liczba powtórzeń wykracza poza dopuszczalny zakres.</string>
+    <string name="workout_error_empty_group">Grupa nie ma etapów.</string>
+    <string name="workout_error_nested_repeat_not_supported">Grupa powtórzeniowa nie może zawierać innej grupy powtórzeniowej.</string>
+    <string name="workout_error_leg_not_supported">To urządzenie nie obsługuje tej dyscypliny sportowej w trybie wielodyscyplinarnym.</string>
+    <string name="workout_error_step_type_not_supported">To urządzenie nie obsługuje tego typu kroku.</string>
+    <string name="workout_error_duration_not_supported">To urządzenie nie obsługuje typu czas trwania.</string>
+    <string name="workout_error_target_not_supported">To urządzenie nie obsługuje tego celu.</string>
+    <string name="workout_error_secondary_target_not_supported">To urządzenie nie obsługuje celu drugorzędnego.</string>
+    <string name="workout_error_secondary_target_conflict">Cel główny i cel drugorzędny są ze sobą sprzeczne.</string>
+    <string name="workout_error_min_above_max">Wartość min nie może być większa od wartości max.</string>
+    <string name="workout_error_value_out_of_range">Wartość wykracza poza zakres.</string>
+    <string name="workout_error_exercise_not_supported">To urządzenie nie obsługuje danego ćwiczenia.</string>
+    <string name="workout_exercise_picker_title">Wybierz ćwiczenie</string>
+    <string name="workout_exercise_picker_search_hint">Wyszukaj ćwiczenie</string>
+    <string name="workout_exercise_picker_empty">Nie znaleziono pasujących ćwiczeń</string>
+    <string name="workout_exercise_picker_filter_title">Filtruj ćwiczenia</string>
+    <plurals name="workout_exercise_picker_filter_count">
+        <item quantity="one">%d ćwiczenie</item>
+        <item quantity="few">%d ćwiczenia</item>
+        <item quantity="many">%d ćwiczeń</item>
+        <item quantity="other">%d ćwiczeń</item>
+    </plurals>
 </resources>
