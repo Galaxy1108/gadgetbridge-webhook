@@ -36,6 +36,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate
 import nodomain.freeyourgadget.gadgetbridge.model.BatteryConfig
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.service.devices.oppo.OppoHeadphonesSupport
+import nodomain.freeyourgadget.gadgetbridge.service.devices.oppo.OppoUuid
 import nodomain.freeyourgadget.gadgetbridge.service.devices.oppo.commands.TouchConfigSide
 import nodomain.freeyourgadget.gadgetbridge.service.devices.oppo.commands.TouchConfigType
 import nodomain.freeyourgadget.gadgetbridge.service.devices.oppo.commands.TouchConfigValue
@@ -103,9 +104,6 @@ abstract class OppoHeadphonesCoordinator : AbstractBLClassicDeviceCoordinator() 
     }
 
     private fun DeviceSettingsScope.touchOptions(device: GBDevice) {
-        if (touchOptions.isEmpty()) {
-            return
-        }
         screen(
             DeviceSpecificSettingsScreen.TOUCH_OPTIONS,
             R.drawable.ic_touch,
@@ -132,6 +130,13 @@ abstract class OppoHeadphonesCoordinator : AbstractBLClassicDeviceCoordinator() 
                 }
             if (supportsAnc(device)) {
                 touchOptionsAncCycleModes()
+            }
+            if (supportsFindPhone(device)) {
+                switchSetting(
+                    key = OppoHeadphonesPreferences.FIND_PHONE,
+                    title = R.string.prefs_find_phone,
+                    icon = R.drawable.ic_vibration,
+                )
             }
         }
     }
@@ -160,8 +165,10 @@ abstract class OppoHeadphonesCoordinator : AbstractBLClassicDeviceCoordinator() 
     final override fun getDeviceKind(device: GBDevice): DeviceCoordinator.DeviceKind =
         DeviceCoordinator.DeviceKind.EARBUDS
 
+    open fun ctrlUuid(device: GBDevice): OppoUuid = OppoUuid.VENDOR_RFCOMM
     open fun supportsLdac(device: GBDevice): Boolean = false
     open fun supportsMultipoint(device: GBDevice): Boolean = false
     open fun supportsGameMode(device: GBDevice): Boolean = false
     open fun supportsAnc(device: GBDevice): Boolean = false
+    open fun supportsFindPhone(device: GBDevice): Boolean = false
 }

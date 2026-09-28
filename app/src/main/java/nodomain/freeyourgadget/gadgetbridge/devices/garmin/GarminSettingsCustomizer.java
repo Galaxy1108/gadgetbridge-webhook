@@ -41,10 +41,14 @@ import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsHandler;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
+import nodomain.freeyourgadget.gadgetbridge.model.DeviceService;
 import nodomain.freeyourgadget.gadgetbridge.service.AbstractDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.FileType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.FitFile;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.FitLocalMessageBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.RecordData;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.FitDevice;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDeviceSettings;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitFileId;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitUserProfile;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
@@ -71,6 +75,59 @@ public class GarminSettingsCustomizer implements DeviceSpecificSettingsCustomize
         if (prefSleepSend != null) {
             prefSleepSend.setOnPreferenceClickListener(dummy -> sendSleep(handler));
         }
+
+        final Preference prefConnection = handler.findPreference("garmin_experimental_connection_send");
+        if (prefConnection != null) {
+            prefConnection.setOnPreferenceClickListener(dummy -> sendConnection(handler));
+        }
+    }
+
+    private boolean sendConnection(DeviceSpecificSettingsHandler handler) {
+        final GBDevice device = handler.getDevice();
+        if (!device.isInitialized()) {
+            LOG.warn("ConnectionTest device: {}", device.getState());
+            toast(handler.getContext(), R.string.device_not_connected, Toast.LENGTH_LONG, GB.ERROR);
+            return false;
+        }
+
+        final FitLocalMessageBuilder messages = new FitLocalMessageBuilder();
+        final long now = System.currentTimeMillis() / 1000L;
+
+        final FitFileId.Builder fileId = new FitFileId.Builder();
+        fileId.setType(FileType.FILETYPE.SETTINGS);
+        fileId.setManufacturer(FitDevice.M1_P65534.manufacturer);
+        fileId.setProduct(FitDevice.M1_P65534.product);
+        fileId.setSerialNumber(1L);
+        fileId.setTimeCreated(now);
+        fileId.setNumber(0);
+        messages.addRecordData(fileId.build(messages.getNextAvailableLocalMessageType()));
+
+        final DevicePrefs prefs = GBApplication.getDevicePrefs(device);
+        final int wifi = prefs.getInt("garmin_experimental_connection_Wifi", -2);
+        final int wifiAutoUpload = prefs.getInt("garmin_experimental_connection_WifiAutoUpload", -2);
+
+        final FitDeviceSettings.Builder settings = new FitDeviceSettings.Builder();
+        if (wifi != -2) {
+            settings.setWifiEnabled(wifi == -1 ? null : wifi);
+        }
+        if (wifiAutoUpload != -2) {
+            settings.setWifiAutoUploadEnabled(wifiAutoUpload == -1 ? null : wifiAutoUpload);
+        }
+        messages.addRecordData(settings.build(messages.getNextAvailableLocalMessageType()));
+
+        final FitFile fitFile = new FitFile(messages.getRecordDataList());
+        final byte[] fitBytes = fitFile.getOutgoingMessage();
+
+        final Uri uri = Uri.parse("fake://SendConnection");
+        final Bundle options = new Bundle();
+        options.putByteArray(AbstractDeviceSupport.BUNDLE_EXTRA_INSTALL_BYTES, fitBytes);
+        options.putString(AbstractDeviceSupport.BUNDLE_EXTRA_INSTALL_TASK_NAME, "configure SendConnection");
+
+        final DeviceService deviceService = GBApplication.deviceService(device);
+        LOG.info("send SendConnection to device: Wifi={} WifiAutoUpload={}",
+            wifi, wifiAutoUpload);
+        deviceService.onInstallApp(uri, options);
+        return true;
     }
 
     private void addBlockedDomain(final DeviceSpecificSettingsHandler handler,
