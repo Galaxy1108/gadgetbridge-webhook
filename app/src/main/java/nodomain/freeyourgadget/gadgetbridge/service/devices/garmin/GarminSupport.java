@@ -137,6 +137,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitWeatherConditions;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.workouts.GarminWorkoutFitEncoder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.CurrentTimeRequestMessage;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.DeviceInformationMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.DownloadRequestMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.GFDIMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.MusicControlEntityUpdateMessage;
@@ -176,6 +177,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     private final List<MessageHandler> messageHandlers;
     private final List<FileType> supportedFileTypeList = new ArrayList<>();
     private ICommunicator communicator;
+    private GarminRfcommListener rfcommListener;
     private MediaManager mediaManager;
     private boolean mFirstConnect = false;
     private boolean isBusyFetching;
@@ -255,6 +257,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             if (communicator != null) {
                 communicator.dispose();
             }
+            if (rfcommListener != null) {
+                rfcommListener.close();
+                rfcommListener = null;
+            }
             // BT disconnect: tell ExploreSync to drop in-flight buffers.
             if (protocolBufferHandler != null && protocolBufferHandler.getExploreSyncHandler() != null) {
                 protocolBufferHandler.getExploreSyncHandler().onDisconnected();
@@ -318,6 +324,11 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         resetFileSyncState();
 
+        if (getCoordinator().supportsRfcommFileTransfer() && rfcommListener == null) {
+            rfcommListener = new GarminRfcommListener(this);
+            rfcommListener.start();
+        }
+
         if (getDevicePrefs().getBoolean(PREF_ALLOW_HIGH_MTU, true)) {
             builder.requestMtu(515);
         }
@@ -379,8 +390,23 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         }
     }
 
+    /**
+     * Messages from the RFCOMM link are handled on the listener thread, which routes all replies
+     * back over RFCOMM.
+     */
+    private boolean isRfcommThread() {
+        return rfcommListener != null && Thread.currentThread() == rfcommListener;
+    }
+
     @Override
     public void onMessage(final byte[] message) {
+        if (rfcommListener != null && !Thread.holdsLock(this)) {
+            // BLE and RFCOMM messages arrive on different threads and share the file sync state
+            synchronized (this) {
+                onMessage(message);
+            }
+            return;
+        }
         if (null == message) {
             return; //message is not complete yet TODO check before calling
         }
@@ -417,12 +443,27 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         sendAck("send status", parsedMessage); //send status message
 
+        if (parsedMessage instanceof DeviceInformationMessage deviceInformation && rfcommListener != null && !isRfcommThread()) {
+            rfcommListener.requestConnection(deviceInformation.getClassicAddress());
+        }
+
         sendOutgoingMessage("send reply", parsedMessage); //send reply if any
 
         sendOutgoingMessage("send followup", followup); //send followup message if any
 
         final List<GBDeviceEvent> events = parsedMessage.getGBDeviceEvent();
         for (final GBDeviceEvent event : events) {
+            if (isRfcommThread()) {
+                // The RFCOMM link has its own handshake. The BLE link owns initialization and
+                // its packet size, so do not let the second handshake touch them.
+                if (event instanceof CapabilitiesDeviceEvent) {
+                    completeRfcommInitialization();
+                    continue;
+                }
+                if (event instanceof MaxPacketSizeDeviceEvent) {
+                    continue;
+                }
+            }
             evaluateGBDeviceEvent(event);
         }
 
@@ -599,6 +640,20 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         // FIXME respect dataTypes?
 
+        if (rfcommListener != null) {
+            // This device only lists files over RFCOMM
+            if (!rfcommListener.isConnected()) {
+                // the device starts the sync by itself once it connects
+                rfcommListener.requestConnection(null);
+                return;
+            }
+            final GFDIMessage download = fileTransferHandler.initiateDownload();
+            if (download != null) {
+                rfcommListener.sendMessage(download.getOutgoingMessage());
+            }
+            return;
+        }
+
         // We initiate download here even in the new sync protocol so that the watch "flushes" the data
         // otherwise we might get incomplete monitor files
         sendOutgoingMessage("fetch recorded data", fileTransferHandler.initiateDownload());
@@ -740,6 +795,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         byte[] out = message.getOutgoingMessage();
         if (out != null && LOG.isDebugEnabled())
             LOG.debug("OUTGOING message {}: {}", message, GB.lazyHexdump(out));
+        if (isRfcommThread()) {
+            rfcommListener.sendMessage(out);
+            return;
+        }
         if (communicator == null) {
             LOG.error("outgoing communicator is null");
             return;
@@ -753,6 +812,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         byte[] ack = message.getAckBytestream();
         if (ack != null && LOG.isDebugEnabled())
             LOG.debug("OUTGOING ACK {}: {}", message, GB.lazyHexdump(ack));
+        if (isRfcommThread()) {
+            rfcommListener.sendMessage(ack);
+            return;
+        }
         if (communicator == null) {
             LOG.error("ack communicator is null");
             return;
@@ -872,6 +935,14 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         }
 
         return weatherLocalMessage;
+    }
+
+    private void completeRfcommInitialization() {
+        // Mirrors what the official app sends on this link, after which the device requests a sync
+        LOG.info("RFCOMM link initialized");
+        sendOutgoingMessage("rfcomm: request supported file types", new SupportedFileTypesMessage());
+        sendDeviceSettings();
+        sendOutgoingMessage("rfcomm: set sync ready", new SystemEventMessage(SystemEventMessage.GarminSystemEventType.SYNC_READY, 0));
     }
 
     private void completeInitialization() {
