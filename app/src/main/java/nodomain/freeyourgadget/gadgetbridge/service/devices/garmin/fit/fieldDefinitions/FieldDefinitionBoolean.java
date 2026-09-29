@@ -25,7 +25,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.baseTypes
 
 public class FieldDefinitionBoolean extends FieldDefinition {
 
-    public FieldDefinitionBoolean(int localNumber, int size, BaseType baseType, String name, int scale, int offset) {
+    public FieldDefinitionBoolean(int localNumber, int size, BaseType baseType, String name, double scale, int offset) {
         super(localNumber, size, baseType, name, scale, offset);
     }
 
