@@ -27,7 +27,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefi
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitions;
 
 public class FieldDefinitionFactory {
-    public static FieldDefinition create(int localNumber, int size, FieldDefinitions field, BaseType baseType, String name, int scale, int offset) {
+    public static FieldDefinition create(int localNumber, int size, FieldDefinitions field, BaseType baseType, String name, double scale, int offset) {
         if (null == field) {
             return new FieldDefinition(localNumber, size, baseType, name, scale, offset);
         }

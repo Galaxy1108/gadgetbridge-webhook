@@ -30,7 +30,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Wea
 
 public class FieldDefinitionWeatherCondition extends FieldDefinition {
 
-    public FieldDefinitionWeatherCondition(int localNumber, int size, BaseType baseType, String name, int scale, int offset) {
+    public FieldDefinitionWeatherCondition(int localNumber, int size, BaseType baseType, String name, double scale, int offset) {
         super(localNumber, size, baseType, name, scale, offset);
     }
 
