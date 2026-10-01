@@ -257,7 +257,7 @@ public class FitImporter {
                 sample.setSleepScore(score);
                 sleepStatsSamples.add(sample);
             } else if (record instanceof FitSleepLevel fitSleepLevel) {
-                final SleepStage stage = fitSleepLevel.getSleepStage();
+                final SleepStage stage = fitSleepLevel.getSleepLevel();
                 if (stage == null) {
                     continue;
                 }
@@ -267,13 +267,13 @@ public class FitImporter {
                 sample.setStage(stage.num);
                 sleepStageSamples.add(sample);
             } else if (record instanceof FitNapEvent nap) {
-                if (nap.getStartTimestamp() == null || nap.getEndTimestamp() == null) {
+                if (nap.getStartTime() == null || nap.getEndTime() == null) {
                     continue;
                 }
-                LOG.trace("Nap at {}: from {} to {}", ts, nap.getStartTimestamp(), nap.getEndTimestamp());
+                LOG.trace("Nap at {}: from {} to {}", ts, nap.getStartTime(), nap.getEndTime());
                 final GarminNapSample sample = new GarminNapSample();
-                sample.setTimestamp(nap.getStartTimestamp() * 1000L);
-                sample.setEndTimestamp(nap.getEndTimestamp() * 1000L);
+                sample.setTimestamp(nap.getStartTime() * 1000L);
+                sample.setEndTimestamp(nap.getEndTime() * 1000L);
                 napSamples.add(sample);
             } else if (record instanceof FitMonitoring monitoringRecord) {
                 final Long currentMonitoringTimestamp = monitoringRecord.computeTimestamp(lastMonitoringTimestamp);
@@ -435,12 +435,12 @@ public class FitImporter {
                 }
                 restingHrSamples.add(sample);
             } else if (record instanceof FitBattery fitBattery) {
-                Integer level = fitBattery.getBatteryLevel();
-                if (ts != null && level != null) {
+                Integer remainingCapacity = fitBattery.getCapacity();
+                if (ts != null && remainingCapacity != null) {
                     BatteryLevel batteryLevel = new BatteryLevel();
                     batteryLevel.setTimestamp(ts.intValue());
                     batteryLevel.setBatteryIndex(0);
-                    batteryLevel.setLevel(level);
+                    batteryLevel.setLevel(remainingCapacity);
                     batterySamples.add(batteryLevel);
                 }
             } else if (record instanceof FitHillScore fitHillScore) {
