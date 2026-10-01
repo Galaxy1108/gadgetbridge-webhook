@@ -36,13 +36,13 @@ public class FieldDefinition implements FieldInterface {
     protected static final Logger LOG = LoggerFactory.getLogger(FieldDefinition.class);
 
     protected final BaseType baseType;
-    protected final int scale;
+    protected final double scale;
     protected final int offset;
     private final int number;
     private final int size;
     private final String name;
 
-    public FieldDefinition(int number, int size, BaseType baseType, String name, int scale, int offset) {
+    public FieldDefinition(int number, int size, BaseType baseType, String name, double scale, int offset) {
         this.number = number;
         this.size = size;
         this.baseType = baseType;
@@ -52,7 +52,7 @@ public class FieldDefinition implements FieldInterface {
     }
 
     public FieldDefinition(int number, int size, BaseType baseType, String name) {
-        this(number, size, baseType, name, 1, 0);
+        this(number, size, baseType, name, 1.0, 0);
     }
 
     private static FieldDefinitionTimestamp TIMESTAMP_253;
@@ -147,7 +147,7 @@ public class FieldDefinition implements FieldInterface {
     @Override
     public int hashCode() {
         int result = Objects.hashCode(baseType);
-        result = 31 * result + scale;
+        result = 31 * result + Double.hashCode(scale);
         result = 31 * result + offset;
         result = 31 * result + number;
         result = 31 * result + size;

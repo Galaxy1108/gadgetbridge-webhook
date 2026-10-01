@@ -2236,6 +2236,13 @@
     <string name="devicetype_garmin_vivosmart_4" translatable="false">Garmin Vívosmart 4</string>
     <string name="devicetype_garmin_vivosmart_5" translatable="false">Garmin Vívosmart 5</string>
     <string name="devicetype_garmin_vivosport" translatable="false">Garmin Vívosport</string>
+    <string name="devicetype_garmin_d2_air" translatable="false">Garmin D2 Air</string>
+    <string name="devicetype_garmin_d2_air_x10" translatable="false">Garmin D2 Air X10</string>
+    <string name="devicetype_garmin_d2_air_x15" translatable="false">Garmin D2 Air X15</string>
+    <string name="devicetype_garmin_d2_mach_1" translatable="false">Garmin D2 Mach 1</string>
+    <string name="devicetype_garmin_d2_mach_1_pro" translatable="false">Garmin D2 Mach 1 Pro</string>
+    <string name="devicetype_garmin_d2_mach_2" translatable="false">Garmin D2 Mach 2</string>
+    <string name="devicetype_garmin_d2_mach_2_pro" translatable="false">Garmin D2 Mach 2 Pro</string>
     <string name="devicetype_gree_ac" translatable="false">Gree Air Conditioner</string>
     <string name="devicetype_vibratissimo" translatable="false">Vibratissimo</string>
     <string name="devicetype_um25" translatable="false">UM-25</string>
