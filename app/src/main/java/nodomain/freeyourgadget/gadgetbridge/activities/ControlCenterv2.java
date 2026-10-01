@@ -234,10 +234,14 @@ public class ControlCenterv2 extends AppCompatActivity
         final int bottomNavPaddingLeft = navigationView.getPaddingLeft();
         final int bottomNavPaddingRight = navigationView.getPaddingRight();
         final int bottomNavPaddingTop = navigationView.getPaddingTop();
+        swipeLayout = findViewById(R.id.dashboard_swipe_layout);
         ViewCompat.setOnApplyWindowInsetsListener(mainContent, (view, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
             toolbar.setPadding(toolbarPaddingLeft, insets.top, toolbarPaddingRight, toolbarPaddingBottom);
             navigationView.setPadding(bottomNavPaddingLeft, bottomNavPaddingTop, bottomNavPaddingRight, insets.bottom);
+            // #6894 - when the bottom nav is not visible, the FAB would show up behind the system navbar
+            final int contentPaddingBottom = navigationView.getVisibility() == View.VISIBLE ? 0 : insets.bottom;
+            swipeLayout.setPadding(swipeLayout.getPaddingLeft(), swipeLayout.getPaddingTop(), swipeLayout.getPaddingRight(), contentPaddingBottom);
             navigationHeaderView.setPadding(headerPaddingLeft, insets.top, headerPaddingRight, headerPaddingBottom);
             return windowInsets;
         });
@@ -300,7 +304,6 @@ public class ControlCenterv2 extends AppCompatActivity
         });
 
         // Set pull-down-to-refresh action
-        swipeLayout = findViewById(R.id.dashboard_swipe_layout);
         swipeLayout.setEnabled(prefs.refreshOnSwipe());
         swipeLayout.setOnRefreshListener(() -> {
             if (prefs.refreshOnSwipe()) {
