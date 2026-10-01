@@ -1138,8 +1138,7 @@
         {"num":0,"name":"file","base":"ENUM"},
         {"num":1,"name":"mesg_num","base":"UINT16"},
         {"num":2,"name":"count_type","base":"ENUM"},
-        {"num":3,"name":"max_count","base":"UINT16"},
-        {"num":4,"name":"count","base":"UINT16"},
+        {"num":3,"name":"count","base":"UINT16"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -3571,7 +3570,7 @@
         {"num":2,"name":"end_timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":3,"name":"end_tz_offset","base":"SINT16","UOM":"MINUTES"},
         {"num":4,"name":"feedback","base":"ENUM"},
-        {"num":6,"name":"deleted","base":"ENUM","type":"BOOLEAN"},
+        {"num":5,"name":"deleted","base":"ENUM","type":"BOOLEAN"},
         {"num":7,"name":"updated_timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":254,"name":"message_index","base":"UINT16"}

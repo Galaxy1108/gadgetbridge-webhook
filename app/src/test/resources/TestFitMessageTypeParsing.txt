@@ -27,7 +27,7 @@ FitTotals{2025-09-21 23:59:59.000, timer_time=1, distance=1, calories=1, sport=1
 FitActivity{2025-09-21 23:59:59.000, total_timer_time=1000, num_sessions=1, type=1, event=WORKOUT, event_type=STOP, local_timestamp=631065601, event_group=1, timestamp=1758499199},
 FitSoftware{2025-09-21 23:59:59.000, version=1.0, part_number=a, message_index=1},
 FitFileCapabilities{2025-09-21 23:59:59.000, type=2, flags=1, directory=a, max_count=1, max_size=1, message_index=1},
-FitMesgCapabilities{2025-09-21 23:59:59.000, file=2, mesg_num=1, count_type=1, max_count=1, message_index=1},
+FitMesgCapabilities{2025-09-21 23:59:59.000, file=2, mesg_num=1, count_type=1, count=1, message_index=1},
 FitFieldCapabilities{2025-09-21 23:59:59.000, file=2, mesg_num=1, field_num=1, count=1, message_index=1},
 FitFileCreator{2025-09-21 23:59:59.000, software_version=1, hardware_version=1},
 FitBloodPressure{2025-09-21 23:59:59.000, systolic_pressure=1, diastolic_pressure=1, mean_arterial_pressure=1, map_3_sample_mean=1, map_morning_values=1, map_evening_values=1, heart_rate=1, heart_rate_type=1, status=1, user_profile_index=1, timestamp=1758499199},
