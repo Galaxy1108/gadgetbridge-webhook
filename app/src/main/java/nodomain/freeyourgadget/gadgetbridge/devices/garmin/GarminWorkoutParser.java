@@ -626,8 +626,8 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
                         AVG_LEFT_POWER_PHASE,
                         context.getString(
                                 R.string.range_degrees,
-                                Math.round(startAngle.floatValue() / 0.7111111),
-                                Math.round(endAngle.floatValue() / 0.7111111)
+                                Math.round(startAngle.floatValue()),
+                                Math.round(endAngle.floatValue())
                         )
                 );
             }
@@ -642,8 +642,8 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
                         AVG_RIGHT_POWER_PHASE,
                         context.getString(
                                 R.string.range_degrees,
-                                Math.round(startAngle.floatValue() / 0.7111111),
-                                Math.round(endAngle.floatValue() / 0.7111111)
+                                Math.round(startAngle.floatValue()),
+                                Math.round(endAngle.floatValue())
                         )
                 );
             }
@@ -658,8 +658,8 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
                         AVG_LEFT_POWER_PHASE_PEAK,
                         context.getString(
                                 R.string.range_degrees,
-                                Math.round(startAngle.floatValue() / 0.7111111),
-                                Math.round(endAngle.floatValue() / 0.7111111)
+                                Math.round(startAngle.floatValue()),
+                                Math.round(endAngle.floatValue())
                         )
                 );
             }
@@ -674,8 +674,8 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
                         AVG_RIGHT_POWER_PHASE_PEAK,
                         context.getString(
                                 R.string.range_degrees,
-                                Math.round(startAngle.floatValue() / 0.7111111),
-                                Math.round(endAngle.floatValue() / 0.7111111)
+                                Math.round(startAngle.floatValue()),
+                                Math.round(endAngle.floatValue())
                         )
                 );
             }

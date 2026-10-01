@@ -113,6 +113,13 @@ import nodomain.freeyourgadget.gadgetbridge.devices.garmin.hrm.GarminHrm200Coord
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.hrm.GarminHrm600Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.hrm.GarminHrmProPlusCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.cirqa.GarminCirqaCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.d2.GarminD2AirCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.d2.GarminD2AirX10Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.d2.GarminD2AirX15Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.d2.GarminD2Mach1Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.d2.GarminD2Mach1ProCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.d2.GarminD2Mach2Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.d2.GarminD2Mach2ProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.descent.GarminDescentG1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.descent.GarminDescentG2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.descent.GarminDescentMk3Coordinator;
@@ -999,6 +1006,13 @@ public enum DeviceType {
     GARMIN_VIVOSMART_5(GarminVivosmart5Coordinator.class),
     GARMIN_VIVOSPORT(GarminVivosportCoordinator.class),
     GARMIN_CIRQA(GarminCirqaCoordinator.class),
+    GARMIN_D2_AIR(GarminD2AirCoordinator.class),
+    GARMIN_D2_AIR_X10(GarminD2AirX10Coordinator.class),
+    GARMIN_D2_AIR_X15(GarminD2AirX15Coordinator.class),
+    GARMIN_D2_MACH_1(GarminD2Mach1Coordinator.class),
+    GARMIN_D2_MACH_1_PRO(GarminD2Mach1ProCoordinator.class),
+    GARMIN_D2_MACH_2(GarminD2Mach2Coordinator.class),
+    GARMIN_D2_MACH_2_PRO(GarminD2Mach2ProCoordinator.class),
     GREE_AC(GreeAcCoordinator.class),
     AAWIRELESS(AAWirelessCoordinator.class),
     VIBRATISSIMO(VibratissimoCoordinator.class),
