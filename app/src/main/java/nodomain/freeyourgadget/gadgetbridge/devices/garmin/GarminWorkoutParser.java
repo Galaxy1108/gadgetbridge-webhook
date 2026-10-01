@@ -62,10 +62,10 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Wat
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.exception.FitParseException;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.ExerciseCategory;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitActivity;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitBattery;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDeviceInfo;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitFileCreator;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitFileId;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDiveGas;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDiveSettings;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDiveSummary;
@@ -120,9 +120,9 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
     private final List<FitWorkoutStep> workoutSteps = new ArrayList<>();
     private final Map<Integer, FitDeviceInfo> deviceInfos = new TreeMap<>();
     @Nullable
-    private FitDeviceStatus deviceStatusStart = null;
+    private FitBattery batteyStart = null;
     @Nullable
-    private FitDeviceStatus deviceStatusEnd = null;
+    private FitBattery batteryEnd = null;
     @Nullable
     private Number ebikeBatteryStart = null;
     @Nullable
@@ -236,8 +236,8 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
         laps.clear();
         workoutSteps.clear();
         deviceInfos.clear();
-        deviceStatusStart = null;
-        deviceStatusEnd = null;
+        batteyStart = null;
+        batteryEnd = null;
         ebikeBatteryStart = null;
         ebikeBatteryEnd = null;
         workout = null;
@@ -361,11 +361,11 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
             if (relevant) {
                 deviceInfos.put(deviceIndex, deviceInfo);
             }
-        } else if (record instanceof FitDeviceStatus deviceStatus) {
-            if (deviceStatusStart == null) {
-                deviceStatusStart = deviceStatus;
+        } else if (record instanceof FitBattery fitBattery) {
+            if (batteyStart == null) {
+                batteyStart = fitBattery;
             } else {
-                deviceStatusEnd = deviceStatus;
+                batteryEnd = fitBattery;
             }
             // FitImporter implements the main processing for these records
             return false;
@@ -1063,21 +1063,21 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
             gearTableBuilder.addToSummaryData(summaryData);
         }
 
-        if (deviceStatusStart != null) {
-            Number batteryLevel = deviceStatusStart.getBatteryLevel();
+        if (batteyStart != null) {
+            Number batteryLevel = batteyStart.getBatteryLevel();
             String batteryUom = UNIT_PERCENTAGE;
             if (batteryLevel == null) {
-                batteryLevel = deviceStatusStart.getBatteryVoltage();
+                batteryLevel = batteyStart.getBatteryVoltage();
                 batteryUom = UNIT_VOLT;
             }
             summaryData.add(BATTERY_LEVEL_START, batteryLevel, batteryUom);
         }
 
-        if (deviceStatusEnd != null) {
-            Number batteryLevel = deviceStatusEnd.getBatteryLevel();
+        if (batteryEnd != null) {
+            Number batteryLevel = batteryEnd.getBatteryLevel();
             String batteryUom = UNIT_PERCENTAGE;
             if (batteryLevel == null) {
-                batteryLevel = deviceStatusEnd.getBatteryVoltage();
+                batteryLevel = batteryEnd.getBatteryVoltage();
                 batteryUom = UNIT_VOLT;
             }
             summaryData.add(BATTERY_LEVEL_END, batteryLevel, batteryUom);

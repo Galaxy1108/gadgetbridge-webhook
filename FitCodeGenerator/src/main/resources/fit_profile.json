@@ -390,7 +390,7 @@
     },
     {
       "num": 15,
-      "name": "GOALS",
+      "name": "GOAL",
       "fields": [
         {"num":0,"name":"sport","base":"ENUM"},
         {"num":1,"name":"sub_sport","base":"ENUM"},
@@ -1411,7 +1411,7 @@
     },
     {
       "num": 104,
-      "name": "DEVICE_STATUS",
+      "name": "BATTERY",
       "fields": [
         {"num":0,"name":"battery_voltage","base":"UINT16","scale":1000},
         {"num":2,"name":"battery_level","base":"UINT8","UOM":"PERCENT"},
@@ -1477,7 +1477,7 @@
     },
     {
       "num": 128,
-      "name": "WEATHER",
+      "name": "WEATHER_CONDITIONS",
       "fields": [
         {"num":0,"name":"weather_report","base":"ENUM","type":"WeatherReport"},
         {"num":1,"name":"temperature","base":"SINT8","type":"TEMPERATURE","UOM":"CELSIUS"},
@@ -2270,7 +2270,7 @@
     },
     {
       "num": 207,
-      "name": "DEVELOPER_DATA",
+      "name": "DEVELOPER_DATA_ID",
       "fields": [
         {"num":0,"name":"developer_id","base":"BYTE","arrayLen":16},
         {"num":1,"name":"application_id","base":"BYTE","arrayLen":16},
@@ -2599,7 +2599,7 @@
     },
     {
       "num": 269,
-      "name": "SPO2",
+      "name": "SPO2_DATA",
       "fields": [
         {"num":0,"name":"reading_spo2","base":"UINT8","UOM":"PERCENT"},
         {"num":1,"name":"reading_confidence","base":"UINT8"},
@@ -2628,7 +2628,7 @@
     },
     {
       "num": 275,
-      "name": "SLEEP_STAGE",
+      "name": "SLEEP_LEVEL",
       "fields": [
         {"num":0,"name":"sleep_stage","base":"ENUM","type":"SleepStage"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"}
@@ -3102,7 +3102,7 @@
     },
     {
       "num": 346,
-      "name": "SLEEP_STATS",
+      "name": "SLEEP_ASSESSMENT",
       "fields": [
         {"num":0,"name":"combined_awake_score","base":"UINT8"},
         {"num":1,"name":"awake_time_score","base":"UINT8"},
@@ -3271,7 +3271,7 @@
     },
     {
       "num": 370,
-      "name": "HRV_SUMMARY",
+      "name": "HRV_STATUS_SUMMARY",
       "fields": [
         {"num":0,"name":"weekly_average","base":"UINT16","scale":128,"UOM":"MILLISECONDS"},
         {"num":1,"name":"last_night_average","base":"UINT16","scale":128,"UOM":"MILLISECONDS"},
@@ -3564,7 +3564,7 @@
     },
     {
       "num": 412,
-      "name": "NAP",
+      "name": "NAP_EVENT",
       "fields": [
         {"num":0,"name":"start_timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":1,"name":"start_tz_offset","base":"SINT16","UOM":"MINUTES"},
