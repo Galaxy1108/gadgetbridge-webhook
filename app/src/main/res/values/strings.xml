@@ -1460,6 +1460,7 @@
     <string name="activity_prefs_goal_standing_hours">Daily target: standing hours</string>
     <string name="activity_prefs_goal_standing_time_minutes">Daily target: standing time in minutes</string>
     <string name="activity_prefs_goal_fat_burn_time_minutes">Daily target: fat burn time in minutes</string>
+    <string name="activity_prefs_goal_hydration_ml">Daily target: water intake in milliliters</string>
     <string name="activity_prefs_goal_active_calories_burnt">Daily target: active calories burnt</string>
     <string name="active_time">Active time</string>
     <string name="standing_time">Standing time</string>
@@ -1528,6 +1529,9 @@
     <string name="pref_summary_setup_bt_pairing">Deactivate this if you have trouble connecting</string>
     <string name="unit_metric">Metric</string>
     <string name="unit_imperial">Imperial</string>
+    <string name="hydration_unit_milliliter">Milliliters</string>
+    <string name="hydration_unit_cup">Cups</string>
+    <string name="hydration_unit_ounce">Fluid ounces</string>
     <string name="timeformat_24h">24H</string>
     <string name="timeformat_am_pm">AM/PM</string>
     <string name="dateformat_day_month">Day, Month</string>

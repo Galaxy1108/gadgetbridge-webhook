@@ -1,5 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.garmin;
 
+import java.util.Locale;
+
 import nodomain.freeyourgadget.gadgetbridge.util.CheckSums;
 
 public class GarminPreferences {
@@ -16,6 +18,11 @@ public class GarminPreferences {
     public static final String PREF_GARMIN_MLR = "garmin_mlr";
     public static final String PREF_GARMIN_EXPLORE_SYNC = "garmin_exploresync";
     public static final String PREF_GARMIN_LEGACY_SYNC_FLUSH = "garmin_legacy_sync_flush";
+    public static final String PREF_GARMIN_HYDRATION_SUPPORTED = "garmin_hydration_supported";
+    public static final String PREF_HYDRATION_UNIT = "hydration_unit";
+    public static final String PREF_HYDRATION_AUTO_GOAL = "hydration_auto_goal";
+    public static final String PREF_HYDRATION_CONTAINER_VOLUME = "hydration_container_%d_volume";
+    public static final String PREF_HYDRATION_CONTAINER_UNIT = "hydration_container_%d_unit";
 
     public static String agpsStatus(final String url) {
         return String.format(GarminPreferences.PREF_GARMIN_AGPS_STATUS, CheckSums.md5(url));
@@ -27,5 +34,13 @@ public class GarminPreferences {
 
     public static String agpsFilename(final String url) {
         return String.format(GarminPreferences.PREF_GARMIN_AGPS_FILENAME, CheckSums.md5(url));
+    }
+
+    public static String hydrationContainerVolume(final int container) {
+        return String.format(Locale.ROOT, GarminPreferences.PREF_HYDRATION_CONTAINER_VOLUME, container);
+    }
+
+    public static String hydrationContainerUnit(final int container) {
+        return String.format(Locale.ROOT, GarminPreferences.PREF_HYDRATION_CONTAINER_UNIT, container);
     }
 }
