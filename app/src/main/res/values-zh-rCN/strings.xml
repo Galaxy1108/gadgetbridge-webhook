@@ -5321,4 +5321,22 @@
     <string name="workout_error_exercise_not_supported">此设备不支持锻炼。</string>
     <string name="pref_huawei_wheelchair_mode">轮椅模式</string>
     <string name="pref_huawei_wheelchair_mode_enable_summary">手表将提供滚动锻炼功能，活动记录将跟踪日常活动，如轮椅推动次数。步数不会被计入。</string>
+    <string name="activity_prefs_goal_hydration_ml">每日目标：饮水量（毫升）</string>
+    <string name="hydration_unit_milliliter">毫升</string>
+    <string name="hydration_unit_cup">杯</string>
+    <string name="hydration_unit_ounce">液量盎司</string>
+    <string name="hydration_unit_milliliter_symbol">毫升</string>
+    <string name="hydration_unit_cup_symbol">杯</string>
+    <string name="hydration_unit_ounce_symbol">液量盎司</string>
+    <string name="pref_header_hydration">喝水</string>
+    <string name="pref_hydration_container_i">容器 %1$d</string>
+    <string name="pref_hydration_container_volume">容量</string>
+    <string name="hydration_total">总计</string>
+    <string name="hydration_goal">每日目标</string>
+    <string name="hydration_daily_average">日平均</string>
+    <string name="hydration_add">添加</string>
+    <string name="hydration_add_increment">+%1$s</string>
+    <string name="hydration_add_title">添加饮水量（%1$s）</string>
+    <string name="hydration_add_invalid_value">值无效</string>
+    <string name="body_energy_percentage">%1$d %%</string>
 </resources>
