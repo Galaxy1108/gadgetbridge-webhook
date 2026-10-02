@@ -29,12 +29,12 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Wea
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionWeatherAqi;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionWeatherCondition;
 
-public class FitWeather extends AbstractFitWeather {
-    public FitWeather(final RecordDefinition recordDefinition, final RecordHeader recordHeader) {
+public class FitWeatherConditions extends AbstractFitWeatherConditions {
+    public FitWeatherConditions(final RecordDefinition recordDefinition, final RecordHeader recordHeader) {
         super(recordDefinition, recordHeader);
     }
 
-    public static class Builder extends AbstractFitWeather.Builder {
+    public static class Builder extends AbstractFitWeatherConditions.Builder {
         public void weatherWindDirection(int degree) {
             if (0 <= degree) {
                 degree %= 360;

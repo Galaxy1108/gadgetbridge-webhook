@@ -133,7 +133,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Wea
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitAlarmSettings;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDeviceSettings;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitFileId;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitWeather;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitWeatherConditions;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.workouts.GarminWorkoutFitEncoder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.CurrentTimeRequestMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.DownloadRequestMessage;
@@ -780,7 +780,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         final FitLocalMessageBuilder weatherLocalMessage = new FitLocalMessageBuilder();
 
-        final FitWeather.Builder today = new FitWeather.Builder();
+        final FitWeatherConditions.Builder today = new FitWeatherConditions.Builder();
         today.setWeatherReport(WeatherReport.current);
         today.setTimestamp((long) weather.getTimestamp());
         today.setObservedAtTime((long) weather.getTimestamp());
@@ -804,7 +804,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         for (int hour = 0; hour <= 11; hour++) {
             if (hour < weather.getHourly().size()) {
                 WeatherSpec.Hourly hourly = weather.getHourly().get(hour);
-                final FitWeather.Builder weatherHourlyForecast = new FitWeather.Builder();
+                final FitWeatherConditions.Builder weatherHourlyForecast = new FitWeatherConditions.Builder();
                 weatherHourlyForecast.setWeatherReport(WeatherReport.hourly_forecast);
                 weatherHourlyForecast.setTimestamp((long) hourly.getTimestamp());
                 weatherHourlyForecast.weatherTemperature(hourly.getTemp());
@@ -827,7 +827,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         // since they share the same message type in the definition message
         final int dailyMessageType = weatherLocalMessage.getNextAvailableLocalMessageType();
 
-        final FitWeather.Builder todayDailyForecast = new FitWeather.Builder();
+        final FitWeatherConditions.Builder todayDailyForecast = new FitWeatherConditions.Builder();
         todayDailyForecast.setWeatherReport(WeatherReport.daily_forecast);
         todayDailyForecast.setTimestamp((long) weather.getTimestamp());
         todayDailyForecast.weatherLowTemperature(weather.getTodayMinTemp());
@@ -848,7 +848,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             if (day < weather.getForecasts().size()) {
                 WeatherSpec.Daily daily = weather.getForecasts().get(day);
                 int ts = weather.getTimestamp() + (day + 1) * 24 * 60 * 60;
-                final FitWeather.Builder weatherDailyForecast = new FitWeather.Builder();
+                final FitWeatherConditions.Builder weatherDailyForecast = new FitWeatherConditions.Builder();
                 weatherDailyForecast.setWeatherReport(WeatherReport.daily_forecast);
                 weatherDailyForecast.setTimestamp((long) weather.getTimestamp());
                 weatherDailyForecast.weatherLowTemperature(daily.getMinTemp());

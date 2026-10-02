@@ -82,8 +82,8 @@ object GarminWorkoutFitEncoder {
     private fun workout(template: WorkoutTemplate, garminSport: GarminSport, steps: StepRecords): FitWorkout {
         val builder = FitWorkout.Builder()
         builder.setMessageIndex(0)
-        builder.setName(template.name)
-        template.note?.takeIf { it.isNotEmpty() }?.let { builder.setNotes(it) }
+        builder.setWktName(template.name)
+        template.note?.takeIf { it.isNotEmpty() }?.let { builder.setWktDescription(it) }
         builder.setSport(garminSport.type)
         builder.setSubSport(garminSport.subtype)
         builder.setCapabilities(32L) // TODO what are these?
