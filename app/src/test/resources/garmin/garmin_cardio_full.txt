@@ -14,7 +14,7 @@ FitWorkoutStep{duration_type=TIME, duration_value=45000, target_type=OPEN, targe
 FitWorkoutStep{duration_type=TIME, duration_value=45000, target_type=OPEN, target_value=0, intensity=ACTIVE, exercise_category=0, exercise_weight=0.0, weight_display_unit=KILOGRAM, message_index=10},
 FitWorkoutStep{duration_type=REPS, duration_value=8, target_type=OPEN, target_value=0, intensity=ACTIVE, exercise_category=17, exercise_name=21, exercise_weight=20.0, weight_display_unit=KILOGRAM, message_index=11},
 FitWorkoutStep{duration_type=TIME, duration_value=45000, target_type=OPEN, target_value=0, intensity=RECOVERY, weight_display_unit=KILOGRAM, message_index=12},
-FitWorkoutStep{duration_type=REPEAT_UNTIL_STEPS_CMPLT, duration_value=11, target_value=4, skip_last_recover=0, message_index=13},
+FitWorkoutStep{duration_type=REPEAT_UNTIL_STEPS_CMPLT, duration_value=11, target_value=4, skip_last_recover=false, message_index=13},
 FitWorkoutStep{duration_type=TIME, duration_value=45000, target_type=OPEN, target_value=0, intensity=COOLDOWN, weight_display_unit=KILOGRAM, message_index=14},
 FitExerciseTitle{exercise_category=0, message_index=0},
 FitExerciseTitle{exercise_category=28, exercise_name=6, message_index=1},
