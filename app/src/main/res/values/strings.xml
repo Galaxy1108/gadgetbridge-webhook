@@ -4781,6 +4781,7 @@
     <string name="battery_full_threshold">Full battery threshold</string>
     <string name="default_percentage">Default (%1$d%%)</string>
     <string name="battery_percentage_str">%1$s%%</string>
+    <string name="body_energy_percentage">%1$d %%</string>
     <string name="pref_import_activity_files_title">Import activity files</string>
     <string name="pref_import_activity_files_summary">Manually import activity files from the phone storage</string>
     <string name="pref_reprocess_activity_files_title">Reprocess activity files</string>
