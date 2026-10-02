@@ -6,6 +6,7 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper
 import nodomain.freeyourgadget.gadgetbridge.devices.HydrationSampleProvider
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.GarminPreferences
@@ -28,6 +29,7 @@ import java.time.format.SignStyle
 import java.time.temporal.ChronoField
 import java.util.Locale
 import androidx.core.content.edit
+import nodomain.freeyourgadget.gadgetbridge.util.GB
 
 class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInterceptor {
     override fun supports(request: GarminHttpRequest): Boolean {
@@ -50,7 +52,11 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
             val json: JsonElement? = when {
                 method == "PUT" && path == PATH_REGISTER -> JsonObject()
                 method == "GET" && path == PATH_SETTINGS -> getSettings()
-                method == "PUT" && path == PATH_LOG -> log(parseBody(request))
+                method == "PUT" && path == PATH_LOG -> {
+                    val dailySummary = log(parseBody(request))
+                    GB.signalActivityDataFinish(deviceSupport.device)
+                    dailySummary
+                }
                 method == "GET" && path.startsWith(PATH_DAILY) -> {
                     val date = LocalDate.parse(path.substring(PATH_DAILY.length))
                     GBApplication.acquireDbReadOnly().use { db ->
@@ -118,10 +124,7 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
             @Suppress("SpellCheckingInspection")
             add("dailyAverageinML", JsonNull.INSTANCE)
             if (lastEntry != null) {
-                val lastEntryTime = Instant.ofEpochMilli(lastEntry.timestamp)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime()
-                addProperty("lastEntryTimestampLocal", lastEntryTime.format(TIMESTAMP_LOCAL_FORMATTER))
+                addProperty("lastEntryTimestampLocal", formatTimestampLocal(lastEntry.timestamp))
             } else {
                 add("lastEntryTimestampLocal", JsonNull.INSTANCE)
             }
@@ -131,29 +134,7 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
     }
 
     private fun getSettings(): JsonObject {
-        val prefs: Prefs = deviceSupport.devicePrefs
-
-        val containers = JsonArray()
-        for (container in 1..CONTAINER_COUNT) {
-            val defaultVolume = DEFAULT_CONTAINER_VOLUMES[container - 1]
-            val volume = prefs.getString(
-                GarminPreferences.hydrationContainerVolume(container),
-                defaultVolume.toString()
-            )
-            containers.add(JsonObject().apply {
-                addProperty("volume", volume.toIntOrNull() ?: volume.toDoubleOrNull() ?: defaultVolume)
-                addProperty("unit", getUnit(prefs, GarminPreferences.hydrationContainerUnit(container)).key)
-            })
-        }
-
-        return JsonObject().apply {
-            add("hydrationContainers", containers)
-            addProperty("hydrationMeasurementUnit", getUnit(prefs, GarminPreferences.PREF_HYDRATION_UNIT).key)
-            addProperty(
-                "hydrationAutoGoalEnabled",
-                prefs.getBoolean(GarminPreferences.PREF_HYDRATION_AUTO_GOAL, false)
-            )
-        }
+        return buildSettings(deviceSupport.devicePrefs, false)
     }
 
     private fun saveSettings(body: JsonObject) {
@@ -161,7 +142,7 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
 
         deviceSupport.devicePrefs.preferences.edit {
             body.get("hydrationContainers")?.takeIf { it.isJsonArray }?.asJsonArray
-                ?.take(CONTAINER_COUNT)
+                ?.take(GarminPreferences.HYDRATION_CONTAINER_COUNT)
                 ?.forEachIndexed { i, element ->
                     val container = element.asJsonObject
                     container.get("volume")?.takeIf { it.isJsonPrimitive }?.let {
@@ -172,17 +153,12 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
                     }
                 }
             parseUnit(body.get("hydrationMeasurementUnit"))?.let {
-                putString(GarminPreferences.PREF_HYDRATION_UNIT, it.key)
+                putString(DeviceSettingsPreferenceConst.PREF_HYDRATION_UNIT, it.key)
             }
-            body.get("hydrationAutoGoalEnabled")?.takeIf { it.isJsonPrimitive }?.let {
-                putBoolean(GarminPreferences.PREF_HYDRATION_AUTO_GOAL, it.asBoolean)
-            }
-
+            //body.get("hydrationAutoGoalEnabled")?.takeIf { it.isJsonPrimitive }?.let {
+            //    putBoolean(GarminPreferences.PREF_HYDRATION_AUTO_GOAL, it.asBoolean)
+            //}
         }
-    }
-
-    private fun getUnit(prefs: Prefs, key: String): HydrationUnit {
-        return HydrationUnit.fromKey(prefs.getString(key, null)) ?: HydrationUnit.MILLILITER
     }
 
     private fun parseUnit(element: JsonElement?): HydrationUnit? {
@@ -216,9 +192,6 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
         private const val PATH_DAILY = PATH_SUMMARY + "daily/"
         private const val PATH_ALL_DATA = PATH_SUMMARY + "allData/"
 
-        private const val CONTAINER_COUNT = 3
-        private val DEFAULT_CONTAINER_VOLUMES = intArrayOf(250, 500, 750)
-
         /**
          * Local date and time, without zero padding, with an optional fraction of the second.
          */
@@ -241,5 +214,49 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
 
         private val TIMESTAMP_LOCAL_FORMATTER: DateTimeFormatter =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.S", Locale.ROOT)
+
+        @JvmStatic
+        fun buildSettings(prefs: Prefs, withContainerNames: Boolean): JsonObject {
+            val containers = JsonArray()
+            for (container in 1..GarminPreferences.HYDRATION_CONTAINER_COUNT) {
+                val defaultVolume = GarminPreferences.hydrationContainerDefaultVolume(container)
+                val volume = prefs.getString(
+                    GarminPreferences.hydrationContainerVolume(container),
+                    defaultVolume.toString()
+                )
+                containers.add(JsonObject().apply {
+                    if (withContainerNames) {
+                        addProperty("name", "Container $container")
+                    }
+                    addProperty("volume", volume.toIntOrNull() ?: volume.toDoubleOrNull() ?: defaultVolume)
+                    addProperty("unit", getUnit(prefs, GarminPreferences.hydrationContainerUnit(container)).key)
+                })
+            }
+
+            return JsonObject().apply {
+                addProperty(
+                    "hydrationMeasurementUnit",
+                    getUnit(prefs, DeviceSettingsPreferenceConst.PREF_HYDRATION_UNIT).key
+                )
+                add("hydrationContainers", containers)
+                // TODO auto goal?
+                addProperty("hydrationAutoGoalEnabled", false)
+            }
+        }
+
+        /**
+         * Formats a timestamp in epoch ms as a local date and time, with one fraction digit.
+         */
+        @JvmStatic
+        fun formatTimestampLocal(timestamp: Long): String {
+            return Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .format(TIMESTAMP_LOCAL_FORMATTER)
+        }
+
+        private fun getUnit(prefs: Prefs, key: String): HydrationUnit {
+            return HydrationUnit.fromKey(prefs.getString(key, null)) ?: HydrationUnit.MILLILITER
+        }
     }
 }

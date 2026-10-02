@@ -2,13 +2,16 @@ package nodomain.freeyourgadget.gadgetbridge.devices.garmin
 
 import android.content.Context
 import android.net.Uri
+import android.text.InputType
 import android.widget.Toast
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsScope
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.enumList
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.fetchUnknownFiles
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.highMtu
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.installUnsupportedFiles
@@ -21,6 +24,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.compon
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.WorkoutTemplateListActivity
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.actions.GarminSendWaypointActivity
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.model.HydrationUnit
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.FitAsyncProcessor
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils
 import nodomain.freeyourgadget.gadgetbridge.util.GB
@@ -53,6 +57,10 @@ fun garminDeviceSettings(
             icon = R.drawable.ic_activity_unknown_small,
             activityClass = WorkoutTemplateListActivity::class.java,
         )
+    }
+
+    if (coordinator.supportsHydration(device)) {
+        garminHydration()
     }
 
     if (coordinator.supportsCalendarEvents(device)) {
@@ -169,6 +177,47 @@ fun garminDeviceSettings(
             defaultValue = false,
             connectedOnly = false,
         )
+    }
+}
+
+private fun DeviceSettingsScope.garminHydration() {
+    screen(
+        key = "pref_screen_garmin_hydration",
+        title = R.string.pref_header_hydration,
+        icon = R.drawable.ic_drink,
+    ) {
+        enumList<HydrationUnit>(
+            key = DeviceSettingsPreferenceConst.PREF_HYDRATION_UNIT,
+            title = R.string.pref_title_unit_system,
+            icon = R.drawable.ic_straighten,
+            defaultValue = HydrationUnit.MILLILITER,
+            connectedOnly = false,
+        )
+
+        for (container in 1..GarminPreferences.HYDRATION_CONTAINER_COUNT) {
+            category(
+                key = "pref_header_hydration_container_$container",
+                titleText = GBApplication.getContext().getString(R.string.pref_hydration_container_i, container),
+                iconSpaceReserved = false,
+            ) {
+                text(
+                    key = GarminPreferences.hydrationContainerVolume(container),
+                    title = R.string.pref_hydration_container_volume,
+                    icon = R.drawable.ic_drink,
+                    defaultValue = GarminPreferences.hydrationContainerDefaultVolume(container).toString(),
+                    inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL,
+                    connectedOnly = false,
+                )
+
+                enumList<HydrationUnit>(
+                    key = GarminPreferences.hydrationContainerUnit(container),
+                    title = R.string.workout_field_unit,
+                    icon = R.drawable.ic_straighten,
+                    defaultValue = HydrationUnit.MILLILITER,
+                    connectedOnly = false,
+                )
+            }
+        }
     }
 }
 

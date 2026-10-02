@@ -137,6 +137,7 @@ public class HydrationSampleProvider extends AbstractTimeSampleProvider<GenericH
 
         while (true) {
             try {
+                getSampleDao().insert(sample);
                 return;
             } catch (final SQLiteConstraintException e) {
                 sample.setTimestamp(sample.getTimestamp() + 1);

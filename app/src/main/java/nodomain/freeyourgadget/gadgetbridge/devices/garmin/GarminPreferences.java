@@ -19,10 +19,11 @@ public class GarminPreferences {
     public static final String PREF_GARMIN_EXPLORE_SYNC = "garmin_exploresync";
     public static final String PREF_GARMIN_LEGACY_SYNC_FLUSH = "garmin_legacy_sync_flush";
     public static final String PREF_GARMIN_HYDRATION_SUPPORTED = "garmin_hydration_supported";
-    public static final String PREF_HYDRATION_UNIT = "hydration_unit";
-    public static final String PREF_HYDRATION_AUTO_GOAL = "hydration_auto_goal";
     public static final String PREF_HYDRATION_CONTAINER_VOLUME = "hydration_container_%d_volume";
     public static final String PREF_HYDRATION_CONTAINER_UNIT = "hydration_container_%d_unit";
+
+    public static final int HYDRATION_CONTAINER_COUNT = 3;
+    private static final int[] HYDRATION_CONTAINER_DEFAULT_VOLUMES = {250, 500, 750};
 
     public static String agpsStatus(final String url) {
         return String.format(GarminPreferences.PREF_GARMIN_AGPS_STATUS, CheckSums.md5(url));
@@ -42,5 +43,12 @@ public class GarminPreferences {
 
     public static String hydrationContainerUnit(final int container) {
         return String.format(Locale.ROOT, GarminPreferences.PREF_HYDRATION_CONTAINER_UNIT, container);
+    }
+
+    /**
+     * The default volume of a hydration container, in the default unit of the container.
+     */
+    public static int hydrationContainerDefaultVolume(final int container) {
+        return HYDRATION_CONTAINER_DEFAULT_VOLUMES[container - 1];
     }
 }
