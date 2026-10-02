@@ -151,26 +151,26 @@
         {"num":3,"name":"height","base":"UINT8","UOM":"CENTIMETER"},
         {"num":4,"name":"weight","base":"UINT16","scale":10,"UOM":"KILOGRAM"},
         {"num":5,"name":"language","base":"ENUM","type":"Language"},
-        {"num":6,"name":"elev_setting","base":"ENUM","type":"MeasurementSystem"},
-        {"num":7,"name":"weight_setting","base":"ENUM","type":"MeasurementSystem"},
+        {"num":6,"name":"elev_setting","base":"ENUM","type":"DisplayMeasure"},
+        {"num":7,"name":"weight_setting","base":"ENUM","type":"DisplayMeasure"},
         {"num":8,"name":"resting_heart_rate","base":"UINT8","UOM":"BEATS_PER_MINUTE"},
         {"num":9,"name":"default_max_running_heart_rate","base":"UINT8","UOM":"BEATS_PER_MINUTE"},
         {"num":10,"name":"default_max_biking_heart_rate","base":"UINT8","UOM":"BEATS_PER_MINUTE"},
         {"num":11,"name":"default_max_heart_rate","base":"UINT8","UOM":"BEATS_PER_MINUTE"},
         {"num":12,"name":"hr_setting","base":"ENUM"},
-        {"num":13,"name":"speed_setting","base":"ENUM","type":"MeasurementSystem"},
-        {"num":14,"name":"dist_setting","base":"ENUM","type":"MeasurementSystem"},
+        {"num":13,"name":"speed_setting","base":"ENUM","type":"DisplayMeasure"},
+        {"num":14,"name":"dist_setting","base":"ENUM","type":"DisplayMeasure"},
         {"num":16,"name":"power_setting","base":"ENUM"},
         {"num":17,"name":"activity_class","base":"ENUM"},
         {"num":18,"name":"position_setting","base":"ENUM"},
-        {"num":21,"name":"temperature_setting","base":"ENUM","type":"MeasurementSystem"},
+        {"num":21,"name":"temperature_setting","base":"ENUM","type":"DisplayMeasure"},
         {"num":22,"name":"local_id","base":"UINT16"},
         {"num":23,"name":"global_id","base":"BYTE","arrayLen":6},
         {"num":24,"name":"year_of_birth","base":"UINT8","offset":-1900},
         {"num":26,"name":"pressure_setting","base":"ENUM"},
         {"num":28,"name":"wake_time","base":"UINT32"},
         {"num":29,"name":"sleep_time","base":"UINT32"},
-        {"num":30,"name":"height_setting","base":"ENUM","type":"MeasurementSystem"},
+        {"num":30,"name":"height_setting","base":"ENUM","type":"DisplayMeasure"},
         {"num":31,"name":"user_running_step_length","base":"UINT16"},
         {"num":32,"name":"user_walking_step_length","base":"UINT16"},
         {"num":34,"name":"recovery_time","base":"UINT16"},
@@ -180,11 +180,11 @@
         {"num":42,"name":"time_last_lthr_cycling","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":44,"name":"birth_day","base":"UINT8"},
         {"num":45,"name":"birth_month","base":"UINT8Z"},
-        {"num":47,"name":"depth_setting","base":"ENUM","type":"MeasurementSystem"},
+        {"num":47,"name":"depth_setting","base":"ENUM","type":"DisplayMeasure"},
         {"num":49,"name":"dive_count","base":"UINT32"},
         {"num":53,"name":"moderate_activity","base":"UINT8"},
         {"num":54,"name":"vigorous_activity","base":"UINT8"},
-        {"num":58,"name":"golf_distance","base":"ENUM","type":"MeasurementSystem"},
+        {"num":58,"name":"golf_distance","base":"ENUM","type":"DisplayMeasure"},
         {"num":62,"name":"gender_x","base":"ENUM"},
         {"num":65,"name":"running_coach","base":"ENUM"},
         {"num":66,"name":"cycling_coach","base":"ENUM"},
@@ -196,7 +196,7 @@
       "num": 4,
       "name": "HRM_PROFILE",
       "fields": [
-        {"num":0,"name":"enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":0,"name":"enabled","base":"ENUM","type":"Bool"},
         {"num":1,"name":"hrm_ant_id","base":"UINT16Z"},
         {"num":2,"name":"log_hrv","base":"ENUM"},
         {"num":3,"name":"hrm_ant_id_trans_type","base":"UINT8Z"},
@@ -207,7 +207,7 @@
       "num": 5,
       "name": "SDM_PROFILE",
       "fields": [
-        {"num":0,"name":"enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":0,"name":"enabled","base":"ENUM","type":"Bool"},
         {"num":1,"name":"sdm_ant_id","base":"UINT16Z"},
         {"num":2,"name":"sdm_cal_factor","base":"UINT16","scale":10,"UOM":"PERCENT"},
         {"num":3,"name":"odometer","base":"UINT32","scale":100,"UOM":"METER"},
@@ -233,15 +233,15 @@
         {"num":9,"name":"auto_wheelsize","base":"UINT16","scale":1000,"UOM":"METER"},
         {"num":10,"name":"bike_weight","base":"UINT16","scale":10,"UOM":"KILOGRAM"},
         {"num":11,"name":"power_cal_factor","base":"UINT16","scale":10,"UOM":"PERCENT"},
-        {"num":12,"name":"auto_wheel_cal","base":"ENUM","type":"BOOLEAN"},
-        {"num":13,"name":"auto_power_zero","base":"ENUM","type":"BOOLEAN"},
+        {"num":12,"name":"auto_wheel_cal","base":"ENUM","type":"Bool"},
+        {"num":13,"name":"auto_power_zero","base":"ENUM","type":"Bool"},
         {"num":14,"name":"id","base":"UINT8"},
-        {"num":15,"name":"spd_enabled","base":"ENUM","type":"BOOLEAN"},
-        {"num":16,"name":"cad_enabled","base":"ENUM","type":"BOOLEAN"},
-        {"num":17,"name":"spdcad_enabled","base":"ENUM","type":"BOOLEAN"},
-        {"num":18,"name":"power_enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":15,"name":"spd_enabled","base":"ENUM","type":"Bool"},
+        {"num":16,"name":"cad_enabled","base":"ENUM","type":"Bool"},
+        {"num":17,"name":"spdcad_enabled","base":"ENUM","type":"Bool"},
+        {"num":18,"name":"power_enabled","base":"ENUM","type":"Bool"},
         {"num":19,"name":"crank_length","base":"UINT8","scale":2,"offset":-110,"UOM":"MILLIMETER"},
-        {"num":20,"name":"enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":20,"name":"enabled","base":"ENUM","type":"Bool"},
         {"num":21,"name":"bike_spd_ant_id_trans_type","base":"UINT8Z"},
         {"num":22,"name":"bike_cad_ant_id_trans_type","base":"UINT8Z"},
         {"num":23,"name":"bike_spdcad_ant_id_trans_type","base":"UINT8Z"},
@@ -251,7 +251,7 @@
         {"num":39,"name":"front_gear","base":"UINT8Z","arrayLen":0},
         {"num":40,"name":"rear_gear_num","base":"UINT8Z"},
         {"num":41,"name":"rear_gear","base":"UINT8Z","arrayLen":0},
-        {"num":44,"name":"shimano_di2_enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":44,"name":"shimano_di2_enabled","base":"ENUM","type":"Bool"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
@@ -389,14 +389,14 @@
       "num": 14,
       "name": "DATA_SCREEN",
       "fields": [
-        {"num":1,"name":"enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":1,"name":"enabled","base":"ENUM","type":"Bool"},
         {"num":3,"name":"field_count","base":"UINT8"},
         {"num":4,"name":"zone_fields","base":"UINT8","arrayLen":4},
         {"num":7,"name":"data_fields","base":"UINT16","arrayLen":10},
         {"num":8,"name":"layout","base":"ENUM"},
         {"num":9,"name":"position","base":"UINT8"},
         {"num":10,"name":"screen_type","base":"ENUM"},
-        {"num":12,"name":"hidden","base":"ENUM","type":"BOOLEAN"},
+        {"num":12,"name":"hidden","base":"ENUM","type":"Bool"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -408,7 +408,7 @@
         {"num":1,"name":"sub_sport","base":"ENUM"},
         {"num":2,"name":"start_date","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":3,"name":"end_date","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
-        {"num":4,"name":"type","base":"ENUM","type":"GoalType"},
+        {"num":4,"name":"type","base":"ENUM","type":"Goal"},
         {"num":5,"name":"value","base":"UINT32"},
         {"num":6,"name":"repeat","base":"ENUM"},
         {"num":7,"name":"target_value","base":"UINT32"},
@@ -682,7 +682,7 @@
         {"num":34,"name":"left_right_balance","base":"UINT16"},
         {"num":35,"name":"first_length_index","base":"UINT16"},
         {"num":37,"name":"avg_stroke_distance","base":"UINT16"},
-        {"num":38,"name":"swim_stroke","base":"ENUM","type":"SwimStyle"},
+        {"num":38,"name":"swim_stroke","base":"ENUM","type":"SwimStroke"},
         {"num":39,"name":"sub_sport","base":"ENUM"},
         {"num":40,"name":"num_active_lengths","base":"UINT16","UOM":"LENGTHS"},
         {"num":41,"name":"total_work","base":"UINT32","UOM":"JOULE"},
@@ -1030,7 +1030,7 @@
         {"num":1,"name":"product","base":"UINT16"},
         {"num":2,"name":"serial_number","base":"UINT32Z"},
         {"num":3,"name":"time_created","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
-        {"num":4,"name":"completed","base":"ENUM","type":"BOOLEAN"},
+        {"num":4,"name":"completed","base":"ENUM","type":"Bool"},
         {"num":5,"name":"type","base":"ENUM"},
         {"num":6,"name":"scheduled_time","base":"UINT32"}
       ]
@@ -1504,7 +1504,7 @@
       "fields": [
         {"num":0,"name":"weather_report","base":"ENUM","type":"WeatherReport"},
         {"num":1,"name":"temperature","base":"SINT8","type":"TEMPERATURE","UOM":"CELSIUS"},
-        {"num":2,"name":"condition","base":"ENUM","type":"WeatherCondition"},
+        {"num":2,"name":"condition","base":"ENUM","type":"WeatherStatus"},
         {"num":3,"name":"wind_direction","base":"UINT16","UOM":"DEGREES"},
         {"num":4,"name":"wind_speed","base":"UINT16","UOM":"MILLIMETER_PER_SECOND"},
         {"num":5,"name":"precipitation_probability","base":"UINT8"},
@@ -1514,7 +1514,7 @@
         {"num":9,"name":"observed_at_time","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":10,"name":"observed_location_lat","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":11,"name":"observed_location_long","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
-        {"num":12,"name":"day_of_week","base":"ENUM","type":"DAY_OF_WEEK"},
+        {"num":12,"name":"day_of_week","base":"ENUM","type":"DayOfWeek"},
         {"num":13,"name":"high_temperature","base":"SINT8","type":"TEMPERATURE","UOM":"CELSIUS"},
         {"num":14,"name":"low_temperature","base":"SINT8","type":"TEMPERATURE","UOM":"CELSIUS"},
         {"num":15,"name":"dew_point","base":"SINT8","type":"TEMPERATURE"},
@@ -2242,7 +2242,7 @@
         {"num":0,"name":"screen_index","base":"UINT8"},
         {"num":1,"name":"field_count","base":"UINT8"},
         {"num":2,"name":"layout","base":"ENUM"},
-        {"num":3,"name":"screen_enabled","base":"ENUM","type":"BOOLEAN"}
+        {"num":3,"name":"screen_enabled","base":"ENUM","type":"Bool"}
       ]
     },
     {
@@ -2271,7 +2271,7 @@
         {"num":8,"name":"data_units","base":"ENUM"},
         {"num":9,"name":"qualifier","base":"ENUM"},
         {"num":10,"name":"descriptor","base":"ENUM"},
-        {"num":11,"name":"is_signed","base":"ENUM","type":"BOOLEAN"}
+        {"num":11,"name":"is_signed","base":"ENUM","type":"Bool"}
       ]
     },
     {
@@ -2390,15 +2390,15 @@
       "fields": [
         {"num":0,"name":"time","base":"UINT16","type":"ALARM"},
         {"num":1,"name":"repeat","base":"UINT32Z"},
-        {"num":2,"name":"enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":2,"name":"enabled","base":"ENUM","type":"Bool"},
         {"num":3,"name":"sound","base":"ENUM","type":"Tone"},
-        {"num":4,"name":"backlight","base":"ENUM","type":"BOOLEAN"},
+        {"num":4,"name":"backlight","base":"ENUM","type":"Bool"},
         {"num":5,"name":"time_created","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":6,"name":"message","base":"STRING"},
         {"num":7,"name":"snooze","base":"UINT8"},
         {"num":8,"name":"label","base":"ENUM","type":"AlarmLabel"},
         {"num":11,"name":"time_updated","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
-        {"num":12,"name":"smart_wake","base":"ENUM","type":"BOOLEAN"},
+        {"num":12,"name":"smart_wake","base":"ENUM","type":"Bool"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -2571,15 +2571,15 @@
       "fields": [
         {"num":0,"name":"depth","base":"UINT32","scale":1000,"UOM":"METER"},
         {"num":1,"name":"time","base":"SINT32","UOM":"SECONDS"},
-        {"num":2,"name":"enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":2,"name":"enabled","base":"ENUM","type":"Bool"},
         {"num":3,"name":"alarm_type","base":"ENUM"},
         {"num":4,"name":"sound","base":"ENUM"},
         {"num":5,"name":"dive_types","base":"ENUM","arrayLen":0},
         {"num":6,"name":"id","base":"UINT32"},
-        {"num":7,"name":"popup_enabled","base":"ENUM","type":"BOOLEAN"},
-        {"num":8,"name":"trigger_on_descent","base":"ENUM","type":"BOOLEAN"},
-        {"num":9,"name":"trigger_on_ascent","base":"ENUM","type":"BOOLEAN"},
-        {"num":10,"name":"repeating","base":"ENUM","type":"BOOLEAN"},
+        {"num":7,"name":"popup_enabled","base":"ENUM","type":"Bool"},
+        {"num":8,"name":"trigger_on_descent","base":"ENUM","type":"Bool"},
+        {"num":9,"name":"trigger_on_ascent","base":"ENUM","type":"Bool"},
+        {"num":10,"name":"repeating","base":"ENUM","type":"Bool"},
         {"num":11,"name":"speed","base":"SINT32","scale":1000,"UOM":"MILES_PER_SECOND"},
         {"num":13,"name":"intensity","base":"ENUM"},
         {"num":254,"name":"message_index","base":"UINT16"}
@@ -2667,7 +2667,7 @@
       "num": 275,
       "name": "SLEEP_LEVEL",
       "fields": [
-        {"num":0,"name":"sleep_level","base":"ENUM","type":"SleepStage"},
+        {"num":0,"name":"sleep_level","base":"ENUM","type":"SleepLevel"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"}
       ]
     },
@@ -3535,15 +3535,15 @@
       "fields": [
         {"num":0,"name":"depth","base":"UINT32","scale":1000,"UOM":"METER"},
         {"num":1,"name":"time","base":"SINT32","UOM":"SECONDS"},
-        {"num":2,"name":"enabled","base":"ENUM","type":"BOOLEAN"},
+        {"num":2,"name":"enabled","base":"ENUM","type":"Bool"},
         {"num":3,"name":"alarm_type","base":"ENUM"},
         {"num":4,"name":"sound","base":"ENUM"},
         {"num":5,"name":"dive_types","base":"ENUM","arrayLen":0},
         {"num":6,"name":"id","base":"UINT32"},
-        {"num":7,"name":"popup_enabled","base":"ENUM","type":"BOOLEAN"},
-        {"num":8,"name":"trigger_on_descent","base":"ENUM","type":"BOOLEAN"},
-        {"num":9,"name":"trigger_on_ascent","base":"ENUM","type":"BOOLEAN"},
-        {"num":10,"name":"repeating","base":"ENUM","type":"BOOLEAN"},
+        {"num":7,"name":"popup_enabled","base":"ENUM","type":"Bool"},
+        {"num":8,"name":"trigger_on_descent","base":"ENUM","type":"Bool"},
+        {"num":9,"name":"trigger_on_ascent","base":"ENUM","type":"Bool"},
+        {"num":10,"name":"repeating","base":"ENUM","type":"Bool"},
         {"num":11,"name":"speed","base":"SINT32","scale":1000,"UOM":"MILES_PER_SECOND"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
@@ -3677,7 +3677,7 @@
         {"num":2,"name":"end_time","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":3,"name":"end_timezone_offset","base":"SINT16","UOM":"MINUTES"},
         {"num":4,"name":"feedback","base":"ENUM"},
-        {"num":5,"name":"is_deleted","base":"ENUM","type":"BOOLEAN"},
+        {"num":5,"name":"is_deleted","base":"ENUM","type":"Bool"},
         {"num":6,"name":"source","base":"ENUM"},
         {"num":7,"name":"update_timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"TIMESTAMP","UOM":"SECONDS"},
@@ -4478,6 +4478,14 @@
       ]
     },
     {
+      "name": "DisplayMeasure",
+      "entries": [
+        {"num":0,"name":"metric"},
+        {"num":1,"name":"imperial"},
+        {"num":2,"name":"nautical"}
+      ]
+    },
+    {
       "name": "EllipticalExerciseName",
       "entries": [
         {"num":0,"name":"ELLIPTICAL"}
@@ -5094,15 +5102,7 @@
       ]
     },
     {
-      "name": "GoalSource",
-      "entries": [
-        {"num":0,"name":"auto"},
-        {"num":1,"name":"community"},
-        {"num":2,"name":"manual"}
-      ]
-    },
-    {
-      "name": "GoalType",
+      "name": "Goal",
       "entries": [
         {"num":0,"name":"time"},
         {"num":1,"name":"distance"},
@@ -5113,6 +5113,14 @@
         {"num":6,"name":"active_minutes"},
         {"num":7,"name":"hydration"},
         {"num":8,"name":"weight"}
+      ]
+    },
+    {
+      "name": "GoalSource",
+      "entries": [
+        {"num":0,"name":"auto"},
+        {"num":1,"name":"community"},
+        {"num":2,"name":"manual"}
       ]
     },
     {
@@ -5683,14 +5691,6 @@
         {"num":90,"name":"WEIGHTED_SIDE_LUNGE_JUMP_OFF"},
         {"num":91,"name":"OVERHEAD_RUCK_LUNGE"},
         {"num":92,"name":"BACK_RUCK_LUNGE"}
-      ]
-    },
-    {
-      "name": "MeasurementSystem",
-      "entries": [
-        {"num":0,"name":"metric"},
-        {"num":1,"name":"imperial"},
-        {"num":2,"name":"nautical"}
       ]
     },
     {
@@ -6553,7 +6553,7 @@
       ]
     },
     {
-      "name": "SleepStage",
+      "name": "SleepLevel",
       "entries": [
         {"num":0,"name":"UNMEASURABLE"},
         {"num":1,"name":"AWAKE"},
@@ -6721,7 +6721,7 @@
       ]
     },
     {
-      "name": "SwimStyle",
+      "name": "SwimStroke",
       "entries": [
         {"num":0,"name":"FREESTYLE","label":"R.string.freestyle"},
         {"num":1,"name":"BACKSTROKE","label":"R.string.backstroke"},
@@ -6941,7 +6941,15 @@
       ]
     },
     {
-      "name": "WeatherCondition",
+      "name": "WeatherReport",
+      "entries": [
+        {"num":0,"name":"current"},
+        {"num":1,"name":"hourly_forecast"},
+        {"num":2,"name":"daily_forecast"}
+      ]
+    },
+    {
+      "name": "WeatherStatus",
       "entries": [
         {"num":0,"name":"CLEAR"},
         {"num":1,"name":"PARTLY_CLOUDY"},
@@ -6966,14 +6974,6 @@
         {"num":20,"name":"LIGHT_RAIN_SNOW"},
         {"num":21,"name":"HEAVY_RAIN_SNOW"},
         {"num":22,"name":"CLOUDY"}
-      ]
-    },
-    {
-      "name": "WeatherReport",
-      "entries": [
-        {"num":0,"name":"current"},
-        {"num":1,"name":"hourly_forecast"},
-        {"num":2,"name":"daily_forecast"}
       ]
     },
     {

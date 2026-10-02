@@ -25,9 +25,9 @@ import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.RecordDefinition;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.RecordHeader;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.WeatherAqi;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.WeatherCondition;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.WeatherStatus;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionWeatherAqi;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionWeatherCondition;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionWeatherStatus;
 
 public class FitWeatherConditions extends AbstractFitWeatherConditions {
     public FitWeatherConditions(final RecordDefinition recordDefinition, final RecordHeader recordHeader) {
@@ -141,7 +141,7 @@ public class FitWeatherConditions extends AbstractFitWeatherConditions {
         }
 
         public void weatherCondition(final int openWeatherCode) {
-            WeatherCondition weatherCondition = FieldDefinitionWeatherCondition.openWeatherCodeToFitWeatherStatus(openWeatherCode);
+            WeatherStatus weatherCondition = FieldDefinitionWeatherStatus.openWeatherCodeToFitWeatherStatus(openWeatherCode);
             setCondition(weatherCondition);
         }
 

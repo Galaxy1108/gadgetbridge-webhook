@@ -159,8 +159,8 @@ public enum FitCodeGen {
 
             public enum FieldDefinitions {
                 ALARM,
-                BOOLEAN,
-                DAY_OF_WEEK,
+                Bool,
+                DayOfWeek,
                 FILE_TYPE,
                 TEMPERATURE,
                 TIMESTAMP,
@@ -871,8 +871,8 @@ public enum FitCodeGen {
         if (primitive.getType() != null) {
             return switch (primitive.getType()) {
                 case "ALARM" -> new FieldClass(LocalTime.class);
-                case "BOOLEAN" -> new FieldClass(Boolean.class);
-                case "DAY_OF_WEEK" -> new FieldClass(DayOfWeek.class);
+                case "Bool" -> new FieldClass(Boolean.class);
+                case "DayOfWeek" -> new FieldClass(DayOfWeek.class);
                 case "ExerciseCategory" ->
                         new FieldClass("nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.ExerciseCategory[]", true);
                 case "FILE_TYPE" ->
