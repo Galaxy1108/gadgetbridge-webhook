@@ -22,8 +22,9 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefi
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionCoordinate;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionDayOfWeek;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionFileType;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionLocalDateTime;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionTemperature;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionTimestamp;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionDateTime;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitions;
 
 public class FieldDefinitionFactory {
@@ -37,7 +38,8 @@ public class FieldDefinitionFactory {
             case DayOfWeek -> new FieldDefinitionDayOfWeek(localNumber, size, baseType, name, scale, offset);
             case FILE_TYPE -> new FieldDefinitionFileType(localNumber, size, baseType, name);
             case TEMPERATURE -> new FieldDefinitionTemperature(localNumber, size, baseType, name, scale, offset);
-            case TIMESTAMP -> new FieldDefinitionTimestamp(localNumber, size, baseType, name);
+            case DateTime -> new FieldDefinitionDateTime(localNumber, size, baseType, name);
+            case LocalDateTime -> new FieldDefinitionLocalDateTime(localNumber, size, baseType, name);
             case COORDINATE -> new FieldDefinitionCoordinate(localNumber, size, baseType, name, scale, offset);
             default -> FieldDefinitions.create(localNumber, size, field, baseType, name, scale, offset);
         };

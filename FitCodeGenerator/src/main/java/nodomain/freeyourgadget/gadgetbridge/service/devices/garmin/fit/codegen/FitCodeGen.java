@@ -163,7 +163,8 @@ public enum FitCodeGen {
                 DayOfWeek,
                 FILE_TYPE,
                 TEMPERATURE,
-                TIMESTAMP,
+                DateTime,
+                LocalDateTime,
                 COORDINATE,
             """;
 
@@ -877,10 +878,9 @@ public enum FitCodeGen {
                         new FieldClass("nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.ExerciseCategory[]", true);
                 case "FILE_TYPE" ->
                         new FieldClass("nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.FileType.FILETYPE");
-                case "HR_TIME_IN_ZONE" -> new FieldClass(Double[].class);
-                case "HR_ZONE_HIGH_BOUNDARY" -> new FieldClass(Integer[].class);
                 case "TEMPERATURE" -> new FieldClass(Integer.class);
-                case "TIMESTAMP" -> new FieldClass(Long.class);
+                case "DateTime" -> new FieldClass(Long.class);
+                case "LocalDateTime" -> new FieldClass(Long.class);
                 case "COORDINATE" -> new FieldClass(Double.class);
                 default ->
                         new FieldClass("nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums."
