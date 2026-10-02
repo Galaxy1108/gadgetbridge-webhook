@@ -2,8 +2,12 @@ package nodomain.freeyourgadget.gadgetbridge.model
 
 import android.content.Context
 import androidx.annotation.StringRes
+import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.LabeledEntry
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import java.text.NumberFormat
 import java.util.Locale
 
 enum class HydrationUnit(
@@ -26,14 +30,33 @@ enum class HydrationUnit(
     fun fromMl(volumeMl: Double): Double = volumeMl / ml
 
     /**
+     * Converts a volume in this unit to the other unit.
+     */
+    fun convert(volume: Double, to: HydrationUnit): Double = volume * ml / to.ml
+
+    /**
      * Formats a volume in mL as a value in this unit, followed by the unit symbol.
      */
     fun format(context: Context, volumeMl: Double): String {
-        return String.format(Locale.getDefault(), "%.${decimals}f %s", fromMl(volumeMl), context.getString(symbol))
+        val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
+        numberFormat.maximumFractionDigits = decimals
+        return numberFormat.format(fromMl(volumeMl)) + " " + context.getString(symbol)
     }
 
     companion object {
         @JvmStatic
         fun fromKey(key: String?): HydrationUnit? = entries.firstOrNull { it.key == key }
+
+        /**
+         * The unit in which the device displays hydration volumes.
+         */
+        @JvmStatic
+        fun forDevice(device: GBDevice): HydrationUnit {
+            val key = GBApplication.getDevicePrefs(device).getString(
+                DeviceSettingsPreferenceConst.PREF_HYDRATION_UNIT,
+                null
+            )
+            return fromKey(key) ?: MILLILITER
+        }
     }
 }

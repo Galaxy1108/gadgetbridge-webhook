@@ -89,6 +89,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceApp;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.HydrationContainer;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
@@ -939,9 +940,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     }
 
     private static boolean isHydrationContainerPref(final String config) {
-        for (int container = 1; container <= GarminPreferences.HYDRATION_CONTAINER_COUNT; container++) {
-            if (config.equals(GarminPreferences.hydrationContainerVolume(container)) ||
-                    config.equals(GarminPreferences.hydrationContainerUnit(container))) {
+        for (int container = 1; container <= HydrationContainer.COUNT; container++) {
+            if (config.equals(HydrationContainer.volumeKey(container)) ||
+                    config.equals(HydrationContainer.unitKey(container))) {
                 return true;
             }
         }

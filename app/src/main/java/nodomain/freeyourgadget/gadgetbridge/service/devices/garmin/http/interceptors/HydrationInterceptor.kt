@@ -12,6 +12,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.HydrationSampleProvider
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.GarminPreferences
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
+import nodomain.freeyourgadget.gadgetbridge.model.HydrationContainer
 import nodomain.freeyourgadget.gadgetbridge.model.HydrationUnit
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminSupport
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.GarminHttpRequest
@@ -142,14 +143,14 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
 
         deviceSupport.devicePrefs.preferences.edit {
             body.get("hydrationContainers")?.takeIf { it.isJsonArray }?.asJsonArray
-                ?.take(GarminPreferences.HYDRATION_CONTAINER_COUNT)
+                ?.take(HydrationContainer.COUNT)
                 ?.forEachIndexed { i, element ->
                     val container = element.asJsonObject
                     container.get("volume")?.takeIf { it.isJsonPrimitive }?.let {
-                        putString(GarminPreferences.hydrationContainerVolume(i + 1), it.asString)
+                        putString(HydrationContainer.volumeKey(i + 1), it.asString)
                     }
                     parseUnit(container.get("unit"))?.let {
-                        putString(GarminPreferences.hydrationContainerUnit(i + 1), it.key)
+                        putString(HydrationContainer.unitKey(i + 1), it.key)
                     }
                 }
             parseUnit(body.get("hydrationMeasurementUnit"))?.let {
@@ -218,18 +219,14 @@ class HydrationInterceptor(private val deviceSupport: GarminSupport) : HttpInter
         @JvmStatic
         fun buildSettings(prefs: Prefs, withContainerNames: Boolean): JsonObject {
             val containers = JsonArray()
-            for (container in 1..GarminPreferences.HYDRATION_CONTAINER_COUNT) {
-                val defaultVolume = GarminPreferences.hydrationContainerDefaultVolume(container)
-                val volume = prefs.getString(
-                    GarminPreferences.hydrationContainerVolume(container),
-                    defaultVolume.toString()
-                )
+            for (container in 1..HydrationContainer.COUNT) {
+                val volume = HydrationContainer.getVolume(prefs, container)
                 containers.add(JsonObject().apply {
                     if (withContainerNames) {
                         addProperty("name", "Container $container")
                     }
-                    addProperty("volume", volume.toIntOrNull() ?: volume.toDoubleOrNull() ?: defaultVolume)
-                    addProperty("unit", getUnit(prefs, GarminPreferences.hydrationContainerUnit(container)).key)
+                    addProperty("volume", if (volume % 1 == 0.0) volume.toInt() else volume)
+                    addProperty("unit", HydrationContainer.getUnit(prefs, container).key)
                 })
             }
 

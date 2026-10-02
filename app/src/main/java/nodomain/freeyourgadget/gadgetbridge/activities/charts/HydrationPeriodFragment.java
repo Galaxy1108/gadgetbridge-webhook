@@ -127,7 +127,7 @@ public class HydrationPeriodFragment extends HydrationFragment<HydrationPeriodFr
             days.add(new HydrationDay(date, total != null ? Math.max(total, 0) : 0));
         }
 
-        return new HydrationData(days, new ActivityUser().getHydrationGoalMl(), getDisplayUnit(device));
+        return new HydrationData(days, new ActivityUser().getHydrationGoalMl(), HydrationUnit.forDevice(device));
     }
 
     @Override

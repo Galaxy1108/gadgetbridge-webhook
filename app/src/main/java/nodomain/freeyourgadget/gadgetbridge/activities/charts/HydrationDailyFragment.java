@@ -35,8 +35,10 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.devices.HydrationSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser;
+import nodomain.freeyourgadget.gadgetbridge.model.HydrationContainer;
 import nodomain.freeyourgadget.gadgetbridge.model.HydrationUnit;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
+import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 
 public class HydrationDailyFragment extends HydrationFragment<HydrationDailyFragment.HydrationData> {
     private static final int INCREMENT_ML = 250;
@@ -47,6 +49,8 @@ public class HydrationDailyFragment extends HydrationFragment<HydrationDailyFrag
     private TextView hydrationGoal;
     private Button addIncrementButton;
     private Button addButton;
+    private Button removeIncrementButton;
+    private final Button[] containerButtons = new Button[HydrationContainer.COUNT];
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
@@ -62,6 +66,10 @@ public class HydrationDailyFragment extends HydrationFragment<HydrationDailyFrag
         hydrationGoal = rootView.findViewById(R.id.hydration_goal);
         addIncrementButton = rootView.findViewById(R.id.hydration_add_increment);
         addButton = rootView.findViewById(R.id.hydration_add);
+        removeIncrementButton = rootView.findViewById(R.id.hydration_remove_increment);
+        containerButtons[0] = rootView.findViewById(R.id.hydration_add_container_1);
+        containerButtons[1] = rootView.findViewById(R.id.hydration_add_container_2);
+        containerButtons[2] = rootView.findViewById(R.id.hydration_add_container_3);
 
         refresh();
 
@@ -74,7 +82,14 @@ public class HydrationDailyFragment extends HydrationFragment<HydrationDailyFrag
         final HydrationSampleProvider provider = device.getDeviceCoordinator().getHydrationSampleProvider(device, db.getDaoSession());
         final double totalMl = provider != null ? provider.getDayTotal(HydrationSampleProvider.toDay(date)) : 0;
         final int goalMl = new ActivityUser().getHydrationGoalMl();
-        return new HydrationData(date, totalMl, goalMl, getDisplayUnit(device));
+        final Prefs prefs = GBApplication.getDevicePrefs(device);
+        final double[] containerVolumesMl = new double[HydrationContainer.COUNT];
+        final HydrationUnit[] containerUnits = new HydrationUnit[HydrationContainer.COUNT];
+        for (int i = 0; i < HydrationContainer.COUNT; i++) {
+            containerVolumesMl[i] = HydrationContainer.getVolumeMl(prefs, i + 1);
+            containerUnits[i] = HydrationContainer.getUnit(prefs, i + 1);
+        }
+        return new HydrationData(date, totalMl, goalMl, HydrationUnit.forDevice(device), containerVolumesMl, containerUnits);
     }
 
     @Override
@@ -107,6 +122,15 @@ public class HydrationDailyFragment extends HydrationFragment<HydrationDailyFrag
         addIncrementButton.setOnClickListener(v -> addEntry(day, INCREMENT_ML));
         addButton.setEnabled(editable);
         addButton.setOnClickListener(v -> showAddDialog(day, unit));
+        removeIncrementButton.setText(unit.format(context, -INCREMENT_ML));
+        removeIncrementButton.setEnabled(editable);
+        removeIncrementButton.setOnClickListener(v -> addEntry(day, -INCREMENT_ML));
+        for (int i = 0; i < HydrationContainer.COUNT; i++) {
+            final double volumeMl = data.containerVolumesMl[i];
+            containerButtons[i].setText(getString(R.string.hydration_add_increment, data.containerUnits[i].format(context, volumeMl)));
+            containerButtons[i].setEnabled(editable);
+            containerButtons[i].setOnClickListener(v -> addEntry(day, volumeMl));
+        }
     }
 
     @Override
@@ -187,12 +211,21 @@ public class HydrationDailyFragment extends HydrationFragment<HydrationDailyFrag
         private final double totalMl;
         private final int goalMl;
         private final HydrationUnit unit;
+        private final double[] containerVolumesMl;
+        private final HydrationUnit[] containerUnits;
 
-        protected HydrationData(final LocalDate date, final double totalMl, final int goalMl, final HydrationUnit unit) {
+        protected HydrationData(final LocalDate date,
+                                final double totalMl,
+                                final int goalMl,
+                                final HydrationUnit unit,
+                                final double[] containerVolumesMl,
+                                final HydrationUnit[] containerUnits) {
             this.date = date;
             this.totalMl = totalMl;
             this.goalMl = goalMl;
             this.unit = unit;
+            this.containerVolumesMl = containerVolumesMl;
+            this.containerUnits = containerUnits;
         }
     }
 }

@@ -355,7 +355,12 @@ object DeviceSettingRenderer {
                         } else {
                             summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
                         }
-                        setOnPreferenceChangeListener { _, _ ->
+                        setOnPreferenceChangeListener { pref, newValue ->
+                            setting.onValueChange?.invoke(
+                                pref,
+                                (pref as ListPreference).value ?: setting.defaultValue,
+                                newValue as String
+                            )
                             handler.notifyPreferenceChanged(setting.key)
                             postRefresh()
                             true
