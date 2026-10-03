@@ -379,7 +379,7 @@ public class GarminSupportTest extends TestBase {
     public void TestFitFileSettings2() throws FitParseException, IOException {
         //https://github.com/polyvertex/fitdecode/blob/48b6554d8a3baf33f8b5b9b2fd079fcbe9ac8ce2/tests/files/Settings2.fit
         byte[] fileContents = readBinaryResource("/TestFitFileSettings2.fit");
-        String expectedOutput = readTextResource("/TestFitFileSettings2.txt");
+        String expectedOutput = readTextResource("/TestFitFileSettings2.txt").trim();
 
         FitFile fitFile = FitFile.parseIncoming(fileContents);
         String actualOutput = fitFile.toString().replace("}, Fit", "},\nFit").replace("}, RecordData{", "},\nRecordData{");

@@ -90,7 +90,7 @@ object GarminWorkoutFitEncoder {
         builder.setNumValidSteps(steps.stepRecords.size)
         if (template.activityKind == ActivityKind.MULTISPORT) {
             builder.setNumSessions(steps.sessionRecords.size)
-            builder.setTransitions(if (template.transitions == true) 1 else 0)
+            builder.setTransitions(template.transitions)
         }
         if (template.activityKind == ActivityKind.POOL_SWIM) {
             steps.poolLength?.let { (lengthCm, unit) ->
@@ -199,7 +199,7 @@ object GarminWorkoutFitEncoder {
             builder.setDurationType(WktStepDuration.REPEAT_UNTIL_STEPS_CMPLT)
             builder.setDurationValue(startIndex.toLong())
             builder.setTargetValue((node.repeatCount ?: 1).toLong())
-            builder.setSkipLastRecover(if (activityKind == ActivityKind.POOL_SWIM) 1 else 0)
+            builder.setSkipLastRecover(activityKind == ActivityKind.POOL_SWIM)
             stepRecords.add(builder.build(LMT_WORKOUT_STEP))
             messageIndex++
         }

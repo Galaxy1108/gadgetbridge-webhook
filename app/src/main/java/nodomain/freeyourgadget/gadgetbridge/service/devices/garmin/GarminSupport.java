@@ -89,6 +89,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceApp;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.HydrationContainer;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
@@ -158,8 +159,11 @@ import nodomain.freeyourgadget.gadgetbridge.util.notifications.GBProgressNotific
 import static nodomain.freeyourgadget.gadgetbridge.GBApplication.ACTION_APP_IS_IN_BACKGROUND;
 import static nodomain.freeyourgadget.gadgetbridge.GBApplication.ACTION_APP_IS_IN_FOREGROUND;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_ALLOW_HIGH_MTU;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_HYDRATION_SEND_TODAY;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_HYDRATION_UNIT;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_SEND_APP_NOTIFICATIONS;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_TIME_SYNC;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivityUser.PREF_USER_GOAL_HYDRATION_ML;
 
 
 public class GarminSupport extends AbstractBTLESingleDeviceSupport implements ICommunicator.Callback {
@@ -914,14 +918,53 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             return;
         }
 
-        //noinspection SwitchStatementWithTooFewBranches
+        if (isHydrationContainerPref(config)) {
+            sendHydrationSettings();
+            return;
+        }
+
         switch (config) {
             case PREF_SEND_APP_NOTIFICATIONS:
                 NotificationSubscriptionDeviceEvent notificationSubscriptionDeviceEvent = new NotificationSubscriptionDeviceEvent();
                 notificationSubscriptionDeviceEvent.enable = true; // actual status is fetched from preferences
                 evaluateGBDeviceEvent(notificationSubscriptionDeviceEvent);
                 return;
+            case PREF_HYDRATION_UNIT:
+                sendHydrationSettings();
+                return;
+            case PREF_USER_GOAL_HYDRATION_ML:
+            case PREF_HYDRATION_SEND_TODAY:
+                sendHydrationUpdate();
+                return;
         }
+    }
+
+    private static boolean isHydrationContainerPref(final String config) {
+        for (int container = 1; container <= HydrationContainer.COUNT; container++) {
+            if (config.equals(HydrationContainer.volumeKey(container)) ||
+                    config.equals(HydrationContainer.unitKey(container))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void sendHydrationUpdate() {
+        if (!getCoordinator().supportsHydration(getDevice())) {
+            return;
+        }
+        try {
+            sendProtobufRequest("hydration update", protocolBufferHandler.getPushNotificationHandler().hydrationUpdate());
+        } catch (final Exception e) {
+            LOG.error("Failed to send hydration update", e);
+        }
+    }
+
+    private void sendHydrationSettings() {
+        if (!getCoordinator().supportsHydration(getDevice())) {
+            return;
+        }
+        sendProtobufRequest("hydration settings", protocolBufferHandler.getPushNotificationHandler().hydrationSettings());
     }
 
     private void resetFileSyncState() {

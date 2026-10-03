@@ -100,7 +100,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminUtils;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Event;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.EventType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.HrvStatus;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.SleepStage;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.SleepLevel;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.exception.FitParseException;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitBattery;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitDiveReadiness;
@@ -257,7 +257,7 @@ public class FitImporter {
                 sample.setSleepScore(score);
                 sleepStatsSamples.add(sample);
             } else if (record instanceof FitSleepLevel fitSleepLevel) {
-                final SleepStage stage = fitSleepLevel.getSleepLevel();
+                final SleepLevel stage = fitSleepLevel.getSleepLevel();
                 if (stage == null) {
                     continue;
                 }
