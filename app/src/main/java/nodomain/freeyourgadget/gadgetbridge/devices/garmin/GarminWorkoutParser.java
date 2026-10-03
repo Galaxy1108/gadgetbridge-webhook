@@ -56,8 +56,8 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.AntGadget
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.FitFile;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.RecordData;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.BatteryStatus;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.DisplayMeasure;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.GarminSport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.MeasurementSystem;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.WaterType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.exception.FitParseException;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.ExerciseCategory;
@@ -444,7 +444,7 @@ public class GarminWorkoutParser implements ActivitySummaryParser {
 
         final String weightUnit;
         if (userProfile != null && userProfile.getWeightSetting() != null) {
-            weightUnit = MeasurementSystem.metric.equals(userProfile.getWeightSetting()) ? UNIT_KG : UNIT_LB;
+            weightUnit = DisplayMeasure.metric.equals(userProfile.getWeightSetting()) ? UNIT_KG : UNIT_LB;
         } else {
             weightUnit = UNIT_KG;
         }

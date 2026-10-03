@@ -110,7 +110,7 @@ public class GBDaoGenerator {
             outputDir.mkdirs();
         }
 
-        final Schema schema = new Schema(147, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(148, MAIN_PACKAGE + ".entities");
 
         final List<Entity> sampleProvidersToGenerate = new LinkedList<>();
         final List<Entity> batterySampleProvidersToGenerate = new LinkedList<>();
@@ -310,6 +310,7 @@ public class GBDaoGenerator {
         addGenericMetricsSample(schema, user, device);
         sampleProvidersToGenerate.add(addGenericSleepScoreSample(schema, user, device));
         sampleProvidersToGenerate.add(addGenericBodyEnergySample(schema, user, device));
+        addGenericHydrationSample(schema, user, device);
 
         validateSerializableEntities(schema);
 
@@ -2819,6 +2820,18 @@ public class GBDaoGenerator {
         Entity sample = addEntity(schema, "GenericBodyEnergySample");
         addCommonTimeSampleProperties("AbstractBodyEnergySample", sample, user, device);
         sample.addIntProperty(SAMPLE_ENERGY).notNull().codeBeforeGetter(OVERRIDE);
+        return sample;
+    }
+
+    private static Entity addGenericHydrationSample(Schema schema, Entity user, Entity device) {
+        Entity sample = addEntity(schema, "GenericHydrationSample");
+        addCommonTimeSampleProperties("AbstractHydrationSample", sample, user, device);
+        Property day = sample.addIntProperty("day").notNull().codeBeforeGetter(OVERRIDE).getProperty();
+        sample.addDoubleProperty("volumeMl").notNull().codeBeforeGetter(OVERRIDE);
+        final Index indexDeviceDay = new Index();
+        indexDeviceDay.addProperty(findProperty(sample, "deviceId"));
+        indexDeviceDay.addProperty(day);
+        sample.addIndex(indexDeviceDay);
         return sample;
     }
 
