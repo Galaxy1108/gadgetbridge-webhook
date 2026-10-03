@@ -30,9 +30,11 @@ import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.
 
 import android.content.Context;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.ScatterChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -976,14 +978,19 @@ public class DefaultWorkoutCharts {
         return segments;
     }
 
-    private static LineData createGappedLineData(final Context context,
-                                                 final List<Entry> entries,
-                                                 final String label,
-                                                 final int color) {
+    @VisibleForTesting
+    static LineData createGappedLineData(final Context context,
+                                         final List<Entry> entries,
+                                         final String label,
+                                         final int color) {
         final List<ILineDataSet> dataSets = new ArrayList<>();
-        // Every segment keeps the same label
+        // Only the first segment carries the label, so the legend names the series once
         for (final List<Entry> segment : splitOnGaps(entries)) {
-            dataSets.add(createLineDataSet(context, segment, label, color));
+            final LineDataSet dataSet = createLineDataSet(context, segment, dataSets.isEmpty() ? label : null, color);
+            if (!dataSets.isEmpty()) {
+                dataSet.setForm(Legend.LegendForm.NONE);
+            }
+            dataSets.add(dataSet);
         }
         return new LineData(dataSets);
     }
