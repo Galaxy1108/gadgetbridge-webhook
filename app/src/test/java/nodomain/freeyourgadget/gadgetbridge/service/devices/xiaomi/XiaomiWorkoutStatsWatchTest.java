@@ -18,6 +18,7 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi;
 
 import android.os.Looper;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,10 +28,12 @@ import org.robolectric.Shadows;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.Health;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.WorkoutStatsWatch;
+import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.WorkoutStatusWatchSport;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.XiaomiProto;
 import nodomain.freeyourgadget.gadgetbridge.service.SleepAsAndroidSender;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.services.XiaomiHealthService;
@@ -39,11 +42,13 @@ import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
 /**
  * The live workout stats exchanged while the Sleep as Android synthetic workout is open: the
- * phone's push on subtype 49, and the watch's own copy pushed unsolicited on subtype 50.
+ * phone's push on subtype 49, the watch's own copy pushed unsolicited on subtype 50, and the
+ * timezone the workout status on subtype 26 opens the session with.
  */
 public class XiaomiWorkoutStatsWatchTest extends TestBase {
 
     private static final int COMMAND_TYPE = 8;
+    private static final int CMD_WORKOUT_WATCH_STATUS = 26;
     private static final int CMD_WORKOUT_STATS_PHONE = 49;
     private static final int CMD_WEAR_SPORT_DATA_V2A = 50;
 
@@ -56,6 +61,7 @@ public class XiaomiWorkoutStatsWatchTest extends TestBase {
     private XiaomiSupport support;
     private XiaomiHealthService health;
     private SleepAsAndroidSender sender;
+    private TimeZone defaultTimeZone;
 
     @Before
     @Override
@@ -66,6 +72,12 @@ public class XiaomiWorkoutStatsWatchTest extends TestBase {
         sender = Mockito.mock(SleepAsAndroidSender.class);
         health = new XiaomiHealthService(support);
         health.setSleepAsAndroidSender(sender);
+        defaultTimeZone = TimeZone.getDefault();
+    }
+
+    @After
+    public void restoreTimeZone() {
+        TimeZone.setDefault(defaultTimeZone);
     }
 
     private void idle(final long millis) {
@@ -93,6 +105,19 @@ public class XiaomiWorkoutStatsWatchTest extends TestBase {
         return captor.getAllValues().stream()
                 .filter(cmd -> cmd.getSubtype() == CMD_WORKOUT_STATS_PHONE)
                 .collect(Collectors.toList());
+    }
+
+    /** The timezone the first workout status the phone sent carried. */
+    private WorkoutStatusWatchSport timezoneSentToTheBand() {
+        final ArgumentCaptor<XiaomiProto.Command> captor =
+                ArgumentCaptor.forClass(XiaomiProto.Command.class);
+        Mockito.verify(support, Mockito.atLeast(1))
+                .sendCommand(Mockito.anyString(), captor.capture());
+        return captor.getAllValues().stream()
+                .filter(cmd -> cmd.getSubtype() == CMD_WORKOUT_WATCH_STATUS)
+                .findFirst()
+                .orElseThrow(AssertionError::new)
+                .getHealth().getWorkoutStatusWatch().getSportInfo();
     }
 
     /** The heart rate the last stats packet the phone sent carried. */
@@ -142,6 +167,30 @@ public class XiaomiWorkoutStatsWatchTest extends TestBase {
         idle(4 * IDLE_INTERVAL_MS);
 
         Assert.assertTrue(sentStats().isEmpty());
+    }
+
+    /** UTC+2 is 8 quarter hours, zigzag 16, the value captured from a band in that zone. */
+    @Test
+    public void aPositiveTimezoneIsSentZigzagEncoded() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Etc/GMT-2"));
+        openSession();
+
+        final WorkoutStatusWatchSport timezone = timezoneSentToTheBand();
+
+        Assert.assertEquals(8, timezone.getTzOffsetQuarterHours());
+        Assert.assertArrayEquals(GB.hexStringToByteArray("0810"), timezone.toByteArray());
+    }
+
+    /** UTC-5 is -20 quarter hours, zigzag 39. */
+    @Test
+    public void aNegativeTimezoneIsSentZigzagEncoded() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Etc/GMT+5"));
+        openSession();
+
+        final WorkoutStatusWatchSport timezone = timezoneSentToTheBand();
+
+        Assert.assertEquals(-20, timezone.getTzOffsetQuarterHours());
+        Assert.assertArrayEquals(GB.hexStringToByteArray("0827"), timezone.toByteArray());
     }
 
     @Test
