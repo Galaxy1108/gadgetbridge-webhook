@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
 
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -433,5 +434,11 @@ public class BodyEnergyFragment extends AbstractChartFragment<BodyEnergyFragment
             this.todaySamples = todaySamples;
             this.historicalData = historicalData;
         }
+    }
+
+    @Nullable
+    @Override
+    public ChartDataRange getAvailableDataRange(final GBDevice device, final DBHandler db) {
+        return ChartDataRange.ofSamples(device.getDeviceCoordinator().getBodyEnergySampleProvider(device, db.getDaoSession()));
     }
 }

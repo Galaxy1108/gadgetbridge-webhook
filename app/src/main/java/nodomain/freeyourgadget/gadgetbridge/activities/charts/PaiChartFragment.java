@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -472,5 +473,11 @@ public class PaiChartFragment extends AbstractChartFragment<PaiChartFragment.Pai
         public WeekChartsData<BarData> getWeekBeforeData() {
             return weekBeforeData;
         }
+    }
+
+    @Nullable
+    @Override
+    public ChartDataRange getAvailableDataRange(final GBDevice device, final DBHandler db) {
+        return ChartDataRange.ofSamples(device.getDeviceCoordinator().getPaiSampleProvider(device, db.getDaoSession()));
     }
 }

@@ -18,6 +18,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.charts;
 
 import android.util.TypedValue;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.components.YAxis;
@@ -509,5 +510,11 @@ public abstract class AbstractActivityChartFragment<D extends ChartsData> extend
         }
         sample.setTimestamp(timestamp);
         return sample;
+    }
+
+    @Nullable
+    @Override
+    public ChartDataRange getAvailableDataRange(final GBDevice device, final DBHandler db) {
+        return ChartDataRange.ofActivitySamples(device.getDeviceCoordinator().getSampleProvider(device, db.getDaoSession()));
     }
 }

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.Chart;
@@ -490,5 +491,14 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
             this.minimum = minimum;
             this.maximum = maximum;
         }
+    }
+
+    @Nullable
+    @Override
+    public ChartDataRange getAvailableDataRange(final GBDevice device, final DBHandler db) {
+        return ChartDataRange.union(
+                ChartDataRange.ofActivitySamples(device.getDeviceCoordinator().getSampleProvider(device, db.getDaoSession())),
+                ChartDataRange.ofSamples(device.getDeviceCoordinator().getHeartRateRestingSampleProvider(device, db.getDaoSession()))
+        );
     }
 }

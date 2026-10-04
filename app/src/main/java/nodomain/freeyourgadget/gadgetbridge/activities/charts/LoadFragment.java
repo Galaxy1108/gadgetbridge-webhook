@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -790,5 +791,15 @@ public class LoadFragment extends AbstractChartFragment<LoadFragment.LoadsData> 
             this.day = day;
             this.i = i;
         }
+    }
+
+    @Nullable
+    @Override
+    public ChartDataRange getAvailableDataRange(final GBDevice device, final DBHandler db) {
+        return ChartDataRange.union(
+                ChartDataRange.ofSamples(device.getDeviceCoordinator().getWorkoutLoadSampleProvider(device, db.getDaoSession())),
+                ChartDataRange.ofSamples(device.getDeviceCoordinator().getTrainingAcuteLoadSampleProvider(device, db.getDaoSession())),
+                ChartDataRange.ofSamples(device.getDeviceCoordinator().getTrainingChronicLoadSampleProvider(device, db.getDaoSession()))
+        );
     }
 }

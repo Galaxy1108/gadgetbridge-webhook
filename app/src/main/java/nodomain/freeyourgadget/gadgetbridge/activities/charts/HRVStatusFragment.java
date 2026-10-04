@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.activities.charts;
 
+import androidx.annotation.Nullable;
+
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -1060,5 +1062,14 @@ public class HRVStatusFragment extends AbstractChartFragment<HRVStatusFragment.H
             this.baseLineBalancedLower = baseLineBalancedLower;
             this.baseLineBalancedUpper = baseLineBalancedUpper;
         }
+    }
+
+    @Nullable
+    @Override
+    public ChartDataRange getAvailableDataRange(final GBDevice device, final DBHandler db) {
+        return ChartDataRange.union(
+                ChartDataRange.ofSamples(device.getDeviceCoordinator().getHrvSummarySampleProvider(device, db.getDaoSession())),
+                ChartDataRange.ofSamples(device.getDeviceCoordinator().getHrvValueSampleProvider(device, db.getDaoSession()))
+        );
     }
 }

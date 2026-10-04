@@ -435,4 +435,13 @@ public class TrainingReadinessFragment extends AbstractChartFragment<TrainingRea
             this.stressRanges = stressRanges;
         }
     }
+
+    @Nullable
+    @Override
+    public ChartDataRange getAvailableDataRange(final GBDevice device, final DBHandler db) {
+        return ChartDataRange.union(
+                ChartDataRange.ofSamples(device.getDeviceCoordinator().getHrvSummarySampleProvider(device, db.getDaoSession())),
+                ChartDataRange.ofSamples(device.getDeviceCoordinator().getStressSampleProvider(device, db.getDaoSession()))
+        );
+    }
 }

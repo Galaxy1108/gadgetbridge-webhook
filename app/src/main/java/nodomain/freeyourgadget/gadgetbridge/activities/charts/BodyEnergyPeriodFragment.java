@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.CandleStickChart;
@@ -293,5 +294,10 @@ public class BodyEnergyPeriodFragment extends AbstractChartFragment<BodyEnergyPe
             this.maximum = maximum;
         }
     }
-}
 
+    @Nullable
+    @Override
+    public ChartDataRange getAvailableDataRange(final GBDevice device, final DBHandler db) {
+        return ChartDataRange.ofSamples(device.getDeviceCoordinator().getBodyEnergySampleProvider(device, db.getDaoSession()));
+    }
+}
