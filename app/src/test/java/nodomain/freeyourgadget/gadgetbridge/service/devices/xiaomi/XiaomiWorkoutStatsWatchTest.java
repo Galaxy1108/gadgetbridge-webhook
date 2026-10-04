@@ -134,6 +134,17 @@ public class XiaomiWorkoutStatsWatchTest extends TestBase {
     }
 
     @Test
+    public void theStatsStopWhenTheServiceIsDisposed() {
+        openSession();
+        health.dispose();
+        Mockito.clearInvocations(support);
+
+        idle(4 * IDLE_INTERVAL_MS);
+
+        Assert.assertTrue(sentStats().isEmpty());
+    }
+
+    @Test
     public void theHeartRateReachesSleepAsAndroid() {
         openSession();
 

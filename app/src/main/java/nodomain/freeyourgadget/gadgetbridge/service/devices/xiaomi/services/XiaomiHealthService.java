@@ -286,6 +286,8 @@ public class XiaomiHealthService extends AbstractXiaomiService {
         gpsStarted = false;
         gpsFixAcquired = false;
         workoutStarted = false;
+        stopWorkoutStatsTicker();
+        saaRawSensorActive = false;
         activityFetcher.dispose();
     }
 
