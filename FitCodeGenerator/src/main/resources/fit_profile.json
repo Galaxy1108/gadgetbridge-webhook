@@ -1119,7 +1119,7 @@
       "num": 34,
       "name": "ACTIVITY",
       "fields": [
-        {"num":0,"name":"total_timer_time","base":"UINT32"},
+        {"num":0,"name":"total_timer_time","base":"UINT32","scale":1000,"UOM":"SECONDS"},
         {"num":1,"name":"num_sessions","base":"UINT16"},
         {"num":2,"name":"type","base":"ENUM"},
         {"num":3,"name":"event","base":"ENUM","type":"Event"},
@@ -1305,7 +1305,7 @@
       "num": 78,
       "name": "HRV",
       "fields": [
-        {"num":0,"name":"time","base":"UINT16","arrayLen":0}
+        {"num":0,"name":"time","base":"UINT16","scale":1000,"arrayLen":0,"UOM":"SECONDS"}
       ]
     },
     {

@@ -1498,8 +1498,6 @@ public class FitExporter {
 
     private RecordData buildActivity(final long endSeconds, final long elapsedSeconds,
                                      final int utcOffsetSeconds) {
-        // NativeFITMessage.ACTIVITY field 0 (total_timer_time) is declared without scale —
-        // FIT spec is scale=1000 unit=s, so pre-multiply seconds → milliseconds.
         // Field 5 (local_timestamp) is a FIT TIMESTAMP, so the encoder subtracts the Garmin
         // epoch — pass raw Unix seconds plus the phone-zone UTC offset so local_timestamp
         // holds the local wall-clock; importers recover the timezone as
@@ -1507,7 +1505,7 @@ public class FitExporter {
         return new FitActivity.Builder()
                 .setTimestamp(endSeconds)
                 .setLocalTimestamp(endSeconds + utcOffsetSeconds)
-                .setTotalTimerTime(elapsedSeconds * 1000L)
+                .setTotalTimerTime((double)elapsedSeconds)
                 .setNumSessions(1)
                 .setType(ACTIVITY_TYPE_MANUAL)
                 .setEvent(Event.ACTIVITY)
