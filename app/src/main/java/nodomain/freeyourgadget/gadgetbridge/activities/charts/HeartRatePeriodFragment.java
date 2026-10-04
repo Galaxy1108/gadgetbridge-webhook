@@ -158,7 +158,8 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
                     .orElse(DATA_INVALID);
         }
 
-        final TimeWeightedAverageAccumulator accumulator = new TimeWeightedAverageAccumulator(60 * HeartRateUtils.MAX_HR_MEASUREMENTS_GAP_MINUTES, 60);
+        final int maxHRGapMinutes = device.getDeviceCoordinator().getMaxHeartRateMeasurementsGapMinutes(device);
+        final TimeWeightedAverageAccumulator accumulator = new TimeWeightedAverageAccumulator(60 * maxHRGapMinutes, 60);
         for (int i = 0; i < samples.size(); i++) {
             final ActivitySample sample = samples.get(i);
             if (heartRateUtilsInstance.isValidHeartRateValue(sample.getHeartRate())) {
@@ -358,6 +359,8 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
         mDateView.setText(formattedDate);
 
         HeartRateUtils heartRateUtilsInstance = HeartRateUtils.getInstance();
+        final GBDevice device = getChartsHost().getDevice();
+        final int maxHRGapMinutes = device.getDeviceCoordinator().getMaxHeartRateMeasurementsGapMinutes(device);
         final List<Entry> lineEntries = new ArrayList<>();
         List<? extends ActivitySample> samples = data.samples;
         final TimestampTranslation tsTranslation = new TimestampTranslation();
@@ -371,7 +374,7 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
             }
             final int ts = sample.getTimestamp();
             final int shortTs = tsTranslation.shorten(ts);
-            if (lastTs == 0 || (ts - lastTs) <= 60 * HeartRateUtils.MAX_HR_MEASUREMENTS_GAP_MINUTES) {
+            if (lastTs == 0 || (ts - lastTs) <= 60 * maxHRGapMinutes) {
                 lineEntries.add(new Entry(shortTs, sample.getHeartRate()));
             } else {
                 if (!lineEntries.isEmpty()) {

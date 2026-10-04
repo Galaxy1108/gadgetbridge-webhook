@@ -283,7 +283,7 @@ public abstract class AbstractActivityChartFragment<D extends ChartsData> extend
             for (ActivitySample sample : highResSamples) {
                 if (sample.getKind() != ActivityKind.NOT_WORN && heartRateUtilsInstance.isValidHeartRateValue(sample.getHeartRate())) {
                     int tsShorten = tsTranslation.shorten(sample.getTimestamp());
-                    if (lastTsShorten == 0 || (tsShorten - lastTsShorten) <= 60 * HeartRateUtils.MAX_HR_MEASUREMENTS_GAP_MINUTES) {
+                    if (lastTsShorten == 0 || (tsShorten - lastTsShorten) <= 60 * gbDevice.getDeviceCoordinator().getMaxHeartRateMeasurementsGapMinutes(gbDevice)) {
                         heartRateLineEntries.add(new Entry(tsShorten, sample.getHeartRate()));
                     } else {
                         if (!heartRateLineEntries.isEmpty()) {
