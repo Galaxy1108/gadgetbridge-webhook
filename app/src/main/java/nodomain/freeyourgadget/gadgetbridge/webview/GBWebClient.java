@@ -121,10 +121,8 @@ public class GBWebClient extends WebViewClient {
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         Uri parsedUri = request.getUrl();
         LOG.debug("WEBVIEW shouldInterceptRequest URL: {} (method {})", parsedUri.toString(), request.getMethod());
-        WebResourceResponse mimickedReply = mimicReply(parsedUri, request.getMethod(), request.getRequestHeaders());
-        if (mimickedReply != null)
-            return mimickedReply;
-        return super.shouldInterceptRequest(view, request);
+        // Do not call super: it calls the legacy overload, which sends the request again
+        return mimicReply(parsedUri, request.getMethod(), request.getRequestHeaders());
     }
 
     @Override
