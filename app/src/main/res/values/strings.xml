@@ -5465,6 +5465,7 @@
     <string name="pref_health_connect_manual_settings">Manage Health Connect Data</string>
     <string name="pref_health_connect_settings">Health Connect Settings</string>
     <string name="pref_health_connect_settings_summary">Open Android Health Connect settings</string>
+    <string name="pref_health_connect_request_permissions_summary">Some permissions are not granted. Tap to request them.</string>
     <string name="pref_health_connect_disable_notice">To disable Health Connect Export, remove all permissions of Gadgetbridge from the Health Connect App</string>
     <string name="pref_health_connect_sync_notice">Depending on the amount of data, a Health Connect sync might take several minutes.</string>
     <string name="pref_health_connect_device_selection">Select devices</string>
