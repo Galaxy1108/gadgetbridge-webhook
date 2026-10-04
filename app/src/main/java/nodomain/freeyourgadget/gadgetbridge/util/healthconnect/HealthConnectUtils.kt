@@ -550,6 +550,31 @@ class HealthConnectUtils {
         private const val MIN_VALID_SAMPLE_SECONDS = 1420070400L // 2015-01-01T00:00:00Z
         private const val MIN_VALID_SAMPLE_MILLIS = MIN_VALID_SAMPLE_SECONDS * 1000
 
+        /**
+         * Deletes the sync state of [dataType] for [gbDevice].
+         */
+        @JvmStatic
+        fun resetSyncState(
+            gbDevice: GBDevice,
+            dataType: HealthConnectPermissionManager.HealthConnectDataType,
+        ) {
+            GBApplication.acquireDB().use { db ->
+                val deviceFromDb = DBHelper.findDevice(gbDevice, db.daoSession) ?: return
+                CompanionLogger.info(
+                    "$HC_SYNC_TAG Resetting sync state for {}({})",
+                    gbDevice.aliasOrName,
+                    dataType.name
+                )
+                db.daoSession.healthConnectSyncStateDao.queryBuilder()
+                    .where(
+                        HealthConnectSyncStateDao.Properties.DeviceId.eq(deviceFromDb.id),
+                        HealthConnectSyncStateDao.Properties.DataType.eq(dataType.name)
+                    )
+                    .buildDelete()
+                    .executeDeleteWithoutDetachingEntities()
+            }
+        }
+
         private fun getSyncTimestampRange(
             context: Context,
             gbDevice: GBDevice,
