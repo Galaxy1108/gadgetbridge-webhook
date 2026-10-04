@@ -111,6 +111,7 @@ public class ActivityChartsActivity extends AbstractGBActivity implements Charts
 
     private GBDevice mGBDevice;
     private ViewGroup dateBar;
+    private List<Button> nextButtons;
 
     private ActivityResultLauncher<Intent> chartsPreferencesLauncher;
     private final ActivityResultCallback<ActivityResult> chartsPreferencesCallback = result -> {
@@ -252,6 +253,8 @@ public class ActivityChartsActivity extends AbstractGBActivity implements Charts
         mPrevMonthButton.setOnClickListener(v -> handleButtonClicked(DATE_PREV_MONTH));
         final Button mNextMonthButton = findViewById(R.id.charts_next_month);
         mNextMonthButton.setOnClickListener(v -> handleButtonClicked(DATE_NEXT_MONTH));
+
+        nextButtons = Arrays.asList(mNextButton, mNextWeekButton, mNextMonthButton);
     }
 
     @Override
@@ -325,6 +328,13 @@ public class ActivityChartsActivity extends AbstractGBActivity implements Charts
     @Override
     public void setDateInfo(final String dateInfo) {
         mDateControl.setText(dateInfo);
+
+        final LocalDate endDate = Instant.ofEpochMilli(getEndDate().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+        final boolean isCurrentDay = !endDate.isBefore(LocalDate.now());
+        for (final Button button : nextButtons) {
+            button.setEnabled(!isCurrentDay);
+            button.setAlpha(!isCurrentDay ? 1f : 0.38f);
+        }
     }
 
     @Override
