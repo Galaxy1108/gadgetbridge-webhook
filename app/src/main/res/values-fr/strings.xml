@@ -4840,4 +4840,18 @@
         <item quantity="many">%d pas</item>
         <item quantity="other">%d pas</item>
     </plurals>
+    <plurals name="workout_exercise_picker_filter_count">
+        <item quantity="one">%d exercice</item>
+        <item quantity="many">%d exercices</item>
+        <item quantity="other">%d exercices</item>
+    </plurals>
+    <string name="datestep_letter_day">J</string>
+    <string name="datestep_letter_week">S</string>
+    <string name="datestep_letter_month">M</string>
+    <string name="datestep_prev_day">Jour précédent</string>
+    <string name="datestep_next_day">Jour suivant</string>
+    <string name="datestep_prev_week">Semaine précédente</string>
+    <string name="datestep_next_week">Semaine suivante</string>
+    <string name="datestep_prev_month">Mois précédent</string>
+    <string name="datestep_next_month">Mois suivant</string>
 </resources>
