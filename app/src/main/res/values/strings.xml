@@ -2330,6 +2330,7 @@
     <string name="devicetype_waspos" translatable="false">Wasp-OS</string>
     <string name="devicetype_smaq2oss" translatable="false">SMA-Q2 OSS</string>
     <string name="devicetype_fitpro" translatable="false">FitPro</string>
+    <string name="devicetype_nx_wear_b8" translatable="false">Nx Wear B8</string>
     <string name="devicetype_colacao21" translatable="false">ColaCao 2021</string>
     <string name="devicetype_colacao23" translatable="false">ColaCao 2023</string>
     <string name="devicetype_ak102" translatable="false">AK102</string>
@@ -5972,6 +5973,15 @@
     <string name="workout_error_min_above_max">Min must not be above max.</string>
     <string name="workout_error_value_out_of_range">Value is out of range.</string>
     <string name="workout_error_exercise_not_supported">An exercise is not supported by this device.</string>
+
+    <string name="nx_wear_b8_measure_stress">Measure stress</string>
+    <string name="nx_wear_b8_stress_result">Stress: %1$d</string>
+    <string name="nx_wear_b8_measure_spo2">Measure blood oxygen</string>
+    <string name="nx_wear_b8_spo2_result">Blood oxygen: %1$d%%</string>
+    <string name="nx_wear_b8_measurement_in_progress">Measuring…</string>
+    <string name="nx_wear_b8_measurement_failed">Measurement failed. Wear the band securely and try again.</string>
+    <string name="nx_wear_b8_measurement_result">Measurement result</string>
+    <string name="nx_wear_b8_shake_to_take_picture">Shake to take a picture</string>
 
     <string name="workout_exercise_picker_title">Choose an exercise</string>
     <string name="workout_exercise_picker_search_hint">Search exercises</string>

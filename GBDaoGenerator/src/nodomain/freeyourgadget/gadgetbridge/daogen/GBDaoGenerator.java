@@ -110,7 +110,7 @@ public class GBDaoGenerator {
             outputDir.mkdirs();
         }
 
-        final Schema schema = new Schema(148, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(149, MAIN_PACKAGE + ".entities");
 
         final List<Entity> sampleProvidersToGenerate = new LinkedList<>();
         final List<Entity> batterySampleProvidersToGenerate = new LinkedList<>();
@@ -124,6 +124,7 @@ public class GBDaoGenerator {
         addHealthConnectSleepSession(schema, device);
         addInternetFirewallRule(schema, device);
         addXiaomiHipeeP1Reading(schema, device);
+        addNxWearSportSample(schema, user, device);
 
         // yeah deep shit, has to be here (after device) for db upgrade and column order
         // because addDevice adds a property to deviceAttributes also....
@@ -1158,6 +1159,16 @@ public class GBDaoGenerator {
         downloadedFitFile.addIndex(indexUnique);
 
         return downloadedFitFile;
+    }
+
+    private static Entity addNxWearSportSample(Schema schema, Entity user, Entity device) {
+        Entity sample = addEntity(schema, "NxWearSportSample");
+        addCommonTimeSampleProperties("AbstractTimeSample", sample, user, device);
+        sample.addIntProperty(SAMPLE_STEPS).notNull();
+        sample.addIntProperty("distance").notNull();
+        sample.addIntProperty("calories").notNull();
+        sample.addIntProperty("duration").notNull();
+        return sample;
     }
 
     private static Entity addGarminActivitySample(Schema schema, Entity user, Entity device) {
