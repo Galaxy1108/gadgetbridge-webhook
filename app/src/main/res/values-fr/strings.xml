@@ -4798,4 +4798,19 @@
     <string name="accent_color_cyan">Cyan</string>
     <string name="accent_color_blue">Bleu</string>
     <string name="accent_color_indigo">Indigo</string>
+    <string name="accent_color_violet">Violet</string>
+    <string name="accent_color_pink">Rose</string>
+    <string name="accent_color_white">Blanc</string>
+    <string name="blood_pressure_all_users">Tous utilisateurs</string>
+    <string name="blood_pressure_user_index">Utilisateur %d</string>
+    <string name="blood_pressure_unknown_user">Utilisateur inconnu</string>
+    <string name="activity_prefs_goal_hydration_ml">Cible quotidienne : eau absorbée en millilitres</string>
+    <string name="hydration_unit_milliliter">Millilitres</string>
+    <string name="hydration_unit_cup">Tasses</string>
+    <string name="hydration_unit_ounce">Onces liquides</string>
+    <string name="hydration_unit_milliliter_symbol">ml</string>
+    <string name="hydration_unit_cup_symbol">tasses</string>
+    <string name="hydration_unit_ounce_symbol">oz liq</string>
+    <string name="pref_header_hydration">Hydratation</string>
+    <string name="pref_hydration_container_i">Contenant</string>
 </resources>
