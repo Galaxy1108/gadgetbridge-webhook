@@ -4812,5 +4812,32 @@
     <string name="hydration_unit_cup_symbol">tasses</string>
     <string name="hydration_unit_ounce_symbol">oz liq</string>
     <string name="pref_header_hydration">Hydratation</string>
-    <string name="pref_hydration_container_i">Contenant</string>
+    <string name="pref_hydration_container_i">Contenant %1$d</string>
+    <string name="pref_hydration_container_volume">Volume</string>
+    <string name="hydration_total">Total</string>
+    <string name="hydration_goal">Objectif quotidien</string>
+    <string name="hydration_daily_average">Moyenne quotidienne</string>
+    <string name="hydration_add">Ajouter</string>
+    <string name="hydration_add_increment">+%1$s</string>
+    <string name="hydration_add_invalid_value">Valeur incorrecte</string>
+    <string name="table_header_hr">FC</string>
+    <plurals name="workout_list_activity_count">
+        <item quantity="one">%d activité</item>
+        <item quantity="many">%d activités</item>
+        <item quantity="other">%d activités</item>
+    </plurals>
+    <plurals name="workout_export_skipped">
+        <item quantity="one">%d fichier non exporté, voyez le journal</item>
+        <item quantity="many">%d fichiers non exportés, voyez le journal</item>
+        <item quantity="other">%d fichiers non exportés, voyez le journal</item>
+    </plurals>
+    <string name="pref_sleepasandroid_alarm_max_minutes">Alarme vibrante maximum (minutes)</string>
+    <string name="body_energy_percentage">%1$d %%</string>
+    <string name="pref_huawei_wheelchair_mode">Mode fauteuil roulant</string>
+    <string name="pref_health_connect_request_permissions_summary">Certaines autorisations manquent. Touchez pour les demander.</string>
+    <plurals name="workout_template_step_count">
+        <item quantity="one">%d pas</item>
+        <item quantity="many">%d pas</item>
+        <item quantity="other">%d pas</item>
+    </plurals>
 </resources>
