@@ -110,7 +110,7 @@ public class GBDaoGenerator {
             outputDir.mkdirs();
         }
 
-        final Schema schema = new Schema(150, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(151, MAIN_PACKAGE + ".entities");
 
         final List<Entity> sampleProvidersToGenerate = new LinkedList<>();
         final List<Entity> batterySampleProvidersToGenerate = new LinkedList<>();
@@ -278,6 +278,7 @@ public class GBDaoGenerator {
         addAppSpecificNotificationSettings(schema, device);
         sampleProvidersToGenerate.add(addCyclingSample(schema, user, device));
         addAudioRecordings(schema, device);
+        addDeviceMusicFile(schema, device);
         addPebbleAppstoreIdEntry(schema);
 
         Entity weightSampleF8 = addWeightSampleF8(schema, user, device);
@@ -1756,6 +1757,27 @@ public class GBDaoGenerator {
         recording.addIntProperty("duration");
 
         recording.addToOne(device, deviceId);
+    }
+
+    private static void addDeviceMusicFile(Schema schema, Entity device) {
+        Entity musicFile = addEntity(schema, "DeviceMusicFile");
+        musicFile.addIdProperty().autoincrement();
+
+        Property deviceId = musicFile.addLongProperty("deviceId").notNull().getProperty();
+        Property hash = musicFile.addStringProperty("hash").notNull().getProperty();
+
+        Index indexUnique = new Index();
+        indexUnique.addProperty(deviceId);
+        indexUnique.addProperty(hash);
+        indexUnique.makeUnique();
+        musicFile.addIndex(indexUnique);
+
+        musicFile.addStringProperty("title");
+        musicFile.addStringProperty("album");
+        musicFile.addStringProperty("artist");
+        musicFile.addLongProperty("size").notNull();
+
+        musicFile.addToOne(device, deviceId);
     }
 
     private static void addNotificationFilterEntry(Schema schema, Entity notificationFilterEntity) {
