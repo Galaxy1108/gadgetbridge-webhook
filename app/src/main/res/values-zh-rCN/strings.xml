@@ -5370,7 +5370,7 @@
     <string name="datestep_letter_week">周</string>
     <string name="datestep_letter_month">月</string>
     <string name="datestep_prev_day">前一天</string>
-    <string name="datestep_next_day">下一天</string>
+    <string name="datestep_next_day">后一天</string>
     <string name="datestep_prev_week">上周</string>
     <string name="datestep_next_week">下周</string>
     <string name="datestep_prev_month">上月</string>
