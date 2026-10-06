@@ -1255,6 +1255,10 @@
     <string name="miband_fwinstaller_incompatible_version">Incompatible firmware</string>
     <string name="fwinstaller_firmware_not_compatible_to_device">This firmware is not compatible with the device</string>
     <string name="fwinstaller_file_not_compatible_to_device">The selected file is not compatible with the device</string>
+    <string name="watchface_install_resolution_matches">The watchface resolution matches this device. The watchface might be compatible, but Gadgetbridge cannot confirm it. A watchface for a different device might brick your device.</string>
+    <string name="watchface_install_aspect_ratio_matches">The watchface preview fits the screen of this device. The watchface might be compatible, but Gadgetbridge cannot confirm it. A watchface for a different device might brick your device.</string>
+    <string name="watchface_install_compatibility_unknown">Gadgetbridge cannot confirm that this watchface is compatible with this device. A watchface for a different device might brick your device.</string>
+    <string name="watchface_install_confirm_risk">I understand the risk, install anyway</string>
     <string name="fwinstaller_no_compatible_device_found">No compatible device found to install %1s</string>
     <string name="miband_prefs_reserve_alarm_calendar">Alarms to reserve for upcoming events</string>
     <string name="miband_prefs_reserve_reminder_calendar">Reminders to reserve for upcoming events</string>
