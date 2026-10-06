@@ -249,6 +249,7 @@
         {"num":22,"name":"bike_cad_ant_id_trans_type","base":"UINT8Z"},
         {"num":23,"name":"bike_spdcad_ant_id_trans_type","base":"UINT8Z"},
         {"num":24,"name":"bike_power_ant_id_trans_type","base":"UINT8Z"},
+        {"num":35,"name":"color","base":"UINT8","arrayLen":3},
         {"num":37,"name":"odometer_rollover","base":"UINT8"},
         {"num":38,"name":"front_gear_num","base":"UINT8Z"},
         {"num":39,"name":"front_gear","base":"UINT8Z","arrayLen":0},
@@ -1908,7 +1909,9 @@
       "fields": [
         {"num":0,"name":"mode","base":"ENUM"},
         {"num":1,"name":"layout","base":"BYTE"},
-        {"num":13,"name":"accent_color","base":"UINT16"},
+        {"num":5,"name":"accent_color_8","base":"UINT8"},
+        {"num":7,"name":"background","base":"BYTE"},
+        {"num":13,"name":"accent_color_16","base":"UINT16"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -2288,6 +2291,15 @@
         {"num":9,"name":"qualifier","base":"ENUM"},
         {"num":10,"name":"descriptor","base":"ENUM"},
         {"num":11,"name":"is_signed","base":"ENUM","type":"Bool"}
+      ]
+    },
+    {
+      "num": 203,
+      "name": "BIKE_RADAR_PROFILE",
+      "fields": [
+        {"num":0,"name":"vehicles_display","base":"ENUM"},
+        {"num":1,"name":"halo_display","base":"ENUM"},
+        {"num":2,"name":"tone","base":"ENUM"}
       ]
     },
     {
