@@ -1080,7 +1080,7 @@ public enum DeviceType {
     SOUNDCORE_LIFE_TUNE_XR(SoundcoreLifeTuneXRCoordinator.class),
     SOUNDCORE_AEROFIT2(SoundcoreAeroFit2Coordinator.class),
     SOUNDCORE_SPORT_X20(SoundcoreSportX20Coordinator.class),
-    SOUNDCORE_A30i(SoundcoreA30iCoordinator.class),
+    SOUNDCORE_A30I(SoundcoreA30iCoordinator.class),
     HAYLOU_S35_ANC(HaylouS35AncCoordinator.class),
     MOONDROP_SPACE_TRAVEL(MoondropSpaceTravelCoordinator.class),
     MOONDROP_SPACE_TRAVEL_2(MoondropSpaceTravel2Coordinator.class),
