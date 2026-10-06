@@ -5375,4 +5375,10 @@
     <string name="datestep_next_week">下周</string>
     <string name="datestep_prev_month">上月</string>
     <string name="datestep_next_month">下月</string>
+    <string name="range_integer">%1$d – %2$d</string>
+    <string name="pref_title_allow_unsupported_devices">允许不支持的设备</string>
+    <string name="pref_summary_navigation_allow_unsupported_devices">将导航指令以通知形式发送到不支持导航的设备</string>
+    <string name="pref_title_navigation_right_hand_driving">右侧通行</string>
+    <string name="pref_description_navigation_right_hand_driving">控制环形交叉路口显示哪个导航图标。</string>
+    <string name="pref_title_navigation_continuous_updates">发送持续更新</string>
 </resources>
