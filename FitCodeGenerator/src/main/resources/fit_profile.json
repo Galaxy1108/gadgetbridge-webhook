@@ -151,7 +151,7 @@
         {"num":0,"name":"friendly_name","base":"STRING","stringLen":8},
         {"num":1,"name":"gender","base":"ENUM"},
         {"num":2,"name":"age","base":"UINT8","UOM":"YEARS"},
-        {"num":3,"name":"height","base":"UINT8","UOM":"CENTIMETER"},
+        {"num":3,"name":"height","base":"UINT8","scale":100,"UOM":"METER"},
         {"num":4,"name":"weight","base":"UINT16","scale":10,"UOM":"KILOGRAM"},
         {"num":5,"name":"language","base":"ENUM","type":"Language"},
         {"num":6,"name":"elev_setting","base":"ENUM","type":"DisplayMeasure"},
@@ -174,8 +174,8 @@
         {"num":28,"name":"wake_time","base":"UINT32"},
         {"num":29,"name":"sleep_time","base":"UINT32"},
         {"num":30,"name":"height_setting","base":"ENUM","type":"DisplayMeasure"},
-        {"num":31,"name":"user_running_step_length","base":"UINT16"},
-        {"num":32,"name":"user_walking_step_length","base":"UINT16"},
+        {"num":31,"name":"user_running_step_length","base":"UINT16","scale":1000,"UOM":"METER"},
+        {"num":32,"name":"user_walking_step_length","base":"UINT16","scale":1000,"UOM":"METER"},
         {"num":34,"name":"recovery_time","base":"UINT16"},
         {"num":35,"name":"recovery_time_start","base":"UINT32","type":"DateTime","UOM":"SECONDS"},
         {"num":37,"name":"lactate_threshold_speed","base":"UINT16","scale":10,"UOM":"KILOMETER_PER_HOUR"},
@@ -390,7 +390,7 @@
         {"num":129,"name":"pack_mode","base":"ENUM","type":"Bool"},
         {"num":130,"name":"touch_lock","base":"ENUM"},
         {"num":131,"name":"audio_prompt_output","base":"ENUM"},
-        {"num":153,"name":"precise_target_speed","base":"UINT32","scale":1000000,"UOM":"METER_PER_SECOND"},
+        {"num":153,"name":"precise_target_speed","base":"UINT32","UOM":"METER_PER_SECOND"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -497,7 +497,7 @@
         {"num":37,"name":"left_right_balance","base":"UINT16"},
         {"num":38,"name":"end_position_lat","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":39,"name":"end_position_long","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
-        {"num":41,"name":"avg_stroke_count","base":"UINT32"},
+        {"num":41,"name":"avg_stroke_count","base":"UINT32","scale":10,"UOM":"STORKES_PER_LAP"},
         {"num":42,"name":"avg_stroke_distance","base":"UINT16","scale":100,"UOM":"METER"},
         {"num":43,"name":"swim_stroke","base":"ENUM"},
         {"num":44,"name":"pool_length","base":"UINT16","scale":100,"UOM":"METER"},
@@ -958,7 +958,7 @@
         {"num":2,"name":"manufacturer","base":"UINT16"},
         {"num":3,"name":"serial_number","base":"UINT32Z"},
         {"num":4,"name":"product","base":"UINT16"},
-        {"num":5,"name":"software_version","base":"UINT16"},
+        {"num":5,"name":"software_version","base":"UINT16","scale":100},
         {"num":6,"name":"hardware_version","base":"UINT8"},
         {"num":7,"name":"cum_operating_time","base":"UINT32","UOM":"SECONDS"},
         {"num":9,"name":"reception_quality","base":"UINT8","UOM":"PERCENT"},
@@ -1420,8 +1420,8 @@
         {"num":19,"name":"opponent_score","base":"UINT16"},
         {"num":20,"name":"stroke_count","base":"UINT16","arrayLen":0,"UOM":"COUNT"},
         {"num":21,"name":"zone_count","base":"UINT16","arrayLen":0,"UOM":"COUNT"},
-        {"num":22,"name":"enhanced_avg_respiration_rate","base":"UINT16","scale":1000},
-        {"num":23,"name":"enhanced_max_respiration_rate","base":"UINT16","scale":1000},
+        {"num":22,"name":"enhanced_avg_respiration_rate","base":"UINT16","scale":100,"UOM":"BREATHS_PER_MINUTE"},
+        {"num":23,"name":"enhanced_max_respiration_rate","base":"UINT16","scale":100,"UOM":"BREATHS_PER_MINUTE"},
         {"num":24,"name":"avg_respiration_rate","base":"UINT8"},
         {"num":25,"name":"max_respiration_rate","base":"UINT8"},
         {"num":26,"name":"metabolic_calories","base":"UINT16","UOM":"KCAL"},
@@ -2064,14 +2064,14 @@
       "fields": [
         {"num":0,"name":"timestamp_ms","base":"UINT16","UOM":"MILLISECONDS"},
         {"num":1,"name":"system_time","base":"UINT32","arrayLen":0,"UOM":"MILLISECONDS"},
-        {"num":2,"name":"pitch","base":"SINT16","arrayLen":0},
-        {"num":3,"name":"roll","base":"SINT16","arrayLen":0},
+        {"num":2,"name":"pitch","base":"SINT16","scale":10430.38,"arrayLen":0,"UOM":"RADIANS"},
+        {"num":3,"name":"roll","base":"SINT16","scale":10430.38,"arrayLen":0,"UOM":"RADIANS"},
         {"num":4,"name":"accel_lateral","base":"SINT16","scale":100,"arrayLen":0,"UOM":"METER_PER_SQUARE_SECOND"},
         {"num":5,"name":"accel_normal","base":"SINT16","scale":100,"arrayLen":0,"UOM":"METER_PER_SQUARE_SECOND"},
         {"num":6,"name":"turn_rate","base":"SINT16","scale":1024,"arrayLen":0,"UOM":"RADIANS_PER_SECOND"},
         {"num":7,"name":"stage","base":"ENUM","arrayLen":0},
         {"num":8,"name":"attitude_stage_complete","base":"UINT8","arrayLen":0,"UOM":"PERCENT"},
-        {"num":9,"name":"track","base":"UINT16","arrayLen":0},
+        {"num":9,"name":"track","base":"UINT16","scale":10430.38,"arrayLen":0,"UOM":"RADIANS"},
         {"num":10,"name":"validity","base":"UINT16","arrayLen":0},
         {"num":253,"name":"timestamp","base":"UINT32","type":"DateTime","UOM":"SECONDS"}
       ]
@@ -2767,7 +2767,7 @@
         {"num":1,"name":"energy_total","base":"UINT32"},
         {"num":2,"name":"zero_cross_cnt","base":"UINT16"},
         {"num":3,"name":"instance","base":"UINT8"},
-        {"num":4,"name":"time_above_threshold","base":"UINT16"},
+        {"num":4,"name":"time_above_threshold","base":"UINT16","scale":25,"UOM":"SECONDS"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"DateTime","UOM":"SECONDS"}
       ]
     },
@@ -2807,9 +2807,9 @@
       "fields": [
         {"num":0,"name":"timestamp_ms","base":"UINT16","UOM":"MILLISECONDS"},
         {"num":1,"name":"sampling_interval","base":"UINT16","UOM":"MILLISECONDS"},
-        {"num":2,"name":"accel_x","base":"SINT16","arrayLen":0},
-        {"num":3,"name":"accel_y","base":"SINT16","arrayLen":0},
-        {"num":4,"name":"accel_z","base":"SINT16","arrayLen":0},
+        {"num":2,"name":"accel_x","base":"SINT16","scale":1.024,"arrayLen":0,"UOM":"MILLIGRAVITY"},
+        {"num":3,"name":"accel_y","base":"SINT16","scale":1.024,"arrayLen":0,"UOM":"MILLIGRAVITY"},
+        {"num":4,"name":"accel_z","base":"SINT16","scale":1.024,"arrayLen":0,"UOM":"MILLIGRAVITY"},
         {"num":5,"name":"timestamp_32k","base":"UINT32"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"DateTime","UOM":"SECONDS"}
       ]
@@ -3462,9 +3462,9 @@
       "fields": [
         {"num":0,"name":"timestamp_ms","base":"UINT16","UOM":"MILLISECONDS"},
         {"num":1,"name":"sampling_interval","base":"UINT16","UOM":"1/32768 s"},
-        {"num":2,"name":"gyro_x","base":"SINT16","arrayLen":0},
-        {"num":3,"name":"gyro_y","base":"SINT16","arrayLen":0},
-        {"num":4,"name":"gyro_z","base":"SINT16","arrayLen":0},
+        {"num":2,"name":"gyro_x","base":"SINT16","scale":28.57143,"arrayLen":0,"UOM":"DEGREES_PER_SECOND"},
+        {"num":3,"name":"gyro_y","base":"SINT16","scale":28.57143,"arrayLen":0,"UOM":"DEGREES_PER_SECOND"},
+        {"num":4,"name":"gyro_z","base":"SINT16","scale":28.57143,"arrayLen":0,"UOM":"DEGREES_PER_SECOND"},
         {"num":5,"name":"timestamp_32k","base":"UINT32","UOM":"1/32768 s"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"DateTime","UOM":"SECONDS"}
       ]
