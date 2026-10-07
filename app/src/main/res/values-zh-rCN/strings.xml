@@ -5416,4 +5416,8 @@
     <string name="nx_wear_b8_measurement_failed">测量失败。安全佩戴手环并重试。</string>
     <string name="nx_wear_b8_measurement_result">测量结果</string>
     <string name="nx_wear_b8_shake_to_take_picture">摇动拍照</string>
+    <string name="watchface_install_resolution_matches">表盘分辨率匹配此设备。表盘可能兼容，但 Gadgetbridge 无法确认。不同设备的表盘可能让设备变砖。</string>
+    <string name="watchface_install_aspect_ratio_matches">表盘预览适配该设备的屏幕尺寸。表盘可能兼容，但Gadgetbridge 无法确认。不同设备的表盘可能让你的设备变砖。</string>
+    <string name="watchface_install_compatibility_unknown">Gadgetbridge 无法确认该表盘兼容此设备。不同设备的表盘可能让你的设备变砖。</string>
+    <string name="watchface_install_confirm_risk">我理解风险，仍要安装</string>
 </resources>
