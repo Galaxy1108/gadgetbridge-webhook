@@ -4209,4 +4209,6 @@
     <string name="appmanager_app_store">Магазин програм</string>
     <string name="pref_summary_navigation_allow_unsupported_devices">Надсилати інструкції з навігації як сповіщення на пристрої які не підтримають навігацію</string>
     <string name="datestep_next_month">Наступний місяць</string>
+    <string name="pref_description_navigation_continuous_updates">Якщо увімкненно - оновлення надсилаються на пристрій постійно. Якщо вимкнено - оновлення надсилаються за раз</string>
+    <string name="busy_task_progress_str">%1$s від %2$s</string>
 </resources>
