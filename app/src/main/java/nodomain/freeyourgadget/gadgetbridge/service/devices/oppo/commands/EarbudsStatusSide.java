@@ -1,4 +1,5 @@
 /*  Copyright (C) 2024 José Rebelo
+    Copyright (C) 2026 NTeditor, badcpp
 
     This file is part of Gadgetbridge.
 
@@ -18,17 +19,14 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.oppo.commands;
 
 import androidx.annotation.Nullable;
 
-public enum SubscriptionType {
-    BATTERY(0x01),
-    EARBUDS_STATUS(0x02),
-    ANC_SELECTOR(0x03),
-    GAME_MODE(0x05),
-    MULTIPOINT(0x06),
+public enum EarbudsStatusSide {
+    LEFT(0x01),
+    RIGHT(0x02),
     ;
 
     private final int code;
 
-    SubscriptionType(final int code) {
+    EarbudsStatusSide(final int code) {
         this.code = code;
     }
 
@@ -37,8 +35,8 @@ public enum SubscriptionType {
     }
 
     @Nullable
-    public static SubscriptionType fromCode(final int code) {
-        for (final SubscriptionType param : SubscriptionType.values()) {
+    public static EarbudsStatusSide fromCode(final int code) {
+        for (final EarbudsStatusSide param : EarbudsStatusSide.values()) {
             if (param.code == code) {
                 return param;
             }
