@@ -62,7 +62,7 @@ import java.util.Locale
 
 /**
  * The workout list itself: dashboard, summaries, filtering, selection / action mode,
- * deletion, export and track fetching. Hosted by [WorkoutListActivity].
+ * deletion, export and track fetching. Hosted by [WorkoutsFragment] and [WorkoutListActivity].
  */
 class WorkoutListFragment : Fragment() {
     private val viewModel: WorkoutListViewModel by viewModels()
@@ -72,9 +72,10 @@ class WorkoutListFragment : Fragment() {
     private var dateFromFilter = 0L
     private var dateToFilter = 0L
     private var deviceFilter = 0L
+    private var initialDeviceFilter = 0L
     private var itemsFilter: List<Long>? = null
     private var nameContainsFilter: String? = null
-    private var gbDevice: GBDevice? = null
+    private var gbDevices = mutableListOf<GBDevice>()
     private var selectedItems: BitSet? = null
     private var swipeLayout: SwipeRefreshLayout? = null
     private var summariesAdapter: WorkoutSummariesAdapter? = null
@@ -114,7 +115,7 @@ class WorkoutListFragment : Fragment() {
                         LOG.error("Got device changed without device")
                         return
                     }
-                    if (device != gbDevice) {
+                    if (!gbDevices.contains(device)) {
                         return
                     }
                     val swipe = swipeLayout ?: return
@@ -151,10 +152,11 @@ class WorkoutListFragment : Fragment() {
         override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
             return when (menuItem.itemId) {
                 R.id.activity_action_statistics -> {
-                    startActivity(
-                        Intent(requireContext(), WorkoutStatisticsActivity::class.java)
-                            .putExtra(GBDevice.EXTRA_DEVICE, gbDevice)
-                    )
+                    val intent = Intent(requireContext(), WorkoutStatisticsActivity::class.java)
+                    if (deviceFilter != ActivitySummariesFilter.ALL_DEVICES) {
+                        intent.putExtra(GBDevice.EXTRA_DEVICE, gbDevices.first())
+                    }
+                    startActivity(intent)
                     true
                 }
 
@@ -176,9 +178,17 @@ class WorkoutListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        gbDevice = BundleCompat.getParcelable(requireArguments(), GBDevice.EXTRA_DEVICE, GBDevice::class.java)
-            ?: throw IllegalArgumentException("Must provide a device when creating this fragment")
-        deviceFilter = getDeviceId(gbDevice!!)
+        val singleDevice = arguments?.let { BundleCompat.getParcelable(it, GBDevice.EXTRA_DEVICE, GBDevice::class.java) }
+        if (singleDevice != null) {
+            gbDevices.add(singleDevice)
+            deviceFilter = getDeviceId(singleDevice)
+        }
+        if (gbDevices.isEmpty()) {
+            gbDevices.addAll(GBApplication.app().deviceManager.devices)
+            deviceFilter = ActivitySummariesFilter.ALL_DEVICES
+        }
+        // Store the initial deviceFilter for the "reset filter" action
+        initialDeviceFilter = deviceFilter
 
         // Load and apply saved quick filter
         applySavedQuickFilter()
@@ -224,7 +234,6 @@ class WorkoutListFragment : Fragment() {
 
         val workoutSummariesAdapter = WorkoutSummariesAdapter(
             requireContext(),
-            gbDevice!!,
             activityFilter,
             dateFromFilter,
             dateToFilter,
@@ -465,6 +474,16 @@ class WorkoutListFragment : Fragment() {
     }
 
     private fun resetFetchTimestampToChosenDate() {
+        if (deviceFilter == ActivitySummariesFilter.ALL_DEVICES) {
+            GB.toast(
+                requireContext(),
+                // FIXME: make translatable
+                "Select a single device first",
+                Toast.LENGTH_LONG,
+                GB.INFO
+            )
+            return
+        }
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
             .build()
@@ -474,7 +493,7 @@ class WorkoutListFragment : Fragment() {
                 set(selectedDate.year, selectedDate.monthValue - 1, selectedDate.dayOfMonth)
             }
             val timestamp = date.timeInMillis - 1000
-            GBApplication.getDeviceSpecificSharedPrefs(gbDevice!!.address).edit().apply {
+            GBApplication.getDeviceSpecificSharedPrefs(gbDevices.first().address).edit().apply {
                 remove("lastSportsActivityTimeMillis")
                 putLong("lastSportsActivityTimeMillis", timestamp)
                 apply()
@@ -499,13 +518,13 @@ class WorkoutListFragment : Fragment() {
     }
 
     private fun fetchTrackData() {
-        gbDevice?.let { device ->
+        gbDevices.forEach { device ->
             if (device.isInitialized && !device.isBusy) {
                 swipeLayout?.isRefreshing = true
                 GBApplication.deviceService(device).onFetchRecordedData(RecordedDataTypes.TYPE_GPS_TRACKS)
             } else {
                 swipeLayout?.isRefreshing = false
-                if (!device.isInitialized) {
+                if (!device.isInitialized && deviceFilter != ActivitySummariesFilter.ALL_DEVICES) {
                     GB.toast(
                         requireContext(),
                         getString(R.string.device_not_connected),
@@ -518,7 +537,6 @@ class WorkoutListFragment : Fragment() {
     }
 
     private fun showExportDialog(summaries: List<BaseActivitySummary>) {
-        val device = gbDevice ?: return
         if (summaries.isEmpty()) return
 
         val prefs = GBApplication.getPrefs()
@@ -549,7 +567,7 @@ class WorkoutListFragment : Fragment() {
                     apply()
                 }
                 val parts = boxes.filterValues { it.isChecked }.keys
-                exportWorkouts(device, summaries, parts, asZip)
+                exportWorkouts(summaries, parts, asZip)
             }
             .setNegativeButton(android.R.string.cancel, null)
             .create()
@@ -562,7 +580,6 @@ class WorkoutListFragment : Fragment() {
     }
 
     private fun exportWorkouts(
-        device: GBDevice,
         summaries: List<BaseActivitySummary>,
         parts: Set<WorkoutBatchExporter.Part>,
         asZip: Boolean
@@ -573,7 +590,7 @@ class WorkoutListFragment : Fragment() {
         lifecycleScope.launch {
             val result = try {
                 withContext(Dispatchers.IO) {
-                    WorkoutBatchExporter.export(context, device, summaries, parts, asZip)
+                    WorkoutBatchExporter.export(context, summaries, parts, asZip)
                 }
             } catch (e: Exception) {
                 LOG.error("Failed to export workouts", e)
@@ -613,7 +630,6 @@ class WorkoutListFragment : Fragment() {
     private fun showActivityDetail(position: Int) {
         val intent = WorkoutDetailsActivity.createFilteredListIntent(
             requireContext(),
-            gbDevice!!,
             position,
             activityFilter,
             dateFromFilter,
@@ -633,7 +649,7 @@ class WorkoutListFragment : Fragment() {
             putExtra("dateFromFilter", dateFromFilter)
             putExtra("dateToFilter", dateToFilter)
             putExtra("deviceFilter", deviceFilter)
-            putExtra("initial_deviceFilter", getDeviceId(gbDevice!!))
+            putExtra("initial_deviceFilter", initialDeviceFilter)
             putExtra("nameContainsFilter", nameContainsFilter)
         }
         activityFilterLauncher.launch(filterIntent)
@@ -661,18 +677,15 @@ class WorkoutListFragment : Fragment() {
             adapter.setItemsFilter(itemsFilter)
             adapter.setDeviceFilter(deviceFilter)
         }
-        gbDevice?.let { device ->
-            viewModel.loadSummaries(
-                device,
-                activityFilter,
-                dateFromFilter,
-                dateToFilter,
-                nameContainsFilter,
-                deviceFilter,
-                itemsFilter,
-                silent
-            )
-        }
+        viewModel.loadSummaries(
+            activityFilter,
+            dateFromFilter,
+            dateToFilter,
+            nameContainsFilter,
+            deviceFilter,
+            itemsFilter,
+            silent
+        )
     }
 
     private fun applySavedQuickFilter() {
@@ -686,6 +699,11 @@ class WorkoutListFragment : Fragment() {
     companion object {
         private val LOG = LoggerFactory.getLogger(WorkoutListFragment::class.java)
         private const val PREF_EXPORT_AS_ZIP = "workout_export_as_zip"
+
+        @JvmStatic
+        fun newInstance(): WorkoutListFragment {
+            return WorkoutListFragment()
+        }
 
         @JvmStatic
         fun newInstance(device: GBDevice): WorkoutListFragment {
