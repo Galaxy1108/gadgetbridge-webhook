@@ -357,6 +357,21 @@ public class SleepAsAndroidSender {
     }
 
     /**
+     * Whether accelerometer samples are wanted. Reads several preferences, so a caller holding a
+     * whole batch of samples checks this once and feeds each of them to
+     * {@link #submitAccelSample}.
+     *
+     * @return true if a sample submitted now would be measured
+     */
+    public boolean acceptsAccelSamples() {
+        return isDeviceDefault()
+                && isFeatureEnabled(SleepAsAndroidFeature.ACCELEROMETER)
+                && hasFeature(SleepAsAndroidFeature.ACCELEROMETER)
+                && trackingOngoing
+                && !trackingPaused;
+    }
+
+    /**
      * On accelerometer changed
      *
      * @param x the x value
@@ -364,11 +379,19 @@ public class SleepAsAndroidSender {
      * @param z the z value
      */
     public void onAccelChanged(float x, float y, float z) {
-        if (!isDeviceDefault() || !isFeatureEnabled(SleepAsAndroidFeature.ACCELEROMETER) || !hasFeature(SleepAsAndroidFeature.ACCELEROMETER) || !trackingOngoing)
-            return;
-        if (trackingPaused)
-            return;
+        if (!acceptsAccelSamples()) return;
 
+        submitAccelSample(x, y, z);
+    }
+
+    /**
+     * Measure one sample, for a caller that has just checked {@link #acceptsAccelSamples()}.
+     *
+     * @param x the x value
+     * @param y the y value
+     * @param z the z value
+     */
+    public void submitAccelSample(float x, float y, float z) {
         updateMaxRawData(x, y, z);
     }
 
