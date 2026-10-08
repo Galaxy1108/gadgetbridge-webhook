@@ -5420,4 +5420,8 @@
     <string name="watchface_install_aspect_ratio_matches">表盘预览适配该设备的屏幕尺寸。表盘可能兼容，但Gadgetbridge 无法确认。不同设备的表盘可能让你的设备变砖。</string>
     <string name="watchface_install_compatibility_unknown">Gadgetbridge 无法确认该表盘兼容此设备。不同设备的表盘可能让你的设备变砖。</string>
     <string name="watchface_install_confirm_risk">我理解风险，仍要安装</string>
+    <string name="map_theme_custom">自定义…</string>
+    <string name="map_theme_custom_file_title">自定义主题文件</string>
+    <string name="map_theme_custom_file_summary">带渲染主题及其图标的 Zip 压缩包，在上方主题设为自定义时使用</string>
+    <string name="map_theme_custom_file_invalid">非有效的 mapsforge 渲染器主题：%1$s</string>
 </resources>
