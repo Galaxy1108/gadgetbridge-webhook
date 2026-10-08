@@ -2,7 +2,7 @@
 
 <!-- For contributors: do not modify this file - the project maintainers will update it as needed -->
 
-#### Next version (WIP)
+#### 0.95.0
 
 * Initial support for 1MORE SonoFlow SE
 * Initial support for 8BitDo Micro
