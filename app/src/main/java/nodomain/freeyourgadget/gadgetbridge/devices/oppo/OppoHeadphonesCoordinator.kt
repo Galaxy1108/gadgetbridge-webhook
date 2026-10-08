@@ -17,6 +17,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.devices.oppo
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothClass
 import android.util.Pair
 import java.util.Locale
@@ -56,6 +57,7 @@ abstract class OppoHeadphonesCoordinator : AbstractBLClassicDeviceCoordinator() 
 
     override fun getBatteryCount(device: GBDevice): Int = 3
 
+    @SuppressLint("MissingPermission") // if we're here, we have permission
     override fun supports(candidate: GBDeviceCandidate): Boolean {
         if (!super.supports(candidate)) return false
         val majorDeviceClass = candidate.device?.bluetoothClass?.majorDeviceClass
