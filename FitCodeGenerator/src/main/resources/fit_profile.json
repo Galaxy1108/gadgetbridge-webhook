@@ -7719,6 +7719,7 @@
     {"manufacturer":1,"product":5056,"name":"D2 Mach 2 Pro","type":"DeviceType.GARMIN_D2_MACH_2_PRO"},
     {"manufacturer":1,"product":5133,"name":"Fenix 9","type":"DeviceType.GARMIN_FENIX_9"},
     {"manufacturer":1,"product":5134,"name":"Fenix 9","type":"DeviceType.GARMIN_FENIX_9"},
+    {"manufacturer":1,"product":5169,"name":"Enduro 4","type":"DeviceType.GARMIN_ENDURO_4"},
     {"manufacturer":1,"product":5214,"name":"Forerunner 70","type":"DeviceType.GARMIN_FORERUNNER_70"},
     {"manufacturer":1,"product":10007,"name":"SDM4 Pod"},
     {"manufacturer":1,"product":10014,"name":"Edge Remote"},
