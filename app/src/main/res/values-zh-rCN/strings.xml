@@ -3858,7 +3858,7 @@
     <string name="auth_settings">认证设置</string>
     <string name="title_activity_gps_track_installer">GPS 轨迹安装程序</string>
     <string name="pref_title_block_screenshot">阻止截图</string>
-    <string name="pref_summary_block_screenshots">防止截图并在非安全显示屏上查看。需要重启GB才能完全生效。</string>
+    <string name="pref_summary_block_screenshots">阻止截图以及在非安全显示屏上查看。需要重启GB才能完全生效。</string>
     <string name="title_gpx_track_name">轨迹名称</string>
     <string name="chinese">中文</string>
     <string name="training_acute_load">急性负荷</string>
@@ -5424,4 +5424,6 @@
     <string name="map_theme_custom_file_title">自定义主题文件</string>
     <string name="map_theme_custom_file_summary">带渲染主题及其图标的 Zip 压缩包，在上方主题设为自定义时使用</string>
     <string name="map_theme_custom_file_invalid">非有效的 mapsforge 渲染器主题：%1$s</string>
+    <string name="pref_title_contrasting_surfaces">有颜色对比的界面</string>
+    <string name="pref_summary_contrasting_surfaces">给条状元素和图块自己的色度，与背景色区分开来</string>
 </resources>
