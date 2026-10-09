@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.appcompat.widget.ListPopupWindow
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.color.MaterialColors
@@ -55,7 +54,7 @@ class ChartConfigBottomSheet : BottomSheetDialogFragment() {
 
         binding.chartConfigCancel.setOnClickListener { dismiss() }
         binding.chartConfigApply.setOnClickListener {
-            setFragmentResult(REQUEST_KEY, bundleOf(RESULT_CONFIG to draft.serialize()))
+            setFragmentResult(REQUEST_KEY, Bundle().apply { putString(RESULT_CONFIG, draft.serialize()) })
             dismiss()
         }
 
@@ -188,10 +187,10 @@ class ChartConfigBottomSheet : BottomSheetDialogFragment() {
         private const val STATE_DRAFT = "draft"
 
         fun newInstance(available: List<SportMetric>, config: ChartConfig) = ChartConfigBottomSheet().apply {
-            arguments = bundleOf(
-                ARG_AVAILABLE to ArrayList(available.map { it.name }),
-                ARG_CONFIG to config.serialize(),
-            )
+            arguments = Bundle().apply {
+                putStringArrayList(ARG_AVAILABLE, ArrayList(available.map { it.name }))
+                putString(ARG_CONFIG, config.serialize())
+            }
         }
     }
 }
