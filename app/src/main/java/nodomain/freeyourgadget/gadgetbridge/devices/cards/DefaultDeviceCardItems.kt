@@ -16,6 +16,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
+import com.jaredrummler.android.colorpicker.MaterialColorPickerDialog
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.ConfigureAlarms
@@ -436,7 +437,7 @@ object DefaultDeviceCardItems {
                 builder.setPresets(presets)
             }
 
-            val dialog = builder.create()
+            val dialog = MaterialColorPickerDialog.create(builder)
             dialog.setColorPickerDialogListener(object : ColorPickerDialogListener {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     device.setExtraInfo("led_color", color)
