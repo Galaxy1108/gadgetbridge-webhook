@@ -17,33 +17,26 @@
         <ImageView
             android:id="@+id/gauge_bar"
             android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/gauge_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@id/gauge_bar"
-            android:layout_alignBottom="@id/gauge_bar"
             android:layout_centerHorizontal="true"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_marginTop="28dp"
+            android:gravity="center_horizontal"
+            android:text="@string/stats_empty_value"
+            android:textSize="30sp" />
 
-            <TextView
-                android:id="@+id/gauge_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="@string/stats_empty_value"
-                android:textSize="30sp" />
-
-            <TextView
-                android:id="@+id/gauge_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/no_data" />
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/gauge_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/gauge_value"
+            android:layout_centerHorizontal="true"
+            android:text="@string/no_data" />
 
     </RelativeLayout>
 
