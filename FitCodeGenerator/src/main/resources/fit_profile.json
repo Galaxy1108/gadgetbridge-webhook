@@ -38,7 +38,7 @@
         {"num":2,"name":"time_offset","base":"UINT32","arrayLen":0,"UOM":"SECONDS"},
         {"num":3,"name":"summer_time_mode","base":"ENUM"},
         {"num":4,"name":"time_mode","base":"ENUM","arrayLen":0},
-        {"num":5,"name":"time_zone_offset","base":"SINT8","arrayLen":0,"UOM":"MINUTES_15"},
+        {"num":5,"name":"time_zone_offset","base":"SINT8","scale":4,"arrayLen":0,"UOM":"HOURS"},
         {"num":8,"name":"alarms_time","base":"UINT16","arrayLen":0},
         {"num":9,"name":"alarms_mode","base":"ENUM","arrayLen":0},
         {"num":10,"name":"key_tones","base":"ENUM"},
