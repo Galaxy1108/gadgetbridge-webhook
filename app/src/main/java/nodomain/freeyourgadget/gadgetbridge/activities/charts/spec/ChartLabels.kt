@@ -121,13 +121,14 @@ fun dayOfMonthValues(lastDay: Int): List<Double> =
     (listOf(1) + (DAY_LABEL_STEP..lastDay step DAY_LABEL_STEP)).map { it.toDouble() }
 
 /**
- * 2 to 7 labels between [min] and [max] (epoch seconds), on round local times [zoneOffsetSeconds] from UTC.
+ * 2 to 7 labels between [min] and [max] (epoch seconds), on round local times. [zoneOffsetSeconds] gives the
+ * offset from UTC at an epoch second.
  */
 fun timeLabelValues(
     min: Double,
     max: Double,
     maxLabels: Int,
-    zoneOffsetSeconds: Int = 0,
+    zoneOffsetSeconds: (Double) -> Int = { 0 },
     spacings: List<Double> = TIME_LABEL_SPACINGS_SECONDS,
 ): List<Double> {
     val range = max - min
@@ -136,10 +137,15 @@ fun timeLabelValues(
     val minimumSpacing = range / count
     val spacing = spacings.firstOrNull { it >= minimumSpacing }
         ?: (ceil(minimumSpacing / SECONDS_PER_DAY) * SECONDS_PER_DAY)
-    val first = ceil((min + zoneOffsetSeconds) / spacing) * spacing - zoneOffsetSeconds
+    val minOffset = zoneOffsetSeconds(min)
+    val firstLocal = ceil((min + minOffset) / spacing) * spacing
+    // The offset can change inside the range, so each local time is converted with the offset at that time
     return generateSequence(0) { it + 1 }
-        .map { first + it * spacing }
+        .map { firstLocal + it * spacing }
+        .map { local -> local - zoneOffsetSeconds(local - minOffset) }
         .takeWhile { it <= max }
+        .filter { it >= min }
+        .distinct()
         .toList()
 }
 

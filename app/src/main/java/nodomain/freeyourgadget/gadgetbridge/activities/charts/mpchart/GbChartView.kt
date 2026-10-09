@@ -397,8 +397,8 @@ class GbChartView @JvmOverloads constructor(
         if (duration) {
             return timeLabelValues(min, max, maxLabels, spacings = DURATION_LABEL_SPACINGS_SECONDS)
         }
-        val zoneOffsetSeconds = TimeZone.getDefault().getOffset(min.toLong() * 1000L) / 1000
-        return timeLabelValues(min, max, maxLabels, zoneOffsetSeconds)
+        val timeZone = TimeZone.getDefault()
+        return timeLabelValues(min, max, maxLabels, zoneOffsetSeconds = { timeZone.getOffset(it.toLong() * 1000L) / 1000 })
     }
 
     private fun drawSelectedPoints(canvas: Canvas, spec: ChartSpec, selected: Double) {
