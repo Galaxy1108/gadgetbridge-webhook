@@ -35,6 +35,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.charts.bodyenergy.BodyEne
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.ChartLegendView;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.ChartSelection;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.GbChartView;
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartPoint;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSeries;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSpec;
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.StatTileData;
@@ -141,7 +142,7 @@ public class BodyEnergyFragment extends AbstractChartFragment<BodyEnergyFragment
         final ChartSpec spec = BodyEnergyChartData.daySpec(
                 midnight, sampleSeconds, levels, averages, levelLabel, levelColor, averageLabel, AVERAGE_LINE_COLOR
         );
-        bodyEnergyChart.setSelectionContent(x -> daySelection(Math.round(x), sampleSeconds, levels, levelColor));
+        bodyEnergyChart.setSelectionContent(x -> daySelection(Math.round(x), spec, levelColor));
         bodyEnergyChart.setSpec(spec);
 
         final List<ChartSeries> legendSeries = new ArrayList<>();
@@ -170,15 +171,21 @@ public class BodyEnergyFragment extends AbstractChartFragment<BodyEnergyFragment
         StatTileGridUtilKt.addStatTileGrid(bodyEnergyStatsContainer, requireContext(), stats, 0);
     }
 
-    private ChartSelection daySelection(final long time, final long[] sampleSeconds, final int[] levels, final int levelColor) {
+    private ChartSelection daySelection(final long time, final ChartSpec spec, final int levelColor) {
         final String title = DateFormat.getTimeFormat(requireContext()).format(new Date(time * 1000L));
         final List<ChartSelection.Row> rows = new ArrayList<>();
         final StringBuilder description = new StringBuilder(title).append('.');
-        for (int i = 0; i < sampleSeconds.length; i++) {
-            if (sampleSeconds[i] == time) {
-                rows.add(new ChartSelection.Row(levelColor, String.valueOf(levels[i])));
-                description.append(' ').append(getString(R.string.body_energy_legend_level)).append(' ').append(levels[i]).append('.');
-                break;
+        for (final ChartSeries series : spec.getSeries()) {
+            if (!series.getSelectable()) {
+                continue;
+            }
+            for (final ChartPoint point : series.getPoints()) {
+                if (point.getX() == time) {
+                    final long level = Math.round(point.getY());
+                    rows.add(new ChartSelection.Row(levelColor, String.valueOf(level)));
+                    description.append(' ').append(series.getLabel()).append(' ').append(level).append('.');
+                    break;
+                }
             }
         }
         return new ChartSelection(title, rows, description.toString());
