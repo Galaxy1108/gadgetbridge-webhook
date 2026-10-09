@@ -42,6 +42,8 @@ import java.lang.ref.WeakReference
 import java.util.TimeZone
 import java.util.WeakHashMap
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * Renders a [ChartSpec]. Tap or drag sideways to select an x; with a click listener, a tap clicks instead.
@@ -78,6 +80,7 @@ class GbChartView @JvmOverloads constructor(
         }
     })
     private var spec: ChartSpec? = null
+    private var xOrigin = 0.0
     private var barLayout: BarLayout? = null
     private var selection: ChartSelection? = null
     private var targets = DoubleArray(0)
@@ -142,6 +145,7 @@ class GbChartView @JvmOverloads constructor(
             return
         }
         this.spec = spec
+        xOrigin = ChartDataBuilder.xOrigin(spec)
         targets = ChartSlots.targets(spec)
         clearSelection()
         configureXAxis(spec.xAxis)
@@ -149,7 +153,7 @@ class GbChartView @JvmOverloads constructor(
         configureYAxis(axisRight, spec.endYAxis)
         configureLimitLines(spec)
         barLayout = barLayoutFor(spec, 0f)
-        data = ChartDataBuilder.build(spec, barLayout!!, BAR_CORNER_DP)
+        data = ChartDataBuilder.build(spec, barLayout!!, BAR_CORNER_DP, xOrigin)
         updateBarLayout(spec)
         accessibility.invalidateRoot()
     }
@@ -167,7 +171,7 @@ class GbChartView @JvmOverloads constructor(
         val layout = barLayoutFor(spec, viewPortHandler.contentWidth / xAxis.axisRange)
         if (layout == barLayout) return
         barLayout = layout
-        data = ChartDataBuilder.build(spec, layout, BAR_CORNER_DP)
+        data = ChartDataBuilder.build(spec, layout, BAR_CORNER_DP, xOrigin)
     }
 
     fun showMessage(text: String) {
@@ -186,7 +190,7 @@ class GbChartView @JvmOverloads constructor(
 
     private fun targetAt(x: Float, y: Float): Double? {
         if (!hasSlotBounds() || !viewPortHandler.isInBounds(x, y)) return null
-        return ChartSlots.nearest(getValuesByTouchPoint(x, y, AxisDependency.LEFT).x, targets)
+        return ChartSlots.nearest(getValuesByTouchPoint(x, y, AxisDependency.LEFT).x + xOrigin, targets)
     }
 
     internal fun slotAt(x: Float, y: Float): Int? = if (slots() == null) null else targetAt(x, y)?.toInt()
@@ -276,7 +280,7 @@ class GbChartView @JvmOverloads constructor(
         xAxis.removeAllLimitLines()
     }
 
-    private fun guide(x: Double) = LimitLine(x.toFloat()).apply {
+    private fun guide(x: Double) = LimitLine((x - xOrigin).toFloat()).apply {
         lineColor = GUIDE_COLOR
         lineWidth = GUIDE_WIDTH_DP
         val dash = Utils.convertDpToPixel(GUIDE_DASH_DP)
@@ -377,7 +381,7 @@ class GbChartView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         val spec = spec
         if (spec != null) {
-            timeLabelsFor(spec.xAxis)?.let { xAxisLabels.values = it }
+            timeLabelsFor(spec.xAxis)?.let { labels -> xAxisLabels.values = labels.map { it - xOrigin } }
         }
         super.onDraw(canvas)
 
@@ -390,8 +394,8 @@ class GbChartView @JvmOverloads constructor(
     private fun timeLabelsFor(spec: AxisSpec): List<Double>? {
         val duration = spec.format == ChartValueFormat.DURATION_SECONDS
         if (spec.format != ChartValueFormat.TIME_OF_DAY && spec.format != ChartValueFormat.DATE && !duration) return null
-        val min = maxOf(spec.minimum ?: return null, lowestVisibleX.toDouble())
-        val max = minOf(spec.maximum ?: return null, highestVisibleX.toDouble())
+        val min = maxOf(spec.minimum ?: return null, floor(lowestVisibleX + xOrigin))
+        val max = minOf(spec.maximum ?: return null, ceil(highestVisibleX + xOrigin))
         val labelSpace = maxOf(xAxis.labelWidth.toFloat(), Utils.convertDpToPixel(MIN_TIME_LABEL_WIDTH_DP)) +
             Utils.convertDpToPixel(TIME_LABEL_GAP_DP)
         val maxLabels = (viewPortHandler.contentWidth / labelSpace).toInt()
@@ -407,7 +411,7 @@ class GbChartView @JvmOverloads constructor(
             val style = series.style as? SeriesStyle.Line ?: continue
             val point = series.points.firstOrNull { it.x == selected }?.takeIf { it.y > 0.0 } ?: continue
             val axis = if (series.axis == AxisSide.END) AxisDependency.RIGHT else AxisDependency.LEFT
-            val pixel = getPixelForValues(point.x.toFloat(), point.y.toFloat(), axis)
+            val pixel = getPixelForValues((point.x - xOrigin).toFloat(), point.y.toFloat(), axis)
             val x = pixel.x.toFloat()
             val y = pixel.y.toFloat()
 
@@ -435,7 +439,7 @@ class GbChartView @JvmOverloads constructor(
         tooltip.draw(canvas, selection, left, viewPortHandler.contentTop)
     }
 
-    private fun pixelX(x: Double): Float = getPixelForValues(x.toFloat(), 0f, AxisDependency.LEFT).x.toFloat()
+    private fun pixelX(x: Double): Float = getPixelForValues((x - xOrigin).toFloat(), 0f, AxisDependency.LEFT).x.toFloat()
 
     private fun barLayoutFor(spec: ChartSpec, pxPerX: Float) = BarLayout.of(
         pxPerX = pxPerX,
@@ -447,10 +451,12 @@ class GbChartView @JvmOverloads constructor(
     private fun configureXAxis(spec: AxisSpec) {
         val labels = fixedLabelValues(spec)
         val padding = if (labels != null) PERIOD_X_PADDING else 0.0
-        xAxisLabels.values = labels
-        xAxis.valueFormatter = formatterFor(labelFor(spec))
-        spec.minimum?.let { xAxis.axisMinimum = (it - padding).toFloat() } ?: xAxis.resetAxisMinimum()
-        spec.maximum?.let { xAxis.axisMaximum = (it + padding).toFloat() } ?: xAxis.resetAxisMaximum()
+        val origin = xOrigin
+        val label = labelFor(spec)
+        xAxisLabels.values = labels?.map { it - origin }
+        xAxis.valueFormatter = formatterFor { label(it + origin) }
+        spec.minimum?.let { xAxis.axisMinimum = (it - padding - origin).toFloat() } ?: xAxis.resetAxisMinimum()
+        spec.maximum?.let { xAxis.axisMaximum = (it + padding - origin).toFloat() } ?: xAxis.resetAxisMaximum()
     }
 
     private fun configureLimitLines(spec: ChartSpec) {

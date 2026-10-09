@@ -21,6 +21,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.AxisSide
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartPoint
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSeries
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSpec
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartValueFormat
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.SeriesStyle
 
 /**
@@ -72,12 +73,25 @@ internal object ChartDataBuilder {
     fun columns(spec: ChartSpec) = spec.series.filter { it.style is SeriesStyle.Column && it.points.isNotEmpty() }
 
     /**
+     * The origin x value to which the entry x values are relative to. Corresponds to
+     * the axis minimum on an epoch-second axis, otherwise 0.
+     */
+    fun xOrigin(spec: ChartSpec): Double = when (spec.xAxis.format) {
+        ChartValueFormat.TIME_OF_DAY, ChartValueFormat.DATE ->
+            spec.xAxis.minimum ?: spec.series.flatMap { it.points }.minOfOrNull { it.x } ?: 0.0
+        else -> 0.0
+    }
+
+    /**
      * Columns drawn side by side at one x; series sharing a [SeriesStyle.Column.stackKey] stack into one.
      */
     fun columnGroups(spec: ChartSpec): List<List<ChartSeries>> =
         columns(spec).groupBy { (it.style as SeriesStyle.Column).stackKey ?: it.key }.values.toList()
 
-    fun build(spec: ChartSpec, layout: BarLayout, cornerRadiusDp: Float): CombinedData {
+    /**
+     * The data of [spec], with each x relative to [xOrigin].
+     */
+    fun build(spec: ChartSpec, layout: BarLayout, cornerRadiusDp: Float, xOrigin: Double): CombinedData {
         val columns = columnGroups(spec)
         val ranges = spec.series.filter { it.style is SeriesStyle.Range && it.points.isNotEmpty() }
         val bands = ranges.filter { (it.style as SeriesStyle.Range).width == null }
@@ -90,27 +104,29 @@ internal object ChartDataBuilder {
                 barData = BarData(columns.mapIndexed { index, group ->
                     val offset = (index - (columns.size - 1) / 2f) * step
                     if (group.size == 1) {
-                        barDataSet(group.single(), offset, cornerRadiusDp)
+                        barDataSet(group.single(), xOrigin, offset, cornerRadiusDp)
                     } else {
-                        stackedDataSet(group, offset, cornerRadiusDp)
+                        stackedDataSet(group, xOrigin, offset, cornerRadiusDp)
                     }
                 }).apply { barWidth = layout.width }
             }
             if (bands.isNotEmpty()) {
-                barData = BarData(bands.map { rangeDataSet(it) }).apply { barWidth = 1f }
+                barData = BarData(bands.map { rangeDataSet(it, xOrigin) }).apply { barWidth = 1f }
             }
             if (candles.isNotEmpty()) {
-                candleData = CandleData(candles.map { candleDataSet(it) })
+                candleData = CandleData(candles.map { candleDataSet(it, xOrigin) })
             }
             if (lines.isNotEmpty()) {
-                lineData = LineData(lines.flatMap { series -> segments(series).map { lineDataSet(series, it) } })
+                lineData = LineData(lines.flatMap { series -> segments(series).map { lineDataSet(series, it, xOrigin) } })
             }
         }
     }
 
-    private fun barDataSet(series: ChartSeries, offset: Float, cornerRadiusDp: Float): BarDataSet<Float> {
+    private fun barDataSet(series: ChartSeries, xOrigin: Double, offset: Float, cornerRadiusDp: Float): BarDataSet<Float> {
         val style = series.style as SeriesStyle.Column
-        val entries = series.points.map { BarEntry(x = it.x.toFloat() + offset, y = it.y.toFloat(), data = it.x.toFloat()) }
+        val entries = series.points.map {
+            BarEntry(x = (it.x - xOrigin).toFloat() + offset, y = it.y.toFloat(), data = it.x.toFloat())
+        }
         return BarDataSet(entries, series.label).apply {
             color = style.color
             fills = listOf(Fill(topRounded(style.color, Utils.convertDpToPixel(cornerRadiusDp))))
@@ -120,12 +136,12 @@ internal object ChartDataBuilder {
         }
     }
 
-    private fun stackedDataSet(group: List<ChartSeries>, offset: Float, cornerRadiusDp: Float): BarDataSet<Float> {
+    private fun stackedDataSet(group: List<ChartSeries>, xOrigin: Double, offset: Float, cornerRadiusDp: Float): BarDataSet<Float> {
         val xs = group.flatMap { series -> series.points.map { it.x } }.distinct().sorted()
         val entries = xs.map { x ->
             val values = group.map { series -> (series.points.firstOrNull { it.x == x }?.y ?: 0.0).toFloat() }
             val sections = values.indexOfLast { it != 0f } + 1
-            BarEntry(x = x.toFloat() + offset, stackValues = values.take(maxOf(sections, 1)), data = x.toFloat())
+            BarEntry(x = (x - xOrigin).toFloat() + offset, stackValues = values.take(maxOf(sections, 1)), data = x.toFloat())
         }
         val groupColors = group.map { (it.style as SeriesStyle.Column).color }
         return BarDataSet(entries, group.first().label).apply {
@@ -137,11 +153,11 @@ internal object ChartDataBuilder {
         }
     }
 
-    private fun rangeDataSet(series: ChartSeries): BarDataSet<Float> {
+    private fun rangeDataSet(series: ChartSeries, xOrigin: Double): BarDataSet<Float> {
         val style = series.style as SeriesStyle.Range
         val entries = series.points.map { point ->
             val low = (point.low ?: 0.0).toFloat()
-            BarEntry(x = point.x.toFloat(), stackValues = listOf(low, point.y.toFloat() - low), data = point.x.toFloat())
+            BarEntry(x = (point.x - xOrigin).toFloat(), stackValues = listOf(low, point.y.toFloat() - low), data = point.x.toFloat())
         }
         return BarDataSet(entries, series.label).apply {
             colors = listOf(Color.TRANSPARENT, style.color)
@@ -151,12 +167,12 @@ internal object ChartDataBuilder {
         }
     }
 
-    private fun candleDataSet(series: ChartSeries): CandleDataSet<Float> {
+    private fun candleDataSet(series: ChartSeries, xOrigin: Double): CandleDataSet<Float> {
         val style = series.style as SeriesStyle.Range
         val entries = series.points.map { point ->
             val low = (point.low ?: 0.0).toFloat()
             val high = point.y.toFloat()
-            CandleEntry(x = point.x.toFloat(), high = high, low = low, open = low, close = high, data = point.x.toFloat())
+            CandleEntry(x = (point.x - xOrigin).toFloat(), high = high, low = low, open = low, close = high, data = point.x.toFloat())
         }
         return CandleDataSet(entries, series.label).apply {
             color = style.color
@@ -184,9 +200,9 @@ internal object ChartDataBuilder {
         return segments
     }
 
-    private fun lineDataSet(series: ChartSeries, points: List<ChartPoint>): LineDataSet<Float> {
+    private fun lineDataSet(series: ChartSeries, points: List<ChartPoint>, xOrigin: Double): LineDataSet<Float> {
         val style = series.style as SeriesStyle.Line
-        val entries = points.map { Entry(x = it.x.toFloat(), y = it.y.toFloat(), data = it.x.toFloat()) }
+        val entries = points.map { Entry(x = (it.x - xOrigin).toFloat(), y = it.y.toFloat(), data = it.x.toFloat()) }
         return LineDataSet(entries, series.label).apply {
             color = if (style.showLine) style.color else Color.TRANSPARENT
             lineWidth = LINE_WIDTH_DP
