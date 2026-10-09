@@ -152,7 +152,7 @@ public class StepsPeriodFragment extends StepsFragment<StepsPeriodFragment.Steps
     }
 
     /**
-     * The tooltip of day: its date and steps.
+     * The tooltip of a day: its date and steps.
      */
     private ChartSelection selection(final long[] epochDays, final long[] steps, final int stepsColor, final double x) {
         final Locale locale = Locale.getDefault();

@@ -62,6 +62,8 @@ class WorkoutStatisticsViewModel : ViewModel() {
 
     private fun startLoad(device: GBDevice) {
         loadJob?.cancel()
+        // Clear summaries before the cache, so that a running workoutInputs() does not cache old results
+        summaries = emptyList()
         workoutInputCache.clear()
         _state.value = StatisticsState.Loading
         loadJob = viewModelScope.launch {
@@ -108,10 +110,14 @@ class WorkoutStatisticsViewModel : ViewModel() {
 
         val device = checkNotNull(device) { "load() must be called before overview()/period()" }
         val parser = device.deviceCoordinator.getActivitySummaryParser(device, GBApplication.app())
-        return summaries
-            .filter { it.activityKind == kindCode }
-            .map { workoutInput(parser, it) }
-            .also { workoutInputCache[kindCode] = it }
+        val source = summaries
+        val inputs = withContext(Dispatchers.IO) {
+            source.filter { it.activityKind == kindCode }.map { workoutInput(parser, it) }
+        }
+        if (summaries === source) {
+            workoutInputCache[kindCode] = inputs
+        }
+        return inputs
     }
 
     private fun loadSummaries(device: GBDevice): List<BaseActivitySummary> {

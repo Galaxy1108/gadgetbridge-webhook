@@ -117,7 +117,24 @@ class GbChartView @JvmOverloads constructor(
         configureLimitLines(spec)
         barLayout = barLayoutFor(spec, 0f)
         data = ChartDataBuilder.build(spec, barLayout!!, cornerRadiusPx())
+        updateBarLayout(spec)
         accessibility.invalidateRoot()
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        spec?.let { updateBarLayout(it) }
+    }
+
+    /**
+     * Rebuilds the data when the bar width changes. The axis range and the content width are known only after the data is set.
+     */
+    private fun updateBarLayout(spec: ChartSpec) {
+        if (xAxis.axisRange <= 0f) return
+        val layout = barLayoutFor(spec, viewPortHandler.contentWidth / xAxis.axisRange)
+        if (layout == barLayout) return
+        barLayout = layout
+        data = ChartDataBuilder.build(spec, layout, cornerRadiusPx())
     }
 
     fun showMessage(text: String) {
@@ -263,12 +280,7 @@ class GbChartView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         val spec = spec
-        if (spec != null && xAxis.axisRange > 0f) {
-            val layout = barLayoutFor(spec, viewPortHandler.contentWidth / xAxis.axisRange)
-            if (layout != barLayout) {
-                barLayout = layout
-                data = ChartDataBuilder.build(spec, layout, cornerRadiusPx())
-            }
+        if (spec != null) {
             timeLabelsFor(spec.xAxis)?.let { xAxisLabels.values = it }
         }
         super.onDraw(canvas)
