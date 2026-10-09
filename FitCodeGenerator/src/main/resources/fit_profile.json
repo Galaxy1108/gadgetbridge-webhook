@@ -465,7 +465,7 @@
         {"num":4,"name":"start_position_long","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":5,"name":"sport","base":"ENUM"},
         {"num":6,"name":"sub_sport","base":"ENUM"},
-        {"num":7,"name":"total_elapsed_time","base":"UINT32"},
+        {"num":7,"name":"total_elapsed_time","base":"UINT32","scale":1000,"UOM":"SECONDS"},
         {"num":8,"name":"total_timer_time","base":"UINT32","scale":1000,"UOM":"SECONDS"},
         {"num":9,"name":"total_distance","base":"UINT32","scale":100,"UOM":"METER"},
         {"num":10,"name":"total_cycles","base":"UINT32","UOM":"CYCLES"},
