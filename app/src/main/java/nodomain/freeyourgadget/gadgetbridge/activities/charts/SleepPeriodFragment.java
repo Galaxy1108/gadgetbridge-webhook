@@ -154,9 +154,11 @@ public class SleepPeriodFragment extends SleepFragment<SleepPeriodFragment.MyCha
         if (!supportsSleepScore()) {
             binding.sleepScoreWrapper.setVisibility(View.GONE);
         } else {
+            binding.sleepScoreChart.setZoomable(TOTAL_DAYS > 7);
             binding.sleepScoreChart.dismissSelectionOnTapOutside(rootView);
         }
 
+        binding.weekSleepChart.setZoomable(TOTAL_DAYS > 7);
         binding.weekSleepChart.dismissSelectionOnTapOutside(rootView);
         // refresh immediately instead of use refreshIfVisible(), for perceived performance
         refresh();

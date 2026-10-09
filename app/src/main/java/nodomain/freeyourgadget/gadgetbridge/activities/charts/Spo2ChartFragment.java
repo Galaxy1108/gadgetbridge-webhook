@@ -83,6 +83,7 @@ public class Spo2ChartFragment extends AbstractChartFragment<Spo2ChartFragment.S
                              final Bundle savedInstanceState) {
         binding = FragmentSpo2Binding.inflate(inflater, container, false);
         binding.manualMeasurements.setVisibility(View.GONE);
+        binding.spo2LineChart.setZoomable(true);
         binding.spo2LineChart.dismissSelectionOnTapOutside(binding.getRoot());
         refresh();
         return binding.getRoot();

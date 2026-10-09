@@ -639,6 +639,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
 
         binding.sleepchartInfo.setMaxLines(sleepLinesLimit);
 
+        binding.sleepchart.setZoomable(true);
         binding.sleepchart.dismissSelectionOnTapOutside(rootView);
 
         int[] config = new int[]{
