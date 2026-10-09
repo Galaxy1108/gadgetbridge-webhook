@@ -104,6 +104,7 @@ class GbChartView @JvmOverloads constructor(
         private set
 
     init {
+        renderer = RoundedCandleRenderer.Combined(this, animator, viewPortHandler)
         rendererXAxis = xAxisLabels
         description.isEnabled = false
         legend.isEnabled = false

@@ -1,7 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart
 
 import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.drawable.GradientDrawable
 import androidx.core.graphics.ColorUtils
 import com.github.mikephil.charting.components.YAxis.AxisDependency
@@ -160,12 +159,7 @@ internal object ChartDataBuilder {
             CandleEntry(x = point.x.toFloat(), high = high, low = low, open = low, close = high, data = point.x.toFloat())
         }
         return CandleDataSet(entries, series.label).apply {
-            shadowColor = style.color
-            increasingColor = style.color
-            increasingPaintStyle = Paint.Style.FILL
-            decreasingColor = style.color
-            decreasingPaintStyle = Paint.Style.FILL
-            neutralColor = style.color
+            color = style.color
             barSpace = ((1f - (style.width ?: 1f)) / 2f).coerceIn(0f, MAX_CANDLE_SPACE)
             isHighlightEnabled = false
             isDrawValuesEnabled = false
