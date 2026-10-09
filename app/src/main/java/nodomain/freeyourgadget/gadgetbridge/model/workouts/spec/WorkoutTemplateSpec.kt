@@ -7,6 +7,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutDurationType
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutEquipment
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutStepType
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutTargetType
+import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutTemplate
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutWeightType
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.exercises.WorkoutExerciseCatalog
 
@@ -117,6 +118,15 @@ data class SportSpec(
     fun stepSpec(stepType: WorkoutStepType): StepSpec = stepOverrides[stepType] ?: defaultStep
 }
 
+class WorkoutTemplateFile(val name: String, val mimeType: String, val bytes: ByteArray)
+
+fun interface WorkoutTemplateExporter {
+    /**
+     * Returns null when the template cannot be encoded.
+     */
+    fun export(template: WorkoutTemplate): WorkoutTemplateFile?
+}
+
 /**
  * What a device supports for workout templates.
  */
@@ -135,4 +145,9 @@ data class WorkoutTemplateSpec(
     val nameMaxLength: Int = 200,
     val noteMaxLength: Int = 200,
     val sports: Map<ActivityKind, SportSpec> = emptyMap(),
+
+    /**
+     * Null when the raw data of a template cannot be shared.
+     */
+    val exporter: WorkoutTemplateExporter? = null,
 )

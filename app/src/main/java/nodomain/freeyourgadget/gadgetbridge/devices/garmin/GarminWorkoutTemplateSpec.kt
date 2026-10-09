@@ -37,6 +37,8 @@ import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutTargetType.SPE
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutWeightType
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.SportSpecBuilder
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.TargetOption
+import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.WorkoutTemplateExporter
+import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.WorkoutTemplateFile
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.WorkoutTemplateSpec
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.cadence
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.calories
@@ -57,8 +59,11 @@ import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.swimPace
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.time
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.weightKg
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.spec.workoutTemplates
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.workouts.GarminExerciseCatalog
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.workouts.GarminExerciseLists
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.workouts.GarminWorkoutFitEncoder
+import nodomain.freeyourgadget.gadgetbridge.util.FileUtils
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -72,6 +77,17 @@ object GarminWorkoutTemplateSpec {
     private val TIME_59M59 = 59.minutes + 59.seconds
     private val POOL_LENGTH_CUSTOM = distanceM(5.0, 200.0, 0.1)
 
+    private val EXPORTER = WorkoutTemplateExporter { template ->
+        val timestamp = GarminTimeUtils.javaMillisToGarminTimestamp(System.currentTimeMillis()).toLong()
+        GarminWorkoutFitEncoder.encode(template, timestamp)?.let { fitFile ->
+            WorkoutTemplateFile(
+                FileUtils.makeValidFileName("${template.name}.fit"),
+                "application/octet-stream",
+                fitFile.outgoingMessage
+            )
+        }
+    }
+
     fun build(coordinator: GarminCoordinator, device: GBDevice): WorkoutTemplateSpec? {
         if (!coordinator.supports(device, GarminCapability.WORKOUT_DOWNLOAD)) return null
 
@@ -81,6 +97,7 @@ object GarminWorkoutTemplateSpec {
             maxTemplates = 200
             nameMaxLength = 40
             noteMaxLength = 200
+            exporter = EXPORTER
 
             // Every sport declared through leg() is also a valid multisport leg
             val legKinds = mutableListOf<ActivityKind>()
