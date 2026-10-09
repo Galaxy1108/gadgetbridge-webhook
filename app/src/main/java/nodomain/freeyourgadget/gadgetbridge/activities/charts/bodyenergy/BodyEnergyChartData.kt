@@ -11,6 +11,7 @@ object BodyEnergyChartData {
     private const val SECONDS_PER_DAY = 24 * 60 * 60
     private const val MAX_ENERGY = 100.0
     private const val DAY_RANGE_WIDTH = 0.4f
+    private const val SMOOTHING_SECONDS = 15 * 60
 
     /**
      * Today's level over the average per [averages] bin, from [midnight] (epoch seconds) to the next one.
@@ -27,7 +28,8 @@ object BodyEnergyChartData {
         averageLabel: String,
         averageColor: Int,
     ): ChartSpec {
-        val levelPoints = sampleSeconds.indices.map { ChartPoint(sampleSeconds[it].toDouble(), levels[it].toDouble()) }
+        val levelPoints =
+            smoothed(sampleSeconds.indices.map { ChartPoint(sampleSeconds[it].toDouble(), levels[it].toDouble()) })
         val averagePoints = averagePoints(midnight, averages)
         if (levelPoints.isEmpty() && averagePoints.isEmpty()) {
             return ChartSpec.EMPTY
@@ -35,10 +37,18 @@ object BodyEnergyChartData {
         return ChartSpec(
             series = listOf(
                 ChartSeries(
-                    "average", averageLabel, averagePoints, SeriesStyle.Line(averageColor, filled = true, curved = true),
+                    "average",
+                    averageLabel,
+                    averagePoints,
+                    SeriesStyle.Line(averageColor, filled = true, curved = true),
                     selectable = false,
                 ),
-                ChartSeries("level", levelLabel, levelPoints, SeriesStyle.Line(levelColor, filled = true, curved = true)),
+                ChartSeries(
+                    "level",
+                    levelLabel,
+                    levelPoints,
+                    SeriesStyle.Line(levelColor, filled = true, curved = true)
+                ),
             ).filter { it.points.isNotEmpty() },
             xAxis = AxisSpec(
                 format = ChartValueFormat.TIME_OF_DAY,
@@ -47,6 +57,23 @@ object BodyEnergyChartData {
             ),
             yAxis = AxisSpec(format = ChartValueFormat.INTEGER, minimum = 0.0, maximum = MAX_ENERGY),
         )
+    }
+
+    private fun smoothed(points: List<ChartPoint>): List<ChartPoint> {
+        var start = 0
+        var end = 0
+        var sum = 0.0
+        return points.map { point ->
+            while (end < points.size && points[end].x - point.x <= SMOOTHING_SECONDS) {
+                sum += points[end].y
+                end++
+            }
+            while (point.x - points[start].x > SMOOTHING_SECONDS) {
+                sum -= points[start].y
+                start++
+            }
+            point.copy(y = sum / (end - start))
+        }
     }
 
     /**
