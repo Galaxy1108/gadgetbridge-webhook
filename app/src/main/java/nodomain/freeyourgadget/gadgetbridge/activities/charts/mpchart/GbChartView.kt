@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.util.AttributeSet
 import android.view.GestureDetector
@@ -290,7 +291,7 @@ class GbChartView @JvmOverloads constructor(
         val axes = listOf(xAxis, axisLeft, axisRight)
         val textColors = axes.map { it.textColor }
         select(null)
-        setBackgroundColor(Color.WHITE)
+        background = ColorDrawable(Color.WHITE)
         axes.forEach { it.textColor = Color.BLACK }
         legend.isEnabled = true
         legend.textColor = Color.BLACK
