@@ -100,6 +100,13 @@
     <string name="calendar_three_months">3 months</string>
     <string name="calendar_six_months">6 months</string>
     <string name="calendar_year">Year</string>
+    <!-- Short duration labels under the battery info slider -->
+    <string name="duration_short_day">1d</string>
+    <string name="duration_short_week">1w</string>
+    <string name="duration_short_two_weeks">2w</string>
+    <string name="duration_short_month">1m</string>
+    <string name="duration_short_six_months">6m</string>
+    <string name="duration_short_year">1y</string>
     <!-- Strings related to Debug Activity -->
     <string name="title_activity_debug">Debug</string>
     <string name="debugactivity_really_factoryreset_title">Really factory reset?</string>

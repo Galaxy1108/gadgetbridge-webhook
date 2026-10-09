@@ -230,6 +230,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         int countInFolder = countDevicesInFolder(folder.getName(), false);
         int connectedInFolder = countDevicesInFolder(folder.getName(), true);
         holder.deviceStatusLabel.setText(context.getString(R.string.controlcenter_connected_fraction, connectedInFolder, countInFolder));
+        DeviceStatusDot.apply(holder.deviceStatusDot, connectedInFolder > 0);
 
         holder.container.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -344,6 +345,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         } else {
             holder.deviceStatusLabel.setText(device.getStateString(context));
         }
+        DeviceStatusDot.apply(holder.deviceStatusDot, device);
 
         //begin of action row: batteries, presets, status values and custom actions are all rendered
         //dynamically from the coordinator's declared card items, see DeviceCardItemBinder
@@ -756,6 +758,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         final Context connectedIconContext;
         TextView deviceNameLabel;
         TextView deviceStatusLabel;
+        View deviceStatusDot;
 
         // Icon row: batteries, presets, status items and custom actions are all rendered
         // dynamically into this container by DeviceCardItemBinder.
@@ -783,6 +786,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
             connectedIconContext = new ContextThemeWrapper(deviceImageView.getContext(), R.style.ThemeOverlay_App_DeviceCardIcon_Connected);
             deviceNameLabel = view.findViewById(R.id.device_name);
             deviceStatusLabel = view.findViewById(R.id.device_status);
+            deviceStatusDot = view.findViewById(R.id.device_status_dot);
 
             deviceInfoView = view.findViewById(R.id.device_info_image);
 
