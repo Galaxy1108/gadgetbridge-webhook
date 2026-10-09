@@ -333,7 +333,7 @@ public class SleepPeriodFragment extends SleepFragment<SleepPeriodFragment.MyCha
                 legend.add(ChartLegendView.lineItem(getString(R.string.target), targetColor));
             }
             if (showAverage && data.getAverage() > 0) {
-                legend.add(ChartLegendView.lineItem(getString(R.string.stress_average), averageColor));
+                legend.add(ChartLegendView.lineItem(getString(R.string.average, getAverage(data.getAverage())), averageColor));
             }
         }
         binding.weekSleepChartLegend.setSeries(legend);
