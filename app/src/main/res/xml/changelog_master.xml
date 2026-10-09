@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
     <!-- For contributors: do not modify this file - the project maintainers will update it as needed -->
+    <release version="0.95.1" versioncode="255">
+        <change>Fix build reproducibility</change>
+    </release>
     <release version="0.95.0" versioncode="254">
       <change>Initial support for 1MORE SonoFlow SE</change>
       <change>Initial support for 8BitDo Micro</change>

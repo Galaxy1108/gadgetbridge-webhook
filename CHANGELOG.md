@@ -2,6 +2,10 @@
 
 <!-- For contributors: do not modify this file - the project maintainers will update it as needed -->
 
+#### 0.95.1
+
+* Fix build reproducibility
+
 #### 0.95.0
 
 * Initial support for 1MORE SonoFlow SE
