@@ -180,7 +180,7 @@ public class Spo2ChartFragment extends AbstractChartFragment<Spo2ChartFragment.S
         if (!spec.getSeries().isEmpty()) {
             legendSeries.add(spec.getSeries().get(0));
             if (!spec.getLimitLines().isEmpty()) {
-                legendSeries.add(ChartLegendView.lineItem(getString(R.string.stress_average), Color.GRAY));
+                legendSeries.add(ChartLegendView.lineItem(getString(R.string.hr_average), Color.GRAY));
             }
         }
         binding.spo2ChartLegend.setSeries(legendSeries);

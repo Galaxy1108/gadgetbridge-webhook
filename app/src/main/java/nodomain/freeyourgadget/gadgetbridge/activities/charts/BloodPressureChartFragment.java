@@ -210,7 +210,7 @@ public class BloodPressureChartFragment extends AbstractChartFragment<BloodPress
 
         final List<ChartSeries> legendSeries = new ArrayList<>(spec.getSeries());
         if (!spec.getLimitLines().isEmpty()) {
-            legendSeries.add(ChartLegendView.lineItem(getString(R.string.stress_average), Color.GRAY));
+            legendSeries.add(ChartLegendView.lineItem(getString(R.string.hr_average), Color.GRAY));
         }
         mLegend.setSeries(legendSeries.size() > 1 ? legendSeries : Collections.emptyList());
     }
