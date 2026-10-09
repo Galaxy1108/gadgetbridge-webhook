@@ -1519,7 +1519,7 @@
         {"num":1,"name":"temperature","base":"SINT8","type":"TEMPERATURE","UOM":"CELSIUS"},
         {"num":2,"name":"condition","base":"ENUM","type":"WeatherStatus"},
         {"num":3,"name":"wind_direction","base":"UINT16","UOM":"DEGREES"},
-        {"num":4,"name":"wind_speed","base":"UINT16","UOM":"MILLIMETER_PER_SECOND"},
+        {"num":4,"name":"wind_speed","base":"UINT16","scale":1000,"UOM":"METER_PER_SECOND"},
         {"num":5,"name":"precipitation_probability","base":"UINT8"},
         {"num":6,"name":"temperature_feels_like","base":"SINT8","type":"TEMPERATURE","UOM":"CELSIUS"},
         {"num":7,"name":"relative_humidity","base":"UINT8"},
