@@ -81,6 +81,7 @@ class GbChartView @JvmOverloads constructor(
     })
     private var spec: ChartSpec? = null
     private var xOrigin = 0.0
+    private var labelledDays: AxisSpec? = null
     private var barLayout: BarLayout? = null
     private var selection: ChartSelection? = null
     private var targets = DoubleArray(0)
@@ -382,6 +383,7 @@ class GbChartView @JvmOverloads constructor(
         val spec = spec
         if (spec != null) {
             timeLabelsFor(spec.xAxis)?.let { labels -> xAxisLabels.values = labels.map { it - xOrigin } }
+            updateDayLabels(spec.xAxis)
         }
         super.onDraw(canvas)
 
@@ -449,14 +451,37 @@ class GbChartView @JvmOverloads constructor(
     )
 
     private fun configureXAxis(spec: AxisSpec) {
-        val labels = fixedLabelValues(spec)
-        val padding = if (labels != null) PERIOD_X_PADDING else 0.0
+        val padding = if (fixedLabelValues(spec) != null) PERIOD_X_PADDING else 0.0
+        labelledDays = null
+        setXLabels(spec)
+        spec.minimum?.let { xAxis.axisMinimum = (it - padding - xOrigin).toFloat() } ?: xAxis.resetAxisMinimum()
+        spec.maximum?.let { xAxis.axisMaximum = (it + padding - xOrigin).toFloat() } ?: xAxis.resetAxisMaximum()
+    }
+
+    /**
+     * Sets the x labels and their format for the range of [axis].
+     */
+    private fun setXLabels(axis: AxisSpec) {
         val origin = xOrigin
-        val label = labelFor(spec)
-        xAxisLabels.values = labels?.map { it - origin }
+        val label = labelFor(axis)
+        xAxisLabels.values = fixedLabelValues(axis)?.map { it - origin }
         xAxis.valueFormatter = formatterFor { label(it + origin) }
-        spec.minimum?.let { xAxis.axisMinimum = (it - padding - origin).toFloat() } ?: xAxis.resetAxisMinimum()
-        spec.maximum?.let { xAxis.axisMaximum = (it + padding - origin).toFloat() } ?: xAxis.resetAxisMaximum()
+    }
+
+    /**
+     * Sets the labels of an [ChartValueFormat.EPOCH_DAY] axis for the days in view.
+     */
+    private fun updateDayLabels(axis: AxisSpec) {
+        if (axis.format != ChartValueFormat.EPOCH_DAY) return
+        val minimum = axis.minimum ?: return
+        val maximum = axis.maximum ?: return
+        val visible = axis.copy(
+            minimum = maxOf(minimum, ceil(lowestVisibleX + xOrigin)),
+            maximum = minOf(maximum, floor(highestVisibleX + xOrigin)),
+        )
+        if (visible == labelledDays) return
+        labelledDays = visible
+        setXLabels(visible)
     }
 
     private fun configureLimitLines(spec: ChartSpec) {
