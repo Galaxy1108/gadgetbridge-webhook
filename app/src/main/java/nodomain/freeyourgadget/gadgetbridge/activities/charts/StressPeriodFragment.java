@@ -396,7 +396,7 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
         mStressLevelsPieChart.setCenterTextColor(GBApplication.getTextColor(getContext()));
         mStressLevelsPieChart.setCenterTextSize(18f);
         mStressLevelsPieChart.setHoleColor(requireContext().getResources().getColor(R.color.transparent));
-        mStressLevelsPieChart.setHoleRadius(85);
+        mStressLevelsPieChart.setHoleRadius(87);
         mStressLevelsPieChart.setDrawEntryLabelsEnabled(false);
         mStressLevelsPieChart.getLegend().setEnabled(false);
     }
