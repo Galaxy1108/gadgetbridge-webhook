@@ -222,9 +222,13 @@ public class ActivitySummariesChartFragment extends AbstractActivityChartFragmen
         private StageSamples withTrackHeartRate(final StageSamples samples, final List<ActivityPoint> activityPoints) {
             final long[] hrSeconds = new long[activityPoints.size()];
             final int[] heartRates = new int[activityPoints.size()];
+            final HeartRateUtils heartRateUtils = HeartRateUtils.getInstance();
             for (int i = 0; i < activityPoints.size(); i++) {
+                final int heartRate = activityPoints.get(i).getHeartRate();
                 hrSeconds[i] = activityPoints.get(i).getTime().getTime() / 1000L;
-                heartRates[i] = Math.max(activityPoints.get(i).getHeartRate(), 0);
+                if (heartRateUtils.isValidHeartRateValue(heartRate)) {
+                    heartRates[i] = heartRate;
+                }
             }
             return samples.withHeartRate(hrSeconds, heartRates);
         }
