@@ -67,11 +67,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.utils.MPPointF;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.color.MaterialColors;
@@ -101,6 +96,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.DeviceDeleteActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.ControlCenterv2;
 import nodomain.freeyourgadget.gadgetbridge.activities.OpenFwAppInstallerActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.ActivityChartsActivity;
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.GaugeDrawer;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
@@ -128,6 +124,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
     private static final Logger LOG = LoggerFactory.getLogger(GBDeviceAdapterv2.class);
 
     private final Context context;
+    private final GaugeDrawer gaugeDrawer = new GaugeDrawer();
     private List<GBDevice> deviceList;
     private List<GBDevice> devicesListWithFolders;
     private String expandedDeviceAddress = "";
@@ -812,9 +809,9 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
 
         //activity card
         LinearLayout cardViewActivityCardLayout;
-        PieChart TotalStepsChart;
-        PieChart TotalDistanceChart;
-        PieChart SleepTimeChart;
+        ActivityGauge TotalStepsChart;
+        ActivityGauge TotalDistanceChart;
+        ActivityGauge SleepTimeChart;
 
         ViewHolder(View view) {
             super(view);
@@ -842,9 +839,12 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
 
             cardViewActivityCardLayout = view.findViewById(R.id.card_view_activity_card_layout);
 
-            TotalStepsChart = view.findViewById(R.id.activity_dashboard_piechart1);
-            TotalDistanceChart = view.findViewById(R.id.activity_dashboard_piechart2);
-            SleepTimeChart = view.findViewById(R.id.activity_dashboard_piechart3);
+            TotalStepsChart = new ActivityGauge(view, R.id.device_card_gauge_steps, R.id.device_card_gauge_steps_ring,
+                    R.id.device_card_gauge_steps_value, R.id.device_card_gauge_steps_label, R.id.device_card_gauge_steps_goal);
+            TotalDistanceChart = new ActivityGauge(view, R.id.device_card_gauge_distance, R.id.device_card_gauge_distance_ring,
+                    R.id.device_card_gauge_distance_value, R.id.device_card_gauge_distance_label, R.id.device_card_gauge_distance_goal);
+            SleepTimeChart = new ActivityGauge(view, R.id.device_card_gauge_sleep, R.id.device_card_gauge_sleep_ring,
+                    R.id.device_card_gauge_sleep_value, R.id.device_card_gauge_sleep_label, R.id.device_card_gauge_sleep_goal);
         }
     }
 
@@ -929,14 +929,11 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         double distanceMeters = (distanceCm > 0 ? distanceCm : steps * stepLength) * 0.01;
         String distanceFormatted = FormatUtils.getFormattedDistanceLabel(distanceMeters);
 
-        setUpChart(holder.TotalStepsChart);
-        setChartsData(holder.TotalStepsChart, steps, stepGoal, context.getString(R.string.steps), NumberFormat.getInstance().format(steps), context);
+        setGaugeData(holder.TotalStepsChart, steps, stepGoal, context.getString(R.string.steps), NumberFormat.getInstance().format(steps), context);
 
-        setUpChart(holder.TotalDistanceChart);
-        setChartsData(holder.TotalDistanceChart, distanceForChart, distanceGoal, context.getString(R.string.distance), distanceFormatted, context);
+        setGaugeData(holder.TotalDistanceChart, distanceForChart, distanceGoal, context.getString(R.string.distance), distanceFormatted, context);
 
-        setUpChart(holder.SleepTimeChart);
-        setChartsData(holder.SleepTimeChart, sleep, sleepGoalMinutes, context.getString(R.string.prefs_activity_in_device_card_sleep_title), String.format("%1s", getHM(sleep)), context);
+        setGaugeData(holder.SleepTimeChart, sleep, sleepGoalMinutes, context.getString(R.string.prefs_activity_in_device_card_sleep_title), String.format("%1s", getHM(sleep)), context);
 
 
         boolean showActivitySteps = GBApplication.getDeviceSpecificSharedPrefs(device.getAddress()).getBoolean(DeviceSettingsPreferenceConst.PREFS_ACTIVITY_IN_DEVICE_CARD_STEPS, true);
@@ -944,13 +941,13 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         boolean showActivityDistance = GBApplication.getDeviceSpecificSharedPrefs(device.getAddress()).getBoolean(DeviceSettingsPreferenceConst.PREFS_ACTIVITY_IN_DEVICE_CARD_DISTANCE, true);
 
         //do the multiple mini-charts for activities in a loop
-        Hashtable<PieChart, Pair<Boolean, Integer>> activitiesStatusMiniCharts = new Hashtable<>();
-        activitiesStatusMiniCharts.put(holder.TotalStepsChart, new Pair<>(showActivitySteps && steps > 0, ActivityChartsActivity.getChartsTabIndex("stepsweek", device, context)));
-        activitiesStatusMiniCharts.put(holder.SleepTimeChart, new Pair<>(showActivitySleep && sleep > 0, ActivityChartsActivity.getChartsTabIndex("sleep", device, context)));
-        activitiesStatusMiniCharts.put(holder.TotalDistanceChart, new Pair<>(showActivityDistance && distanceForChart > 0, ActivityChartsActivity.getChartsTabIndex("activity", device, context)));
+        Hashtable<View, Pair<Boolean, Integer>> activitiesStatusMiniCharts = new Hashtable<>();
+        activitiesStatusMiniCharts.put(holder.TotalStepsChart.container, new Pair<>(showActivitySteps && steps > 0, ActivityChartsActivity.getChartsTabIndex("stepsweek", device, context)));
+        activitiesStatusMiniCharts.put(holder.SleepTimeChart.container, new Pair<>(showActivitySleep && sleep > 0, ActivityChartsActivity.getChartsTabIndex("sleep", device, context)));
+        activitiesStatusMiniCharts.put(holder.TotalDistanceChart.container, new Pair<>(showActivityDistance && distanceForChart > 0, ActivityChartsActivity.getChartsTabIndex("activity", device, context)));
 
-        for (Map.Entry<PieChart, Pair<Boolean, Integer>> miniCharts : activitiesStatusMiniCharts.entrySet()) {
-            PieChart miniChart = miniCharts.getKey();
+        for (Map.Entry<View, Pair<Boolean, Integer>> miniCharts : activitiesStatusMiniCharts.entrySet()) {
+            View miniChart = miniCharts.getKey();
             final Pair<Boolean, Integer> parameters = miniCharts.getValue();
             miniChart.setVisibility(parameters.first ? View.VISIBLE : View.GONE);
             miniChart.setOnClickListener(new View.OnClickListener() {
@@ -970,56 +967,45 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
     private String getHM(long value) {
         return DateTimeUtils.formatDurationHoursMinutes(value, TimeUnit.MINUTES);
     }
-    private void setUpChart(PieChart DashboardChart) {
-        DashboardChart.setTouchEnabled(false);
-        DashboardChart.setNoDataText("");
-        DashboardChart.setNoDataIconEnabled(false);
-        DashboardChart.getLegend().setEnabled(false);
-        DashboardChart.setDrawHoleEnabled(true);
-        DashboardChart.setHoleColor(Color.TRANSPARENT);
-        DashboardChart.getDescription().setText("");
-        DashboardChart.setTransparentCircleAlpha(0);
-        DashboardChart.setHoleRadius(82f);
-        DashboardChart.setTransparentCircleRadius(0f);
-        DashboardChart.setCenterTextColor(MaterialColors.getColor(DashboardChart, com.google.android.material.R.attr.colorOnSurface));
-        DashboardChart.setDrawCenterTextEnabled(true);
-        DashboardChart.setRotationEnabled(true);
-        DashboardChart.setHighlightPerTapEnabled(true);
-        DashboardChart.setCenterTextOffset(0, 0);
-    }
-    private void setChartsData(PieChart pieChart, float value, float target, String label, String stringValue, Context context) {
+    private void setGaugeData(ActivityGauge gauge, float value, float target, String label, String stringValue, Context context) {
         final String CHART_COLOR_START = "#e74c3c";
         final String CHART_COLOR_END = "#2ecc71";
 
-        ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry<>((float) value, null, context.getResources().getDrawable(R.drawable.ic_star_gold), null));
-
-        if (value < target) {
-            entries.add(new PieEntry<>((float) (target - value), null, null, null));
-        }
-
-        pieChart.setCenterText(String.format("%s\n%s", stringValue, label));
         float colorValue = Math.max(0, Math.min(1, value / target));
         int chartColor = interpolateColor(Color.parseColor(CHART_COLOR_START), Color.parseColor(CHART_COLOR_END), colorValue);
 
-        PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setDrawIconsEnabled(false);
-        dataSet.setIconsOffset(new MPPointF(0, -66));
-
-        if (colorValue == 1) {
-            dataSet.setDrawIconsEnabled(true);
-        }
-        dataSet.setSliceSpace(0f);
-        dataSet.setSelectionShift(5f);
-        dataSet.setColors(chartColor, MaterialColors.getColor(pieChart, com.google.android.material.R.attr.colorSurfaceContainerHighest));
-
-        PieData data = new PieData(dataSet);
-        data.setValueTextSize(0f);
-        data.setValueTextColor(Color.WHITE);
-
-        pieChart.setData(data);
-        pieChart.invalidate();
+        gaugeDrawer.drawSimpleGauge(gauge.ring, chartColor, colorValue);
+        gauge.value.setText(stringValue);
+        gauge.label.setText(label);
+        gauge.goal.setVisibility(colorValue == 1 ? View.VISIBLE : View.GONE);
     }
+
+    /**
+     * The views of one activity gauge on the device card.
+     */
+    private static class ActivityGauge {
+        private static final float VALUE_TEXT_SCALE = 0.15f;
+        private static final float LABEL_TEXT_SCALE = 0.11f;
+
+        final View container;
+        final ImageView ring;
+        final TextView value;
+        final TextView label;
+        final ImageView goal;
+
+        ActivityGauge(View view, int containerId, int ringId, int valueId, int labelId, int goalId) {
+            container = view.findViewById(containerId);
+            ring = view.findViewById(ringId);
+            value = view.findViewById(valueId);
+            label = view.findViewById(labelId);
+            goal = view.findViewById(goalId);
+
+            final int size = ring.getLayoutParams().width;
+            value.setTextSize(TypedValue.COMPLEX_UNIT_PX, size * VALUE_TEXT_SCALE);
+            label.setTextSize(TypedValue.COMPLEX_UNIT_PX, size * LABEL_TEXT_SCALE);
+        }
+    }
+
     private float interpolate(float a, float b, float proportion) {
         return (a + ((b - a) * proportion));
     }
