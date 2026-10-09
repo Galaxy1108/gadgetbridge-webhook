@@ -461,9 +461,9 @@ class GbChartView @JvmOverloads constructor(
     /**
      * Sets the x labels and their format for the range of [axis].
      */
-    private fun setXLabels(axis: AxisSpec) {
+    private fun setXLabels(axis: AxisSpec, dayNames: Boolean = true) {
         val origin = xOrigin
-        val label = labelFor(axis)
+        val label = labelFor(axis, dayNames)
         xAxisLabels.values = fixedLabelValues(axis)?.map { it - origin }
         xAxis.valueFormatter = formatterFor { label(it + origin) }
     }
@@ -481,7 +481,7 @@ class GbChartView @JvmOverloads constructor(
         )
         if (visible == labelledDays) return
         labelledDays = visible
-        setXLabels(visible)
+        setXLabels(visible, dayNames = visible == axis)
     }
 
     private fun configureLimitLines(spec: ChartSpec) {

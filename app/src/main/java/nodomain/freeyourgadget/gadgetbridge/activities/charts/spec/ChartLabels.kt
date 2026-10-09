@@ -28,10 +28,10 @@ fun labelFor(format: ChartValueFormat): (Double) -> String = when (format) {
 }
 
 /**
- * Uses day names for an [ChartValueFormat.EPOCH_DAY] axis of a week or less.
+ * Uses day names for an [ChartValueFormat.EPOCH_DAY] axis of a week or less, when [dayNames] is true.
  */
-fun labelFor(axis: AxisSpec): (Double) -> String {
-    if (axis.format == ChartValueFormat.EPOCH_DAY && isWeekOrLess(axis)) {
+fun labelFor(axis: AxisSpec, dayNames: Boolean = true): (Double) -> String {
+    if (axis.format == ChartValueFormat.EPOCH_DAY && dayNames && isWeekOrLess(axis)) {
         return wholeLabeler(Int.MIN_VALUE..Int.MAX_VALUE) { dayOfWeekLabel(epochDay(it).dayOfWeek.value.toDouble()) }
     }
     if (axis.format == ChartValueFormat.EPOCH_DAY && isOverTwoMonths(axis)) {
