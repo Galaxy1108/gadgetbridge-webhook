@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IFillFormatter
 import com.github.mikephil.charting.utils.Fill
+import com.github.mikephil.charting.utils.Utils
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.AxisSide
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartPoint
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSeries
@@ -77,7 +78,7 @@ internal object ChartDataBuilder {
     fun columnGroups(spec: ChartSpec): List<List<ChartSeries>> =
         columns(spec).groupBy { (it.style as SeriesStyle.Column).stackKey ?: it.key }.values.toList()
 
-    fun build(spec: ChartSpec, layout: BarLayout, cornerRadiusPx: Float): CombinedData {
+    fun build(spec: ChartSpec, layout: BarLayout, cornerRadiusDp: Float): CombinedData {
         val columns = columnGroups(spec)
         val ranges = spec.series.filter { it.style is SeriesStyle.Range && it.points.isNotEmpty() }
         val bands = ranges.filter { (it.style as SeriesStyle.Range).width == null }
@@ -89,7 +90,11 @@ internal object ChartDataBuilder {
             if (columns.isNotEmpty()) {
                 barData = BarData(columns.mapIndexed { index, group ->
                     val offset = (index - (columns.size - 1) / 2f) * step
-                    if (group.size == 1) barDataSet(group.single(), offset, cornerRadiusPx) else stackedDataSet(group, offset)
+                    if (group.size == 1) {
+                        barDataSet(group.single(), offset, cornerRadiusDp)
+                    } else {
+                        stackedDataSet(group, offset, cornerRadiusDp)
+                    }
                 }).apply { barWidth = layout.width }
             }
             if (bands.isNotEmpty()) {
@@ -104,26 +109,29 @@ internal object ChartDataBuilder {
         }
     }
 
-    private fun barDataSet(series: ChartSeries, offset: Float, cornerRadiusPx: Float): BarDataSet<Float> {
+    private fun barDataSet(series: ChartSeries, offset: Float, cornerRadiusDp: Float): BarDataSet<Float> {
         val style = series.style as SeriesStyle.Column
         val entries = series.points.map { BarEntry(x = it.x.toFloat() + offset, y = it.y.toFloat(), data = it.x.toFloat()) }
         return BarDataSet(entries, series.label).apply {
             color = style.color
-            fills = listOf(Fill(topRounded(style.color, cornerRadiusPx)))
+            fills = listOf(Fill(topRounded(style.color, Utils.convertDpToPixel(cornerRadiusDp))))
             highlightAlpha = 0
             isDrawValuesEnabled = false
             axisDependency = axisDependency(series)
         }
     }
 
-    private fun stackedDataSet(group: List<ChartSeries>, offset: Float): BarDataSet<Float> {
+    private fun stackedDataSet(group: List<ChartSeries>, offset: Float, cornerRadiusDp: Float): BarDataSet<Float> {
         val xs = group.flatMap { series -> series.points.map { it.x } }.distinct().sorted()
         val entries = xs.map { x ->
             val values = group.map { series -> (series.points.firstOrNull { it.x == x }?.y ?: 0.0).toFloat() }
-            BarEntry(x = x.toFloat() + offset, stackValues = values, data = x.toFloat())
+            val sections = values.indexOfLast { it != 0f } + 1
+            BarEntry(x = x.toFloat() + offset, stackValues = values.take(maxOf(sections, 1)), data = x.toFloat())
         }
+        val groupColors = group.map { (it.style as SeriesStyle.Column).color }
         return BarDataSet(entries, group.first().label).apply {
-            colors = group.map { (it.style as SeriesStyle.Column).color }
+            colors = if (isStacked) groupColors else groupColors.take(1)
+            barCornerRadius = cornerRadiusDp
             highlightAlpha = 0
             isDrawValuesEnabled = false
             axisDependency = axisDependency(group.first())

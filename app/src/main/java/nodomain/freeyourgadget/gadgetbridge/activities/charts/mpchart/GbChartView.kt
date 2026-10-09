@@ -147,7 +147,7 @@ class GbChartView @JvmOverloads constructor(
         configureYAxis(axisRight, spec.endYAxis)
         configureLimitLines(spec)
         barLayout = barLayoutFor(spec, 0f)
-        data = ChartDataBuilder.build(spec, barLayout!!, cornerRadiusPx())
+        data = ChartDataBuilder.build(spec, barLayout!!, BAR_CORNER_DP)
         updateBarLayout(spec)
         accessibility.invalidateRoot()
     }
@@ -165,7 +165,7 @@ class GbChartView @JvmOverloads constructor(
         val layout = barLayoutFor(spec, viewPortHandler.contentWidth / xAxis.axisRange)
         if (layout == barLayout) return
         barLayout = layout
-        data = ChartDataBuilder.build(spec, layout, cornerRadiusPx())
+        data = ChartDataBuilder.build(spec, layout, BAR_CORNER_DP)
     }
 
     fun showMessage(text: String) {
@@ -441,8 +441,6 @@ class GbChartView @JvmOverloads constructor(
         barCount = targets.size,
         grouped = ChartDataBuilder.columnGroups(spec).size > 1,
     )
-
-    private fun cornerRadiusPx() = Utils.convertDpToPixel(BAR_CORNER_DP)
 
     private fun configureXAxis(spec: AxisSpec) {
         val labels = fixedLabelValues(spec)
