@@ -64,10 +64,6 @@ public class TemperatureDailyFragment extends AbstractChartFragment<TemperatureD
     protected static final Logger LOG = LoggerFactory.getLogger(TemperatureDailyFragment.class);
 
     protected int TEMPERATURE_COLOR;
-    protected int CHART_TEXT_COLOR;
-    protected int BACKGROUND_COLOR;
-    protected int DESCRIPTION_COLOR;
-    protected int LEGEND_TEXT_COLOR;
 
     private TextView dateView;
     private LinearLayout statsContainer;
@@ -103,8 +99,6 @@ public class TemperatureDailyFragment extends AbstractChartFragment<TemperatureD
 
     @Override
     protected void init() {
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
-        DESCRIPTION_COLOR = LEGEND_TEXT_COLOR = GBApplication.getTextColor(requireContext());
         TEMPERATURE_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_temperature);
     }
 

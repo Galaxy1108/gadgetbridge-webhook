@@ -45,7 +45,6 @@ import kotlin.jvm.functions.Function1;
 
 import androidx.annotation.Nullable;
 
-import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.ChartLegendView;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.DaySelections;
@@ -77,10 +76,6 @@ public class VO2MaxPeriodFragment extends AbstractChartFragment<VO2MaxPeriodFrag
     private int totalDays;
     private boolean showGauges;
     GBDevice device;
-
-    protected int CHART_TEXT_COLOR;
-    protected int LEGEND_TEXT_COLOR;
-    protected int TEXT_COLOR;
 
     private TextView vo2MaxRunningValue;
     private TextView vo2MaxCyclingValue;
@@ -163,9 +158,6 @@ public class VO2MaxPeriodFragment extends AbstractChartFragment<VO2MaxPeriodFrag
     protected void init() {
         totalDays = getArguments() != null ? getArguments().getInt(ARG_TOTAL_DAYS, DEFAULT_TOTAL_DAYS) : DEFAULT_TOTAL_DAYS;
         showGauges = getArguments() != null && getArguments().getBoolean(ARG_SHOW_GAUGES, false);
-        TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        LEGEND_TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
     }
 
     @Override

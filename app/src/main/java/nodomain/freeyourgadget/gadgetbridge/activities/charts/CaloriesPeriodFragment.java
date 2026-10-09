@@ -43,12 +43,7 @@ public class CaloriesPeriodFragment extends CaloriesFragment<CaloriesPeriodFragm
 
     private TextView mBalanceView;
 
-    protected int CHART_TEXT_COLOR;
-    protected int TEXT_COLOR;
     protected int CALORIES_GOAL;
-
-    protected int BACKGROUND_COLOR;
-    protected int DESCRIPTION_COLOR;
 
     @Override
     protected boolean isSingleDay() {
@@ -98,10 +93,6 @@ public class CaloriesPeriodFragment extends CaloriesFragment<CaloriesPeriodFragm
 
     @Override
     protected void init() {
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
-        BACKGROUND_COLOR = GBApplication.getBackgroundColor(getContext());
-        DESCRIPTION_COLOR = TEXT_COLOR = GBApplication.getTextColor(getContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(getContext());
     }
 
     @Override

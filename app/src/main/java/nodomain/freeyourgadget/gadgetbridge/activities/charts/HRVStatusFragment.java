@@ -106,8 +106,6 @@ public class HRVStatusFragment extends AbstractChartFragment<HRVStatusFragment.H
     private TextView mDateView;
     private TextView mHRVGaugeValue;
     private TextView mHRVGaugeStatus;
-    protected int CHART_TEXT_COLOR;
-    protected int LEGEND_TEXT_COLOR;
     protected int TEXT_COLOR;
     protected int HRV_AVERAGE_COLOR;
     protected int HRV_RANGE_COLOR;
@@ -279,8 +277,6 @@ public class HRVStatusFragment extends AbstractChartFragment<HRVStatusFragment.H
     @Override
     protected void init() {
         TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        LEGEND_TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
         HRV_AVERAGE_COLOR = getResources().getColor(R.color.hrv_status_char_line_color);
         HRV_RANGE_COLOR = getResources().getColor(R.color.hrv_status_range_color);
         HRV_LAST_NIGHT_COLOR = getResources().getColor(R.color.hrv_status_last_night_color);

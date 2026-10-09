@@ -65,11 +65,6 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
     protected int HEARTRATE_MIN_COLOR;
     protected int HEARTRATE_RESTING_COLOR;
     protected int HEARTRATE_MAX_COLOR;
-    protected int CHART_TEXT_COLOR;
-    protected int BACKGROUND_COLOR;
-    protected int DESCRIPTION_COLOR;
-    protected int LEGEND_TEXT_COLOR;
-    protected int TEXT_COLOR;
 
     private TextView mDateView;
     private LinearLayout hrStatsContainer;
@@ -132,8 +127,6 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
     @Override
     protected void init() {
         Prefs prefs = GBApplication.getPrefs();
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
-        DESCRIPTION_COLOR = LEGEND_TEXT_COLOR = TEXT_COLOR = GBApplication.getTextColor(requireContext());
         if (prefs.getBoolean("chart_heartrate_color", false)) {
             HEARTRATE_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_heartrate_alternative);
         } else {

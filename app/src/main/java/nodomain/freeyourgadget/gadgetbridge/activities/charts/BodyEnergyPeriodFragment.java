@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 
 import kotlin.jvm.functions.Function1;
-import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.bodyenergy.BodyEnergyChartData;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.DaySelections;
@@ -44,9 +43,6 @@ public class BodyEnergyPeriodFragment extends AbstractChartFragment<BodyEnergyPe
     static int SEC_PER_DAY = 24 * 60 * 60;
     static int DATA_INVALID = -1;
 
-    private int BACKGROUND_COLOR;
-    private int CHART_TEXT_COLOR;
-    private int LEGEND_TEXT_COLOR;
     private int BODY_ENERGY_COLOR;
 
     private TextView mDateView;
@@ -75,9 +71,6 @@ public class BodyEnergyPeriodFragment extends AbstractChartFragment<BodyEnergyPe
 
     @Override
     protected void init() {
-        BACKGROUND_COLOR = GBApplication.getBackgroundColor(requireContext());
-        LEGEND_TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
         BODY_ENERGY_COLOR = ContextCompat.getColor(requireContext(), R.color.body_energy_level_color);
     }
 

@@ -65,16 +65,8 @@ public class Spo2ChartFragment extends AbstractChartFragment<Spo2ChartFragment.S
 
     private FragmentSpo2Binding binding;
 
-    private int BACKGROUND_COLOR;
-    private int CHART_TEXT_COLOR;
-    private int TEXT_COLOR;
-    private int LEGEND_TEXT_COLOR;
-
     @Override
     protected void init() {
-        BACKGROUND_COLOR = GBApplication.getBackgroundColor(requireContext());
-        LEGEND_TEXT_COLOR = TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
     }
 
     @Override

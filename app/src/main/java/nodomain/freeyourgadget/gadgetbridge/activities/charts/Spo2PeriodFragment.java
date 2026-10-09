@@ -41,7 +41,6 @@ import java.util.List;
 
 import kotlin.jvm.functions.Function1;
 
-import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.ChartLegendView;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.DaySelections;
@@ -58,16 +57,12 @@ import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
 import nodomain.freeyourgadget.gadgetbridge.util.Accumulator;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
 
-
 public class Spo2PeriodFragment extends AbstractChartFragment<Spo2PeriodFragment.Spo2PeriodData> {
     protected static final Logger LOG = LoggerFactory.getLogger(Spo2PeriodFragment.class);
 
     static int SEC_PER_DAY = 24 * 60 * 60;
     static int DATA_INVALID = -1;
 
-    private int BACKGROUND_COLOR;
-    private int CHART_TEXT_COLOR;
-    private int LEGEND_TEXT_COLOR;
     private int SPO2_COLOR;
     private int SPO2_AVG_COLOR;
 
@@ -99,9 +94,6 @@ public class Spo2PeriodFragment extends AbstractChartFragment<Spo2PeriodFragment
     @Override
     protected void init() {
         TypedValue runningColor = new TypedValue();
-        BACKGROUND_COLOR = GBApplication.getBackgroundColor(requireContext());
-        LEGEND_TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
         SPO2_COLOR = ContextCompat.getColor(requireContext(), R.color.spo2_color);
         requireContext().getTheme().resolveAttribute(R.attr.spo2_avg_color, runningColor, true);
         SPO2_AVG_COLOR = runningColor.data;

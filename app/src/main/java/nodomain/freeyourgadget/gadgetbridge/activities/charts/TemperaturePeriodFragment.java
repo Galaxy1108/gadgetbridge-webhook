@@ -66,9 +66,6 @@ public class TemperaturePeriodFragment extends AbstractChartFragment<Temperature
     static final int SEC_PER_DAY = 24 * 60 * 60;
     static final float DATA_INVALID = Float.NaN;
 
-    private int BACKGROUND_COLOR;
-    private int CHART_TEXT_COLOR;
-    private int LEGEND_TEXT_COLOR;
     private int TEMPERATURE_COLOR;
     private int TEMPERATURE_AVG_COLOR;
 
@@ -101,9 +98,6 @@ public class TemperaturePeriodFragment extends AbstractChartFragment<Temperature
 
     @Override
     protected void init() {
-        BACKGROUND_COLOR = GBApplication.getBackgroundColor(requireContext());
-        LEGEND_TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
         TEMPERATURE_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_temperature);
         TEMPERATURE_AVG_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_temperature_average);
     }

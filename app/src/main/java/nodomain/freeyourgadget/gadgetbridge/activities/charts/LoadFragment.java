@@ -108,9 +108,6 @@ public class LoadFragment extends AbstractChartFragment<LoadFragment.LoadsData> 
     private ChartLegendView acuteLoadLegend;
     private GbChartView dailyLoadChart;
     private ChipGroup loadChartDataTypeGroup;
-    protected int CHART_TEXT_COLOR;
-    protected int LEGEND_TEXT_COLOR;
-    protected int TEXT_COLOR;
     protected int LOAD_COLOR;
     protected int OPTIMAL_LOAD_FILL_COLOR;
 
@@ -178,9 +175,6 @@ public class LoadFragment extends AbstractChartFragment<LoadFragment.LoadsData> 
 
     @Override
     protected void init() {
-        TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        LEGEND_TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
         LOAD_COLOR = getAcuteColor(requireContext());
         OPTIMAL_LOAD_FILL_COLOR = getResources().getColor(R.color.training_load_optimal_fill_color);
     }

@@ -77,8 +77,6 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
     private GbChartView mWeekChart;
     private ChartLegendView mWeekLegend;
 
-    protected Locale mLocale;
-
     public static StressPeriodFragment newInstance(int totalDays) {
         StressPeriodFragment fragment = new StressPeriodFragment();
         Bundle args = new Bundle();
@@ -96,7 +94,6 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mLocale = getResources().getConfiguration().locale;
         View rootView = inflater.inflate(R.layout.fragment_weekstress_chart, container, false);
 
         rootView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {

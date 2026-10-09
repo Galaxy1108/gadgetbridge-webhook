@@ -42,7 +42,6 @@ import java.util.Locale;
 
 import kotlin.jvm.functions.Function1;
 
-import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.DaySelections;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart.GbChartView;
@@ -79,8 +78,6 @@ public class RacePredictionPeriodFragment extends AbstractChartFragment<RacePred
     private ChipGroup metricChipGroup;
     private LinearLayout statsContainer;
 
-    protected int CHART_TEXT_COLOR;
-    protected int TEXT_COLOR;
     protected int LINE_COLOR;
 
     public static RacePredictionPeriodFragment newInstance(final int totalDays, final boolean showTiles) {
@@ -111,8 +108,6 @@ public class RacePredictionPeriodFragment extends AbstractChartFragment<RacePred
     protected void init() {
         totalDays = getArguments() != null ? getArguments().getInt(ARG_TOTAL_DAYS, DEFAULT_TOTAL_DAYS) : DEFAULT_TOTAL_DAYS;
         showTiles = getArguments() != null && getArguments().getBoolean(ARG_SHOW_TILES, false);
-        TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
         LINE_COLOR = MaterialColors.getColor(requireContext(), R.attr.accent_color, getResources().getColor(R.color.accent));
     }
 

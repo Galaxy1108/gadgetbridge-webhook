@@ -27,10 +27,7 @@ import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
@@ -112,7 +109,6 @@ public abstract class AbstractActivityChartFragment<D extends ChartsData> extend
     protected int BACKGROUND_COLOR;
     protected int DESCRIPTION_COLOR;
     protected int CHART_TEXT_COLOR;
-    protected int LEGEND_TEXT_COLOR;
     protected int HEARTRATE_COLOR;
     protected int HEARTRATE_FILL_COLOR;
     protected int AK_ACTIVITY_COLOR;
@@ -130,7 +126,7 @@ public abstract class AbstractActivityChartFragment<D extends ChartsData> extend
         Prefs prefs = GBApplication.getPrefs();
         TypedValue runningColor = new TypedValue();
         BACKGROUND_COLOR = GBApplication.getBackgroundColor(getContext());
-        LEGEND_TEXT_COLOR = DESCRIPTION_COLOR = GBApplication.getTextColor(getContext());
+        DESCRIPTION_COLOR = GBApplication.getTextColor(getContext());
         CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(getContext());
         if (prefs.getBoolean("chart_heartrate_color", false)) {
             HEARTRATE_COLOR = ContextCompat.getColor(getContext(), R.color.chart_heartrate_alternative);
@@ -216,122 +212,6 @@ public abstract class AbstractActivityChartFragment<D extends ChartsData> extend
             return new LinkedList<>();
         }
         return provider.getActivitySamples(tsFrom, tsTo);
-    }
-
-    public DefaultChartsData<LineData> refresh(GBDevice gbDevice, List<? extends ActivitySample> samples) {
-        // If there is no high-res samples, all the samples are high-res samples
-        return refresh(gbDevice, samples, samples);
-    }
-
-    public DefaultChartsData<LineData> refresh(GBDevice gbDevice, List<? extends ActivitySample> samples, List<? extends ActivitySample> highResSamples) {
-        TimestampTranslation tsTranslation = new TimestampTranslation();
-        LOG.info("{}: number of samples: {}", getTitle(), samples.size());
-        LOG.info("{}: number of high-res samples: {}", getTitle(), highResSamples.size());
-        LineData lineData;
-
-        if (samples.isEmpty()) {
-            lineData = new LineData();
-            IAxisValueFormatter xValueFormatter = new SampleXLabelFormatter(tsTranslation, "HH:mm");
-            return new DefaultChartsData<>(lineData, xValueFormatter);
-        }
-
-        ActivityKind last_type = ActivityKind.UNKNOWN;
-        float last_value = 0;
-
-        int numEntries = samples.size();
-        List<List<Entry>> entries = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            entries.add(new ArrayList<>());
-        }
-
-        for (int i = 0; i < numEntries; i++) {
-            ActivitySample sample = samples.get(i);
-            ActivityKind type = sample.getKind();
-            int ts = tsTranslation.shorten(sample.getTimestamp());
-            final float value = chartValueOf(sample);
-
-            // do not interpolate NOT_WORN on any side
-            boolean interpolate = !(last_type == ActivityKind.NOT_WORN || type == ActivityKind.NOT_WORN);
-            float interpolation_value = interpolate ? value : last_value;
-
-            // filled charts
-            int index = getIndexOfActivity(type);
-            int last_index = getIndexOfActivity(last_type);
-            if (last_type != type) {
-                entries.get(index).add(createLineEntry(0, ts));
-                entries.get(last_index).add(createLineEntry(interpolation_value, ts));
-                entries.get(last_index).add(createLineEntry(0, ts));
-            }
-            entries.get(index).add(createLineEntry(value, ts));
-
-            last_type = type;
-            last_value = value;
-        }
-
-        boolean hr = supportsHeartrate(gbDevice);
-        final List<Entry> heartRateLineEntries = new ArrayList<>();
-        final List<ILineDataSet<?>> heartRateDataSets = new ArrayList<>();
-        int lastTsShorten = 0;
-        HeartRateUtils heartRateUtilsInstance = HeartRateUtils.getInstance();
-
-        // Currently only for HR
-        if (hr) {
-            for (ActivitySample sample : highResSamples) {
-                if (sample.getKind() != ActivityKind.NOT_WORN && heartRateUtilsInstance.isValidHeartRateValue(sample.getHeartRate())) {
-                    int tsShorten = tsTranslation.shorten(sample.getTimestamp());
-                    if (lastTsShorten == 0 || (tsShorten - lastTsShorten) <= 60 * gbDevice.getDeviceCoordinator().getMaxHeartRateMeasurementsGapMinutes(gbDevice)) {
-                        heartRateLineEntries.add(new Entry<>(tsShorten, sample.getHeartRate(), null, null));
-                    } else {
-                        if (!heartRateLineEntries.isEmpty()) {
-                            List<Entry> clone = new ArrayList<>(heartRateLineEntries.size());
-                            clone.addAll(heartRateLineEntries);
-                            heartRateDataSets.add(createHeartrateSet(clone, "Heart Rate"));
-                            heartRateLineEntries.clear();
-                        }
-                    }
-                    lastTsShorten = tsShorten;
-                    heartRateLineEntries.add(new Entry<>(tsShorten, sample.getHeartRate(), null, null));
-                }
-            }
-        }
-        if (!heartRateLineEntries.isEmpty()) {
-            heartRateDataSets.add(createHeartrateSet(heartRateLineEntries, "Heart Rate"));
-        }
-
-        // convert Entry Lists to Datasets
-        List<ILineDataSet<?>> lineDataSets = new ArrayList<>();
-
-        lineDataSets.add(createDataSet(
-                entries.get(getIndexOfActivity(ActivityKind.ACTIVITY)), akActivity.color, "Activity"
-        ));
-        lineDataSets.add(createDataSet(
-                entries.get(getIndexOfActivity(ActivityKind.DEEP_SLEEP)), akDeepSleep.color, "Deep Sleep"
-        ));
-        lineDataSets.add(createDataSet(
-                entries.get(getIndexOfActivity(ActivityKind.LIGHT_SLEEP)), akLightSleep.color, "Light Sleep"
-        ));
-        lineDataSets.add(createDataSet(
-                entries.get(getIndexOfActivity(ActivityKind.NOT_WORN)), akNotWorn.color, "Not worn"
-        ));
-
-        if (supportsRemSleep(gbDevice)) {
-            lineDataSets.add(createDataSet(
-                    entries.get(getIndexOfActivity(ActivityKind.REM_SLEEP)), akRemSleep.color, "REM Sleep"
-            ));
-        }
-        if (supportsAwakeSleep(gbDevice)) {
-            lineDataSets.add(createDataSet(
-                    entries.get(getIndexOfActivity(ActivityKind.AWAKE_SLEEP)), akAwakeSleep.color, "Awake Sleep"
-            ));
-        }
-        if (hr && !heartRateDataSets.isEmpty()) {
-            lineDataSets.addAll(heartRateDataSets);
-        }
-
-        lineData = new LineData(lineDataSets);
-
-        IAxisValueFormatter xValueFormatter = new SampleXLabelFormatter(tsTranslation, "HH:mm");
-        return new DefaultChartsData<>(lineData, xValueFormatter);
     }
 
     protected static float chartValueOf(final ActivitySample sample) {
@@ -494,23 +374,6 @@ public abstract class AbstractActivityChartFragment<D extends ChartsData> extend
             case NOT_WORN -> 4;
             default -> 5; // treated as ActivityKind.ACTIVITY
         };
-    }
-
-    protected Entry createLineEntry(float value, int xValue) {
-        return new Entry<>(xValue, value, null, null);
-    }
-
-    protected LineDataSet createDataSet(List<Entry> values, Integer color, String label) {
-        LineDataSet set1 = new LineDataSet(values, label);
-        set1.setColor(color);
-        set1.setDrawFilledEnabled(true);
-        set1.setDrawCirclesEnabled(false);
-        set1.setFillColor(color);
-        set1.setFillAlpha(255);
-        set1.setDrawValuesEnabled(false);
-        set1.setValueTextColor(CHART_TEXT_COLOR);
-        set1.setAxisDependency(YAxis.AxisDependency.LEFT);
-        return set1;
     }
 
     protected LineDataSet createHeartrateSet(List<Entry> values, String label) {

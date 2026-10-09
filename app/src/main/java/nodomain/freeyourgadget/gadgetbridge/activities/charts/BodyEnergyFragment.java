@@ -56,8 +56,6 @@ public class BodyEnergyFragment extends AbstractChartFragment<BodyEnergyFragment
     private GbChartView bodyEnergyChart;
     private ChartLegendView bodyEnergyLegend;
 
-    protected int CHART_TEXT_COLOR;
-    protected int LEGEND_TEXT_COLOR;
     protected int TEXT_COLOR;
     protected int SUBTEXT_COLOR;
     protected int AVERAGE_LINE_COLOR;
@@ -96,8 +94,6 @@ public class BodyEnergyFragment extends AbstractChartFragment<BodyEnergyFragment
     protected void init() {
         TEXT_COLOR = GBApplication.getTextColor(requireContext());
         SUBTEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
-        LEGEND_TEXT_COLOR = GBApplication.getTextColor(requireContext());
-        CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
         AVERAGE_LINE_COLOR = Color.GRAY;
     }
 
