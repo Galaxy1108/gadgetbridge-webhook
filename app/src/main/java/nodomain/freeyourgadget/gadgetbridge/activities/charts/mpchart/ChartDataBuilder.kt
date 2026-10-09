@@ -210,7 +210,7 @@ internal object ChartDataBuilder {
             circleColor = style.color
             circleRadius = POINT_RADIUS_DP
             isDrawCircleHoleEnabled = false
-            mode = if (style.curved) LineDataSet.Mode.CUBIC_BEZIER else LineDataSet.Mode.LINEAR
+            mode = if (style.curved) LineDataSet.Mode.HORIZONTAL_BEZIER else LineDataSet.Mode.LINEAR
             isDrawFilledEnabled = style.filled
             val fillBase = style.fillBase
             if (style.filled && fillBase != null) {
