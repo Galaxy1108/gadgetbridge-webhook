@@ -61,11 +61,11 @@ object SleepStagesChartData {
             points.takeIf { it.isNotEmpty() }?.let {
                 ChartSeries("stage_$stage", labels[stage], it, SeriesStyle.Line(colors[stage], filled = true, solidFill = true), selectable = false)
             }
-        } + if (hrPoints.isEmpty()) {
-            listOf(ChartSeries("samples", "", seconds.indices.map { ChartPoint(seconds[it].toDouble(), values[it]) }, SeriesStyle.Line(markerColor, showLine = false)))
-        } else {
-            listOf(ChartSeries("hr", hrLabel, hrPoints, SeriesStyle.Line(hrColor, curved = true, maxGap = hrMaxGapSeconds), AxisSide.END))
-        }
+        } + listOfNotNull(
+            ChartSeries("samples", "", seconds.indices.map { ChartPoint(seconds[it].toDouble(), values[it]) }, SeriesStyle.Line(markerColor, showLine = false)),
+            ChartSeries("hr", hrLabel, hrPoints, SeriesStyle.Line(hrColor, curved = true, maxGap = hrMaxGapSeconds), AxisSide.END)
+                .takeIf { hrPoints.isNotEmpty() },
+        )
         return ChartSpec(
             series = series,
             xAxis = AxisSpec(
