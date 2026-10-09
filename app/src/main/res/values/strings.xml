@@ -5924,6 +5924,8 @@
     <string name="workout_duration_power_above">Power above</string>
     <string name="workout_duration_power_below">Power below</string>
     <string name="workout_duration_button_press">Button press</string>
+    <string name="workout_duration_reps_plus">Extra Reps</string>
+    <string name="workout_duration_reps_plus_summary">Show a \"+\" after the target rep count - go beyond the target reps if you can.</string>
     <string name="workout_duration_swimming_send_off_time">Send-off time</string>
     <string name="workout_duration_swimming_css_send_off_time">CSS send-off time</string>
 
@@ -5954,6 +5956,9 @@
     <string name="workout_weight_body_weight">Body weight</string>
     <string name="workout_weight_percent_1rm">% of 1RM</string>
     <string name="workout_weight_rm">Rep max (RM)</string>
+    <string name="workout_weight_load_category">Load category</string>
+    <string name="workout_load_heavy">Heavy</string>
+    <string name="workout_load_very_heavy">Very heavy</string>
 
     <string name="workout_swim_stroke_choice">Choice</string>
     <string name="workout_swim_stroke_individual_medley">Individual medley</string>

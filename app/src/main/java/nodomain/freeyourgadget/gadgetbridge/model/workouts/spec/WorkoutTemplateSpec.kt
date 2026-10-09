@@ -13,8 +13,9 @@ import nodomain.freeyourgadget.gadgetbridge.model.workouts.exercises.WorkoutExer
 
 /**
  * One duration choice of a step. [value] is null for a type with no value, such as a button press.
+ * [plus] is true when the value can be a target that the user can go beyond.
  */
-data class DurationOption(val type: WorkoutDurationType, val value: ValueSpec? = null)
+data class DurationOption(val type: WorkoutDurationType, val value: ValueSpec? = null, val plus: Boolean = false)
 
 /**
  * One target choice of a step. [value] is null for [WorkoutTargetType.NONE].

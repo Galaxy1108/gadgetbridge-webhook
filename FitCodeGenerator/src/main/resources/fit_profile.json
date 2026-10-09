@@ -1030,6 +1030,7 @@
         {"num":27,"name":"exercise_weight_type","base":"UINT8"},
         {"num":30,"name":"swim_drill_type","base":"ENUM","type":"WktSwimDrill"},
         {"num":31,"name":"workout_index","base":"UINT16"},
+        {"num":35,"name":"exercise_load_category","base":"UINT8"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
