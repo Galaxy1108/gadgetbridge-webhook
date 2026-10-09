@@ -1224,8 +1224,8 @@
       "fields": [
         {"num":0,"name":"device_index","base":"UINT8"},
         {"num":1,"name":"calories","base":"UINT16","UOM":"KCAL"},
-        {"num":2,"name":"distance","base":"UINT32"},
-        {"num":3,"name":"cycles","base":"UINT32"},
+        {"num":2,"name":"distance","base":"UINT32","scale":100,"UOM":"METER"},
+        {"num":3,"name":"cycles","base":"UINT32","scale":2,"UOM":"CYCLES"},
         {"num":4,"name":"active_time","base":"UINT32","scale":1000,"UOM":"SECONDS"},
         {"num":5,"name":"activity_type","base":"ENUM"},
         {"num":6,"name":"activity_subtype","base":"ENUM"},
