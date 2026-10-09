@@ -947,9 +947,9 @@ public class DefaultWorkoutCharts {
         if (gapThreshold <= 0) {
             return null;
         }
-        int segments = 1;
+        int gaps = 0;
         for (final float gap : sampleGaps(entries)) {
-            if (gap > gapThreshold && ++segments >= MAX_SEGMENTS) {
+            if (gap > gapThreshold && ++gaps >= MAX_SEGMENTS) {
                 return null;
             }
         }
