@@ -125,7 +125,7 @@ public class BloodPressurePeriodFragment extends AbstractChartFragment<BloodPres
         mChart = rootView.findViewById(R.id.blood_pressure_chart);
         mLegend = rootView.findViewById(R.id.blood_pressure_period_legend);
         mChart.setZoomable(TOTAL_DAYS > 7);
-        mChart.dismissSelectionOnTapOutside(rootView);
+        mChart.dismissSelectionOnTapOutside(rootView.findViewById(R.id.bp_scroll_view));
 
         FloatingActionButton exportFab = rootView.findViewById(R.id.bp_export_fab);
         exportFab.setOnClickListener(v -> showExportDialog());

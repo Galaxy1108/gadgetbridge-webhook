@@ -98,7 +98,7 @@ public class BloodPressureChartFragment extends AbstractChartFragment<BloodPress
 
         mManualMeasurements.setVisibility(View.GONE);
         mChart.setZoomable(true);
-        mChart.dismissSelectionOnTapOutside(rootView);
+        mChart.dismissSelectionOnTapOutside(rootView.findViewById(R.id.bp_scroll_view));
 
         FloatingActionButton exportFab = rootView.findViewById(R.id.bp_export_fab);
         exportFab.setOnClickListener(v -> showExportDialog());
