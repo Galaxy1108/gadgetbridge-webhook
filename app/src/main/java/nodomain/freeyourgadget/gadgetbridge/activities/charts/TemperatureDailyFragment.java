@@ -110,13 +110,15 @@ public class TemperatureDailyFragment extends AbstractChartFragment<TemperatureD
 
     @Override
     protected TemperatureChartData refreshInBackground(ChartsHost chartsHost, DBHandler db, GBDevice device) {
-        int startTs = getTSStart();
-        int endTs = getTSEnd();
+        final Date day = getEndDate();
 
         final DeviceCoordinator coordinator = device.getDeviceCoordinator();
         final TimeSampleProvider<? extends TemperatureSample> sampleProvider = coordinator.getTemperatureSampleProvider(device, db.getDaoSession());
 
-        final List<? extends TemperatureSample> samples = sampleProvider.getAllSamples(startTs  * 1000L, endTs  * 1000L);
+        final List<? extends TemperatureSample> samples = sampleProvider.getAllSamples(
+                DateTimeUtils.dayStart(day).getTime(),
+                DateTimeUtils.dayEnd(day).getTime()
+        );
         LOG.info("Got {} temperature samples", samples.size());
 
         return new TemperatureChartData(samples);
