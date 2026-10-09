@@ -70,10 +70,10 @@ class GbChartView @JvmOverloads constructor(
         }
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            if (hasOnClickListeners() || !selectionEnabled) {
-                return performClick()
-            }
+            // View.onTouchEvent(), through super.onTouchEvent(), already clicks a view with a click listener
+            if (hasOnClickListeners()) return false
             performClick()
+            if (!selectionEnabled) return false
             val x = targetAt(e.x, e.y)
             if (x == null) select(null) else toggle(x)
             return true
