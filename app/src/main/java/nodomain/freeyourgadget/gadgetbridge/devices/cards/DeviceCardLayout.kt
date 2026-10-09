@@ -64,6 +64,14 @@ object DeviceCardLayout {
         }
     }
 
+    fun reset(device: GBDevice) {
+        LOG.debug("Resetting device card items for {}", device.address)
+        GBApplication.getDeviceSpecificSharedPrefs(device.address).edit {
+            remove(PREF_ORDER)
+            remove(PREF_REMOVED)
+        }
+    }
+
     /**
      * Whether the device card icon row is shown for the current state of the device.
      */

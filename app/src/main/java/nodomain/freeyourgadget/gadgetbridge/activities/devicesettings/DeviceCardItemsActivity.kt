@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -103,12 +104,40 @@ class DeviceCardItemsActivity : AbstractGBActivity() {
         super.onPause()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_device_card_items, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            finish()
-            return true
+        when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                return true
+            }
+
+            R.id.device_card_items_reset -> {
+                showResetDialog()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showResetDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.eightbitdo_keymap_reset_title)
+            .setMessage(R.string.device_card_items_reset_confirmation)
+            .setPositiveButton(R.string.reset) { _, _ -> reset() }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun reset() {
+        DeviceCardLayout.reset(device)
+        items = DeviceCardLayout.apply(device, defaults).toMutableList()
+        removed = DeviceCardLayout.removed(device, defaults).toMutableList()
+        refresh()
     }
 
     private fun save() {
