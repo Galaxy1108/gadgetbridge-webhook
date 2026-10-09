@@ -9,11 +9,9 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.widget.ImageViewCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -32,6 +30,8 @@ import nodomain.freeyourgadget.gadgetbridge.devices.cards.DeviceCardItem
 import nodomain.freeyourgadget.gadgetbridge.devices.cards.DeviceCardLayout
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getParcelableCompat
+import nodomain.freeyourgadget.gadgetbridge.util.dialogs.IconListAdapter
+import java.text.Collator
 import java.util.Collections
 
 class DeviceCardItemsActivity : AbstractGBActivity() {
@@ -122,24 +122,21 @@ class DeviceCardItemsActivity : AbstractGBActivity() {
     }
 
     private fun showAddItemDialog() {
-        val iconTint = ColorStateList.valueOf(MaterialColors.getColor(this, R.attr.textColorSecondary, 0))
-        val iconPadding = resources.getDimensionPixelSize(R.dimen.activity_horizontal_margin)
-        val dialogAdapter = object : ArrayAdapter<DeviceCardItem>(this, android.R.layout.select_dialog_item, removed) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent) as TextView
-                val item = removed[position]
-                view.text = DeviceCardItemBinder.title(item, device, context)
-                val icon = AppCompatResources.getDrawable(context, DeviceCardItemBinder.icon(item, device))?.mutate()
-                icon?.setTintList(iconTint)
-                view.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null)
-                view.compoundDrawablePadding = iconPadding
-                return view
+        val collator = Collator.getInstance()
+        val entries = removed
+            .map {
+                it to IconListAdapter.Entry(
+                    DeviceCardItemBinder.icon(it, device),
+                    DeviceCardItemBinder.title(it, device, this)
+                )
             }
-        }
+            .sortedWith { a, b -> collator.compare(a.second.title, b.second.title) }
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.device_card_add_item)
-            .setAdapter(dialogAdapter) { _, which ->
-                items.add(removed.removeAt(which))
+            .setAdapter(IconListAdapter(this, entries.map { it.second })) { _, which ->
+                val item = entries[which].first
+                removed.remove(item)
+                items.add(item)
                 save()
                 refresh()
             }
