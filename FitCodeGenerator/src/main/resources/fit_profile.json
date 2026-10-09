@@ -692,7 +692,7 @@
         {"num":33,"name":"normalized_power","base":"UINT16","UOM":"WATT"},
         {"num":34,"name":"left_right_balance","base":"UINT16"},
         {"num":35,"name":"first_length_index","base":"UINT16"},
-        {"num":37,"name":"avg_stroke_distance","base":"UINT16"},
+        {"num":37,"name":"avg_stroke_distance","base":"UINT16","scale":100,"UOM":"METER"},
         {"num":38,"name":"swim_stroke","base":"ENUM","type":"SwimStroke"},
         {"num":39,"name":"sub_sport","base":"ENUM"},
         {"num":40,"name":"num_active_lengths","base":"UINT16","UOM":"LENGTHS"},

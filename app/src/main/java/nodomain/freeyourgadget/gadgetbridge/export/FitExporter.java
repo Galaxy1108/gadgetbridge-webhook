@@ -870,7 +870,7 @@ public class FitExporter {
             final Double derived = deriveRowingDistanceMeters(overrides.strokes, strokeLen);
             if (derived != null) {
                 distance = derived;
-                b.setAvgStrokeDistance((int) Math.round(strokeLen * 100.0));
+                b.setAvgStrokeDistance((float) strokeLen);
             }
         }
         if (distance != null) {
