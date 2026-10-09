@@ -1166,6 +1166,11 @@
             android:parentActivityName=".activities.DashboardPreferencesActivity" />
 
         <activity
+            android:name=".activities.devicesettings.DeviceCardItemsActivity"
+            android:label="@string/pref_device_card_items_title"
+            android:parentActivityName=".activities.devicesettings.DeviceSettingsActivity" />
+
+        <activity
             android:name=".activities.dashboard.WidgetInstanceSettingsActivity"
             android:label="@string/pref_dashboard_widget_settings"
             android:parentActivityName=".activities.dashboard.DashboardWidgetsActivity" />

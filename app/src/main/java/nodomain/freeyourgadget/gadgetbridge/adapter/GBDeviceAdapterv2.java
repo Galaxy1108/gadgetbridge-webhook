@@ -106,6 +106,7 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceManager;
+import nodomain.freeyourgadget.gadgetbridge.devices.cards.DeviceCardLayout;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
@@ -129,6 +130,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
     private List<GBDevice> deviceList;
     private List<GBDevice> devicesListWithFolders;
     private String expandedDeviceAddress = "";
+    private final Set<String> revealedCardItemsAddresses = new HashSet<>();
     private String expandedFolderName = "";
     private ViewGroup parent;
     private HashMap<String, DailyTotals> deviceActivityMap = new HashMap<>();
@@ -219,6 +221,8 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         holder.container.setVisibility(View.VISIBLE);
         holder.deviceNameLabel.setText(folder.getName());
         holder.infoIcons.setVisibility(View.GONE);
+        holder.deviceImageView.setOnClickListener(null);
+        holder.deviceImageView.setOnLongClickListener(null);
         holder.deviceInfoBox.setVisibility(View.GONE);
         holder.cardViewActivityCardLayout.setVisibility(View.GONE);
         setDeviceIcon(holder, R.drawable.ic_device_folder, countDevicesInFolder(folder.getName(), true) > 0);
@@ -350,7 +354,13 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
                 hrSampleText = String.valueOf(sample.getHeartRate());
             }
         }
-        DeviceCardItemBinder.bind(holder.infoIcons, coordinator.getCardItems(device), device, context, hrSampleText);
+        DeviceCardItemBinder.bind(
+            holder.infoIcons,
+            DeviceCardLayout.apply(device, coordinator.getCardItems(device)),
+            device,
+            context,
+            hrSampleText
+        );
 
         ItemWithDetailsAdapter infoAdapter = new ItemWithDetailsAdapter(context, device.getDeviceInfos());
         infoAdapter.setHorizontalAlignment(true);
@@ -358,7 +368,23 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         justifyListViewHeightBasedOnChildren(holder.deviceInfoList);
         holder.deviceInfoList.setFocusable(false);
 
-        holder.infoIcons.setVisibility(View.VISIBLE);
+        if (DeviceCardLayout.isShown(device)) {
+            holder.infoIcons.setVisibility(View.VISIBLE);
+            holder.deviceImageView.setOnClickListener(null);
+        } else {
+            final boolean revealed = revealedCardItemsAddresses.contains(device.getAddress());
+            holder.infoIcons.setVisibility(revealed ? View.VISIBLE : View.GONE);
+            holder.deviceImageView.setOnClickListener(v -> {
+                if (!revealedCardItemsAddresses.remove(device.getAddress())) {
+                    revealedCardItemsAddresses.add(device.getAddress());
+                }
+                notifyItemChanged(holder.getBindingAdapterPosition());
+            });
+        }
+        holder.deviceImageView.setOnLongClickListener(v -> {
+            DeviceSettingsActivity.start(context, device);
+            return true;
+        });
 
         final boolean detailsShown = expandedDeviceAddress.equals(device.getAddress());
         boolean showInfoIcon = device.hasDeviceInfos() && !device.isBusy();
@@ -424,6 +450,9 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
                         GBApplication.deviceService(device).onTestNewFunction(null);
                         showTransientSnackbar(R.string.controlcenter_test_new_function);
                     }
+                    return true;
+                } else if (itemId == R.id.controlcenter_device_submenu_device_settings) {
+                    DeviceSettingsActivity.start(context, device);
                     return true;
                 } else if (itemId == R.id.controlcenter_device_submenu_set_alias) {
                     showSetAliasDialog(device);

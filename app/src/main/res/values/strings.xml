@@ -217,6 +217,11 @@
     <string name="pref_header_calendar">Calendar</string>
     <string name="pref_header_connection">Connection</string>
     <string name="pref_header_dashboard">Dashboard</string>
+    <string name="pref_header_device_card">Device card</string>
+    <string name="pref_device_card_show_items_title">Show card items</string>
+    <string name="pref_device_card_items_title">Card items</string>
+    <string name="pref_device_card_items_summary">Customize the items on the device card</string>
+    <string name="device_card_add_item">Add item</string>
     <string name="pref_header_display">Display</string>
     <string name="pref_header_generic">Generic</string>
     <string name="pref_header_health">Health</string>
@@ -377,6 +382,7 @@
     <string name="always">Always</string>
     <string name="when_screen_off">When screen is off</string>
     <string name="never">Never</string>
+    <string name="when_connected">When connected</string>
     <string name="pref_header_privacy">Privacy</string>
     <string name="pref_title_call_privacy_mode">Call privacy mode</string>
     <string name="pref_call_privacy_mode_off">Display name and number</string>
@@ -3735,6 +3741,7 @@
     <string name="prefs_earbud_lights_fade">Fade in and out</string>
     <string name="prefs_earbud_lights_steady">Steady</string>
     <string name="battery_i">Battery %d</string>
+    <string name="battery_with_label">Battery: %s</string>
     <string name="battery_case">Battery case</string>
     <string name="left_earbud">Left earbud</string>
     <string name="right_earbud">Right earbud</string>
