@@ -186,7 +186,8 @@ public class SolarChargingPeriodFragment extends AbstractChartFragment<SolarChar
         day.set(Calendar.HOUR_OF_DAY, 0);
         day.set(Calendar.MINUTE, 0);
         day.set(Calendar.SECOND, 0);
-        return (int) (day.getTimeInMillis() / 1000) - SEC_PER_DAY * (TOTAL_DAYS - 1);
+        day.add(Calendar.DATE, -(TOTAL_DAYS - 1));
+        return (int) (day.getTimeInMillis() / 1000);
     }
 
     private List<? extends SolarChargeSample> getSamples(final DBHandler db, final GBDevice device, final int tsFrom, final int tsTo) {

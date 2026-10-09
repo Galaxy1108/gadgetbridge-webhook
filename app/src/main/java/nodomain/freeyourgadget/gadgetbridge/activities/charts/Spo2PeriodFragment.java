@@ -133,12 +133,13 @@ public class Spo2PeriodFragment extends AbstractChartFragment<Spo2PeriodFragment
     }
 
     private int getStartTs() {
-        Calendar day = Calendar.getInstance();
+        final Calendar day = Calendar.getInstance();
         day.setTime(getEndDate());
         day.set(Calendar.HOUR_OF_DAY, 0);
         day.set(Calendar.MINUTE, 0);
         day.set(Calendar.SECOND, 0);
-        return (int) (day.getTimeInMillis() / 1000) - SEC_PER_DAY * (TOTAL_DAYS - 1);
+        day.add(Calendar.DATE, -(TOTAL_DAYS - 1));
+        return (int) (day.getTimeInMillis() / 1000);
     }
 
     private Spo2DayData fetchSpo2DataForDay(DBHandler db, GBDevice device, int startTs) {
