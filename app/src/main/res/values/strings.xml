@@ -4744,6 +4744,7 @@
     <string name="unbind_before_pair_title">Already bound</string>
     <string name="unbind_before_pair_message">This device is already bound in Android settings, which can make pairing fail for some devices.\n\nIf adding the device fails, please remove it in Android settings and try again.</string>
     <string name="companion_pairing_request_title">Companion device</string>
+    <string name="companion_pairing_hint">This device is not paired as companion device. Pair it to improve the connection stability, let Gadgetbridge reconnect, and to enable background functions.</string>
     <string name="companion_pairing_request_description">Pair this device as companion?.\n\nThis is recommended for some functions such as find device, and provides a better connection.</string>
     <string name="devicetype_scannable">Scannable device</string>
     <string name="state_scanned">Scanned</string>

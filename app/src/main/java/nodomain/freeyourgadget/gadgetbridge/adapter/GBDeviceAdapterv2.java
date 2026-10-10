@@ -46,6 +46,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -131,6 +132,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
     private List<GBDevice> devicesListWithFolders;
     private String expandedDeviceAddress = "";
     private final Set<String> revealedCardItemsAddresses = new HashSet<>();
+    private String pendingCompanionAddress = null;
     private String expandedFolderName = "";
     private ViewGroup parent;
     private HashMap<String, DailyTotals> deviceActivityMap = new HashMap<>();
@@ -221,6 +223,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         holder.container.setVisibility(View.VISIBLE);
         holder.deviceNameLabel.setText(folder.getName());
         holder.infoIcons.setVisibility(View.GONE);
+        holder.companionHint.setVisibility(View.GONE);
         holder.deviceImageView.setOnClickListener(null);
         holder.deviceImageView.setOnLongClickListener(null);
         holder.deviceInfoBox.setVisibility(View.GONE);
@@ -364,6 +367,8 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
             hrSampleText
         );
 
+        bindCompanionHint(holder, device);
+
         ItemWithDetailsAdapter infoAdapter = new ItemWithDetailsAdapter(context, device.getDeviceInfos());
         infoAdapter.setHorizontalAlignment(true);
         holder.deviceInfoList.setAdapter(infoAdapter);
@@ -405,6 +410,38 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
 
         if (coordinator.supportsActivityTracking(device)) {
             setActivityCard(holder, device, dailyTotals);
+        }
+    }
+
+    private void bindCompanionHint(final ViewHolder holder, final GBDevice device) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+            || !(context instanceof Activity)
+            || !CompanionPairingHint.shouldShow(context, device)) {
+            holder.companionHint.setVisibility(View.GONE);
+            return;
+        }
+        holder.companionHint.setVisibility(View.VISIBLE);
+        holder.companionHintDismiss.setOnClickListener(v -> {
+            CompanionPairingHint.dismiss(device);
+            notifyItemChanged(holder.getBindingAdapterPosition());
+        });
+        holder.companionHintPair.setOnClickListener(v -> {
+            pendingCompanionAddress = device.getAddress();
+            CompanionPairingHint.pair((Activity) context, device);
+        });
+    }
+
+    public void onResume() {
+        if (pendingCompanionAddress == null) {
+            return;
+        }
+        final String address = pendingCompanionAddress;
+        pendingCompanionAddress = null;
+        CompanionPairingHint.onChooserClosed(context, address);
+        for (int i = 0; i < devicesListWithFolders.size(); i++) {
+            if (address.equals(devicesListWithFolders.get(i).getAddress())) {
+                notifyItemChanged(i);
+            }
         }
     }
 
@@ -764,6 +801,10 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         // dynamically into this container by DeviceCardItemBinder.
         FlexboxLayout infoIcons;
 
+        final LinearLayout companionHint;
+        final Button companionHintDismiss;
+        final Button companionHintPair;
+
         ImageView deviceInfoView;
         //overflow
         final RelativeLayout deviceInfoBox;
@@ -794,6 +835,10 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
             //overflow
             deviceInfoList = view.findViewById(R.id.device_item_infos);
             infoIcons = view.findViewById(R.id.device_info_icons);
+
+            companionHint = view.findViewById(R.id.companion_hint);
+            companionHintDismiss = view.findViewById(R.id.companion_hint_dismiss);
+            companionHintPair = view.findViewById(R.id.companion_hint_pair);
 
             cardViewActivityCardLayout = view.findViewById(R.id.card_view_activity_card_layout);
 
