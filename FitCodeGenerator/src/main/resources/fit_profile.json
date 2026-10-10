@@ -13,7 +13,7 @@
         {"num":5,"name":"number","base":"UINT16"},
         {"num":6,"name":"manufacturer_partner","base":"UINT16"},
         {"num":7,"name":"original_time_created","base":"UINT32","type":"DateTime","UOM":"SECONDS"},
-        {"num":8,"name":"product_name","base":"STRING","stringLen":20},
+        {"num":8,"name":"product_name","base":"STRING"},
         {"num":251,"name":"pad","base":"BYTE","arrayLen":0}
       ]
     },
@@ -148,7 +148,7 @@
       "num": 3,
       "name": "USER_PROFILE",
       "fields": [
-        {"num":0,"name":"friendly_name","base":"STRING","stringLen":8},
+        {"num":0,"name":"friendly_name","base":"STRING"},
         {"num":1,"name":"gender","base":"ENUM"},
         {"num":2,"name":"age","base":"UINT8","UOM":"YEARS"},
         {"num":3,"name":"height","base":"UINT8","scale":100,"UOM":"METER"},
@@ -307,7 +307,7 @@
       "fields": [
         {"num":0,"name":"sport","base":"ENUM"},
         {"num":1,"name":"sub_sport","base":"ENUM"},
-        {"num":3,"name":"name","base":"STRING","stringLen":24},
+        {"num":3,"name":"name","base":"STRING"},
         {"num":5,"name":"active","base":"ENUM","type":"Bool"},
         {"num":10,"name":"color","base":"UINT8","arrayLen":3},
         {"num":11,"name":"high_contrast","base":"ENUM","type":"Bool"},
@@ -559,7 +559,7 @@
         {"num":107,"name":"front_gear_shift_count","base":"UINT16"},
         {"num":108,"name":"rear_gear_shift_count","base":"UINT16"},
         {"num":109,"name":"sport_profile_index","base":"UINT8"},
-        {"num":110,"name":"sport_profile_name","base":"STRING","stringLen":64},
+        {"num":110,"name":"sport_profile_name","base":"STRING"},
         {"num":111,"name":"sport_index","base":"UINT8"},
         {"num":112,"name":"time_standing","base":"UINT32","scale":1000,"UOM":"SECONDS"},
         {"num":113,"name":"stand_count","base":"UINT16"},
@@ -986,7 +986,7 @@
         {"num":4,"name":"sport","base":"ENUM"},
         {"num":5,"name":"capabilities","base":"UINT32Z"},
         {"num":6,"name":"num_valid_steps","base":"UINT16"},
-        {"num":8,"name":"wkt_name","base":"STRING","stringLen":41},
+        {"num":8,"name":"wkt_name","base":"STRING"},
         {"num":9,"name":"duration_type","base":"ENUM"},
         {"num":10,"name":"duration_value","base":"UINT32"},
         {"num":11,"name":"sub_sport","base":"ENUM"},
@@ -994,7 +994,7 @@
         {"num":13,"name":"transitions","base":"ENUM","type":"Bool"},
         {"num":14,"name":"pool_length","base":"UINT16","scale":100,"UOM":"METER"},
         {"num":15,"name":"pool_length_unit","base":"ENUM"},
-        {"num":17,"name":"wkt_description","base":"STRING","stringLen":201},
+        {"num":17,"name":"wkt_description","base":"STRING"},
         {"num":20,"name":"workout_index","base":"UINT16"},
         {"num":21,"name":"time","base":"UINT32","scale":1000,"UOM":"SECONDS"},
         {"num":22,"name":"distance","base":"UINT32","scale":100,"UOM":"METER"},
@@ -1015,7 +1015,7 @@
         {"num":5,"name":"custom_target_value_low","base":"UINT32"},
         {"num":6,"name":"custom_target_value_high","base":"UINT32"},
         {"num":7,"name":"intensity","base":"ENUM","type":"Intensity"},
-        {"num":8,"name":"notes","base":"STRING","stringLen":201},
+        {"num":8,"name":"notes","base":"STRING"},
         {"num":9,"name":"equipment","base":"ENUM","type":"WorkoutEquipment"},
         {"num":10,"name":"exercise_category","base":"UINT16"},
         {"num":11,"name":"exercise_name","base":"UINT16"},
@@ -1051,7 +1051,7 @@
       "num": 29,
       "name": "LOCATION",
       "fields": [
-        {"num":0,"name":"name","base":"STRING","stringLen":32},
+        {"num":0,"name":"name","base":"STRING"},
         {"num":1,"name":"position_lat","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":2,"name":"position_long","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":3,"name":"symbol","base":"UINT16","type":"LocationSymbol"},
@@ -1087,7 +1087,7 @@
       "name": "COURSE",
       "fields": [
         {"num":4,"name":"sport","base":"ENUM"},
-        {"num":5,"name":"name","base":"STRING","stringLen":16},
+        {"num":5,"name":"name","base":"STRING"},
         {"num":6,"name":"capabilities","base":"UINT32Z"},
         {"num":7,"name":"sub_sport","base":"ENUM"}
       ]
@@ -1101,7 +1101,7 @@
         {"num":3,"name":"position_long","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":4,"name":"distance","base":"UINT32","scale":100,"UOM":"METER"},
         {"num":5,"name":"type","base":"ENUM","type":"CoursePoint"},
-        {"num":6,"name":"name","base":"STRING","stringLen":16},
+        {"num":6,"name":"name","base":"STRING"},
         {"num":8,"name":"favorite","base":"ENUM","type":"Bool"},
         {"num":11,"name":"label","base":"STRING"},
         {"num":15,"name":"rest_duration","base":"UINT32","scale":1000,"UOM":"SECONDS"},
@@ -1155,7 +1155,7 @@
       "fields": [
         {"num":0,"name":"type","base":"ENUM"},
         {"num":1,"name":"flags","base":"UINT8Z"},
-        {"num":2,"name":"directory","base":"STRING","stringLen":16},
+        {"num":2,"name":"directory","base":"STRING"},
         {"num":3,"name":"max_count","base":"UINT16"},
         {"num":4,"name":"max_size","base":"UINT32","UOM":"BYTES"},
         {"num":254,"name":"message_index","base":"UINT16"}
@@ -1499,7 +1499,7 @@
         {"num":0,"name":"bluetooth_enabled","base":"ENUM","type":"Bool"},
         {"num":1,"name":"bluetooth_le_enabled","base":"ENUM","type":"Bool"},
         {"num":2,"name":"ant_enabled","base":"ENUM","type":"Bool"},
-        {"num":3,"name":"name","base":"STRING","stringLen":20},
+        {"num":3,"name":"name","base":"STRING"},
         {"num":4,"name":"live_tracking_enabled","base":"ENUM","type":"Bool"},
         {"num":5,"name":"weather_conditions_enabled","base":"ENUM","type":"Bool"},
         {"num":6,"name":"weather_alerts_enabled","base":"ENUM","type":"Bool"},
@@ -1523,7 +1523,7 @@
         {"num":5,"name":"precipitation_probability","base":"UINT8"},
         {"num":6,"name":"temperature_feels_like","base":"SINT8","type":"TEMPERATURE","UOM":"CELSIUS"},
         {"num":7,"name":"relative_humidity","base":"UINT8"},
-        {"num":8,"name":"location","base":"STRING","stringLen":15},
+        {"num":8,"name":"location","base":"STRING"},
         {"num":9,"name":"observed_at_time","base":"UINT32","type":"DateTime","UOM":"SECONDS"},
         {"num":10,"name":"observed_location_lat","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":11,"name":"observed_location_long","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
@@ -1576,8 +1576,8 @@
       "num": 138,
       "name": "FILES",
       "fields": [
-        {"num":1,"name":"directory","base":"STRING","stringLen":30},
-        {"num":2,"name":"file","base":"STRING","stringLen":30},
+        {"num":1,"name":"directory","base":"STRING"},
+        {"num":2,"name":"file","base":"STRING"},
         {"num":3,"name":"flags","base":"UINT8Z"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
@@ -1672,7 +1672,7 @@
         {"num":26,"name":"nec_long","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":27,"name":"swc_lat","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
         {"num":28,"name":"swc_long","base":"SINT32","type":"COORDINATE","UOM":"SEMICIRCLES"},
-        {"num":29,"name":"name","base":"STRING","stringLen":50},
+        {"num":29,"name":"name","base":"STRING"},
         {"num":30,"name":"normalized_power","base":"UINT16","UOM":"WATT"},
         {"num":31,"name":"left_right_balance","base":"UINT16"},
         {"num":32,"name":"sub_sport","base":"ENUM"},
@@ -1828,7 +1828,7 @@
       "num": 148,
       "name": "SEGMENT_ID",
       "fields": [
-        {"num":0,"name":"name","base":"STRING","stringLen":50},
+        {"num":0,"name":"name","base":"STRING"},
         {"num":1,"name":"uuid","base":"STRING","stringLen":33},
         {"num":2,"name":"sport","base":"ENUM"},
         {"num":3,"name":"enabled","base":"ENUM","type":"Bool"},
@@ -1843,12 +1843,12 @@
       "num": 149,
       "name": "SEGMENT_LEADERBOARD_ENTRY",
       "fields": [
-        {"num":0,"name":"name","base":"STRING","stringLen":100},
+        {"num":0,"name":"name","base":"STRING"},
         {"num":1,"name":"type","base":"ENUM"},
         {"num":2,"name":"group_primary_key","base":"UINT32"},
         {"num":3,"name":"activity_id","base":"UINT32"},
         {"num":4,"name":"segment_time","base":"UINT32","scale":1000,"UOM":"SECONDS"},
-        {"num":5,"name":"activity_id_string","base":"STRING","stringLen":22},
+        {"num":5,"name":"activity_id_string","base":"STRING"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -2274,7 +2274,7 @@
         {"num":2,"name":"field_id","base":"UINT8"},
         {"num":3,"name":"concept_count","base":"UINT8"},
         {"num":4,"name":"display_type","base":"ENUM"},
-        {"num":5,"name":"title","base":"STRING","stringLen":32}
+        {"num":5,"name":"title","base":"STRING"}
       ]
     },
     {
@@ -2310,12 +2310,12 @@
         {"num":0,"name":"developer_data_index","base":"UINT8"},
         {"num":1,"name":"field_definition_number","base":"UINT8"},
         {"num":2,"name":"fit_base_type_id","base":"UINT8"},
-        {"num":3,"name":"field_name","base":"STRING","stringLen":64},
+        {"num":3,"name":"field_name","base":"STRING"},
         {"num":4,"name":"array","base":"UINT8"},
         {"num":5,"name":"components","base":"STRING"},
         {"num":6,"name":"scale","base":"UINT8"},
         {"num":7,"name":"offset","base":"SINT8"},
-        {"num":8,"name":"units","base":"STRING","stringLen":16},
+        {"num":8,"name":"units","base":"STRING"},
         {"num":9,"name":"bits","base":"STRING"},
         {"num":10,"name":"accumulate","base":"STRING"},
         {"num":13,"name":"fit_base_unit_id","base":"UINT16"},
@@ -3261,7 +3261,7 @@
       "num": 352,
       "name": "POWER_GUIDE",
       "fields": [
-        {"num":1,"name":"name","base":"STRING","stringLen":50},
+        {"num":1,"name":"name","base":"STRING"},
         {"num":2,"name":"splits","base":"UINT16"},
         {"num":4,"name":"created","base":"UINT32","type":"DateTime","UOM":"SECONDS"},
         {"num":7,"name":"effort_target","base":"FLOAT32"},
@@ -3751,9 +3751,9 @@
       "name": "SUBWAVE_MESSAGE",
       "fields": [
         {"num":0,"name":"direction","base":"ENUM"},
-        {"num":2,"name":"body","base":"STRING","stringLen":150},
-        {"num":3,"name":"sender","base":"STRING","stringLen":50},
-        {"num":6,"name":"receiver","base":"STRING","stringLen":16},
+        {"num":2,"name":"body","base":"STRING"},
+        {"num":3,"name":"sender","base":"STRING"},
+        {"num":6,"name":"receiver","base":"STRING"},
         {"num":7,"name":"sender_ant","base":"UINT32Z"},
         {"num":253,"name":"timestamp","base":"UINT32","type":"DateTime","UOM":"SECONDS"}
       ]
