@@ -3460,7 +3460,7 @@
     </string-array>
 
     <string-array name="activity_filter_quick_filter_period_items">
-        <item>@string/sports_activity_quick_filter_select</item>
+        <item>@string/custom</item>
         <item>@string/activity_summary_today</item>
         <item>@string/sports_activity_quick_filter_this_week</item>
         <item>@string/sports_activity_quick_filter_this_month</item>

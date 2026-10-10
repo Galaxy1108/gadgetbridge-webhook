@@ -3433,6 +3433,7 @@
     <string name="activity_summaries_all_devices">All devices</string>
     <string name="activity_filter_from_placeholder">distant past</string>
     <string name="activity_filter_to_placeholder">today</string>
+    <string name="activity_filter_to_before_from">Before the start date</string>
     <!-- swim styles -->
     <string name="breaststroke">Breaststroke</string>
     <string name="freestyle">Freestyle</string>
