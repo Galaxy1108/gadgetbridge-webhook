@@ -6,6 +6,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSeries
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartValueFormat
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.LimitLineSpec
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.LineCurve
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.SeriesStyle
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -37,7 +38,7 @@ object TemperatureChartData {
             return ChartSpec.EMPTY
         }
         return ChartSpec(
-            series = listOf(ChartSeries("temperature", label, points, SeriesStyle.Line(color, curved = true))),
+            series = listOf(ChartSeries("temperature", label, points, SeriesStyle.Line(color, curve = LineCurve.FLAT_AT_POINTS))),
             xAxis = AxisSpec(
                 format = ChartValueFormat.TIME_OF_DAY,
                 minimum = startTs.toDouble(),

@@ -22,6 +22,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartPoint
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSeries
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartValueFormat
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.LineCurve
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.SeriesStyle
 
 /**
@@ -210,7 +211,11 @@ internal object ChartDataBuilder {
             circleColor = style.color
             circleRadius = POINT_RADIUS_DP
             isDrawCircleHoleEnabled = false
-            mode = if (style.curved) LineDataSet.Mode.HORIZONTAL_BEZIER else LineDataSet.Mode.LINEAR
+            mode = when (style.curve) {
+                LineCurve.STRAIGHT -> LineDataSet.Mode.LINEAR
+                LineCurve.FLAT_AT_POINTS -> LineDataSet.Mode.HORIZONTAL_BEZIER
+                LineCurve.SMOOTH -> LineDataSet.Mode.CUBIC_BEZIER
+            }
             isDrawFilledEnabled = style.filled
             val fillBase = style.fillBase
             if (style.filled && fillBase != null) {

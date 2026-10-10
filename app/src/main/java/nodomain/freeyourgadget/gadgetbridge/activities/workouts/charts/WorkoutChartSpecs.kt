@@ -10,6 +10,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSeries
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartValueFormat
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.LimitLineSpec
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.LineCurve
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.SeriesStyle
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.durationLabel
 import nodomain.freeyourgadget.gadgetbridge.model.heartratezones.HeartRateZonesResolver
@@ -96,7 +97,7 @@ object WorkoutChartSpecs {
         val style = if (chart.series.dots) {
             SeriesStyle.Line(chart.series.color, showLine = false, showPoints = true)
         } else {
-            SeriesStyle.Line(chart.series.color, curved = true, maxGap = chart.series.maxGap)
+            SeriesStyle.Line(chart.series.color, curve = LineCurve.FLAT_AT_POINTS, maxGap = chart.series.maxGap)
         }
         return ChartSeries(chart.id, chart.title, chart.series.points, style, side)
     }

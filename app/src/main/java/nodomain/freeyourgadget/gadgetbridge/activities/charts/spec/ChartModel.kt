@@ -16,7 +16,7 @@ sealed interface SeriesStyle {
     data class Line(
         val color: Int,
         val filled: Boolean = false,
-        val curved: Boolean = false,
+        val curve: LineCurve = LineCurve.STRAIGHT,
         val showPoints: Boolean = false,
         val maxGap: Double? = null,
         val showLine: Boolean = true,
@@ -37,6 +37,26 @@ sealed interface SeriesStyle {
      * with [Column] series.
      */
     data class Range(val color: Int, val width: Float? = null) : SeriesStyle
+}
+
+/**
+ * How a [SeriesStyle.Line] connects two neighbouring points.
+ */
+enum class LineCurve {
+    /**
+     * A straight segment.
+     */
+    STRAIGHT,
+
+    /**
+     * A curve that is flat at each point.
+     */
+    FLAT_AT_POINTS,
+
+    /**
+     * A curve that follows the slope through each point.
+     */
+    SMOOTH,
 }
 
 /**

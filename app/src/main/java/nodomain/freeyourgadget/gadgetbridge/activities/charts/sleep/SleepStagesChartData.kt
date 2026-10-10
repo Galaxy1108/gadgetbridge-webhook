@@ -7,6 +7,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSeries
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartValueFormat
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.LimitLineSpec
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.LineCurve
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.SeriesStyle
 
 object SleepStagesChartData {
@@ -63,7 +64,7 @@ object SleepStagesChartData {
             }
         } + listOfNotNull(
             ChartSeries("samples", "", seconds.indices.map { ChartPoint(seconds[it].toDouble(), values[it]) }, SeriesStyle.Line(markerColor, showLine = false)),
-            ChartSeries("hr", hrLabel, hrPoints, SeriesStyle.Line(hrColor, curved = true, maxGap = hrMaxGapSeconds), AxisSide.END)
+            ChartSeries("hr", hrLabel, hrPoints, SeriesStyle.Line(hrColor, curve = LineCurve.FLAT_AT_POINTS, maxGap = hrMaxGapSeconds), AxisSide.END)
                 .takeIf { hrPoints.isNotEmpty() },
         )
         return ChartSpec(
