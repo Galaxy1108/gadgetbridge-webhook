@@ -24,7 +24,6 @@ import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -50,6 +49,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.editor
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.editors.dp
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.editors.formatPairValue
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.editors.formatScalarValue
+import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.editors.formatTypedValue
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.templates.editors.hideKeyboard
 import nodomain.freeyourgadget.gadgetbridge.databinding.ActivityWorkoutTemplateEditBinding
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
@@ -1041,8 +1041,8 @@ private fun stepSummary(
 
     node.duration?.let { duration ->
         val valueSpec = stepSpec?.durations?.find { it.type == duration.type }?.value
-        val text = labeledValue(context, duration.type.label, valueSpec, duration.value)
-        parts.add(if (duration.plus) "$text+" else text)
+        val valueText = scalarText(context, valueSpec, duration.value)?.let { if (duration.plus) "$it+" else it }
+        parts.add(formatTypedValue(context, duration.type, duration.value, valueText))
     }
 
     node.target?.let { target ->
@@ -1056,29 +1056,22 @@ private fun stepSummary(
                 target.type.isRange && valueSpec is ValueSpec.PairRange && target.low != null && target.high != null ->
                     formatPairValue(context, valueSpec, target.low, target.high)
 
-                valueSpec != null && target.low != null -> formatScalarValue(context, valueSpec, target.low)
-                else -> null
+                else -> scalarText(context, valueSpec, target.low)
             }
-            parts.add(listOfNotNull(context.getString(target.type.label), valueText).joinToString(" "))
+            parts.add(formatTypedValue(context, target.type, target.low, valueText))
         }
     }
 
     node.weightType?.let { weightType ->
         if (weightType != WorkoutWeightType.NONE) {
             val valueSpec = stepSpec?.fields?.weightSpecs?.get(weightType)
-            parts.add(labeledValue(context, weightType.label, valueSpec, node.weightValue?.toLong()))
+            val value = node.weightValue?.toLong()
+            parts.add(formatTypedValue(context, weightType, value, scalarText(context, valueSpec, value)))
         }
     }
 
     return parts.joinToString(" · ")
 }
 
-private fun labeledValue(
-    context: Context,
-    @StringRes label: Int,
-    valueSpec: ValueSpec?,
-    value: Long?,
-): String {
-    val valueText = if (valueSpec != null && value != null) formatScalarValue(context, valueSpec, value) else null
-    return listOfNotNull(context.getString(label), valueText).joinToString(" ")
-}
+private fun scalarText(context: Context, valueSpec: ValueSpec?, value: Long?): String? =
+    if (valueSpec != null && value != null) formatScalarValue(context, valueSpec, value) else null

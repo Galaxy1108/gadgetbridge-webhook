@@ -6023,6 +6023,21 @@
     <string name="workout_weight_load_category">Load category</string>
     <string name="workout_load_heavy">Heavy</string>
     <string name="workout_load_very_heavy">Very heavy</string>
+    <string name="workout_value_percent_1rm">%1$s of 1RM</string>
+    <string name="workout_value_percent_ftp">%1$s of FTP</string>
+    <string name="workout_value_rm">%1$sRM</string>
+    <plurals name="workout_value_repetitions">
+        <item quantity="one">%1$s rep</item>
+        <item quantity="other">%1$s reps</item>
+    </plurals>
+    <plurals name="workout_value_laps">
+        <item quantity="one">%1$s lap</item>
+        <item quantity="other">%1$s laps</item>
+    </plurals>
+    <plurals name="workout_value_strokes">
+        <item quantity="one">%1$s stroke</item>
+        <item quantity="other">%1$s strokes</item>
+    </plurals>
 
     <string name="workout_swim_stroke_choice">Choice</string>
     <string name="workout_swim_stroke_individual_medley">Individual medley</string>
