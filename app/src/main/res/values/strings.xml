@@ -1017,7 +1017,7 @@
     <string name="alarm_fri_short">Fri</string>
     <string name="alarm_sat_short">Sat</string>
     <string name="alarm_smart_wakeup">Smart wakeup</string>
-    <string name="alarm_smart_wakeup_interval">Smart wakeup interval:</string>
+    <string name="alarm_smart_wakeup_interval_minutes">Smart wakeup interval (minutes)</string>
     <string name="alarm_smart_wakeup_interval_default">5 minutes</string>
     <string name="alarm_snooze">Snooze</string>
     <string name="alarm_add">Add alarm</string>
