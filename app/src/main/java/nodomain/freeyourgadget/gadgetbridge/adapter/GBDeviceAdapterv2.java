@@ -69,7 +69,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.color.MaterialColors;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -96,6 +95,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.DeviceDeleteActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.ControlCenterv2;
 import nodomain.freeyourgadget.gadgetbridge.activities.OpenFwAppInstallerActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.ActivityChartsActivity;
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.ActivityGauge;
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.GaugeDrawer;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
@@ -165,7 +165,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
 
         for (GBDevice device : deviceList) {
             String folder = device.getParentFolder();
-            if (StringUtils.isNullOrEmpty(folder)){
+            if (StringUtils.isNullOrEmpty(folder)) {
                 enrichedList.add(device);
                 continue;
             }
@@ -193,10 +193,10 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         return new ViewHolder(view);
     }
 
-    private int countDevicesInFolder(String folderName, boolean needsToBeConnected){
+    private int countDevicesInFolder(String folderName, boolean needsToBeConnected) {
         int count = 0;
-        for(GBDevice device : deviceList){
-            if(folderName.equals(device.getParentFolder()) && ((!needsToBeConnected) || device.isConnected())){
+        for (GBDevice device : deviceList) {
+            if (folderName.equals(device.getParentFolder()) && ((!needsToBeConnected) || device.isConnected())) {
                 count++;
             }
         }
@@ -216,7 +216,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         }
     }
 
-    private void showDeviceFolder(ViewHolder holder, final GBDeviceFolder folder){
+    private void showDeviceFolder(ViewHolder holder, final GBDeviceFolder folder) {
         holder.container.setVisibility(View.VISIBLE);
         holder.deviceNameLabel.setText(folder.getName());
         holder.infoIcons.setVisibility(View.GONE);
@@ -235,7 +235,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         holder.container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (expandedFolderName.equals(folder.getName())){
+                if (expandedFolderName.equals(folder.getName())) {
                     // collapse open folder
                     expandedFolderName = "";
                 } else {
@@ -248,33 +248,33 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         holder.container.setOnLongClickListener(null);
     }
 
-    private void setItemMargin(ViewHolder holder, GBDevice device){
+    private void setItemMargin(ViewHolder holder, GBDevice device) {
         Resources r = context.getResources();
         int widthDp = 8;
-        if(!StringUtils.isNullOrEmpty(device.getParentFolder())){
+        if (!StringUtils.isNullOrEmpty(device.getParentFolder())) {
             widthDp = 20;
         }
         float px = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                widthDp,
-                r.getDisplayMetrics()
+            TypedValue.COMPLEX_UNIT_DIP,
+            widthDp,
+            r.getDisplayMetrics()
         );
         CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) holder.container.getLayoutParams();
         layoutParams.setMarginStart((int) px);
         holder.container.setLayoutParams(layoutParams);
 
         int alpha = 0;
-        if(device instanceof GBDeviceFolder && device.getName().equals(expandedFolderName)){
+        if (device instanceof GBDeviceFolder && device.getName().equals(expandedFolderName)) {
             alpha = 50;
-        }else if(!StringUtils.isNullOrEmpty(device.getParentFolder()) && expandedFolderName.equals(device.getParentFolder())){
+        } else if (!StringUtils.isNullOrEmpty(device.getParentFolder()) && expandedFolderName.equals(device.getParentFolder())) {
             alpha = 50;
         }
 
         holder.root.setBackgroundColor(Color.argb(alpha, 0, 0, 0));
     }
 
-    void handleDeviceConnect(GBDevice device){
-        if (!device.getDeviceCoordinator().isConnectable()){
+    void handleDeviceConnect(GBDevice device) {
+        if (!device.getDeviceCoordinator().isConnectable()) {
             device.setState(GBDevice.State.WAITING_FOR_SCAN);
             device.sendDeviceUpdateIntent(GBApplication.getContext(), GBDevice.DeviceUpdateSubject.CONNECTION_STATE);
             return;
@@ -289,19 +289,19 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
 
         setItemMargin(holder, device);
 
-        if(device instanceof GBDeviceFolder){
+        if (device instanceof GBDeviceFolder) {
             showDeviceFolder(holder, (GBDeviceFolder) device);
             return;
         }
 
         String parentFolder = device.getParentFolder();
-        if(!StringUtils.isNullOrEmpty(parentFolder)){
-            if(parentFolder.equals(expandedFolderName)){
+        if (!StringUtils.isNullOrEmpty(parentFolder)) {
+            if (parentFolder.equals(expandedFolderName)) {
                 holder.container.setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 holder.container.setVisibility(View.GONE);
             }
-        }else{
+        } else {
             holder.container.setVisibility(View.VISIBLE);
         }
 
@@ -532,16 +532,17 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
 
     private void showRemoveDeviceDialog(final GBDevice device) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
-                .setCancelable(true)
-                .setTitle(context.getString(R.string.controlcenter_delete_device_name, device.getAliasOrName()))
-                .setMessage(R.string.controlcenter_delete_device_dialogmessage)
-                .setPositiveButton(R.string.delete,
-                        (dialog, which) -> removeDevice(device, true))
-                .setNegativeButton(R.string.cancel, (dialog, which) -> {});
+            .setCancelable(true)
+            .setTitle(context.getString(R.string.controlcenter_delete_device_name, device.getAliasOrName()))
+            .setMessage(R.string.controlcenter_delete_device_dialogmessage)
+            .setPositiveButton(R.string.delete,
+                (dialog, which) -> removeDevice(device, true))
+            .setNegativeButton(R.string.cancel, (dialog, which) -> {
+            });
 
         if (deviceHasFiles(device)) {
             builder.setNeutralButton(R.string.delete_device_and_retain_files,
-                    (dialog, which) -> removeDevice(device, false));
+                (dialog, which) -> removeDevice(device, false));
         }
         builder.show();
     }
@@ -590,7 +591,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         final LinearLayout newFolderLayout = new LinearLayout(context);
         newFolderLayout.setOrientation(LinearLayout.HORIZONTAL);
         newFolderLayout.setPadding(context.getResources().getDimensionPixelSize(R.dimen.dialog_margin),
-                0, context.getResources().getDimensionPixelSize(R.dimen.dialog_margin), 0);
+            0, context.getResources().getDimensionPixelSize(R.dimen.dialog_margin), 0);
 
         final TextView newFolderLabel = new TextView(context);
         newFolderLabel.setText(R.string.controlcenter_folder_name);
@@ -598,7 +599,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         newFolderInput.setInputType(InputType.TYPE_CLASS_TEXT);
 
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+            ViewGroup.LayoutParams.WRAP_CONTENT);
         newFolderInput.setLayoutParams(params);
 
         newFolderInput.addTextChangedListener(new TextWatcher() {
@@ -640,7 +641,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         }
 
         final SpinnerWithIconAdapter deviceListAdapter = new SpinnerWithIconAdapter((Activity) context,
-                R.layout.spinner_with_image_layout, R.id.spinner_item_text, foldersList);
+            R.layout.spinner_with_image_layout, R.id.spinner_item_text, foldersList);
         deviceListSpinner.setAdapter(deviceListAdapter);
 
         deviceListSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -674,40 +675,40 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         linearLayout.addView(newFolderLayout);
 
         new MaterialAlertDialogBuilder(context)
-                .setCancelable(true)
-                .setTitle(R.string.controlcenter_set_folder_title)
-                .setView(linearLayout)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+            .setCancelable(true)
+            .setTitle(R.string.controlcenter_set_folder_title)
+            .setView(linearLayout)
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
 
-                        try (DBHandler dbHandler = GBApplication.acquireDB()) {
-                            DaoSession session = dbHandler.getDaoSession();
-                            Device dbDevice = DBHelper.getDevice(device, session);
-                            String parentFolder = selectedFolder[0];
-                            dbDevice.setParentFolder(parentFolder);
-                            dbDevice.update();
-                            device.setParentFolder(parentFolder);
-                            expandedFolderName = parentFolder;
-                        } catch (Exception ex) {
-                            GB.toast(context, context.getString(R.string.error_setting_parent_folder, ex.getLocalizedMessage()), Toast.LENGTH_LONG, GB.ERROR, ex);
-                        } finally {
-                            Intent refreshIntent = new Intent(DeviceManager.ACTION_REFRESH_DEVICELIST);
-                            LocalBroadcastManager.getInstance(context).sendBroadcast(refreshIntent);
-                        }
+                    try (DBHandler dbHandler = GBApplication.acquireDB()) {
+                        DaoSession session = dbHandler.getDaoSession();
+                        Device dbDevice = DBHelper.getDevice(device, session);
+                        String parentFolder = selectedFolder[0];
+                        dbDevice.setParentFolder(parentFolder);
+                        dbDevice.update();
+                        device.setParentFolder(parentFolder);
+                        expandedFolderName = parentFolder;
+                    } catch (Exception ex) {
+                        GB.toast(context, context.getString(R.string.error_setting_parent_folder, ex.getLocalizedMessage()), Toast.LENGTH_LONG, GB.ERROR, ex);
+                    } finally {
+                        Intent refreshIntent = new Intent(DeviceManager.ACTION_REFRESH_DEVICELIST);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(refreshIntent);
                     }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                })
-                .show();
+                }
+            })
+            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            })
+            .show();
     }
 
-    private boolean folderListContainsName(ArrayList<SpinnerWithIconItem> list, String name){
-        for (SpinnerWithIconItem item: list) {
-            if (item.getText().equals(name)){
+    private boolean folderListContainsName(ArrayList<SpinnerWithIconItem> list, String name) {
+        for (SpinnerWithIconItem item : list) {
+            if (item.getText().equals(name)) {
                 return true;
             }
         }
@@ -730,12 +731,13 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         startIntent.putExtra(DeviceSettingsActivity.MENU_ENTRY_POINT, DeviceSettingsActivity.MENU_ENTRY_POINTS.APPLICATION_SETTINGS);
         context.startActivity(startIntent);
     }
+
     private void showSetAliasDialog(final GBDevice device) {
         final EditText input = new EditText(context);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setText(device.getAlias());
         FrameLayout container = new FrameLayout(context);
-        FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.leftMargin = context.getResources().getDimensionPixelSize(R.dimen.dialog_margin);
         params.rightMargin = context.getResources().getDimensionPixelSize(R.dimen.dialog_margin);
         input.setLayoutParams(params);
@@ -743,34 +745,34 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
 
         new MaterialAlertDialogBuilder(context)
-                .setView(container)
-                .setCancelable(true)
-                .setTitle(context.getString(R.string.controlcenter_set_alias))
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        try (DBHandler dbHandler = GBApplication.acquireDB()) {
-                            DaoSession session = dbHandler.getDaoSession();
-                            Device dbDevice = DBHelper.getDevice(device, session);
-                            String alias = input.getText().toString();
-                            dbDevice.setAlias(alias);
-                            dbDevice.update();
-                            device.setAlias(alias);
-                        } catch (Exception ex) {
-                            GB.toast(context, context.getString(R.string.error_setting_alias) + ex.getLocalizedMessage(), Toast.LENGTH_LONG, GB.ERROR, ex);
-                        } finally {
-                            Intent refreshIntent = new Intent(DeviceManager.ACTION_REFRESH_DEVICELIST);
-                            LocalBroadcastManager.getInstance(context).sendBroadcast(refreshIntent);
-                        }
+            .setView(container)
+            .setCancelable(true)
+            .setTitle(context.getString(R.string.controlcenter_set_alias))
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    try (DBHandler dbHandler = GBApplication.acquireDB()) {
+                        DaoSession session = dbHandler.getDaoSession();
+                        Device dbDevice = DBHelper.getDevice(device, session);
+                        String alias = input.getText().toString();
+                        dbDevice.setAlias(alias);
+                        dbDevice.update();
+                        device.setAlias(alias);
+                    } catch (Exception ex) {
+                        GB.toast(context, context.getString(R.string.error_setting_alias) + ex.getLocalizedMessage(), Toast.LENGTH_LONG, GB.ERROR, ex);
+                    } finally {
+                        Intent refreshIntent = new Intent(DeviceManager.ACTION_REFRESH_DEVICELIST);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(refreshIntent);
                     }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })
-                .show();
+                }
+            })
+            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // do nothing
+                }
+            })
+            .show();
     }
 
     @Override
@@ -839,12 +841,9 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
 
             cardViewActivityCardLayout = view.findViewById(R.id.card_view_activity_card_layout);
 
-            TotalStepsChart = new ActivityGauge(view, R.id.device_card_gauge_steps, R.id.device_card_gauge_steps_ring,
-                    R.id.device_card_gauge_steps_value, R.id.device_card_gauge_steps_label, R.id.device_card_gauge_steps_goal);
-            TotalDistanceChart = new ActivityGauge(view, R.id.device_card_gauge_distance, R.id.device_card_gauge_distance_ring,
-                    R.id.device_card_gauge_distance_value, R.id.device_card_gauge_distance_label, R.id.device_card_gauge_distance_goal);
-            SleepTimeChart = new ActivityGauge(view, R.id.device_card_gauge_sleep, R.id.device_card_gauge_sleep_ring,
-                    R.id.device_card_gauge_sleep_value, R.id.device_card_gauge_sleep_label, R.id.device_card_gauge_sleep_goal);
+            TotalStepsChart = new ActivityGauge(view.findViewById(R.id.device_card_gauge_steps));
+            TotalDistanceChart = new ActivityGauge(view.findViewById(R.id.device_card_gauge_distance));
+            SleepTimeChart = new ActivityGauge(view.findViewById(R.id.device_card_gauge_sleep));
         }
     }
 
@@ -929,11 +928,11 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
         double distanceMeters = (distanceCm > 0 ? distanceCm : steps * stepLength) * 0.01;
         String distanceFormatted = FormatUtils.getFormattedDistanceLabel(distanceMeters);
 
-        setGaugeData(holder.TotalStepsChart, steps, stepGoal, context.getString(R.string.steps), NumberFormat.getInstance().format(steps), context);
+        holder.TotalStepsChart.update(gaugeDrawer, steps, stepGoal, NumberFormat.getInstance().format(steps), context.getString(R.string.steps));
 
-        setGaugeData(holder.TotalDistanceChart, distanceForChart, distanceGoal, context.getString(R.string.distance), distanceFormatted, context);
+        holder.TotalDistanceChart.update(gaugeDrawer, distanceForChart, distanceGoal, distanceFormatted, context.getString(R.string.distance));
 
-        setGaugeData(holder.SleepTimeChart, sleep, sleepGoalMinutes, context.getString(R.string.prefs_activity_in_device_card_sleep_title), String.format("%1s", getHM(sleep)), context);
+        holder.SleepTimeChart.update(gaugeDrawer, sleep, sleepGoalMinutes, String.format("%1s", getHM(sleep)), context.getString(R.string.prefs_activity_in_device_card_sleep_title));
 
 
         boolean showActivitySteps = GBApplication.getDeviceSpecificSharedPrefs(device.getAddress()).getBoolean(DeviceSettingsPreferenceConst.PREFS_ACTIVITY_IN_DEVICE_CARD_STEPS, true);
@@ -967,77 +966,24 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
     private String getHM(long value) {
         return DateTimeUtils.formatDurationHoursMinutes(value, TimeUnit.MINUTES);
     }
-    private void setGaugeData(ActivityGauge gauge, float value, float target, String label, String stringValue, Context context) {
-        final String CHART_COLOR_START = "#e74c3c";
-        final String CHART_COLOR_END = "#2ecc71";
-
-        float colorValue = Math.max(0, Math.min(1, value / target));
-        int chartColor = interpolateColor(Color.parseColor(CHART_COLOR_START), Color.parseColor(CHART_COLOR_END), colorValue);
-
-        gaugeDrawer.drawSimpleGauge(gauge.ring, chartColor, colorValue);
-        gauge.value.setText(stringValue);
-        gauge.label.setText(label);
-        gauge.goal.setVisibility(colorValue == 1 ? View.VISIBLE : View.GONE);
-    }
-
-    /**
-     * The views of one activity gauge on the device card.
-     */
-    private static class ActivityGauge {
-        private static final float VALUE_TEXT_SCALE = 0.15f;
-        private static final float LABEL_TEXT_SCALE = 0.11f;
-
-        final View container;
-        final ImageView ring;
-        final TextView value;
-        final TextView label;
-        final ImageView goal;
-
-        ActivityGauge(View view, int containerId, int ringId, int valueId, int labelId, int goalId) {
-            container = view.findViewById(containerId);
-            ring = view.findViewById(ringId);
-            value = view.findViewById(valueId);
-            label = view.findViewById(labelId);
-            goal = view.findViewById(goalId);
-
-            final int size = ring.getLayoutParams().width;
-            value.setTextSize(TypedValue.COMPLEX_UNIT_PX, size * VALUE_TEXT_SCALE);
-            label.setTextSize(TypedValue.COMPLEX_UNIT_PX, size * LABEL_TEXT_SCALE);
-        }
-    }
-
-    private float interpolate(float a, float b, float proportion) {
-        return (a + ((b - a) * proportion));
-    }
-
-    private int interpolateColor(int a, int b, float proportion) {
-        float[] hsva = new float[3];
-        float[] hsvb = new float[3];
-        Color.colorToHSV(a, hsva);
-        Color.colorToHSV(b, hsvb);
-        for (int i = 0; i < 3; i++) {
-            hsvb[i] = interpolate(hsva[i], hsvb[i], proportion);
-        }
-        return Color.HSVToColor(hsvb);
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     void createDynamicShortcut(GBDevice device) {
         Intent intent = new Intent(context, ControlCenterv2.class)
-                .setAction(ACTION_CONNECT)
-                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                .putExtra("device", device.getAddress());
+            .setAction(ACTION_CONNECT)
+            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            .putExtra("device", device.getAddress());
 
         ShortcutManager shortcutManager = (ShortcutManager) context.getApplicationContext().getSystemService(Context.SHORTCUT_SERVICE);
 
         DeviceCoordinator coordinator = device.getDeviceCoordinator();
 
         shortcutManager.pushDynamicShortcut(new ShortcutInfo.Builder(context, device.getAddress())
-                .setLongLived(false)
-                .setShortLabel(device.getAliasOrName())
-                .setIntent(intent)
-                .setIcon(Icon.createWithResource(context, coordinator.getDefaultIconResource()))
-                .build()
+            .setLongLived(false)
+            .setShortLabel(device.getAliasOrName())
+            .setIntent(intent)
+            .setIcon(Icon.createWithResource(context, coordinator.getDefaultIconResource()))
+            .build()
         );
     }
 
