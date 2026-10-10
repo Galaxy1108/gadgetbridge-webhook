@@ -207,7 +207,8 @@ internal object ChartDataBuilder {
         return LineDataSet(entries, series.label).apply {
             color = if (style.showLine) style.color else Color.TRANSPARENT
             lineWidth = LINE_WIDTH_DP
-            isDrawCirclesEnabled = style.showPoints
+            // If the line is a single point, draw it
+            isDrawCirclesEnabled = style.showPoints || points.size == 1
             circleColor = style.color
             circleRadius = POINT_RADIUS_DP
             isDrawCircleHoleEnabled = false
