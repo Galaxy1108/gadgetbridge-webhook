@@ -1985,6 +1985,8 @@
     <string name="hrv_status_low">Low</string>
     <string name="hrv_status_poor">Poor</string>
     <string name="hrv_status_last_night">Last night</string>
+    <string name="hrv_status_last_night_timeline">Last Night Timeline</string>
+    <string name="hrv_status_trend">HRV Trend</string>
     <string name="hrv_status_last_night_legend">Last night (ms)</string>
     <string name="hrv_status_last_night_highest_5">Last night 5-min max avg</string>
     <string name="hrv_status_nightly_avg">Nightly average</string>
