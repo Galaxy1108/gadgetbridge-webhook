@@ -105,7 +105,7 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
         hrLegend = rootView.findViewById(R.id.heart_rate_chart_legend);
         hrStatsContainer = rootView.findViewById(R.id.hr_stats_container);
         final SectionHeaderView chartHeader = rootView.findViewById(R.id.hr_chart_header);
-        chartHeader.setTitle(getString(TOTAL_DAYS == 1 ? R.string.day_timeline : R.string.heart_rate_trend));
+        chartHeader.setTitle(getString(TOTAL_DAYS == 1 ? R.string.day_timeline : R.string.heart_rate_daily));
 
         refresh();
 

@@ -23,7 +23,7 @@
         <nodomain.freeyourgadget.gadgetbridge.activities.workouts.SectionHeaderView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:sectionTitle="@string/respiratory_rate_trend" />
+            app:sectionTitle="@string/respiratory_rate_daily" />
 
         <LinearLayout
             android:layout_width="match_parent"
