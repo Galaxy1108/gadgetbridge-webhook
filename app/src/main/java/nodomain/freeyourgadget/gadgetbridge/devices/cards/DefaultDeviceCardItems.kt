@@ -17,6 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import com.jaredrummler.android.colorpicker.MaterialColorPickerDialog
+import nodomain.freeyourgadget.gadgetbridge.BuildConfig
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.ConfigureAlarms
@@ -186,6 +187,10 @@ object DefaultDeviceCardItems {
             items.add(ActionCardItem(it))
         }
 
+        if (BuildConfig.DEBUG) {
+            items.add(ActionCardItem(testNewFunctionAction(), visible = initialized, optional = true))
+        }
+
         return items
     }
 
@@ -323,6 +328,18 @@ object DefaultDeviceCardItems {
     private fun heartRateTestOnClick(device: GBDevice, context: Context) {
         GBApplication.deviceService(device).onHeartRateTest()
         HeartRateDialog(device, context).show()
+    }
+
+    private fun testNewFunctionAction(): DeviceCardAction = object : DeviceCardAction {
+        override fun getId(): String = "test_new_function"
+        override fun getIcon(device: GBDevice) = R.drawable.ic_science
+        override fun getDescription(device: GBDevice, context: Context): String =
+            context.getString(R.string.controlcenter_test_new_function)
+
+        override fun onClick(device: GBDevice, context: Context) {
+            Snackbar.make(snackBarAnchor(context), R.string.controlcenter_test_new_function, Snackbar.LENGTH_SHORT).show()
+            GBApplication.deviceService(device).onTestNewFunction(null)
+        }
     }
 
     private fun fmFrequencyAction(): DeviceCardAction = object : DeviceCardAction {
