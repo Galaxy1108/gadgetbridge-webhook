@@ -512,10 +512,11 @@ class WorkoutTemplateEditActivity : AbstractGBActivity() {
         if (row.node.type == WorkoutNodeType.REPEAT) {
             popup.menu.add(0, MENU_ADD_STEP_INSIDE, 1, R.string.workout_template_add_step_inside)
         }
+        popup.menu.add(0, MENU_DUPLICATE, 2, R.string.widgets_duplicate)
         val deleteLabel =
             if (row.node.type == WorkoutNodeType.LEG) R.string.workout_template_multisport_leg_delete
             else R.string.workout_template_delete_step
-        popup.menu.add(0, MENU_DELETE, 2, deleteLabel)
+        popup.menu.add(0, MENU_DELETE, 3, deleteLabel)
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 MENU_EDIT -> {
@@ -529,6 +530,11 @@ class WorkoutTemplateEditActivity : AbstractGBActivity() {
 
                 MENU_ADD_STEP_INSIDE -> {
                     addStep(parent = row.node)
+                    true
+                }
+
+                MENU_DUPLICATE -> {
+                    viewModel.duplicate(row.node)
                     true
                 }
 
@@ -913,6 +919,7 @@ class WorkoutTemplateEditActivity : AbstractGBActivity() {
         private const val MENU_EDIT = 1
         private const val MENU_ADD_STEP_INSIDE = 2
         private const val MENU_DELETE = 3
+        private const val MENU_DUPLICATE = 4
 
         /**
          * The indent of one nesting level of a step row.
