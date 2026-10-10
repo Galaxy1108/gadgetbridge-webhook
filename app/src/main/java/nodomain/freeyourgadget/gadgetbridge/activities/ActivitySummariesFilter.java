@@ -16,7 +16,6 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.activities;
 
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -30,21 +29,22 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.material.datepicker.MaterialDatePicker;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -324,27 +324,24 @@ public class ActivitySummariesFilter extends AbstractGBActivity {
     }
 
     public void getDate(final String filter, long currentDatemillis) {
-        Calendar currentDate = Calendar.getInstance();
-        if (currentDatemillis > 0) {
-            currentDate = GregorianCalendar.getInstance();
-            currentDate.setTimeInMillis(currentDatemillis);
-        }
+        final long initialMillis = currentDatemillis > 0 ? currentDatemillis : System.currentTimeMillis();
+        final MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setSelection(DateTimeUtils.toUtcDayStartMillis(initialMillis))
+                .build();
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            final LocalDate selectedDate = DateTimeUtils.utcMillisToLocalDate(selection);
+            final Calendar date = Calendar.getInstance();
 
-        new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar date = Calendar.getInstance();
-
-                if (filter.equals(DATE_FILTER_FROM)) {
-                    date.set(year, monthOfYear, dayOfMonth, 0, 0);
-                    dateFromFilter = date.getTimeInMillis();
-                } else {
-                    date.set(year, monthOfYear, dayOfMonth, 23, 59);
-                    dateToFilter = date.getTimeInMillis();
-                }
-                update_filter_fields();
+            if (filter.equals(DATE_FILTER_FROM)) {
+                date.set(selectedDate.getYear(), selectedDate.getMonthValue() - 1, selectedDate.getDayOfMonth(), 0, 0);
+                dateFromFilter = date.getTimeInMillis();
+            } else {
+                date.set(selectedDate.getYear(), selectedDate.getMonthValue() - 1, selectedDate.getDayOfMonth(), 23, 59);
+                dateToFilter = date.getTimeInMillis();
             }
-        }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE)).show();
+            update_filter_fields();
+        });
+        datePicker.show(getSupportFragmentManager(), "WORKOUT_FILTER_DATE_PICKER");
     }
 
     private void setTimePeriodFilter(String selection) {

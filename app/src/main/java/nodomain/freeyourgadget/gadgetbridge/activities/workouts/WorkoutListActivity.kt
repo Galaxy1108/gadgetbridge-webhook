@@ -1,6 +1,5 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.workouts
 
-import android.app.DatePickerDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -21,6 +20,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
@@ -35,6 +35,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes
 import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils
+import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.GB
 import nodomain.freeyourgadget.gadgetbridge.util.WorkoutFilterUtils
 import nodomain.freeyourgadget.gadgetbridge.util.healthconnect.HealthConnectWorkoutSync
@@ -67,24 +68,26 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
     private var summariesAdapter: WorkoutSummariesAdapter? = null
     private var actionMode: ActionMode? = null
 
-    private val activityDetailLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == WorkoutDetailsActivity.RESULT_WORKOUT_CHANGED) {
-            // FIXME we could try to only update the workouts that changed
-            refresh()
+    private val activityDetailLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == WorkoutDetailsActivity.RESULT_WORKOUT_CHANGED) {
+                // FIXME we could try to only update the workouts that changed
+                refresh()
+            }
         }
-    }
 
-    private val activityFilterLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        result.data?.extras?.let { bundle ->
-            activityFilter = bundle.getInt("activityFilter", 0)
-            dateFromFilter = bundle.getLong("dateFromFilter", 0)
-            dateToFilter = bundle.getLong("dateToFilter", 0)
-            deviceFilter = bundle.getLong("deviceFilter", 0)
-            nameContainsFilter = bundle.getString("nameContainsFilter")
-            itemsFilter = bundle.getSerializableCompat<ArrayList<Long>>("itemsFilter")
-            refresh()
+    private val activityFilterLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            result.data?.extras?.let { bundle ->
+                activityFilter = bundle.getInt("activityFilter", 0)
+                dateFromFilter = bundle.getLong("dateFromFilter", 0)
+                dateToFilter = bundle.getLong("dateToFilter", 0)
+                deviceFilter = bundle.getLong("deviceFilter", 0)
+                nameContainsFilter = bundle.getString("nameContainsFilter")
+                itemsFilter = bundle.getSerializableCompat<ArrayList<Long>>("itemsFilter")
+                refresh()
+            }
         }
-    }
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -135,6 +138,7 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
                 finish()
                 true
             }
+
             R.id.activity_action_statistics -> {
                 startActivity(
                     Intent(this, WorkoutStatisticsActivity::class.java)
@@ -142,14 +146,17 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
                 )
                 true
             }
+
             R.id.activity_action_manage_timestamp -> {
                 resetFetchTimestampToChosenDate()
                 true
             }
+
             R.id.activity_action_filter -> {
                 runFilterActivity()
                 true
             }
+
             else -> false
         }
     }
@@ -339,6 +346,7 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
 
                         return true
                     }
+
                     R.id.activity_action_export -> {
                         val toExport = ArrayList<BaseActivitySummary>()
                         for (i in 0 until selectedItems!!.length()) {
@@ -349,6 +357,7 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
                         showExportDialog(toExport)
                         return true
                     }
+
                     R.id.activity_action_select_all -> {
                         for (i in 1 until itemAdapter!!.itemCount - 1) {
                             if (!selectedItems!!.get(i)) {
@@ -359,6 +368,7 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
                         mode.title = getString(R.string.number_selected_items, selectedItems!!.cardinality())
                         return true
                     }
+
                     R.id.activity_action_addto_filter -> {
                         val toFilter = ArrayList<Long>()
                         for (i in 0 until selectedItems!!.length()) {
@@ -405,24 +415,22 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
     }
 
     private fun resetFetchTimestampToChosenDate() {
-        val currentDate = Calendar.getInstance()
-        DatePickerDialog(
-            this,
-            { _, year, monthOfYear, dayOfMonth ->
-                val date = Calendar.getInstance().apply {
-                    set(year, monthOfYear, dayOfMonth)
-                }
-                val timestamp = date.timeInMillis - 1000
-                GBApplication.getDeviceSpecificSharedPrefs(gbDevice!!.address).edit().apply {
-                    remove("lastSportsActivityTimeMillis")
-                    putLong("lastSportsActivityTimeMillis", timestamp)
-                    apply()
-                }
-            },
-            currentDate.get(Calendar.YEAR),
-            currentDate.get(Calendar.MONTH),
-            currentDate.get(Calendar.DATE)
-        ).show()
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
+        datePicker.addOnPositiveButtonClickListener { selection ->
+            val selectedDate = DateTimeUtils.utcMillisToLocalDate(selection)
+            val date = Calendar.getInstance().apply {
+                set(selectedDate.year, selectedDate.monthValue - 1, selectedDate.dayOfMonth)
+            }
+            val timestamp = date.timeInMillis - 1000
+            GBApplication.getDeviceSpecificSharedPrefs(gbDevice!!.address).edit().apply {
+                remove("lastSportsActivityTimeMillis")
+                putLong("lastSportsActivityTimeMillis", timestamp)
+                apply()
+            }
+        }
+        datePicker.show(supportFragmentManager, "WORKOUT_FETCH_DATE_PICKER")
     }
 
     override fun onDestroy() {
@@ -466,6 +474,7 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
             WorkoutBatchExporter.Part.GPX to view.findViewById<CheckBox>(R.id.workout_export_gpx),
             WorkoutBatchExporter.Part.RAW to view.findViewById<CheckBox>(R.id.workout_export_raw)
         )
+
         fun prefKey(part: WorkoutBatchExporter.Part) = "workout_export_" + part.name.lowercase(Locale.ROOT)
         boxes.forEach { (part, box) ->
             box.isChecked = prefs.getBoolean(prefKey(part), part != WorkoutBatchExporter.Part.RAW)
@@ -513,11 +522,21 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
                 }
             } catch (e: Exception) {
                 LOG.error("Failed to export workouts", e)
-                GB.toast(this@WorkoutListActivity, getString(R.string.workout_export_nothing), Toast.LENGTH_LONG, GB.ERROR)
+                GB.toast(
+                    this@WorkoutListActivity,
+                    getString(R.string.workout_export_nothing),
+                    Toast.LENGTH_LONG,
+                    GB.ERROR
+                )
                 return@launch
             }
             if (result.files.isEmpty()) {
-                GB.toast(this@WorkoutListActivity, getString(R.string.workout_export_nothing), Toast.LENGTH_LONG, GB.ERROR)
+                GB.toast(
+                    this@WorkoutListActivity,
+                    getString(R.string.workout_export_nothing),
+                    Toast.LENGTH_LONG,
+                    GB.ERROR
+                )
                 return@launch
             }
             if (result.skipped > 0) {
@@ -528,7 +547,11 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
                     GB.WARN
                 )
             }
-            AndroidUtils.shareFiles(this@WorkoutListActivity, result.files, WorkoutBatchExporter.mimeTypeFor(result.files))
+            AndroidUtils.shareFiles(
+                this@WorkoutListActivity,
+                result.files,
+                WorkoutBatchExporter.mimeTypeFor(result.files)
+            )
         }
     }
 
