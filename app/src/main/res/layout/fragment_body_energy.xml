@@ -44,7 +44,7 @@
         <nodomain.freeyourgadget.gadgetbridge.activities.workouts.SectionHeaderView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:sectionTitle="@string/body_energy_day_timeline" />
+            app:sectionTitle="@string/day_timeline" />
 
         <LinearLayout
             android:layout_width="match_parent"
