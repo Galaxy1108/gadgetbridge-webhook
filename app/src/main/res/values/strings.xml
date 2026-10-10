@@ -3770,10 +3770,10 @@
     <string name="pref_ambient_sound_tone">Ambient Sound Tone</string>
     <string name="pref_ambient_sound_tone_summary">From Soft to Clear</string>
     <string name="pref_balance">Balance</string>
-    <string name="pref_switch_controls_anc_ambient">Noise cancelling ←→ Ambient</string>
-    <string name="pref_switch_controls_anc_off">Noise cancelling ←→ Off</string>
-    <string name="pref_switch_controls_ambient_off">Ambient ←→ Off</string>
-    <string name="pref_switch_controls_anc_ambient_off">Noise cancelling ←→ Ambient ←→ Off</string>
+    <string name="pref_switch_controls_anc_ambient">Noise cancelling ↔ Ambient</string>
+    <string name="pref_switch_controls_anc_off">Noise cancelling ↔ Off</string>
+    <string name="pref_switch_controls_ambient_off">Ambient ↔ Off</string>
+    <string name="pref_switch_controls_anc_ambient_off">Noise cancelling ↔ Ambient ↔ Off</string>
     <string name="prefs_noise_control">Noise control</string>
     <string name="prefs_voice_detect">Voice detect</string>
     <string name="prefs_voice_detect_summary">Enable Ambient sound and lower playback automatically after voice has been detected</string>
