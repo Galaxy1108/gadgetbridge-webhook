@@ -1989,6 +1989,7 @@
     <string name="hrv_status_trend">HRV Trend</string>
     <string name="day_timeline">Day Timeline</string>
     <string name="body_energy_trend">Body Energy Trend</string>
+    <string name="stress_daily_levels">Daily Stress Levels</string>
     <string name="race_prediction_trend">Race Time Trend</string>
     <string name="hrv_status_last_night_legend">Last night (ms)</string>
     <string name="hrv_status_last_night_highest_5">Last night 5-min max avg</string>
@@ -3825,6 +3826,10 @@
     <string name="stress_mild">Mild</string>
     <string name="stress_moderate">Moderate</string>
     <string name="stress_high">High</string>
+    <string name="stress_relaxed_avg">Relaxed AVG</string>
+    <string name="stress_mild_avg">Mild AVG</string>
+    <string name="stress_moderate_avg">Moderate AVG</string>
+    <string name="stress_high_avg">High AVG</string>
     <string name="pai_total">Total</string>
     <string name="pai_day">Day increase</string>
     <string name="weight_kg">%1$.2f kg</string>

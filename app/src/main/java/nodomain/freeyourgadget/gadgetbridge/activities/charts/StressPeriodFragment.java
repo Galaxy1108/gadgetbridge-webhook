@@ -17,10 +17,6 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.charts;
 
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,10 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.Chart;
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +65,6 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
 
     private LinearLayout mStatsContainer;
     private TextView stressDatesText;
-    private PieChart mStressLevelsPieChart;
     private GbChartView mWeekChart;
     private ChartLegendView mWeekLegend;
 
@@ -104,11 +95,9 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
         mWeekChart.setZoomable(TOTAL_DAYS > 7);
         mWeekChart.dismissSelectionOnTapOutside(rootView);
         mWeekLegend = rootView.findViewById(R.id.weekstress_chart_legend);
-        mStressLevelsPieChart = rootView.findViewById(R.id.stress_pie_chart);
         mStatsContainer = rootView.findViewById(R.id.stress_stats_container);
         stressDatesText = rootView.findViewById(R.id.stress_dates);
 
-        setupPieChart();
         refresh();
 
         return rootView;
@@ -127,7 +116,6 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
     @Override
     protected void updateChartsnUIThread(MyChartsData mcd) {
         updateWeekChart(mcd.getWeekBeforeData());
-        updatePieChart(mcd.getStressWeeklyData());
         updateStressTiles(mcd.getStressWeeklyData());
 
         stressDatesText.setText(DateTimeUtils.formatDaysUntil(TOTAL_DAYS, getTSEnd()));
@@ -164,71 +152,6 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
             }
         }
         mWeekLegend.setSeries(legendSeries);
-    }
-
-    private void updatePieChart(final MyStressWeeklyData stressWeeklyData) {
-        List<PieEntry> pieEntries = new ArrayList<>();
-        List<Integer> pieColors = new ArrayList<>();
-
-        if (stressWeeklyData.totalDaysForAverage() > 0) {
-            long totalTime = stressWeeklyData.totalStressTime();
-            if (totalTime > 0) {
-                if (stressWeeklyData.totalRelaxed() > 0) {
-                    pieEntries.add(new PieEntry<>(stressWeeklyData.totalRelaxed(),
-                            StressType.RELAXED.getLabel(getContext()), null, null));
-                    pieColors.add(StressType.RELAXED.getColor(getContext()));
-                }
-                if (stressWeeklyData.totalMild() > 0) {
-                    pieEntries.add(new PieEntry<>(stressWeeklyData.totalMild(),
-                            StressType.MILD.getLabel(getContext()), null, null));
-                    pieColors.add(StressType.MILD.getColor(getContext()));
-                }
-                if (stressWeeklyData.totalModerate() > 0) {
-                    pieEntries.add(new PieEntry<>(stressWeeklyData.totalModerate(),
-                            StressType.MODERATE.getLabel(getContext()), null, null));
-                    pieColors.add(StressType.MODERATE.getColor(getContext()));
-                }
-                if (stressWeeklyData.totalHigh() > 0) {
-                    pieEntries.add(new PieEntry<>(stressWeeklyData.totalHigh(),
-                            StressType.HIGH.getLabel(getContext()), null, null));
-                    pieColors.add(StressType.HIGH.getColor(getContext()));
-                }
-            }
-        }
-
-        if (pieEntries.isEmpty()) {
-            pieEntries.add(new PieEntry<>(1, null, null, null));
-            pieColors.add(getResources().getColor(R.color.gauge_line_color));
-        }
-
-        PieDataSet pieDataSet = new PieDataSet(pieEntries, "");
-        pieDataSet.setColors(pieColors);
-        pieDataSet.setValueTextColor(DESCRIPTION_COLOR);
-        pieDataSet.setValueTextSize(13f);
-        pieDataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        pieDataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        pieDataSet.setDrawValuesEnabled(false);
-        pieDataSet.setSliceSpace(2f);
-        PieData pieData = new PieData(pieDataSet);
-
-        mStressLevelsPieChart.setData(pieData);
-
-        // Set center text with average stress level
-        if (stressWeeklyData.averageStress() > 0) {
-            int avgStress = stressWeeklyData.averageStress();
-            int noc = String.valueOf(avgStress).length();
-            SpannableString centerText = new SpannableString(avgStress + "\n" +
-                    getContext().getString(R.string.stress_average));
-            centerText.setSpan(new RelativeSizeSpan(1.75f), 0, noc, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            centerText.setSpan(new RelativeSizeSpan(0.72f), noc, centerText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            mStressLevelsPieChart.setCenterText(centerText);
-        } else {
-            SpannableString centerText = new SpannableString("-\n" +
-                    getContext().getString(R.string.stress_average));
-            centerText.setSpan(new RelativeSizeSpan(1.25f), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            centerText.setSpan(new RelativeSizeSpan(0.72f), 2, centerText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            mStressLevelsPieChart.setCenterText(centerText);
-        }
     }
 
     private void updateStressTiles(final MyStressWeeklyData stressWeeklyData) {
@@ -268,7 +191,14 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
     }
 
     private StatTileData buildStressTile(final StressType stressType, final String value) {
-        return new StatTileData(value, stressType.getLabel(requireContext()), null, null, null, null, stressType.getColor(requireContext()));
+        final int label = switch (stressType) {
+            case RELAXED -> R.string.stress_relaxed_avg;
+            case MILD -> R.string.stress_mild_avg;
+            case MODERATE -> R.string.stress_moderate_avg;
+            case HIGH -> R.string.stress_high_avg;
+            default -> R.string.unknown;
+        };
+        return new StatTileData(value, getString(label), null, null, null, null, stressType.getColor(requireContext()));
     }
 
     private MyStressWeeklyData getMyStressWeeklyData(DBHandler db, Calendar day, GBDevice device) {
@@ -385,22 +315,6 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
         return new StressPeriodBars(epochDays, minutes);
     }
 
-    private void setupPieChart() {
-        mStressLevelsPieChart.setBackgroundColor(BACKGROUND_COLOR);
-        mStressLevelsPieChart.getDescription().setTextColor(DESCRIPTION_COLOR);
-        mStressLevelsPieChart.setEntryLabelColor(DESCRIPTION_COLOR);
-        mStressLevelsPieChart.getDescription().setText("");
-        mStressLevelsPieChart.setNoDataText("");
-        mStressLevelsPieChart.setNoDataIconEnabled(false);
-        mStressLevelsPieChart.setTouchEnabled(false);
-        mStressLevelsPieChart.setCenterTextColor(GBApplication.getTextColor(getContext()));
-        mStressLevelsPieChart.setCenterTextSize(18f);
-        mStressLevelsPieChart.setHoleColor(requireContext().getResources().getColor(R.color.transparent));
-        mStressLevelsPieChart.setHoleRadius(87);
-        mStressLevelsPieChart.setDrawEntryLabelsEnabled(false);
-        mStressLevelsPieChart.getLegend().setEnabled(false);
-    }
-
     @Override
     protected void setupLegend(Chart<?> chart) {
     }
@@ -408,7 +322,6 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
     @Override
     protected void renderCharts() {
         mWeekChart.invalidate();
-        mStressLevelsPieChart.invalidate();
     }
 
     private int getRangeDays() {
