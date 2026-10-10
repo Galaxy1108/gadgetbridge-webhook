@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.activities.charts;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +66,7 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
 
     private LinearLayout mStatsContainer;
     private TextView stressDatesText;
+    private TextView stressAverageText;
     private GbChartView mWeekChart;
     private ChartLegendView mWeekLegend;
 
@@ -97,6 +99,7 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
         mWeekLegend = rootView.findViewById(R.id.weekstress_chart_legend);
         mStatsContainer = rootView.findViewById(R.id.stress_stats_container);
         stressDatesText = rootView.findViewById(R.id.stress_dates);
+        stressAverageText = rootView.findViewById(R.id.stress_average);
 
         refresh();
 
@@ -119,6 +122,9 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
         updateStressTiles(mcd.getStressWeeklyData());
 
         stressDatesText.setText(DateTimeUtils.formatDaysUntil(TOTAL_DAYS, getTSEnd()));
+        final int averageStress = mcd.getStressWeeklyData().averageStress();
+        stressAverageText.setText(getString(R.string.average,
+                averageStress > 0 ? String.valueOf(averageStress) : getString(R.string.stats_empty_value)));
     }
 
     private void updateWeekChart(final StressPeriodBars bars) {
@@ -128,7 +134,9 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
             labels[i] = BAR_LEVELS[i].getLabel(requireContext());
             colors[i] = BAR_LEVELS[i].getColor(requireContext());
         }
-        final ChartSpec spec = StressChartData.periodSpec(bars.epochDays(), bars.minutes(), labels, colors);
+        final String averageLabel = getString(R.string.charts_legend_stress_average);
+        final ChartSpec spec = StressChartData.periodSpec(bars.epochDays(), bars.minutes(), labels, colors,
+                bars.averages(), averageLabel, Color.GRAY);
 
         final List<String> rowLabels = new ArrayList<>();
         final List<Integer> rowColors = new ArrayList<>();
@@ -142,6 +150,9 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
                     ? DateTimeUtils.formatDurationHoursMinutes(Math.round(levelMinutes[i] * 60), TimeUnit.SECONDS)
                     : emptyValue);
         }
+        rowLabels.add(averageLabel);
+        rowColors.add(Color.GRAY);
+        rowTexts.add(i -> bars.averages()[i] > 0 ? String.valueOf(bars.averages()[i]) : emptyValue);
         mWeekChart.setSelectionContent(x -> DaySelections.of(bars.epochDays(), x, rowLabels, rowColors, rowTexts, emptyValue));
         mWeekChart.setSpec(spec);
 
@@ -150,6 +161,7 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
             for (final StressType type : StressType.values()) {
                 legendSeries.add(ChartLegendView.squareItem(type.getLabel(requireContext()), type.getColor(requireContext())));
             }
+            legendSeries.add(ChartLegendView.lineItem(averageLabel, Color.GRAY));
         }
         mWeekLegend.setSeries(legendSeries);
     }
@@ -271,6 +283,7 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
 
         final long[] epochDays = new long[TOTAL_DAYS];
         final double[][] minutes = new double[BAR_LEVELS.length][TOTAL_DAYS];
+        final int[] averages = new int[TOTAL_DAYS];
 
         DeviceCoordinator coordinator = device.getDeviceCoordinator();
         int sampleRate = 60;
@@ -309,10 +322,11 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
                 minutes[level][counter] = dailyTotals.get(BAR_LEVELS[level]) / 60d;
             }
             minutes[BAR_LEVELS.length - 1][counter] = Math.max(totalPossibleMinutes - totalMinutesTracked, 0);
+            averages[counter] = calculateAverageStress(samples);
 
             day.add(Calendar.DATE, 1);
         }
-        return new StressPeriodBars(epochDays, minutes);
+        return new StressPeriodBars(epochDays, minutes, averages);
     }
 
     @Override
@@ -352,7 +366,7 @@ public class StressPeriodFragment extends StressFragment<StressPeriodFragment.My
         }
     }
 
-    private record StressPeriodBars(long[] epochDays, double[][] minutes) {
+    private record StressPeriodBars(long[] epochDays, double[][] minutes, int[] averages) {
     }
 
     private record MyStressWeeklyData(long totalRelaxed,
