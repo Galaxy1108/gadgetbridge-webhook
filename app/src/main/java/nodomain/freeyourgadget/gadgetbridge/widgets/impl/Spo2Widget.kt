@@ -24,6 +24,7 @@ import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import org.slf4j.LoggerFactory
 
@@ -75,7 +76,7 @@ object Spo2Widget : GaugeWidget<Spo2Widget.Data>() {
         return Data(latestSpo2)
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         if (data.spo2 > 0) {
             gaugeValue.text = context.getString(R.string.battery_percentage_str, data.spo2.toString())
             drawSimpleGauge(

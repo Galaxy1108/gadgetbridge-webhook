@@ -14,6 +14,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.BodyEnergySample
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 import kotlin.math.abs
 
@@ -88,7 +89,7 @@ object BodyEnergyWidget : GaugeWidget<BodyEnergyWidget.Data>() {
         return data
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         val colorEnergy = ContextCompat.getColor(context, R.color.body_energy_level_color)
 
         if (data.isToday) {

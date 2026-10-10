@@ -10,6 +10,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.HydrationUnit
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import java.text.NumberFormat
 import java.time.Instant
@@ -39,7 +40,7 @@ object HydrationWidget : GaugeWidget<HydrationWidget.Data>() {
         return Data(totalMl, ActivityUser().hydrationGoalMl, unit)
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         gaugeValue.text = if (data.unit == HydrationUnit.MILLILITER && data.totalMl >= 1000) {
             val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
             numberFormat.maximumFractionDigits = 1

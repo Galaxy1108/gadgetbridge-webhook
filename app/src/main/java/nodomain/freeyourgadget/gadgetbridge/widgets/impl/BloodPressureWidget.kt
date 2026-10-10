@@ -9,6 +9,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.BloodPressureSample
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 
 /**
@@ -55,7 +56,7 @@ object BloodPressureWidget : GaugeWidget<BloodPressureWidget.Data>() {
         return Data(latestSystolic, latestDiastolic)
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         if (data.systolic > 0 && data.diastolic > 0) {
             gaugeValue.text = context.getString(R.string.blood_pressure_avg_format, data.systolic, data.diastolic)
 

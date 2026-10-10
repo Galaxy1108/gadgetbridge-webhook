@@ -24,6 +24,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import java.text.NumberFormat
 
 /**
@@ -43,7 +44,7 @@ object StepsWidget : GaugeWidget<StepsWidget.Data>() {
         return Data(total, scope.stepsGoalFactor(total))
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         gaugeValue.text = NumberFormat.getInstance().format(data.total)
         drawSimpleGauge(gaugeBar, WidgetColors.activity, data.goalFactor)
     }

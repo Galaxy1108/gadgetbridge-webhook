@@ -8,6 +8,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import java.util.Locale
 
 /**
@@ -27,7 +28,7 @@ object SleepWidget : GaugeWidget<SleepWidget.Data>() {
         return Data(total, scope.sleepGoalFactor(total))
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         gaugeValue.text = String.format(Locale.ROOT, "%d:%02d", data.total / 60, data.total % 60)
         drawSimpleGauge(gaugeBar, WidgetColors.lightSleep, data.goalFactor)
     }

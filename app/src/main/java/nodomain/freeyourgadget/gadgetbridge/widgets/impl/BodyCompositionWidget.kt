@@ -26,6 +26,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.util.BodyCompositionCalculator
 import nodomain.freeyourgadget.gadgetbridge.util.BodyCompositionEstimates
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 
 /**
@@ -46,7 +47,7 @@ abstract class BodyCompositionWidget : GaugeWidget<BodyCompositionWidget.Data>()
         return Data(composition, ActivityUser().gender)
     }
 
-    final override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    final override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         val value = data.composition?.let { valueOf(it) }
         if (value == null) {
             gaugeValue.text = context.getString(R.string.stats_empty_value)

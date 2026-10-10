@@ -25,16 +25,17 @@ import nodomain.freeyourgadget.gadgetbridge.test.TestBase
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class HeartRateWidgetTest : TestBase() {
     private fun render(data: HeartRateWidget.Data): String {
-        val instance = WidgetInstance("test-heartrate", HeartRateWidget.id, 1)
+        val instance = WidgetInstance("test-heartrate", HeartRateWidget.id)
         val config = WidgetConfig(instance, Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId)), true, emptySet())
-        val view = HeartRateWidget.createView(LayoutInflater.from(context), FrameLayout(context))
-        HeartRateWidget.bind(view, config, data)
+        val view = HeartRateWidget.createView(LayoutInflater.from(context), FrameLayout(context), WidgetVariant.GAUGE)
+        HeartRateWidget.bind(view, WidgetVariant.GAUGE, config, data)
         return view.findViewById<TextView>(R.id.gauge_value).text.toString()
     }
 

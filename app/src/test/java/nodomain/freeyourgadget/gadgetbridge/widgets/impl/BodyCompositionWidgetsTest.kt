@@ -28,6 +28,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.BodyCompositionCalculator
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -37,10 +38,10 @@ class BodyCompositionWidgetsTest : TestBase() {
     private val composition = BodyCompositionCalculator.compute(ActivityUser.GENDER_MALE, 30, 180, 80f, 500f)
 
     private fun render(widget: BodyCompositionWidget, data: BodyCompositionWidget.Data): String {
-        val instance = WidgetInstance("test-" + widget.id, widget.id, 1)
+        val instance = WidgetInstance("test-" + widget.id, widget.id)
         val config = WidgetConfig(instance, Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId)), true, emptySet())
-        val view = widget.createView(LayoutInflater.from(context), FrameLayout(context))
-        widget.bind(view, config, data)
+        val view = widget.createView(LayoutInflater.from(context), FrameLayout(context), WidgetVariant.GAUGE)
+        widget.bind(view, WidgetVariant.GAUGE, config, data)
         return view.findViewById<TextView>(R.id.gauge_value).text.toString()
     }
 

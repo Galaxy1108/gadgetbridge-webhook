@@ -1,18 +1,41 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets
 
 import android.content.Context
+import androidx.annotation.StringRes
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
+import nodomain.freeyourgadget.gadgetbridge.util.gson.GsonSerialized
 
 /**
- * One widget instance, placed on the dashboard: a [typeId] (maps to [GBWidget.id]) plus the
- * layout-level properties [WidgetLayoutStore] needs to draw the grid.
+ * One copy of a widget that the user added. [typeId] is the [GBWidget.id].
  */
+@GsonSerialized
 data class WidgetInstance(
     val instanceId: String,
     val typeId: String,
-    val columns: Int,
+)
+
+/**
+ * A widget instance in one layout, at the cell of its top-left corner.
+ */
+@GsonSerialized
+data class WidgetPlacement(
+    val instanceId: String,
+    val variantId: String,
+    val x: Int,
+    val y: Int,
+)
+
+/**
+ * A widget instance as the dashboard grid displays it, after compaction.
+ */
+data class PlacedWidget(
+    val instance: WidgetInstance,
+    val widget: GBWidget<*>,
+    val variant: WidgetVariant,
+    val x: Int,
+    val y: Int,
 )
 
 /**
@@ -47,17 +70,16 @@ class WidgetConfig(
     }
 
     /**
-     * The instance's display title: a user override if set, otherwise the widget's own label.
+     * The instance's display title: a user override if set, otherwise [label].
      */
-    fun title(context: Context, widget: GBWidget<*>): String {
+    fun title(context: Context, @StringRes label: Int): String {
         val custom = prefs.getString(KEY_TITLE, "")
-        return custom.ifBlank { context.getString(widget.label) }
+        return custom.ifBlank { context.getString(label) }
     }
 
     companion object {
         const val KEY_DEVICES_MODE = "widget_devices_mode"
         const val KEY_DEVICES = "widget_devices"
-        const val KEY_COLUMNS = "widget_columns"
         const val KEY_TITLE = "widget_title"
 
         const val DEVICES_MODE_INHERIT = "inherit"

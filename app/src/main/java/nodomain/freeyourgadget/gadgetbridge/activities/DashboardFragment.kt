@@ -36,32 +36,31 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
-import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardAdapter
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardCalendarActivity
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardGridBinder
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardViewModel
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridLayout
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.BarShade
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import java.util.Calendar
 import java.util.GregorianCalendar
 
 /**
- * Hosts the widget grid: date header, calendar/settings menu, and the [RecyclerView] the
- * [DashboardAdapter] renders configured widgets into, driven by [DashboardViewModel].
+ * Hosts the widget grid: date header, calendar/settings menu, and the [WidgetGridLayout] the
+ * [DashboardGridBinder] renders the placed widgets into, driven by [DashboardViewModel].
  */
 class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage {
     private val day: Calendar = GregorianCalendar.getInstance()
     private lateinit var textViewDate: TextView
     private lateinit var arrowRight: TextView
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: DashboardAdapter
+    private lateinit var grid: WidgetGridLayout
+    private lateinit var binder: DashboardGridBinder
     private lateinit var viewModel: DashboardViewModel
 
     private var isConfigChanged = false
@@ -96,21 +95,12 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
         textViewDate = view.findViewById(R.id.dashboard_date)
-        recyclerView = view.findViewById(R.id.dashboard_recyclerview)
+        grid = view.findViewById(R.id.dashboard_grid)
         arrowRight = view.findViewById(R.id.arrow_right)
 
         viewModel = ViewModelProvider(this)[DashboardViewModel::class.java]
-        adapter = DashboardAdapter()
-
-        val metrics = resources.displayMetrics
-        val spanCount = if (metrics.widthPixels / metrics.density >= 600) 4 else 2
-        val layoutManager = GridLayoutManager(requireContext(), spanCount)
-        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(position: Int): Int = adapter.columnsAt(position).coerceAtMost(spanCount)
-        }
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = adapter
-        (recyclerView.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
+        binder = DashboardGridBinder(grid)
+        grid.columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
 
         val arrowLeft = view.findViewById<TextView>(R.id.arrow_left)
         arrowLeft.setOnClickListener {
@@ -185,13 +175,13 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage {
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.instances.collect { instances ->
-                adapter.submitInstances(instances)
+            viewModel.items.collect { items ->
+                binder.submitItems(items)
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { states ->
-                adapter.submitStates(states)
+                binder.submitStates(states)
             }
         }
     }
@@ -210,10 +200,10 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage {
         val deviceList = prefs.getStringSet("dashboard_devices_multiselect", HashSet())
         val timestamp = (day.timeInMillis / 1000L).toInt()
 
-        adapter.cardsEnabled = prefs.getBoolean("dashboard_cards_enabled", true)
-        adapter.dashboardShowAllDevices = showAllDevices
-        adapter.dashboardDeviceList = deviceList
-        adapter.timestamp = timestamp
+        binder.cardsEnabled = prefs.getBoolean("dashboard_cards_enabled", true)
+        binder.dashboardShowAllDevices = showAllDevices
+        binder.dashboardDeviceList = deviceList
+        binder.timestamp = timestamp
 
         val today = GregorianCalendar.getInstance()
         if (DateTimeUtils.isSameDay(today, day)) {
@@ -224,7 +214,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage {
             arrowRight.alpha = 1f
         }
 
-        viewModel.refresh(day, showAllDevices, deviceList)
+        viewModel.refresh(day, grid.columns, showAllDevices, deviceList)
     }
 
     override fun getHeaderShade(): View? {

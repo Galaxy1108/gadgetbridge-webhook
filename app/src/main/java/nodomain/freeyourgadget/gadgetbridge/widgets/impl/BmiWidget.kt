@@ -23,6 +23,7 @@ import android.widget.TextView
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import java.util.Locale
 
@@ -42,7 +43,7 @@ object BmiWidget : GaugeWidget<WeightWidget.Data>() {
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): WeightWidget.Data =
         WeightWidget.loadData(scope, config)
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: WeightWidget.Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: WeightWidget.Data) {
         val bmi = Bmi.of(data.weightKg, data.heightCm)
         if (bmi == null) {
             gaugeValue.text = context.getString(R.string.stats_empty_value)

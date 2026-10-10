@@ -10,6 +10,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.HrvSummarySample
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 
 /**
@@ -61,7 +62,7 @@ object HrvWidget : GaugeWidget<HrvWidget.Data?>() {
         return null
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data?) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data?) {
         val value = if (data != null) {
             calculateGaugeValue(
                 data.weeklyAverage,

@@ -19,11 +19,12 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.device
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
 
 /**
- * Renders one placed widget instance's settings: the common ones (device selection, column span, title override),
+ * Renders one placed widget instance's settings: the common ones (device selection, variant, title override),
  * followed by the widget's own [GBWidget.settings].
  */
 class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRenderHost {
@@ -48,26 +49,26 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
 
         refreshHandle = DeviceSettingRenderer.render(items, screen, prefs, this)
 
-        setupColumnsPreference(instanceId, widget)
+        setupVariantPreference(instanceId)
     }
 
-    /**
-     * [WidgetConfig.KEY_COLUMNS] renders as a normal [ListPreference], but its actual value comes from
-     * [WidgetLayoutStore] (the layout, not this instance's own settings file) since it's what
-     * `DashboardAdapter.columnsAt` reads for the grid's span. So its current value is seeded from
-     * there instead of from `SharedPreferences`, and changes are additionally written back there.
-     */
-    private fun setupColumnsPreference(instanceId: String, widget: GBWidget<*>) {
-        val columnsPref = findPreference<ListPreference>(WidgetConfig.KEY_COLUMNS) ?: return
-        val currentInstance = WidgetLayoutStore.load().find { it.instanceId == instanceId }
-        columnsPref.value = (currentInstance?.columns ?: widget.defaultColumns).toString()
+    private fun setupVariantPreference(instanceId: String) {
+        val variantPref = findPreference<ListPreference>(KEY_VARIANT) ?: return
+        variantPref.isPersistent = false
 
-        val rendererListener = columnsPref.onPreferenceChangeListener
-        columnsPref.setOnPreferenceChangeListener { preference, newValue ->
+        val columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
+        val placement = WidgetLayoutStore.layout(columns).find { it.instanceId == instanceId }
+        if (placement == null) {
+            variantPref.isVisible = false
+            return
+        }
+        variantPref.value = placement.variantId
+
+        val rendererListener = variantPref.onPreferenceChangeListener
+        variantPref.setOnPreferenceChangeListener { preference, newValue ->
             val accepted = rendererListener?.onPreferenceChange(preference, newValue) ?: true
             if (accepted) {
-                val columns = (newValue as? String)?.toIntOrNull() ?: widget.defaultColumns
-                WidgetLayoutStore.setColumns(instanceId, columns)
+                WidgetLayoutStore.setVariant(instanceId, columns, newValue as String)
             }
             accepted
         }
@@ -108,18 +109,13 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
                 ) == WidgetConfig.DEVICES_MODE_SELECTED
             },
         )
-        if (widget.allowedColumns.size > 1) {
+        if (widget.variants.size > 1) {
             list(
-                key = WidgetConfig.KEY_COLUMNS,
-                title = R.string.pref_widget_columns_title,
+                key = KEY_VARIANT,
+                title = R.string.pref_widget_variant_title,
                 icon = R.drawable.ic_font_size,
-                entries = widget.allowedColumns.map {
-                    ListEntry.Res(
-                        it.toString(),
-                        if (it >= 2) R.string.pref_widget_columns_two else R.string.pref_widget_columns_one
-                    )
-                },
-                defaultValue = widget.defaultColumns.toString(),
+                entries = widget.variants.map { ListEntry.Res(it.id, it.name) },
+                defaultValue = widget.variants.first().id,
             )
         }
         text(
@@ -170,6 +166,7 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
     companion object {
         const val ARG_INSTANCE_ID = "widget_instance_id"
         const val ARG_TYPE_ID = "widget_type_id"
+        private const val KEY_VARIANT = "widget_variant"
 
         fun newInstance(instanceId: String, typeId: String): WidgetInstanceSettingsFragment {
             val fragment = WidgetInstanceSettingsFragment()

@@ -10,6 +10,6 @@
     <FrameLayout
         android:id="@+id/dashboard_widget_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
 </com.google.android.material.card.MaterialCardView>

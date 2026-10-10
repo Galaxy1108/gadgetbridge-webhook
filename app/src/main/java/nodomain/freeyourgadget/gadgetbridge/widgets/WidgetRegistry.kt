@@ -4,8 +4,7 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.ActiveTimeWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BloodPressureWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BodyEnergyWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.impl.CaloriesActiveWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.impl.CaloriesSegmentedWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.CaloriesWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.DistanceWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.GoalsWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.HeartRateWidget
@@ -16,13 +15,9 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.impl.SleepScoreWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.SleepWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Spo2Widget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StepsWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StressBreakdownWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StressSegmentedWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StressSimpleWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StressWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.TodayWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxAnyWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxCyclingWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxRunningWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BmiWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BasalMetabolicRateWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BodyFatWidget
@@ -44,8 +39,7 @@ object WidgetRegistry {
         BodyEnergyWidget,
         BodyFatWidget,
         BodyWaterWidget,
-        CaloriesActiveWidget,
-        CaloriesSegmentedWidget,
+        CaloriesWidget,
         DistanceWidget,
         GoalsWidget,
         HeartRateWidget,
@@ -57,13 +51,9 @@ object WidgetRegistry {
         SleepWidget,
         Spo2Widget,
         StepsWidget,
-        StressBreakdownWidget,
-        StressSegmentedWidget,
-        StressSimpleWidget,
+        StressWidget,
         TodayWidget,
-        Vo2MaxAnyWidget,
-        Vo2MaxCyclingWidget,
-        Vo2MaxRunningWidget,
+        Vo2MaxWidget,
         WeightWidget,
     )
 

@@ -34,6 +34,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 import java.util.Calendar
 import kotlin.math.roundToInt
@@ -50,8 +51,10 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     override val id = "today"
     override val label = R.string.pref_dashboard_widget_today_title
     override val icon = R.drawable.ic_calendar_today
-    override val defaultColumns = 2
-    override val allowedColumns = listOf(1, 2)
+    override val variants = listOf(
+        WidgetVariant.LARGE,
+        WidgetVariant.SMALL,
+    )
 
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsActivityTracking(device)
@@ -281,10 +284,10 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     // View (UI thread)
     //
 
-    override fun createView(inflater: LayoutInflater, parent: ViewGroup): View =
+    override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View =
         inflater.inflate(R.layout.dashboard_widget_today, parent, false)
 
-    override fun bind(view: View, config: WidgetConfig, data: Data) {
+    override fun bind(view: View, variant: WidgetVariant, config: WidgetConfig, data: Data) {
         val context = view.context
 
         val legend = view.findViewById<TextView>(R.id.dashboard_piechart_legend)

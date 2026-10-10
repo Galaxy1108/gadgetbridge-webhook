@@ -10,6 +10,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.SleepScoreSample
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 
 /**
@@ -49,7 +50,7 @@ object SleepScoreWidget : GaugeWidget<SleepScoreWidget.Data>() {
         return Data(value)
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         if (data.value > 0) {
             gaugeValue.text = data.value.toString()
             drawSimpleGauge(gaugeBar, WidgetColors.lightSleep, data.value / 100f)

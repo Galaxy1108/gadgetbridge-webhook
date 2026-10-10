@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,19 +10,19 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:paddingHorizontal="8dp"
-        android:background="?attr/datestep_row_bg">
+        android:background="?attr/datestep_row_bg"
+        android:paddingHorizontal="8dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/arrow_left"
             style="@style/Widget.App.DateStep.Primary"
             android:layout_width="48dp"
             android:layout_height="36dp"
-            android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/datestep_prev_day"
             android:text="@string/datestep_letter_day"
-            app:icon="@drawable/ic_chevron_1"
-            android:contentDescription="@string/datestep_prev_day"/>
+            app:icon="@drawable/ic_chevron_1" />
 
         <TextView
             android:id="@+id/dashboard_date"
@@ -32,30 +31,33 @@
             android:layout_centerInParent="true"
             android:text="@string/activity_summary_today"
             android:textAppearance="@style/TextAppearance.App.DateLabel"
-            android:textSize="16sp"/>
+            android:textSize="16sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/arrow_right"
             style="@style/Widget.App.DateStep.Primary.End"
             android:layout_width="48dp"
             android:layout_height="36dp"
-            android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/datestep_next_day"
             android:text="@string/datestep_letter_day"
-            app:icon="@drawable/ic_chevron_1_right"
-            android:contentDescription="@string/datestep_next_day"/>
+            app:icon="@drawable/ic_chevron_1_right" />
     </RelativeLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/dashboard_recyclerview"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            tools:listitem="@layout/dashboard_widget_card" />
+            android:layout_height="match_parent">
+
+            <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridLayout
+                android:id="@+id/dashboard_grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </androidx.core.widget.NestedScrollView>
 
         <View
             android:id="@+id/dashboard_date_row_shade"

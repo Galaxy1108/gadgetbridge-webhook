@@ -9,6 +9,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.FormatUtils
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 
 /**
  * Total distance for the day against the user's distance goal.
@@ -27,7 +28,7 @@ object DistanceWidget : GaugeWidget<DistanceWidget.Data>() {
         return Data(total, scope.distanceGoalFactor(total))
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         gaugeValue.text = FormatUtils.getFormattedDistanceLabel(data.total.toDouble())
         drawSimpleGauge(gaugeBar, WidgetColors.distance, data.goalFactor)
     }

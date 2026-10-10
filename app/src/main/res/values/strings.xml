@@ -2701,6 +2701,7 @@
     <string name="menuitem_total_workout">Total workout</string>
     <string name="menuitem_vo2_max">VO₂ Max</string>
     <string name="generic_metrics">Other</string>
+    <string name="vo2max_any_sport">Any sport</string>
     <string name="p_generic_metrics" translatable="false">genericmetrics</string>
     <string name="generic_metric_select_metric">Metric</string>
     <string name="number_of_generic_metrics">%1$d metrics</string>
@@ -4909,9 +4910,10 @@
     <string name="widgets_drag_to_reorder">Drag to reorder</string>
     <string name="widgets_more_options">More options</string>
     <string name="pref_widget_devices_mode_inherit">Inherit from dashboard</string>
-    <string name="pref_widget_columns_title">Width</string>
-    <string name="pref_widget_columns_one">1 column</string>
-    <string name="pref_widget_columns_two">2 columns</string>
+    <string name="pref_widget_variant_title">Variant</string>
+    <string name="widget_variant_gauge">Gauge</string>
+    <string name="widget_variant_small">Small</string>
+    <string name="widget_variant_large">Large</string>
     <string name="pref_widget_title_title">Custom title</string>
     <string name="pref_widget_title_summary">Overrides the widget\'s default title. Leave empty to use the default.</string>
     <plurals name="amount_of_days">

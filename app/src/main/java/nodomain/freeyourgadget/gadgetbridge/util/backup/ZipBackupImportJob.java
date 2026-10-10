@@ -198,10 +198,10 @@ public class ZipBackupImportJob extends AbstractZipBackupJob {
 
             if (isAborted()) return;
 
-            // At this point global preferences (which includes pref_dashboard_layout) are
-            // already restored, so WidgetLayoutStore.load() reflects the imported layout.
+            // At this point global preferences (which includes the dashboard layouts) are
+            // already restored, so WidgetLayoutStore.instances() reflects the imported instances.
             LOG.debug("Importing widget preferences");
-            for (final WidgetInstance widgetInstance : WidgetLayoutStore.INSTANCE.load()) {
+            for (final WidgetInstance widgetInstance : WidgetLayoutStore.INSTANCE.instances()) {
                 if (isAborted()) break;
 
                 LOG.debug("Importing widget preferences for {}", widgetInstance.getInstanceId());

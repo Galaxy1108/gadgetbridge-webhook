@@ -27,6 +27,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.WeightSample
 import nodomain.freeyourgadget.gadgetbridge.model.WeightUnit
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import org.slf4j.LoggerFactory
 
@@ -51,7 +52,7 @@ object WeightWidget : GaugeWidget<WeightWidget.Data>() {
         return Data(latest?.weightKg?.toDouble() ?: 0.0, ActivityUser().heightCm)
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         if (data.weightKg <= 0) {
             gaugeValue.text = context.getString(R.string.stats_empty_value)
             drawSimpleGauge(gaugeBar, Color.GRAY, -1f)

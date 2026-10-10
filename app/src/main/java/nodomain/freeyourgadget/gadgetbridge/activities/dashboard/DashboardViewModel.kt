@@ -16,11 +16,10 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
+import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
 import org.slf4j.LoggerFactory
 import java.util.Calendar
 
@@ -34,7 +33,7 @@ sealed interface WidgetState {
 }
 
 /**
- * Drives the dashboard's widget grid: loads the configured [WidgetInstance]s from
+ * Drives the dashboard's widget grid: loads the [PlacedWidget]s for a column count from
  * [WidgetLayoutStore], and for the selected day loads each instance's data through its own
  * [nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget.loadData].
  *
@@ -42,8 +41,8 @@ sealed interface WidgetState {
  * ready.
  */
 class DashboardViewModel : ViewModel() {
-    private val _instances = MutableStateFlow<List<WidgetInstance>>(emptyList())
-    val instances: StateFlow<List<WidgetInstance>> = _instances.asStateFlow()
+    private val _items = MutableStateFlow<List<PlacedWidget>>(emptyList())
+    val items: StateFlow<List<PlacedWidget>> = _items.asStateFlow()
 
     private val _state = MutableStateFlow<Map<String, WidgetState>>(emptyMap())
     val state: StateFlow<Map<String, WidgetState>> = _state.asStateFlow()
@@ -51,25 +50,25 @@ class DashboardViewModel : ViewModel() {
     private var refreshJob: Job? = null
 
     /**
-     * Re-reads the layout from [WidgetLayoutStore] and reloads every instance for [day].
+     * Re-reads the layout for [columns] from [WidgetLayoutStore] and reloads every instance for [day].
      */
-    fun refresh(day: Calendar, dashboardShowAllDevices: Boolean, dashboardDeviceList: Set<String>) {
+    fun refresh(day: Calendar, columns: Int, dashboardShowAllDevices: Boolean, dashboardDeviceList: Set<String>) {
         refreshJob?.cancel()
 
-        LOG.debug("Reloading all widgets for {}", DateTimeUtils.formatIso8601(day))
+        LOG.debug("Reloading all widgets for {} in {} columns", DateTimeUtils.formatIso8601(day), columns)
 
-        val layout = WidgetLayoutStore.load()
-        _instances.value = layout
-        _state.value = layout.associate { it.instanceId to WidgetState.Loading }
+        val layout = WidgetLayoutStore.placedWidgets(columns)
+        _items.value = layout
+        _state.value = layout.associate { it.instance.instanceId to WidgetState.Loading }
 
         val timeTo = (day.timeInMillis / 1000L).toInt()
         val timeFrom = DateTimeUtils.shiftDays(timeTo, -1)
         val query = DashboardQuery(timeFrom, timeTo)
 
         refreshJob = viewModelScope.launch(Dispatchers.IO) {
-            val jobs = layout.map { instance ->
+            val jobs = layout.map { placed ->
                 async {
-                    loadInstance(instance, query, dashboardShowAllDevices, dashboardDeviceList)
+                    loadInstance(placed, query, dashboardShowAllDevices, dashboardDeviceList)
                 }
             }
             jobs.awaitAll()
@@ -78,21 +77,13 @@ class DashboardViewModel : ViewModel() {
     }
 
     private suspend fun loadInstance(
-        instance: WidgetInstance,
+        placed: PlacedWidget,
         query: DashboardQuery,
         dashboardShowAllDevices: Boolean,
         dashboardDeviceList: Set<String>,
     ) {
-        val widget = WidgetRegistry.byId(instance.typeId)
-        if (widget == null) {
-            LOG.warn("Unknown widget type {} for instance {}", instance.typeId, instance.instanceId)
-            publish(
-                instance.instanceId,
-                WidgetState.Error(IllegalStateException("Unknown widget type ${instance.typeId}"))
-            )
-            return
-        }
-
+        val instance = placed.instance
+        val widget = placed.widget
         try {
             val prefs = Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId))
             val config = WidgetConfig(instance, prefs, dashboardShowAllDevices, dashboardDeviceList)

@@ -26,6 +26,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.DashboardFragment
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
@@ -34,17 +35,19 @@ import java.text.Collator
 import java.util.Collections
 
 /**
- * Lists the currently configured dashboard widget instances: drag to reorder, and per-row
- * Configure/Duplicate/Remove. A FAB adds a new instance of any widget kind supported by a
- * currently paired device.
+ * Lists the widget instances in the layout for the current column count, in reading order: drag to
+ * reorder, and per-row Configure/Duplicate/Remove. A FAB adds a new instance of any widget
+ * kind supported by a currently paired device.
  */
 class DashboardWidgetsActivity : AbstractGBActivity() {
     private lateinit var adapter: InstanceAdapter
     private var instances: MutableList<WidgetInstance> = mutableListOf()
+    private var columns = WidgetGrid.BASE_COLUMNS
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard_widgets)
+        columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
 
         adapter = InstanceAdapter()
         val recyclerView = findViewById<RecyclerView>(R.id.dashboard_widgets_list)
@@ -75,7 +78,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
 
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
-                WidgetLayoutStore.save(instances)
+                WidgetLayoutStore.reorder(columns, instances.map { it.instanceId })
             }
         })
         touchHelper.attachToRecyclerView(recyclerView)
@@ -107,7 +110,11 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
     }
 
     private fun reload() {
-        instances = WidgetLayoutStore.load().toMutableList()
+        val byId = WidgetLayoutStore.instances().associateBy { it.instanceId }
+        instances = WidgetLayoutStore.layout(columns)
+            .sortedWith(compareBy({ it.y }, { it.x }))
+            .mapNotNull { byId[it.instanceId] }
+            .toMutableList()
         adapter.submit(instances)
     }
 
@@ -143,8 +150,8 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
         reload()
     }
 
-    private fun remove(instance: WidgetInstance) {
-        WidgetLayoutStore.remove(instance.instanceId)
+    private fun delete(instance: WidgetInstance) {
+        WidgetLayoutStore.delete(instance.instanceId)
         reload()
     }
 
@@ -152,7 +159,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
         val popup = PopupMenu(this, anchor)
         if (hasWidget) popup.menu.add(0, MENU_CONFIGURE, 0, R.string.app_configure)
         popup.menu.add(0, MENU_DUPLICATE, 1, R.string.widgets_duplicate)
-        popup.menu.add(0, MENU_REMOVE, 2, R.string.widgets_remove)
+        popup.menu.add(0, MENU_DELETE, 2, R.string.widgets_remove)
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 MENU_CONFIGURE -> {
@@ -165,8 +172,8 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
                     true
                 }
 
-                MENU_REMOVE -> {
-                    remove(instance)
+                MENU_DELETE -> {
+                    delete(instance)
                     true
                 }
 
@@ -233,6 +240,6 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
     companion object {
         private const val MENU_CONFIGURE = 1
         private const val MENU_DUPLICATE = 2
-        private const val MENU_REMOVE = 3
+        private const val MENU_DELETE = 3
     }
 }

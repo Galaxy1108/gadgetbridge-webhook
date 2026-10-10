@@ -22,6 +22,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 import androidx.core.graphics.createBitmap
@@ -34,8 +35,10 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     override val id = "goals"
     override val label = R.string.pref_dashboard_widget_goals_chart_title
     override val icon = R.drawable.ic_done_all
-    override val defaultColumns = 2
-    override val allowedColumns = listOf(1, 2)
+    override val variants = listOf(
+        WidgetVariant.LARGE,
+        WidgetVariant.SMALL,
+    )
 
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsActivityTracking(device)
@@ -104,10 +107,10 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
         return Data(bitmap)
     }
 
-    override fun createView(inflater: LayoutInflater, parent: ViewGroup): View =
+    override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View =
         inflater.inflate(R.layout.dashboard_widget_goals, parent, false)
 
-    override fun bind(view: View, config: WidgetConfig, data: Data) {
+    override fun bind(view: View, variant: WidgetVariant, config: WidgetConfig, data: Data) {
         view.findViewById<ImageView>(R.id.dashboard_goals_chart).setImageBitmap(data.bitmap)
 
         val legend = view.findViewById<TextView>(R.id.dashboard_goals_legend)

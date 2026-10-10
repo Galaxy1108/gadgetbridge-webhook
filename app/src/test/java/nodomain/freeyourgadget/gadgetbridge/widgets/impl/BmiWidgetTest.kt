@@ -25,15 +25,16 @@ import nodomain.freeyourgadget.gadgetbridge.test.TestBase
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BmiWidgetTest : TestBase() {
     private fun render(data: WeightWidget.Data): String {
-        val instance = WidgetInstance("test-bmi", BmiWidget.id, 1)
+        val instance = WidgetInstance("test-bmi", BmiWidget.id)
         val config = WidgetConfig(instance, Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId)), true, emptySet())
-        val view = BmiWidget.createView(LayoutInflater.from(context), FrameLayout(context))
-        BmiWidget.bind(view, config, data)
+        val view = BmiWidget.createView(LayoutInflater.from(context), FrameLayout(context), WidgetVariant.GAUGE)
+        BmiWidget.bind(view, WidgetVariant.GAUGE, config, data)
         return view.findViewById<TextView>(R.id.gauge_value).text.toString()
     }
 

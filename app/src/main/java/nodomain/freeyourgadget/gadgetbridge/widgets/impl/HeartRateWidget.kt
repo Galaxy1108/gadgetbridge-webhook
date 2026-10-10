@@ -27,6 +27,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.heartratezones.HeartRateZonesUtils
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import org.slf4j.LoggerFactory
 
@@ -74,7 +75,7 @@ object HeartRateWidget : GaugeWidget<HeartRateWidget.Data>() {
         return Data(latestHeartRate, maxHeartRate())
     }
 
-    override fun draw(context: Context, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
         val colors = intArrayOf(
             Color.GRAY,
             ContextCompat.getColor(context, R.color.hr_zone_warm_up_color),
