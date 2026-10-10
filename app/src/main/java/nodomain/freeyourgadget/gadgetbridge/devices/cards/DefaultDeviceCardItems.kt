@@ -200,6 +200,8 @@ object DefaultDeviceCardItems {
             }
         }
 
+        items.add(MoreCardItem)
+
         return items
     }
 

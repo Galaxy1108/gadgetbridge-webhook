@@ -74,3 +74,13 @@ data class HeartRateCardItem(
 ) : DeviceCardItem {
     override fun isVisible(device: GBDevice) = visible(device)
 }
+
+/**
+ * A button that opens a dialog with the items that are placed after it.
+ */
+data object MoreCardItem : DeviceCardItem {
+    override val id = "more"
+    override val optional = true
+
+    override fun isVisible(device: GBDevice) = true
+}
