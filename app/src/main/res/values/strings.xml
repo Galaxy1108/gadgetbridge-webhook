@@ -1990,6 +1990,7 @@
     <string name="day_timeline">Day Timeline</string>
     <string name="body_energy_trend">Body Energy Trend</string>
     <string name="vo2max_trend">VO₂ Max Trend</string>
+    <string name="heart_rate_trend">Heart Rate Trend</string>
     <string name="stress_daily_levels">Daily Stress Levels</string>
     <string name="calories_daily_active">Daily Active Calories</string>
     <string name="race_prediction_trend">Race Time Trend</string>
