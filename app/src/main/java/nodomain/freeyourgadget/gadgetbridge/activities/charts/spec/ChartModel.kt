@@ -111,6 +111,11 @@ enum class ChartValueFormat {
      * A duration in minutes, as `H:MM`.
      */
     DURATION_MINUTES,
+
+    /**
+     * A 1-based bar index, shown with [AxisSpec.labeler]. Up to six labels, evenly spaced.
+     */
+    BAR_INDEX,
 }
 
 data class AxisSpec(
