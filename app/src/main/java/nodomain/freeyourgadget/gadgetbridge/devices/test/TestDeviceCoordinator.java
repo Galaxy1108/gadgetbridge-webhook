@@ -53,6 +53,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.test.activity.TestActivitySu
 import nodomain.freeyourgadget.gadgetbridge.devices.test.activity.TestActivityTrackProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestBloodPressureSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestBodyEnergySampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestHeartRateRestingSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestHrvSummarySampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestHrvValueSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestPaiSampleProvider;
@@ -173,8 +174,7 @@ public class TestDeviceCoordinator extends AbstractDeviceCoordinator {
 
     @Override
     public TimeSampleProvider<? extends HeartRateSample> getHeartRateRestingSampleProvider(final GBDevice device, final DaoSession session) {
-        // TODO getHeartRateRestingSampleProvider
-        return super.getHeartRateRestingSampleProvider(device, session);
+        return supportsHeartRateRestingMeasurement(device) ? new TestHeartRateRestingSampleProvider() : super.getHeartRateRestingSampleProvider(device, session);
     }
 
     @Override
