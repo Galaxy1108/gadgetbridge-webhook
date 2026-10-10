@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 
+import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.CatimaManager;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.LoyaltyCard;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.communicator.GarminWatchAppCommunicator;
@@ -71,10 +73,15 @@ public class GarminLoyaltyCardsApp extends GarminWatchApp {
     private void send() {
         if (!isAvailable()) {
             LOG.warn("Loyalty cards app is not installed");
+            CatimaManager.notifySynced(getSupport().getContext(), getSupport().getDevice(), false);
             return;
         }
-        for (int i = 0; i < messages.size(); i++) {
-            sendMessage(messages.get(i), i == 0);
+        final int last = messages.size() - 1;
+        for (int i = 0; i <= last; i++) {
+            final Consumer<Boolean> onResult = i == last
+                ? success -> CatimaManager.notifySynced(getSupport().getContext(), getSupport().getDevice(), success)
+                : null;
+            sendMessage(messages.get(i), i == 0, onResult);
         }
     }
 

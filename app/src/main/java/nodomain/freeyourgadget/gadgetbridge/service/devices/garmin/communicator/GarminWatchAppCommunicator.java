@@ -19,7 +19,10 @@ import java.security.SecureRandom;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.ChecksumCalculator;
@@ -86,6 +89,8 @@ public class GarminWatchAppCommunicator {
 
     private State state = State.IDLE;
     private UUID currentApp;
+    @Nullable
+    private Consumer<Boolean> currentResultCallback;
     private byte[] currentKey;
     private byte[] currentCipher;
     private int currentFragmentCount;
@@ -130,18 +135,20 @@ public class GarminWatchAppCommunicator {
     public synchronized void dispose() {
         timeoutHandler.removeCallbacks(timeoutRunnable);
         state = State.IDLE;
-        pendingMessages.clear();
+        reportResult(false);
+        failPending(pending -> true);
     }
 
     /**
      * Queues a message to a watch app. If replace is set, any messages for the same app that
-     * are waiting for transfer are replaced.
+     * are waiting for transfer are replaced. The onResult callback receives true when the watch
+     * acknowledges the message, and false when the transfer fails.
      */
-    public synchronized void sendMessage(final UUID app, final JsonElement message, final boolean replace) {
+    public synchronized void sendMessage(final UUID app, final JsonElement message, final boolean replace, @Nullable final Consumer<Boolean> onResult) {
         if (replace) {
             pendingMessages.removeIf(pending -> pending.app().equals(app));
         }
-        pendingMessages.add(new PendingMessage(app, message));
+        pendingMessages.add(new PendingMessage(app, message, onResult));
         if (state == State.IDLE) {
             startNext();
         }
@@ -177,6 +184,9 @@ public class GarminWatchAppCommunicator {
                 blob = GarminJson.encode(pending.message());
             } catch (final GarminJsonException e) {
                 LOG.error("Failed to encode message {}", pending.message(), e);
+                if (pending.onResult() != null) {
+                    pending.onResult().accept(false);
+                }
                 continue;
             }
 
@@ -185,10 +195,14 @@ public class GarminWatchAppCommunicator {
             final byte[] cipher = Xxtea.encrypt(pad(blob), key);
             if (cipher.length > MAX_MESSAGE_SIZE) {
                 LOG.error("Message is too long: {} bytes", cipher.length);
+                if (pending.onResult() != null) {
+                    pending.onResult().accept(false);
+                }
                 continue;
             }
 
             currentApp = pending.app();
+            currentResultCallback = pending.onResult();
             currentKey = key;
             currentCipher = cipher;
             currentFragmentCount = (cipher.length + FRAGMENT_DATA_SIZE - 1) / FRAGMENT_DATA_SIZE;
@@ -213,7 +227,7 @@ public class GarminWatchAppCommunicator {
                 if (value.length < 3 || value[2] != 0x00) {
                     LOG.warn("Open connection failed: {}", GB.hexdump(value));
                     // The next messages would also fail anyway
-                    pendingMessages.removeIf(pending -> pending.app().equals(currentApp));
+                    failPending(pending -> pending.app().equals(currentApp));
                     finish();
                     return;
                 }
@@ -326,6 +340,7 @@ public class GarminWatchAppCommunicator {
             sendFragments();
         } else {
             LOG.debug("Message sent to {}", currentApp);
+            reportResult(true);
             close();
         }
     }
@@ -398,7 +413,32 @@ public class GarminWatchAppCommunicator {
         state = State.IDLE;
         currentCipher = null;
         currentKey = null;
+        reportResult(false);
         startNext();
+    }
+
+    /**
+     * Runs the callback of the current message, if it did not run yet.
+     */
+    private void reportResult(final boolean success) {
+        final Consumer<Boolean> onResult = currentResultCallback;
+        currentResultCallback = null;
+        if (onResult != null) {
+            onResult.accept(success);
+        }
+    }
+
+    private void failPending(final Predicate<PendingMessage> filter) {
+        final Iterator<PendingMessage> iterator = pendingMessages.iterator();
+        while (iterator.hasNext()) {
+            final PendingMessage pending = iterator.next();
+            if (filter.test(pending)) {
+                iterator.remove();
+                if (pending.onResult() != null) {
+                    pending.onResult().accept(false);
+                }
+            }
+        }
     }
 
     private synchronized void onTimeout() {
@@ -448,6 +488,6 @@ public class GarminWatchAppCommunicator {
         return new UUID(buf.getLong(), buf.getLong());
     }
 
-    private record PendingMessage(UUID app, JsonElement message) {
+    private record PendingMessage(UUID app, JsonElement message, @Nullable Consumer<Boolean> onResult) {
     }
 }

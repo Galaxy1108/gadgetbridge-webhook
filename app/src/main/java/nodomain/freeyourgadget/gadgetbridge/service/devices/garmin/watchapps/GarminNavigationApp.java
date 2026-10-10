@@ -43,7 +43,7 @@ public class GarminNavigationApp extends GarminWatchApp {
             || !Objects.equals(lastMessage.get("text"), message.get("text")));
 
         lastMessage = message;
-        sendMessage(message, true);
+        sendMessage(message, true, null);
         return true;
     }
 
@@ -55,7 +55,7 @@ public class GarminNavigationApp extends GarminWatchApp {
         if (message.isJsonPrimitive() && "ready".equals(message.getAsString())) {
             final JsonObject repeat = lastMessage.deepCopy();
             repeat.addProperty("alert", false);
-            sendMessage(repeat, true);
+            sendMessage(repeat, true, null);
         }
     }
 }
