@@ -1985,7 +1985,7 @@
     <string name="hrv_status_low">Low</string>
     <string name="hrv_status_poor">Poor</string>
     <string name="hrv_status_last_night">Last night</string>
-    <string name="hrv_status_last_night_timeline">Last Night Timeline</string>
+    <string name="last_night_timeline">Last Night Timeline</string>
     <string name="hrv_status_trend">HRV Trend</string>
     <string name="day_timeline">Day Timeline</string>
     <string name="body_energy_trend">Body Energy Trend</string>

@@ -82,7 +82,7 @@
             android:id="@+id/hrv_chart_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:sectionTitle="@string/hrv_status_last_night_timeline" />
+            app:sectionTitle="@string/last_night_timeline" />
 
         <LinearLayout
             android:layout_width="match_parent"
