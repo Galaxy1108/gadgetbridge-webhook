@@ -3,12 +3,17 @@ package nodomain.freeyourgadget.gadgetbridge.devices.cards
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.NumberPicker
 import android.widget.RadioGroup
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
@@ -33,6 +38,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType
 import nodomain.freeyourgadget.gadgetbridge.model.FindDeviceTarget
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes
+import nodomain.freeyourgadget.gadgetbridge.util.GB
 import java.util.Locale
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -189,6 +195,9 @@ object DefaultDeviceCardItems {
 
         if (BuildConfig.DEBUG) {
             items.add(ActionCardItem(testNewFunctionAction(), visible = initialized, optional = true))
+            if (coordinator.supportsFlashing(device)) {
+                items.add(ActionCardItem(installFileAction(), visible = initialized, optional = true))
+            }
         }
 
         return items
@@ -337,8 +346,46 @@ object DefaultDeviceCardItems {
             context.getString(R.string.controlcenter_test_new_function)
 
         override fun onClick(device: GBDevice, context: Context) {
-            Snackbar.make(snackBarAnchor(context), R.string.controlcenter_test_new_function, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(snackBarAnchor(context), R.string.controlcenter_test_new_function, Snackbar.LENGTH_SHORT)
+                .show()
             GBApplication.deviceService(device).onTestNewFunction(null)
+        }
+    }
+
+    private fun installFileAction(): DeviceCardAction = object : DeviceCardAction {
+        override fun getId(): String = "install_file"
+        override fun getIcon(device: GBDevice) = R.drawable.ic_file_upload
+        override fun getDescription(device: GBDevice, context: Context): String =
+            context.getString(R.string.open_fw_installer_info_text_title)
+
+        override fun onClick(device: GBDevice, context: Context) {
+            val activity = context as ComponentActivity
+            // Registered without a lifecycle owner, so it must unregister itself after the result
+            lateinit var launcher: ActivityResultLauncher<Array<String>>
+            launcher = activity.activityResultRegistry.register(
+                "device_card_install_file",
+                ActivityResultContracts.OpenDocument()
+            ) { uri ->
+                launcher.unregister()
+                if (uri == null) {
+                    return@register
+                }
+                val installHandler = device.deviceCoordinator.findInstallHandler(uri, Bundle.EMPTY, activity)
+                if (installHandler == null) {
+                    GB.toast(
+                        activity.getString(R.string.fwinstaller_file_not_compatible_to_device),
+                        Toast.LENGTH_LONG,
+                        GB.INFO
+                    )
+                    return@register
+                }
+                val intent = Intent(activity, installHandler.installActivity)
+                    .setAction(Intent.ACTION_VIEW)
+                    .setDataAndType(uri, null)
+                    .putExtra(GBDevice.EXTRA_DEVICE, device)
+                activity.startActivity(intent)
+            }
+            launcher.launch(arrayOf("*/*"))
         }
     }
 
