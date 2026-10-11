@@ -1361,7 +1361,7 @@
     <string name="minHR">最小心率</string>
     <string name="minStride">最小步幅</string>
     <string name="spm">步数/分钟</string>
-    <string name="pref_header_sony_equalizer_bands">乐队</string>
+    <string name="pref_header_sony_equalizer_bands">频段</string>
     <string name="sony_audio_upsampling">音频提升采样</string>
     <string name="controlcenter_power_off_confirm_title">关机</string>
     <string name="controlcenter_power_off">关机</string>
@@ -3925,7 +3925,7 @@
     <string name="workout_power">功率</string>
     <string name="Other">其它</string>
     <string name="soundcore_auto_power_off_title">自动关机</string>
-    <string name="soundcore_auto_power_off_summary">与手机断开连接后，设备将在指定超时时间后关机</string>
+    <string name="soundcore_auto_power_off_summary">断开和手机连接后，设备将在指定超时时间后关机</string>
     <string name="soundcore_battery_low_tone_title">低电量提示音</string>
     <string name="soundcore_battery_low_tone_summary" formatted="false">当电量低于20%和10%时听到提示音</string>
     <string name="soundcore_gaming_mode_title">游戏模式</string>
@@ -5523,4 +5523,6 @@
         <item quantity="other">%1$s 次划桨</item>
     </plurals>
     <string name="race_prediction_trend">比赛时间趋势</string>
+    <string name="medium_amount">中</string>
+    <string name="band_index">频段 %d</string>
 </resources>
