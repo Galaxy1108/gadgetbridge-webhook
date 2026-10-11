@@ -5053,4 +5053,14 @@
     <string name="workout_upload_status_open">Zobrazit aktivitu</string>
     <string name="pref_endurain_replace_on_track_change_title">Nahradit cvičení, když se trasa změní</string>
     <string name="pref_endurain_replace_on_track_change_summary">Změna trasy nahraného cvičení znamená smazání aktivity a její opětovné nahrání, kvůli čemuž získá novou adresu. Adresy, které jste upravili ve službě Endurain, zůstanou bez modifikace.</string>
+    <string name="range_integer">%1$d – %2$d</string>
+    <string name="duration_short_day">1d</string>
+    <string name="duration_short_week">1t</string>
+    <string name="duration_short_two_weeks">2t</string>
+    <string name="duration_short_month">1m</string>
+    <string name="duration_short_six_months">6m</string>
+    <string name="duration_short_year">1r</string>
+    <string name="pref_header_device_card">Karta zařízení</string>
+    <string name="pref_device_card_show_items_title">Zobrazit položky karet</string>
+    <string name="pref_device_card_items_title">Položky karet</string>
 </resources>
