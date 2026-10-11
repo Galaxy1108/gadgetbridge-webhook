@@ -236,17 +236,18 @@ public class ActivityChartsActivity extends AbstractGBActivity implements Charts
             viewPager.setCurrentItem(tabFragmentIdToOpen);  // open the tab as specified in the intent
         }
 
-        viewPager.setUserInputEnabled(singleFragmentName == null && GBApplication.getPrefs().getBoolean("charts_allow_swipe", true));
+        viewPager.setUserInputEnabled(enabledTabsList.size() > 1 && GBApplication.getPrefs().getBoolean("charts_allow_swipe", true));
 
-        if (singleFragmentName != null) {
+        if (enabledTabsList.size() == 1) {
             tabLayout.setVisibility(TextView.GONE);
         }
 
-        if (actionbarTitle != 0) {
-            final ActionBar actionBar = getSupportActionBar();
-
-            if (actionBar != null) {
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            if (actionbarTitle != 0) {
                 actionBar.setTitle(actionbarTitle);
+            } else if (enabledTabsList.size() == 1) {
+                actionBar.setTitle(getPageTitle(0));
             }
         }
 

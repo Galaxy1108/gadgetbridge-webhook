@@ -881,7 +881,7 @@
             android:label="@string/title_activity_LenovoWatch_calibration" />
         <activity
             android:name=".activities.charts.ActivityChartsActivity"
-            android:label="@string/title_activity_charts"
+            android:label="@string/charts"
             android:parentActivityName=".activities.ControlCenterv2" />
         <activity
             android:name=".activities.ConfigureAlarms"
