@@ -18,8 +18,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.github.mikephil.charting.charts.Chart
+import com.google.android.material.card.MaterialCardView
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.activities.workouts.applyStatTileStyle
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
@@ -141,6 +143,7 @@ class ChartsOverviewFragment : AbstractChartFragment<ChartsOverviewFragment.Over
     ) : ListAdapter<OverviewItem, OverviewAdapter.ViewHolder>(DIFF_CALLBACK) {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_charts_overview, parent, false)
+            applyStatTileStyle(view as MaterialCardView)
             return ViewHolder(view)
         }
 
