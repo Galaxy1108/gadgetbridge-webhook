@@ -39,6 +39,12 @@ data class WidgetVariant(
         val SMALL = WidgetVariant("small", R.string.widget_variant_small, 6, 2)
 
         /**
+         * The single-column size of the day and goals overviews.
+         */
+        @JvmField
+        val OVERVIEW_TALL = WidgetVariant("tall", R.string.widget_variant_tall, 3, 4)
+
+        /**
          * The large size of the day and goals overviews.
          */
         @JvmField

@@ -36,12 +36,14 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     private val LOG = LoggerFactory.getLogger(TodayWidget::class.java)
     private const val LEGEND_ROW_GAP_DP = 4f
     private const val COMPACT_LEGEND_ROW_GAP_DP = 5f
+    private const val TALL_CLOCK_DP = 108f
+    private const val TALL_LABEL_SP = 9f
     private val AXIS = listOf("00", "06", "12", "18", "24")
 
     override val id = "today"
     override val label = R.string.widget_day_clock_title
     override val icon = R.drawable.ic_calendar_today
-    override val variants = listOf(WidgetVariant.LARGE, WidgetVariant.SMALL)
+    override val variants = listOf(WidgetVariant.LARGE, WidgetVariant.SMALL, WidgetVariant.OVERVIEW_TALL)
 
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsActivityTracking(device)
@@ -210,8 +212,15 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     // View (UI thread)
     //
 
-    override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View =
-        inflater.inflate(if (variant == WidgetVariant.SMALL) R.layout.dashboard_widget_day_timeline else R.layout.dashboard_widget_day_clock, parent, false)
+    override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View = when (variant) {
+        WidgetVariant.SMALL -> inflater.inflate(R.layout.dashboard_widget_day_timeline, parent, false)
+        WidgetVariant.OVERVIEW_TALL -> inflater.inflate(R.layout.dashboard_widget_day_clock_tall, parent, false).also {
+            val clock = it.findViewById<DayClockView>(R.id.tile_day_clock)
+            clock.maxSizeDp = TALL_CLOCK_DP
+            clock.labelSp = TALL_LABEL_SP
+        }
+        else -> inflater.inflate(R.layout.dashboard_widget_day_clock, parent, false)
+    }
 
     override fun bind(view: View, variant: WidgetVariant, config: WidgetConfig, data: Data) {
         val context = view.context
@@ -239,7 +248,8 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
 
     private fun isSmall(config: WidgetConfig) = config.variant == WidgetVariant.SMALL
 
-    private fun legendGap(config: WidgetConfig) = if (isSmall(config)) COMPACT_LEGEND_ROW_GAP_DP else LEGEND_ROW_GAP_DP
+    private fun legendGap(config: WidgetConfig) =
+        if (config.variant == WidgetVariant.LARGE) LEGEND_ROW_GAP_DP else COMPACT_LEGEND_ROW_GAP_DP
 
     override fun onClick(view: View, variant: WidgetVariant, config: WidgetConfig, timestamp: Int) {
         WidgetActions.openChart(view.context, config, this, "activity", label, "", timestamp)

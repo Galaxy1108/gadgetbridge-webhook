@@ -46,6 +46,24 @@ class DayClockView @JvmOverloads constructor(
     private var now: Int? = null
     private var showLabels = false
 
+    /**
+     * The size of the clock when there is room for it.
+     */
+    var maxSizeDp: Float = SIZE_DP
+        set(value) {
+            field = value
+            requestLayout()
+        }
+
+    /**
+     * The size of the hour labels when the clock is at [maxSizeDp].
+     */
+    var labelSp: Float = LABEL_SP
+        set(value) {
+            field = value
+            invalidate()
+        }
+
     private val density = resources.displayMetrics.density
     private val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -82,7 +100,7 @@ class DayClockView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val maxSize = (SIZE_DP * density).roundToInt()
+        val maxSize = (maxSizeDp * density).roundToInt()
         var size = min(MeasureSpec.getSize(widthMeasureSpec), maxSize)
         if (MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.UNSPECIFIED) {
             size = min(size, MeasureSpec.getSize(heightMeasureSpec))
@@ -106,7 +124,7 @@ class DayClockView @JvmOverloads constructor(
         }
 
         if (showLabels) {
-            val fontSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, LABEL_SP, resources.displayMetrics) * width / (SIZE_DP * density)
+            val fontSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, labelSp, resources.displayMetrics) * width / (maxSizeDp * density)
             labelPaint.textSize = fontSize
             labelPaint.color = innerLabelColor
             labelPaint.typeface = Typeface.DEFAULT

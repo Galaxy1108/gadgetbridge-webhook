@@ -36,6 +36,8 @@ import kotlin.math.roundToInt
  */
 object GoalsWidget : GBWidget<GoalsWidget.Data> {
     private const val LEGEND_ROW_GAP_DP = 4f
+    private const val TALL_LEGEND_ROW_GAP_DP = 6f
+    private const val TALL_RINGS_DP = 128f
     private const val VALUE_ROW_GAP_DP = 7f
     private const val METERS_PER_KM = 1000.0
     private const val MILES_PER_METER = 0.000621371
@@ -57,7 +59,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     override val id = "goals"
     override val label = R.string.widget_goals_title
     override val icon = R.drawable.ic_done_all
-    override val variants = listOf(WidgetVariant.LARGE, WidgetVariant.SMALL)
+    override val variants = listOf(WidgetVariant.LARGE, WidgetVariant.SMALL, WidgetVariant.OVERVIEW_TALL)
 
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsActivityTracking(device)
@@ -79,8 +81,13 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
         return Data(goals)
     }
 
-    override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View =
-        inflater.inflate(if (variant == WidgetVariant.SMALL) R.layout.dashboard_widget_goals_wide else R.layout.dashboard_widget_goal_rings, parent, false)
+    override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View = when (variant) {
+        WidgetVariant.SMALL -> inflater.inflate(R.layout.dashboard_widget_goals_wide, parent, false)
+        WidgetVariant.OVERVIEW_TALL -> inflater.inflate(R.layout.dashboard_widget_goal_rings_tall, parent, false).also {
+            it.findViewById<GoalRingsView>(R.id.tile_goal_rings).maxSizeDp = TALL_RINGS_DP
+        }
+        else -> inflater.inflate(R.layout.dashboard_widget_goal_rings, parent, false)
+    }
 
     override fun bind(view: View, variant: WidgetVariant, config: WidgetConfig, data: Data) {
         val context = view.context
@@ -93,7 +100,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
             renderFlowLegend(
                 view.findViewById(R.id.tile_flow_legend),
                 data.goals.map { it.goal.color to context.getString(it.goal.label) },
-                LEGEND_ROW_GAP_DP,
+                legendGap(config),
             )
         }
         view.contentDescription = describe(context, config, data)
@@ -109,7 +116,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
             renderFlowLegend(
                 view.findViewById(R.id.tile_flow_legend),
                 Goal.entries.map { it.color to context.getString(it.label) },
-                LEGEND_ROW_GAP_DP,
+                legendGap(config),
             )
         }
     }
@@ -119,6 +126,9 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     }
 
     private fun isSmall(config: WidgetConfig) = config.variant == WidgetVariant.SMALL
+
+    private fun legendGap(config: WidgetConfig) =
+        if (config.variant == WidgetVariant.OVERVIEW_TALL) TALL_LEGEND_ROW_GAP_DP else LEGEND_ROW_GAP_DP
 
     /**
      * One row per goal: its swatch and name, then the value right-aligned.
