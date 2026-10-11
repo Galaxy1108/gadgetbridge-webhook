@@ -2613,6 +2613,7 @@
     <string name="generic_metrics">Other</string>
     <string name="p_generic_metrics" translatable="false">genericmetrics</string>
     <string name="generic_metric_select_metric">Metric</string>
+    <string name="number_of_generic_metrics">%1$d metrics</string>
     <string name="generic_metric_samples">Samples</string>
     <string name="generic_metric_chart_label_with_unit">%1$s (%2$s)</string>
     <string name="metric_garmin_endurance_score">Endurance Score</string>
