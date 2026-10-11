@@ -39,7 +39,7 @@ class WidgetLayoutStoreTest : TestBase() {
         assertEquals(WidgetVariant.SMALL.id, placements["today"]?.variantId)
         assertEquals(StressWidget.SIMPLE.id, placements["c"]?.variantId)
         assertEquals(
-            mapOf("today" to (0 to 0), "a" to (3 to 0), "b" to (3 to 2), "c" to (0 to 3), "d" to (3 to 4)),
+            mapOf("today" to (0 to 0), "a" to (0 to 2), "b" to (3 to 2), "c" to (0 to 4), "d" to (3 to 4)),
             positions(WidgetGrid.BASE_COLUMNS),
         )
 
@@ -53,7 +53,7 @@ class WidgetLayoutStoreTest : TestBase() {
     @Test
     fun derivesWiderLayoutFromBaseLayout() {
         assertEquals(
-            mapOf("today" to (0 to 0), "a" to (3 to 0), "b" to (6 to 0), "c" to (9 to 0), "d" to (3 to 2)),
+            mapOf("today" to (0 to 0), "a" to (6 to 0), "b" to (9 to 0), "c" to (0 to 2), "d" to (3 to 2)),
             positions(12),
         )
     }
@@ -73,7 +73,7 @@ class WidgetLayoutStoreTest : TestBase() {
         WidgetLayoutStore.saveLayout(12, WidgetLayoutStore.layout(12))
         val instance = WidgetLayoutStore.add("sleep")
 
-        assertEquals(0 to 5, positions(WidgetGrid.BASE_COLUMNS)[instance.instanceId])
+        assertEquals(0 to 6, positions(WidgetGrid.BASE_COLUMNS)[instance.instanceId])
         assertEquals(6 to 2, positions(12)[instance.instanceId])
     }
 
@@ -82,7 +82,7 @@ class WidgetLayoutStoreTest : TestBase() {
         WidgetLayoutStore.setVariant("today", WidgetGrid.BASE_COLUMNS, WidgetVariant.LARGE.id)
 
         assertEquals(
-            mapOf("today" to (0 to 0), "a" to (3 to 6), "b" to (3 to 8), "c" to (0 to 6), "d" to (3 to 10)),
+            mapOf("today" to (0 to 0), "a" to (0 to 5), "b" to (3 to 5), "c" to (0 to 7), "d" to (3 to 7)),
             positions(WidgetGrid.BASE_COLUMNS),
         )
     }

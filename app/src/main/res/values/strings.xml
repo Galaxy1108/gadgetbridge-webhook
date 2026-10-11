@@ -4916,6 +4916,77 @@
     <string name="widget_variant_large">Large</string>
     <string name="pref_widget_title_title">Custom title</string>
     <string name="pref_widget_title_summary">Overrides the widget\'s default title. Leave empty to use the default.</string>
+    <string name="widget_variant_number">Number</string>
+    <string name="widget_variant_tall">Tall</string>
+    <string name="widget_variant_wide">Wide</string>
+    <string name="widget_status_no_data">No data yet</string>
+    <!-- Under a goal metric's value, e.g. "of 10,000" -->
+    <string name="widget_status_of_goal">of %s</string>
+    <!-- Active part of the total calories, e.g. "420 active" -->
+    <string name="widget_status_active">%s active</string>
+    <!-- Body energy charged and drained over the day, e.g. "+40 / -38" -->
+    <string name="widget_status_charged_drained">+%1$d / -%2$d</string>
+    <string name="widget_status_building_baseline">Building baseline</string>
+    <string name="widget_status_superior">Superior</string>
+    <!-- Heart rate zone number, e.g. "Zone 3" -->
+    <string name="widget_status_hr_zone">Zone %d</string>
+    <!-- Lowest blood oxygen of the day, e.g. "Lowest 92%" -->
+    <string name="widget_status_lowest">Lowest %s</string>
+    <string name="widget_status_elevated">Elevated</string>
+    <string name="widget_status_stage_1">Stage 1</string>
+    <string name="widget_status_stage_2">Stage 2</string>
+    <string name="widget_status_underweight">Underweight</string>
+    <string name="widget_status_overweight">Overweight</string>
+    <string name="widget_status_obese">Obese</string>
+    <string name="widget_status_healthy">Healthy</string>
+    <!-- Weight change over the last 30 days, e.g. "-0.6 kg in 30 days" -->
+    <string name="widget_status_weight_change">%s in 30 days</string>
+    <!-- PAI earned today, e.g. "+12 today" -->
+    <string name="widget_status_pai_today">+%d today</string>
+    <!-- Body energy drained since the day's peak, e.g. "-24 since 09:10" -->
+    <string name="widget_status_since_peak">-%1$d since %2$s</string>
+    <string name="widget_legend_peak">Peak</string>
+    <string name="widget_day_clock_title">24 hours</string>
+    <string name="widget_goals_title">Goals</string>
+    <string name="widget_goals_none">No goals set</string>
+    <!-- e.g. "60 min" -->
+    <string name="widget_value_minutes">%d min</string>
+    <!-- A duration in whole hours, e.g. "8h" -->
+    <string name="widget_duration_h">%dh</string>
+    <!-- Goal value after the current one, e.g. " / 10,000" -->
+    <string name="widget_value_target">\u0020/ %s</string>
+    <!-- One part of a screen reader summary, e.g. "Steps 7,592 of 10,000" -->
+    <string name="widget_description_of_goal">%1$s %2$s of %3$s</string>
+    <!-- Screen reader summary, e.g. "24 hours. Sleep 7h 30m, Activity 1h 33m" -->
+    <string name="widget_overview_description">%1$s. %2$s</string>
+    <!-- One part of a screen reader summary, e.g. "Sleep 7h 30m" -->
+    <string name="widget_description_item">%1$s %2$s</string>
+    <!-- One part of a screen reader summary, e.g. "Steps 76 percent" -->
+    <string name="widget_description_percent">%1$s %2$d percent</string>
+    <!-- e.g. "Resting 58" -->
+    <string name="widget_status_resting">Resting %d</string>
+    <!-- Time of the last measurement, e.g. "at 14:05" -->
+    <string name="widget_status_at">at %s</string>
+    <!-- Screen reader text, e.g. "Heart rate, 72 beats per minute" -->
+    <string name="widget_hr_description">%1$s, %2$d beats per minute</string>
+    <string name="widget_hr_description_resting">resting %d</string>
+    <string name="widget_hr_description_min_max">min %1$d, max %2$d</string>
+    <string name="widget_hr_description_stale">last measured at %s</string>
+    <string name="widget_stat_to_goal">To goal</string>
+    <string name="widget_stat_goal_met">Goal met</string>
+    <string name="widget_stat_peak_hour">Peak hour</string>
+    <string name="widget_stat_asleep">Asleep</string>
+    <string name="widget_stat_baseline">Baseline</string>
+    <string name="widget_stat_last_night">Last night</string>
+    <string name="widget_stat_twelve_weeks">12 weeks</string>
+    <!-- Value needed for the next VO2 max zone, e.g. "Superior at" above "54.0" -->
+    <string name="widget_stat_next_zone">%s at</string>
+    <!-- Goal after the value, e.g. "/ 10,000" -->
+    <string name="widget_value_of_goal">/ %s</string>
+    <!-- e.g. "1,720 kcal" -->
+    <string name="widget_value_kcal">%s kcal</string>
+    <!-- A duration in hours and minutes, e.g. "1h 05m" -->
+    <string name="widget_duration_hm">%1$dh %2$02dm</string>
     <plurals name="amount_of_days">
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>

@@ -18,15 +18,16 @@ package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
 import android.graphics.Color
-import android.widget.ImageView
-import android.widget.TextView
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.util.BodyCompositionCalculator
 import nodomain.freeyourgadget.gadgetbridge.util.BodyCompositionEstimates
+import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
+import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
+import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 
 /**
@@ -35,7 +36,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
  * for the selected day, since a scale is not stepped on every day. The values are estimated
  * from the measurement's impedance when shown, the same way the weight chart does it.
  */
-abstract class BodyCompositionWidget : GaugeWidget<BodyCompositionWidget.Data>() {
+abstract class BodyCompositionWidget : MetricWidget<BodyCompositionWidget.Data>() {
     override val chartTab = "weight"
 
     override fun isSupportedBy(device: GBDevice): Boolean =
@@ -47,16 +48,37 @@ abstract class BodyCompositionWidget : GaugeWidget<BodyCompositionWidget.Data>()
         return Data(composition, ActivityUser().gender)
     }
 
-    final override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    final override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val value = data.composition?.let { valueOf(it) }
-        if (value == null) {
-            gaugeValue.text = context.getString(R.string.stats_empty_value)
-            drawSimpleGauge(gaugeBar, Color.GRAY, -1f)
-            return
+            ?: return emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f))
+        val zones = zones(data)
+        val chart = when {
+            zones != null -> MiniChart.ZoneBar(zones.colors, zones.segments, scale(value))
+            showsScale -> MiniChart.Progress(colorFor(value, data), scale(value))
+            else -> null
         }
-        gaugeValue.text = format(context, value)
-        drawSimpleGauge(gaugeBar, colorFor(value, data), scale(value))
+        return TileModel(
+            value = format(context, value),
+            gauge = GaugeSpec.Progress(colorFor(value, data), scale(value)),
+            status = zones?.let { StatusLine.Chip(colorFor(value, data), context.getString(zones.labelFor(value))) },
+            chart = chart,
+        )
     }
+
+    /**
+     * Whether the number style shows where the value sits on the gauge's scale.
+     */
+    protected open val showsScale: Boolean = true
+
+    /**
+     * The categories the value is judged by, or null for values without a generally agreed range.
+     */
+    protected open fun zones(data: Data): Zones? = null
+
+    /**
+     * Categories on the gauge's 0..1 scale, and the label for a value.
+     */
+    class Zones(val colors: IntArray, val segments: FloatArray, val labelFor: (Float) -> Int)
 
     /** The value this widget shows. */
     protected abstract fun valueOf(composition: BodyCompositionCalculator.BodyComposition): Float

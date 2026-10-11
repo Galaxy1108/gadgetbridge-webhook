@@ -10,8 +10,8 @@ import kotlin.math.roundToInt
 import androidx.core.view.isGone
 
 /**
- * Places each child in a grid of square cells, at the cells in its [LayoutParams]. The cell size is the width divided by
- * [columns]. The height is the number of rows that the children use.
+ * Places each child in a grid of cells, at the cells in its [LayoutParams]. A cell is the width divided by [columns]
+ * wide and [ROW_HEIGHT_DP] high. The height is the number of rows that the children use.
  */
 class WidgetGridLayout @JvmOverloads constructor(
     context: Context,
@@ -32,6 +32,7 @@ class WidgetGridLayout @JvmOverloads constructor(
     ) : MarginLayoutParams(MATCH_PARENT, MATCH_PARENT)
 
     private var cellSize = 0f
+    private val rowHeight = ROW_HEIGHT_DP * resources.displayMetrics.density
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
@@ -43,14 +44,14 @@ class WidgetGridLayout @JvmOverloads constructor(
             val lp = child.layoutParams as LayoutParams
             rows = max(rows, lp.cellY + lp.cellHeight)
             val childWidth = edge(lp.cellX + lp.cellWidth) - edge(lp.cellX) - lp.leftMargin - lp.rightMargin
-            val childHeight = edge(lp.cellY + lp.cellHeight) - edge(lp.cellY) - lp.topMargin - lp.bottomMargin
+            val childHeight = rowEdge(lp.cellY + lp.cellHeight) - rowEdge(lp.cellY) - lp.topMargin - lp.bottomMargin
             child.measure(
                 MeasureSpec.makeMeasureSpec(childWidth.coerceAtLeast(0), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(childHeight.coerceAtLeast(0), MeasureSpec.EXACTLY),
             )
         }
 
-        setMeasuredDimension(width, edge(rows) + paddingTop + paddingBottom)
+        setMeasuredDimension(width, rowEdge(rows) + paddingTop + paddingBottom)
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -58,7 +59,7 @@ class WidgetGridLayout @JvmOverloads constructor(
             if (child.isGone) continue
             val lp = child.layoutParams as LayoutParams
             val left = paddingLeft + edge(lp.cellX) + lp.leftMargin
-            val top = paddingTop + edge(lp.cellY) + lp.topMargin
+            val top = paddingTop + rowEdge(lp.cellY) + lp.topMargin
             child.layout(left, top, left + child.measuredWidth, top + child.measuredHeight)
         }
     }
@@ -67,6 +68,8 @@ class WidgetGridLayout @JvmOverloads constructor(
      * The pixel offset of the edge before cell [cells]. Rounding each edge, not each cell size, keeps the gaps the same.
      */
     private fun edge(cells: Int): Int = (cells * cellSize).roundToInt()
+
+    private fun rowEdge(rows: Int): Int = (rows * rowHeight).roundToInt()
 
     override fun checkLayoutParams(p: ViewGroup.LayoutParams?): Boolean = p is LayoutParams
 
@@ -88,4 +91,9 @@ class WidgetGridLayout @JvmOverloads constructor(
     }
 
     override fun shouldDelayChildPressedState(): Boolean = false
+
+    private companion object {
+        // A half-step of 64dp plus the 12dp gap between tiles
+        const val ROW_HEIGHT_DP = 76f
+    }
 }

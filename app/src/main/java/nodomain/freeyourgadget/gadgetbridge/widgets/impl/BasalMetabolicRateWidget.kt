@@ -35,4 +35,6 @@ object BasalMetabolicRateWidget : BodyCompositionWidget() {
         context.getString(R.string.body_composition_kcal, value.toInt())
 
     override fun scale(value: Float): Float = fraction(value, 1000f, 2500f)
+
+    override val showsScale = false
 }

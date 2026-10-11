@@ -86,7 +86,7 @@ class DashboardViewModel : ViewModel() {
         val widget = placed.widget
         try {
             val prefs = Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId))
-            val config = WidgetConfig(instance, prefs, dashboardShowAllDevices, dashboardDeviceList)
+            val config = WidgetConfig(instance, prefs, dashboardShowAllDevices, dashboardDeviceList, placed.variant)
             val devices = config.resolveDevices(widget)
             val scope = WidgetDataScope(query, devices)
             val data = widget.loadData(scope, config)

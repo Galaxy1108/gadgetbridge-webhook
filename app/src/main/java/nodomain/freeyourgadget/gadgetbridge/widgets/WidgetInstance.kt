@@ -40,14 +40,37 @@ data class PlacedWidget(
 
 /**
  * Per-instance configuration, wrapping [instance]'s own SharedPreferences plus the dashboard-wide
- * device filter it inherits from by default.
+ * device filter it inherits from by default. [variant] is the instance's variant in the displayed layout.
  */
 class WidgetConfig(
     val instance: WidgetInstance,
     val prefs: Prefs,
     private val dashboardShowAllDevices: Boolean,
     private val dashboardDeviceList: Set<String>,
+    val variant: WidgetVariant = WidgetVariant.GAUGE,
 ) {
+    val isTall: Boolean get() = variant.id == WidgetVariant.TALL.id
+
+    val isWide: Boolean get() = variant.id == WidgetVariant.WIDE.id
+
+    val isLargeStyle: Boolean get() = variant.id == WidgetVariant.METRIC_LARGE.id
+
+    /**
+     * Whether the tile spans the base layout's width.
+     */
+    val isFullWidth: Boolean get() = variant.width >= WidgetGrid.BASE_COLUMNS
+
+    /**
+     * Whether the tile shows more than a gauge, and so needs history.
+     */
+    val needsHistory: Boolean
+        get() = variant.id == WidgetVariant.NUMBER.id || isTall || isWide || isLargeStyle
+
+    /**
+     * Whether the tile shows an intraday chart.
+     */
+    val isLarge: Boolean get() = isTall || isFullWidth
+
     /**
      * Resolves the devices this instance should show data for, filtered to those the widget supports.
      */

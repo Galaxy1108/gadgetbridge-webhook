@@ -77,6 +77,11 @@ interface GBWidget<D> {
     fun bind(view: View, variant: WidgetVariant, config: WidgetConfig, data: D)
 
     /**
+     * Shows a view created by [createView] while its data is still loading. No-op by default.
+     */
+    fun bindLoading(view: View, variant: WidgetVariant, config: WidgetConfig) {}
+
+    /**
      * Optional click target for the whole widget, e.g. opening a chart. No-op by default.
      * [timestamp] is the epoch second of the dashboard's currently selected day.
      */

@@ -1,16 +1,16 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.devices.HydrationSampleProvider
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.HydrationUnit
+import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
+import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import java.text.NumberFormat
 import java.time.Instant
@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
 
-object HydrationWidget : GaugeWidget<HydrationWidget.Data>() {
+object HydrationWidget : MetricWidget<HydrationWidget.Data>() {
     override val id = "hydration"
     override val label = R.string.pref_header_hydration
     override val icon = R.drawable.ic_drink
@@ -40,17 +40,25 @@ object HydrationWidget : GaugeWidget<HydrationWidget.Data>() {
         return Data(totalMl, ActivityUser().hydrationGoalMl, unit)
     }
 
-    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
-        gaugeValue.text = if (data.unit == HydrationUnit.MILLILITER && data.totalMl >= 1000) {
+    override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
+        val color = ContextCompat.getColor(context, R.color.hydration_color)
+        val factor = (data.totalMl / data.goalMl).toFloat().coerceIn(0f, 1f)
+        return TileModel(
+            value = format(context, data.totalMl, data.unit),
+            gauge = GaugeSpec.Progress(color, factor),
+            status = ofGoal(context, format(context, data.goalMl.toDouble(), data.unit)),
+            chart = MiniChart.Progress(color, factor),
+        )
+    }
+
+    private fun format(context: Context, ml: Double, unit: HydrationUnit): String =
+        if (unit == HydrationUnit.MILLILITER && ml >= 1000) {
             val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
             numberFormat.maximumFractionDigits = 1
-            numberFormat.format(data.totalMl / 1000) + " " + context.getString(R.string.unit_liter)
+            numberFormat.format(ml / 1000) + " " + context.getString(R.string.unit_liter)
         } else {
-            data.unit.format(context, data.totalMl)
+            unit.format(context, ml)
         }
-        val factor = (data.totalMl / data.goalMl).toFloat().coerceIn(0f, 1f)
-        drawSimpleGauge(gaugeBar, ContextCompat.getColor(context, R.color.hydration_color), factor)
-    }
 
     data class Data(val totalMl: Double, val goalMl: Int, val unit: HydrationUnit)
 }

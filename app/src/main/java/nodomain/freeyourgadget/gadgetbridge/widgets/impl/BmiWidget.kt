@@ -18,12 +18,14 @@ package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
 import android.graphics.Color
-import android.widget.ImageView
-import android.widget.TextView
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
+import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
+import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
+import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import java.util.Locale
 
@@ -31,7 +33,7 @@ import java.util.Locale
  * Body mass index of the most recent weight measurement, from the profile height. Coloured by
  * WHO class like the weight widget's gauge, but showing the index itself.
  */
-object BmiWidget : GaugeWidget<WeightWidget.Data>() {
+object BmiWidget : MetricWidget<WeightWidget.Data>() {
     override val id = "bmi"
     override val label = R.string.body_mass_index
     override val icon = R.drawable.ic_monitor_weight
@@ -40,17 +42,26 @@ object BmiWidget : GaugeWidget<WeightWidget.Data>() {
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsWeightMeasurement(device)
 
-    override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): WeightWidget.Data =
-        WeightWidget.loadData(scope, config)
-
-    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: WeightWidget.Data) {
-        val bmi = Bmi.of(data.weightKg, data.heightCm)
-        if (bmi == null) {
-            gaugeValue.text = context.getString(R.string.stats_empty_value)
-            drawSimpleGauge(gaugeBar, Color.GRAY, -1f)
-            return
-        }
-        gaugeValue.text = String.format(Locale.getDefault(), "%.1f", bmi)
-        drawSimpleGauge(gaugeBar, Bmi.colorFor(bmi), Bmi.gaugeFraction(bmi))
+    override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): WeightWidget.Data {
+        val latest = WeightWidget.latestWeightSample(scope)
+        return WeightWidget.Data(latest?.weightKg?.toDouble() ?: 0.0, ActivityUser().heightCm)
     }
+
+    override fun model(context: Context, config: WidgetConfig, data: WeightWidget.Data): TileModel {
+        val bmi = Bmi.of(data.weightKg, data.heightCm)
+            ?: return emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f), MiniChart.ZoneBar(Bmi.COLORS, Bmi.SEGMENTS, -1f))
+        return TileModel(
+            value = String.format(Locale.getDefault(), "%.1f", bmi),
+            gauge = GaugeSpec.Progress(Bmi.colorFor(bmi), Bmi.gaugeFraction(bmi)),
+            status = StatusLine.Chip(Bmi.colorFor(bmi), context.getString(LABELS[Bmi.categoryOf(bmi)])),
+            chart = MiniChart.ZoneBar(Bmi.COLORS, Bmi.SEGMENTS, Bmi.scaleFraction(bmi)),
+        )
+    }
+
+    private val LABELS = intArrayOf(
+        R.string.widget_status_underweight,
+        R.string.normal,
+        R.string.widget_status_overweight,
+        R.string.widget_status_obese,
+    )
 }

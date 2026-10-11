@@ -12,6 +12,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.bindUnsafe
+import kotlin.math.roundToInt
 
 /**
  * Puts each [PlacedWidget] in a [MaterialCardView] in a [WidgetGridLayout], and binds its loaded data.
@@ -101,13 +102,21 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
     private fun bind(cell: Cell) {
         val item = cell.placed ?: return
         val view = cell.content ?: return
-        val state = states[item.instance.instanceId] as? WidgetState.Ready ?: return
 
         val prefs = Prefs(GBApplication.getWidgetSharedPrefs(item.instance.instanceId))
-        val config = WidgetConfig(item.instance, prefs, dashboardShowAllDevices, dashboardDeviceList)
+        val config = WidgetConfig(item.instance, prefs, dashboardShowAllDevices, dashboardDeviceList, item.variant)
+        val state = states[item.instance.instanceId] as? WidgetState.Ready
+        if (state == null) {
+            item.widget.bindLoading(view, item.variant, config)
+            cell.card.contentDescription = null
+            cell.card.setOnClickListener(null)
+            cell.card.setOnLongClickListener(null)
+            return
+        }
         item.widget.bindUnsafe(view, item.variant, config, state.data)
-        view.setOnClickListener { item.widget.onClick(view, item.variant, config, timestamp) }
-        view.setOnLongClickListener {
+        cell.card.contentDescription = view.contentDescription
+        cell.card.setOnClickListener { item.widget.onClick(view, item.variant, config, timestamp) }
+        cell.card.setOnLongClickListener {
             WidgetInstanceSettingsActivity.startForWidget(view.context, item.instance)
             true
         }
@@ -115,16 +124,22 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
 
     private fun applyCardStyle(card: MaterialCardView) {
         val density = card.resources.displayMetrics.density
-        card.strokeWidth = 0
+        card.cardElevation = 0f
         if (cardsEnabled) {
             // Same fill as the stat tiles, so it follows the theme.
             card.setCardBackgroundColor(MaterialColors.getColor(card, R.attr.stat_tile_bg))
-            card.radius = 4 * density
-            card.cardElevation = 4 * density
+            card.strokeColor = MaterialColors.getColor(card, R.attr.stat_tile_border)
+            card.strokeWidth = (TILE_STROKE_DP * density).roundToInt()
+            card.radius = TILE_RADIUS_DP * density
         } else {
             card.setCardBackgroundColor(Color.TRANSPARENT)
+            card.strokeWidth = 0
             card.radius = 0f
-            card.cardElevation = 0f
         }
+    }
+
+    private companion object {
+        const val TILE_STROKE_DP = 1.5f
+        const val TILE_RADIUS_DP = 12f
     }
 }

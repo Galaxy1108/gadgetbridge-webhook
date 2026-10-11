@@ -9,9 +9,13 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHelper
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.DailyTotals
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Date
 import java.util.GregorianCalendar
 import kotlin.math.roundToInt
@@ -32,6 +36,30 @@ class WidgetDataScope(
     val query: DashboardQuery,
     val devices: List<GBDevice>,
 ) {
+    val zone: ZoneId get() = ZoneId.systemDefault()
+
+    /**
+     * The selected day.
+     */
+    val day: LocalDate get() = Instant.ofEpochSecond(query.timeTo.toLong()).atZone(zone).toLocalDate()
+
+    val isToday: Boolean get() = day == LocalDate.now(zone)
+
+    /**
+     * Epoch second at which the selected day starts.
+     */
+    val dayStart: Long get() = day.atStartOfDay(zone).toEpochSecond()
+
+    /**
+     * How many hours of the selected day have begun: all of them for a past day.
+     */
+    val hoursStarted: Int
+        get() = if (isToday) {
+            WidgetHistory.hoursStarted(dayStart, System.currentTimeMillis() / 1000L)
+        } else {
+            WidgetHistory.HOURS_PER_DAY
+        }
+
     /**
      * Runs [block] against a freshly-acquired read handle, closed when [block] returns.
      */
@@ -89,6 +117,17 @@ class WidgetDataScope(
         if (sleepValues.isEmpty()) 0L else sleepValues.average().roundToInt().toLong()
     }
 
+    /**
+     * Light, deep, REM and awake minutes, averaged over the devices that recorded sleep.
+     */
+    suspend fun sleepStageMinutes(): LongArray = db { db ->
+        val stages = devices.filter { it.deviceCoordinator.supportsSleepMeasurement(it) }
+            .map { dailyTotals(db, it) }
+            .filter { it.sleep > 0 }
+            .map { it.sleepStages }
+        LongArray(4) { stage -> if (stages.isEmpty()) 0L else stages.map { it[stage] }.average().roundToInt().toLong() }
+    }
+
     fun sleepGoalFactor(sleepMinutesTotal: Long): Float {
         val goal = ActivityUser().sleepDurationGoal
         return (sleepMinutesTotal.toFloat() / goal).coerceAtMost(1f)
@@ -138,6 +177,65 @@ class WidgetDataScope(
         if (count == 0) 0 else (total / count.toFloat()).roundToInt()
     }
 
+    /**
+     * Per-hour sums of [valueOf] over the selected day's activity samples of [devices].
+     */
+    suspend fun hourlySums(devices: List<GBDevice>, valueOf: (ActivitySample) -> Float): FloatArray {
+        val sums = FloatArray(WidgetHistory.HOURS_PER_DAY)
+        for (dev in devices) {
+            for (sample in allSamples(dev)) {
+                val hour = ((sample.timestamp - dayStart) / 3600L).toInt()
+                if (hour in sums.indices) {
+                    sums[hour] += valueOf(sample).coerceAtLeast(0f)
+                }
+            }
+        }
+        return sums
+    }
+
+    /**
+     * Active minutes per hour of the selected day, from the step sessions of the step counting devices.
+     */
+    suspend fun hourlyActiveMinutes(): FloatArray {
+        val intervals = devices.filter { it.deviceCoordinator.supportsStepCounter(it) }.flatMap { dev ->
+            StepAnalysis().calculateStepSessions(allSamples(dev), emptyList())
+                .map { it.startTime.time / 1000L to it.endTime.time / 1000L }
+        }
+        return WidgetHistory.minutesPerHour(intervals, dayStart)
+    }
+
+    /**
+     * The night ending on the selected day as stretches on the lanes awake (0), REM (1), light (2) and deep (3),
+     * from the sleep measuring device with the most sleep samples.
+     */
+    suspend fun sleepStretches(): List<HypnogramSegment> = db { db ->
+        val from = (dayStart - SLEEP_WINDOW_OFFSET_SECONDS).toInt()
+        val to = (dayStart + SLEEP_WINDOW_OFFSET_SECONDS - 1).toInt()
+        val nights = devices.filter { it.deviceCoordinator.supportsSleepMeasurement(it) }.map { dev ->
+            val provider = dev.deviceCoordinator.getSampleProvider(dev, db.daoSession)
+            provider?.getAllActivitySamples(from, to).orEmpty().mapNotNull { sample ->
+                sleepLane(sample.kind)?.let { sample.timestamp.toLong() to it }
+            }
+        }
+        val night = nights.maxByOrNull { it.size }.orEmpty()
+        val asleep = night.filter { it.second != SLEEP_LANE_AWAKE }
+        if (asleep.isEmpty()) {
+            emptyList()
+        } else {
+            val first = asleep.minOf { it.first }
+            val last = asleep.maxOf { it.first }
+            WidgetHistory.laneStretches(night.filter { it.first in first..last }, SLEEP_SAMPLE_SECONDS, SLEEP_MAX_GAP_SECONDS)
+        }
+    }
+
+    private fun sleepLane(kind: ActivityKind): Int? = when (kind) {
+        ActivityKind.AWAKE_SLEEP -> SLEEP_LANE_AWAKE
+        ActivityKind.REM_SLEEP -> 1
+        ActivityKind.LIGHT_SLEEP, ActivityKind.SLEEP_ANY -> 2
+        ActivityKind.DEEP_SLEEP -> 3
+        else -> null
+    }
+
     suspend fun activeMinutes(device: GBDevice): Long {
         val samples = allSamples(device)
         val stepAnalysis = StepAnalysis()
@@ -153,5 +251,13 @@ class WidgetDataScope(
     fun activeMinutesGoalFactor(activeMinutesTotal: Long): Float {
         val goal = ActivityUser().activeTimeGoalMinutes.toFloat()
         return (activeMinutesTotal / goal).coerceAtMost(1f)
+    }
+
+    private companion object {
+        // Sleep belongs to the day it ends on, so the night is looked up from noon the day before
+        const val SLEEP_WINDOW_OFFSET_SECONDS = 12 * 60 * 60L
+        const val SLEEP_SAMPLE_SECONDS = 60L
+        const val SLEEP_MAX_GAP_SECONDS = 120L
+        const val SLEEP_LANE_AWAKE = 0
     }
 }

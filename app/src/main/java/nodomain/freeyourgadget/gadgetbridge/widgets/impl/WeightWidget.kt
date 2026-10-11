@@ -18,26 +18,36 @@ package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
 import android.graphics.Color
-import android.widget.ImageView
-import android.widget.TextView
+import android.graphics.PointF
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.WeightSample
 import nodomain.freeyourgadget.gadgetbridge.model.WeightUnit
+import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
+import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
+import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileAxis
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
+import nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import org.slf4j.LoggerFactory
+import java.time.Instant
+import java.time.ZoneId
+import kotlin.math.abs
 
 /**
  * Most recent weight measurement taken on or before the selected day. Weight is not
  * measured every day, so the last known value is shown rather than a value for the day
  * itself. The gauge is coloured by WHO BMI class, computed from the profile height.
  */
-object WeightWidget : GaugeWidget<WeightWidget.Data>() {
+object WeightWidget : MetricWidget<WeightWidget.Data>() {
     private val LOG = LoggerFactory.getLogger(WeightWidget::class.java)
+    private const val HISTORY_DAYS = 30
+    private const val SECONDS_PER_DAY = 24 * 60 * 60L
+    private const val HISTORY_PADDING_KG = 0.5f
 
     override val id = "weight"
     override val label = R.string.menuitem_weight
@@ -49,25 +59,72 @@ object WeightWidget : GaugeWidget<WeightWidget.Data>() {
 
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         val latest = latestWeightSample(scope)
-        return Data(latest?.weightKg?.toDouble() ?: 0.0, ActivityUser().heightCm)
+        return Data(
+            latest?.weightKg?.toDouble() ?: 0.0,
+            ActivityUser().heightCm,
+            if (config.needsHistory) history(scope) else null,
+            scope.dayStart,
+        )
     }
 
-    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         if (data.weightKg <= 0) {
-            gaugeValue.text = context.getString(R.string.stats_empty_value)
-            drawSimpleGauge(gaugeBar, Color.GRAY, -1f)
-            return
+            return emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f))
         }
 
-        gaugeValue.text = WeightUnit.formatWeight(context, data.weightKg, GBApplication.getPrefs().weightUnit)
-
+        val unit = GBApplication.getPrefs().weightUnit
         val bmi = Bmi.of(data.weightKg, data.heightCm)
-        if (bmi == null) {
+        val color = bmi?.let { Bmi.colorFor(it) } ?: Color.rgb(76, 175, 80)
+        val history = data.history
+        val change = if (history != null && history.size > 1) history.last().value - history.first().value else null
+        val line = history?.takeIf { it.isNotEmpty() }?.let { historyLine(it, data.dayStart, color) }
+        return TileModel(
+            value = WeightUnit.formatWeight(context, data.weightKg, unit),
             // no height in the profile, so no BMI to colour by
-            drawSimpleGauge(gaugeBar, Color.rgb(76, 175, 80), -1f)
-            return
+            gauge = GaugeSpec.Progress(color, bmi?.let { Bmi.gaugeFraction(it) } ?: -1f),
+            status = change?.let {
+                val sign = if (it < 0) "-" else "+"
+                StatusLine.Text(
+                    context.getString(R.string.widget_status_weight_change, sign + WeightUnit.formatWeight(context, abs(it).toDouble(), unit))
+                )
+            },
+            chart = line,
+            largeChart = if (config.isLarge) line else null,
+            axis = if (config.isLarge && line != null) {
+                val day = Instant.ofEpochSecond(data.dayStart).atZone(ZoneId.systemDefault()).toLocalDate()
+                TileAxis.dateRange(day.minusDays(HISTORY_DAYS - 1L), day)
+            } else {
+                emptyList()
+            },
+        )
+    }
+
+    private fun historyLine(history: List<TimedValue>, dayStart: Long, color: Int): MiniChart.Line {
+        val start = dayStart - (HISTORY_DAYS - 1) * SECONDS_PER_DAY
+        return MiniChart.Line(
+            points = history.map { PointF((it.seconds - start).toFloat() / SECONDS_PER_DAY, it.value) },
+            xMin = 0f,
+            xMax = HISTORY_DAYS.toFloat(),
+            yMin = history.minOf { it.value } - HISTORY_PADDING_KG,
+            yMax = history.maxOf { it.value } + HISTORY_PADDING_KG,
+            color = color,
+        )
+    }
+
+    private suspend fun history(scope: WidgetDataScope): List<TimedValue> = try {
+        val from = (scope.dayStart - (HISTORY_DAYS - 1) * SECONDS_PER_DAY) * 1000L
+        scope.db { db ->
+            scope.devices.flatMap { dev ->
+                dev.deviceCoordinator.getWeightSampleProvider(dev, db.daoSession)
+                    ?.getAllSamples(from, scope.query.timeTo * 1000L)
+                    .orEmpty()
+                    .filter { it.weightKg > 0 }
+                    .map { TimedValue(it.timestamp / 1000L, it.weightKg) }
+            }.sortedBy { it.seconds }
         }
-        drawSimpleGauge(gaugeBar, Bmi.colorFor(bmi), Bmi.gaugeFraction(bmi))
+    } catch (e: Exception) {
+        LOG.error("Could not get weight history", e)
+        emptyList()
     }
 
     /** The most recent weight measurement of any device, on or before the selected day. */
@@ -88,5 +145,8 @@ object WeightWidget : GaugeWidget<WeightWidget.Data>() {
         null
     }
 
-    data class Data(val weightKg: Double, val heightCm: Int)
+    /**
+     * [history] holds the last 30 days' measurements, oldest first, only for the number style.
+     */
+    class Data(val weightKg: Double, val heightCm: Int, val history: List<TimedValue>? = null, val dayStart: Long = 0)
 }

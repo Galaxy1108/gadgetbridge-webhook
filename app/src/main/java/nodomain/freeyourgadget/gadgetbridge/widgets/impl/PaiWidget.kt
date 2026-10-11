@@ -1,15 +1,17 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.google.android.material.color.MaterialColors
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.PaiSample
+import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
+import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
+import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
@@ -20,7 +22,7 @@ import kotlin.math.roundToInt
  * carry-over portion (total minus today) and today's contribution. Otherwise, the arc is only
  * partially filled to reflect the fraction of the goal completed.
  */
-object PaiWidget : GaugeWidget<PaiWidget.Data>() {
+object PaiWidget : MetricWidget<PaiWidget.Data>() {
     private val LOG = LoggerFactory.getLogger(PaiWidget::class.java)
 
     override val id = "pai"
@@ -69,43 +71,32 @@ object PaiWidget : GaugeWidget<PaiWidget.Data>() {
         return data
     }
 
-    override fun draw(context: Context, variant: WidgetVariant, gaugeValue: TextView, gaugeBar: ImageView, data: Data) {
+    override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         if (data.target <= 0) {
-            drawSimpleGauge(gaugeBar, 0, -1f)
-            gaugeValue.text = "0"
-            return
+            return emptyModel(context)
         }
-
-        gaugeValue.text = data.total.toString()
 
         val colorWeekly = ContextCompat.getColor(context, R.color.chart_pai_weekly)
         val colorToday = ContextCompat.getColor(context, R.color.chart_pai_today)
+        val colors = intArrayOf(colorWeekly, colorToday)
 
-        val targetMet = data.total >= data.target
-
-        if (targetMet) {
+        val segments = if (data.total >= data.target) {
             val todayFraction = if (data.total > 0) data.today / data.total.toFloat() else 0f
-            val weeklyFraction = 1f - todayFraction
-            drawSegmentedGauge(
-                gaugeBar,
-                intArrayOf(colorWeekly, colorToday),
-                floatArrayOf(weeklyFraction, todayFraction),
-                -1f,
-                fadeOutsideDot = false,
-                gapBetweenSegments = false,
-            )
+            floatArrayOf(1f - todayFraction, todayFraction)
         } else {
-            val todayFraction = data.today / data.target.toFloat()
-            val weeklyFraction = (data.total - data.today) / data.target.toFloat()
-            drawSegmentedGauge(
-                gaugeBar,
-                intArrayOf(colorWeekly, colorToday),
-                floatArrayOf(weeklyFraction, todayFraction),
-                -1f,
-                fadeOutsideDot = false,
-                gapBetweenSegments = false,
-            )
+            floatArrayOf((data.total - data.today) / data.target.toFloat(), data.today / data.target.toFloat())
         }
+        val rest = (1f - segments.sum()).coerceAtLeast(0f)
+
+        return TileModel(
+            value = data.total.toString(),
+            gauge = GaugeSpec.Zones(colors, segments, gapBetweenSegments = false),
+            status = StatusLine.Text(context.getString(R.string.widget_status_pai_today, data.today)),
+            chart = MiniChart.Composition(
+                intArrayOf(colorWeekly, colorToday, MaterialColors.getColor(context, R.attr.gauge_track, colorWeekly)),
+                floatArrayOf(segments[0], segments[1], rest),
+            ),
+        )
     }
 
     /**

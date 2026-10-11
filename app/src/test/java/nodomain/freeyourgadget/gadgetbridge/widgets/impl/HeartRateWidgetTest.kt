@@ -46,7 +46,7 @@ class HeartRateWidgetTest : TestBase() {
 
     @Test
     fun heartRateIsShown() {
-        assertEquals("72", render(HeartRateWidget.Data(72, 190)))
+        assertEquals("72 ${context.getString(R.string.bpm)}", render(HeartRateWidget.Data(72, 190)))
     }
 
     @Test
@@ -79,6 +79,37 @@ class HeartRateWidgetTest : TestBase() {
 
     @Test
     fun heartRateAboveMaxIsStillShown() {
-        assertEquals("205", render(HeartRateWidget.Data(205, 190)))
+        assertEquals("205 ${context.getString(R.string.bpm)}", render(HeartRateWidget.Data(205, 190)))
+    }
+
+    @Test
+    fun gaugeSpansFortyToTwoHundred() {
+        assertEquals(0f, HeartRateWidget.gaugeFraction(30), 0f)
+        assertEquals(0.5f, HeartRateWidget.gaugeFraction(120), 1e-6f)
+        assertEquals(1f, HeartRateWidget.gaugeFraction(210), 0f)
+    }
+
+    @Test
+    fun gaugeSegmentsAreRestThenFiveZones_fillingTheScale() {
+        val segments = HeartRateWidget.gaugeSegments(HeartRateWidget.zoneFloors(190))
+
+        assertEquals(6, segments.size)
+        assertEquals((95 - 40) / 160f, segments[0], 1e-6f)
+        assertEquals((200 - 171) / 160f, segments[5], 1e-6f)
+        assertEquals(1f, segments.sum(), 1e-5f)
+    }
+
+    @Test
+    fun restingFallbackIsTheLowestThirtyMinuteAverage() {
+        val dayStart = 0L
+        val samples = listOf(
+            nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue(0, 70f),
+            nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue(900, 60f),
+            nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue(1800, 50f),
+            nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue(2700, 80f),
+        )
+
+        assertEquals(55, HeartRateWidget.lowestRollingAverage(samples, dayStart))
+        assertEquals(0, HeartRateWidget.lowestRollingAverage(emptyList(), dayStart))
     }
 }
