@@ -1273,6 +1273,8 @@
     <string name="charts_min_max_heartrate_popup">Lowest heart rate: %1$d \nHighest heart rate: %2$d \nMovement intensity: %3$s</string>
     <string name="device_not_connected">Not connected.</string>
     <string name="user_feedback_all_alarms_disabled">All alarms disabled</string>
+    <string name="pref_title_do_not_archive_activity_data">Do not archive activity data</string>
+    <string name="pref_summary_do_not_archive_activity_data">Do not mark activities as synced on the device. Useful if Gadgetbridge is used together with other apps. This may cause the watch to run out of space and/or stop syncing properly.</string>
     <string name="pref_title_keep_data_on_device">Keep activity data on device</string>
     <string name="miband_fwinstaller_incompatible_version">Incompatible firmware</string>
     <string name="fwinstaller_firmware_not_compatible_to_device">This firmware is not compatible with the device</string>
