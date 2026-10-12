@@ -4762,6 +4762,8 @@
     <string name="pref_force_connection_type_bt_classic">Bluetooth Classic</string>
     <string name="encryption">Encryption</string>
     <string name="development_preference_do_not_change">Do not change unless instructed, or if you are developer</string>
+    <string name="developer_settings_warning_message">These settings are for developers. Do not change them unless a developer tells you to, or if you know what you are doing. A wrong value can cause the device to stop working correctly.</string>
+    <string name="developer_settings_warning_understand">I understand</string>
     <string name="preference_force_enabled">Force enabled</string>
     <string name="preference_force_disabled">Force disabled</string>
     <string name="pref_force_connection_type_auto_value" translatable="false">BOTH</string>
