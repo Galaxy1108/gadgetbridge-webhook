@@ -5525,4 +5525,7 @@
     <string name="race_prediction_trend">比赛时间趋势</string>
     <string name="medium_amount">中</string>
     <string name="band_index">频段 %d</string>
+    <string name="pref_sleep_respiratory_rate_monitoring">睡眠呼吸速率监测</string>
+    <string name="pref_heartrate_alert_irregular_rhythm">心律不齐警报</string>
+    <string name="number_of_generic_metrics">%1$d 个指标</string>
 </resources>
