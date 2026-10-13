@@ -4949,6 +4949,13 @@
     <string name="widget_day_clock_title">24 hours</string>
     <string name="widget_goals_title">Goals</string>
     <string name="widget_goals_none">No goals set</string>
+    <string name="widget_last_activity_title">Last activity</string>
+    <string name="widget_last_activity_none">No activities yet</string>
+    <!-- Sport and start of the last workout, e.g. "Cycling · Yesterday, 18:40" -->
+    <string name="widget_last_activity_subline">%1$s · %2$s, %3$s</string>
+    <string name="widget_last_activity_avg_hr">Avg HR</string>
+    <!-- Screen reader summary, e.g. "Last activity, Morning run, Running · Today, 07:15. Distance 5.21 km, Duration 28:14, Pace 5:25 /km" -->
+    <string name="widget_last_activity_description">%1$s, %2$s, %3$s. %4$s</string>
     <!-- e.g. "60 min" -->
     <string name="widget_value_minutes">%d min</string>
     <!-- A duration in whole hours, e.g. "8h" -->
