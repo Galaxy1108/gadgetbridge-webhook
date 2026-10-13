@@ -4854,4 +4854,5 @@
     <string name="datestep_next_week">Semaine suivante</string>
     <string name="datestep_prev_month">Mois précédent</string>
     <string name="datestep_next_month">Mois suivant</string>
+    <string name="pref_roidmi_f8_battery_temperature_title">Température batterie</string>
 </resources>
