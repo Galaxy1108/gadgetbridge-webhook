@@ -4855,4 +4855,24 @@
     <string name="datestep_prev_month">Mois précédent</string>
     <string name="datestep_next_month">Mois suivant</string>
     <string name="pref_roidmi_f8_battery_temperature_title">Température batterie</string>
+    <string name="duration_short_day">1d</string>
+    <string name="duration_short_week">1s</string>
+    <string name="duration_short_two_weeks">2s</string>
+    <string name="duration_short_month">1m</string>
+    <string name="duration_short_six_months">6m</string>
+    <string name="duration_short_year">1a</string>
+    <string name="device_card_add_item">Ajouter un élément</string>
+    <string name="device_card_more_summary">Les éléments suivants seront affichés dans une popup</string>
+    <string name="pref_summary_navigation_allow_unsupported_devices">Envoyer des instructions de navigation à des appareils qui ne gèrent pas la navigation</string>
+    <string name="pref_title_navigation_right_hand_driving">Circulation à droite</string>
+    <string name="pref_description_navigation_right_hand_driving">Détermine l\'icône de navigation utilisée pour les ronds-points.</string>
+    <string name="pref_title_navigation_continuous_updates">Envoyer les mises à jour continuellement</string>
+    <string name="pref_description_navigation_continuous_updates">Si activé, les mises à jour sont envoyées continuellement à l\'appareil. Si désactivé, les mises à jour sont envoyées à chaque tournant.</string>
+    <string name="pref_title_navigation_update_rate">Intervalle de mise jour pour le mode continu (en millisecondes)</string>
+    <string name="navigation_destination_reached">Vous êtes arrivé</string>
+    <string name="navigation_eta">Arrivée estimée : %1$s</string>
+    <string name="navigation_distance_left">%1$s restants</string>
+    <string name="map_theme_custom">Personnalisé…</string>
+    <string name="map_theme_custom_file_title">Fichier de thème personnalisé</string>
+    <string name="map_theme_custom_file_summary">Archive zip contenant le thème et ses icônes, utilisé quand le thème ci-dessus est réglé sur Personnalisé</string>
 </resources>
