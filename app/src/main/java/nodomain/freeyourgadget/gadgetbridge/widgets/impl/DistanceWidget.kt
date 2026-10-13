@@ -11,7 +11,6 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
-import java.text.NumberFormat
 
 /**
  * Total distance for the day against the user's distance goal.
@@ -44,7 +43,7 @@ object DistanceWidget : MetricWidget<DistanceWidget.Data>() {
         ratio = if (data.goalMeters > 0) data.total / data.goalMeters.toDouble() else 0.0,
         toGo = (data.goalMeters - data.total).takeIf { it > 0 }?.let { FormatUtils.getFormattedDistanceLabel(it.toDouble()) },
         extraStats = listOf(
-            Stat(NumberFormat.getInstance().format(data.steps), context.getString(R.string.steps)),
+            Stat(data.steps.toString(), context.getString(R.string.steps)),
             Stat(clock(data.activeMinutes), context.getString(R.string.activity_list_summary_active_time)),
         ),
     )

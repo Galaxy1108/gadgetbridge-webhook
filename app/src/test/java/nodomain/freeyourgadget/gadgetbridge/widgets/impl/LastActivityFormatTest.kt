@@ -80,11 +80,6 @@ class LastActivityFormatTest {
     }
 
     @Test
-    fun integer() {
-        assertEquals("1,386", LastActivityFormat.integer(1386, locale))
-    }
-
-    @Test
     fun day() {
         val today = LocalDate.of(2026, 10, 13)
         assertEquals(Day.Today, LastActivityFormat.day(today, today, locale))

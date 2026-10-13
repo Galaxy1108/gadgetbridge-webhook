@@ -17,7 +17,6 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
-import java.text.NumberFormat
 
 /**
  * Calories for the day: active calories against the user's goal, or the total split into active and resting. The
@@ -69,13 +68,12 @@ object CaloriesWidget : MetricWidget<CaloriesWidget.Data>() {
     private fun active(context: Context, data: Data): TileModel {
         val color = ContextCompat.getColor(context, R.color.calories_color)
         return TileModel(
-            value = NumberFormat.getInstance().format(data.activeCalories),
+            value = data.activeCalories.toString(),
             gauge = GaugeSpec.Progress(color, data.activeGoalFactor),
         )
     }
 
     private fun total(context: Context, config: WidgetConfig, data: Data): TileModel {
-        val format = NumberFormat.getInstance()
         val totalCalories = data.activeCalories + data.restingCalories
         val colors = intArrayOf(
             ContextCompat.getColor(context, R.color.calories_resting_color),
@@ -87,15 +85,15 @@ object CaloriesWidget : MetricWidget<CaloriesWidget.Data>() {
         } else {
             GaugeSpec.Zones(intArrayOf(Color.argb(25, 128, 128, 128)), floatArrayOf(1f), gapBetweenSegments = false)
         }
-        val kcal = { value: Int -> context.getString(R.string.widget_value_kcal, format.format(value)) }
+        val kcal = { value: Int -> context.getString(R.string.widget_value_kcal, value.toString()) }
         val hourly = data.hourlyActive
         return TileModel(
-            value = format.format(totalCalories),
+            value = totalCalories.toString(),
             gauge = gauge,
             status = if (config.isTall || config.isLargeStyle) {
                 null
             } else {
-                StatusLine.Text(context.getString(R.string.widget_status_active, format.format(data.activeCalories)))
+                StatusLine.Text(context.getString(R.string.widget_status_active, data.activeCalories.toString()))
             },
             chart = if (config.isLargeStyle) null else MiniChart.Composition(colors, values),
             miniStats = if (config.isLargeStyle) {

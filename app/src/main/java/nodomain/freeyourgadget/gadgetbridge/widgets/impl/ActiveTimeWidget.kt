@@ -11,7 +11,6 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
-import java.text.NumberFormat
 
 /**
  * Active minutes for the day against the user's active time goal.
@@ -44,7 +43,7 @@ object ActiveTimeWidget : MetricWidget<ActiveTimeWidget.Data>() {
         ratio = if (data.goalMinutes > 0) data.total / data.goalMinutes.toDouble() else 0.0,
         toGo = (data.goalMinutes - data.total).takeIf { it > 0 }?.let { clock(it) },
         extraStats = listOf(
-            Stat(NumberFormat.getInstance().format(data.steps), context.getString(R.string.steps)),
+            Stat(data.steps.toString(), context.getString(R.string.steps)),
             Stat(FormatUtils.getFormattedDistanceLabel(data.distanceMeters.toDouble()), context.getString(R.string.distance)),
         ),
     )

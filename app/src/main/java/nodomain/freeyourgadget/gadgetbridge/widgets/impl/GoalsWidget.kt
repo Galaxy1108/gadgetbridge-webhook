@@ -26,7 +26,6 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetActions
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
-import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -171,7 +170,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
      * sleep in hours and minutes.
      */
     private fun formatted(context: Context, progress: Progress): Pair<String, String> = when (progress.goal) {
-        Goal.STEPS -> NumberFormat.getInstance().let { it.format(progress.current.roundToInt()) to it.format(progress.target.roundToInt()) }
+        Goal.STEPS -> progress.current.roundToInt().toString() to progress.target.roundToInt().toString()
         Goal.DISTANCE -> {
             val imperial = GBApplication.getPrefs().distanceUnit == DistanceUnit.IMPERIAL
             val factor = if (imperial) MILES_PER_METER else 1 / METERS_PER_KM

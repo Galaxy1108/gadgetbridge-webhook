@@ -3,7 +3,6 @@ package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -78,8 +77,6 @@ object LastActivityFormat {
         val units = if (imperial) meters / METERS_PER_MILE else meters / 1000.0
         return DecimalFormat("0.0", DecimalFormatSymbols(locale)).format(units / (seconds / 3600.0))
     }
-
-    fun integer(value: Int, locale: Locale): String = NumberFormat.getIntegerInstance(locale).format(value)
 
     fun day(date: LocalDate, today: LocalDate, locale: Locale): Day {
         val daysAgo = ChronoUnit.DAYS.between(date, today)

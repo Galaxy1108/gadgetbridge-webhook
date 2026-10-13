@@ -271,7 +271,7 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
                 context.getString(R.string.Speed)
             )
             StatKind.CALORIES -> StatText(
-                workout.calories?.let { withUnit(sizes, context, LastActivityFormat.integer(it, locale), units.getDisplayUnitLabel(ActivitySummaryEntries.UNIT_KCAL)) },
+                workout.calories?.let { withUnit(sizes, context, it.toString(), units.getDisplayUnitLabel(ActivitySummaryEntries.UNIT_KCAL)) },
                 context.getString(R.string.calories)
             )
             StatKind.AVG_HR -> StatText(
