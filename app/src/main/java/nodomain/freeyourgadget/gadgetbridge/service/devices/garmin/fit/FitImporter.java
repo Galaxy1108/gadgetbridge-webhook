@@ -138,6 +138,8 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitUserProfile;
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
+import nodomain.freeyourgadget.gadgetbridge.util.sleep.EstimatedSleepSession;
+import nodomain.freeyourgadget.gadgetbridge.util.sleep.SleepStageEstimator;
 
 public class FitImporter {
     private static final Logger LOG = LoggerFactory.getLogger(FitImporter.class);
@@ -165,7 +167,7 @@ public class FitImporter {
     private final Map<Integer, Integer> unknownRecords = new HashMap<>();
     @Nullable
     private FitSleepDataInfo fitSleepDataInfo = null;
-    private final List<FitSleepDataRaw> fitSleepDataRawSamples = new ArrayList<>();
+    private RawSleepStream rawSleepStream = new RawSleepStream();
     private final List<GarminSleepRestlessMomentsSample> sleepRestlessMomentsSamples = new ArrayList<>();
     private final List<BatteryLevel> batterySamples = new ArrayList<>();
     @Nullable
@@ -235,9 +237,10 @@ public class FitImporter {
                     LOG.warn("Already had sleep data info: {}", fitSleepDataInfo);
                 }
                 fitSleepDataInfo = newFitSleepDataInfo;
+                rawSleepStream.onInfo(ts, newFitSleepDataInfo.getSampleLength());
             } else if (record instanceof FitSleepDataRaw fitSleepDataRaw) {
                 //LOG.debug("Sleep Data Raw: {}", fitSleepDataRaw);
-                fitSleepDataRawSamples.add(fitSleepDataRaw);
+                rawSleepStream.onRaw(fitSleepDataRaw.getHeartRate(), fitSleepDataRaw.getMovement());
             } else if (record instanceof FitSleepRestlessMoments fitSleepRestlessMoments) {
                 //LOG.debug("Sleep Restless Moments: {}", fitSleepRestlessMoments);
                 if (fitSleepRestlessMoments.getRestlessMomentsCount() != null) {
@@ -279,6 +282,7 @@ public class FitImporter {
                 sample.setTimestamp(ts * 1000L);
                 sample.setStage(stage.num);
                 sleepStageSamples.add(sample);
+                rawSleepStream.onLevel(ts, stage.num);
             } else if (record instanceof FitNapEvent nap) {
                 if (nap.getStartTime() == null || nap.getEndTime() == null) {
                     continue;
@@ -759,7 +763,7 @@ public class FitImporter {
         trainingLoadChronicSamples.clear();
         unknownRecords.clear();
         fitSleepDataInfo = null;
-        fitSleepDataRawSamples.clear();
+        rawSleepStream = new RawSleepStream();
         sleepRestlessMomentsSamples.clear();
         batterySamples.clear();
         fileId = null;
@@ -916,13 +920,13 @@ public class FitImporter {
     }
 
     /**
-     * As per #4048, devices that do not have a sleep widget send raw sleep samples, which we do not
-     * know how to parse. Therefore, we don't persist the sleep stages they report (they're all awake),
-     * but we fake light sleep for the duration of the raw sleep samples, in order to have some data
-     * at all.
+     * As per #4048, devices that do not have a sleep widget send raw sleep samples instead of sleep
+     * stages (the stages they report are all awake or unmeasurable). We estimate the night from the
+     * heart rate and movement in those samples. When no night qualifies, we fake light sleep for the
+     * duration of the raw sleep samples, in order to have some data at all.
      */
     private void processRawSleepSamples(final DaoSession session) {
-        if (fitSleepDataRawSamples.isEmpty()) {
+        if (rawSleepStream.getRawCount() == 0) {
             return;
         }
 
@@ -934,9 +938,16 @@ public class FitImporter {
         }
 
         final long asleepTimeMillis = Objects.requireNonNull(fileId.getTimeCreated()).intValue() * 1000L;
-        final long wakeTimeMillis = asleepTimeMillis + fitSleepDataRawSamples.size() * 60 * 1000L;
+        final long wakeTimeMillis = asleepTimeMillis + rawSleepStream.getRawCount() * 60 * 1000L;
 
-        LOG.debug("Got {} raw sleep samples - faking sleep events from {} to {}", fitSleepDataRawSamples.size(), asleepTimeMillis, wakeTimeMillis);
+        final EstimatedSleepSession night = SleepStageEstimator.estimate(rawSleepStream.minutes());
+        if (night != null) {
+            LOG.debug("Estimated sleep from {} raw sleep samples: {} to {}, {} min asleep", rawSleepStream.getRawCount(), night.getOnset(), night.getEnd(), night.getSleepMinutes());
+            persistEstimatedSleep(session, night, asleepTimeMillis, wakeTimeMillis);
+            return;
+        }
+
+        LOG.debug("Got {} raw sleep samples - faking sleep events from {} to {}", rawSleepStream.getRawCount(), asleepTimeMillis, wakeTimeMillis);
 
         // We only need to fake sleep start and end times, the sample provider will take care of the rest
         try {
@@ -957,6 +968,22 @@ public class FitImporter {
             persistAbstractSamples(List.of(sampleFallAsleep, sampleWakeUp), sampleProvider);
         } catch (final Exception e) {
             GB.toast(context, "Error faking event samples", Toast.LENGTH_LONG, GB.ERROR, e);
+        }
+    }
+
+    private void persistEstimatedSleep(final DaoSession session,
+                                       final EstimatedSleepSession night,
+                                       final long fakedFromMillis,
+                                       final long fakedToMillis) {
+        try {
+            // An import before sleep was estimated may have faked light sleep over this file
+            final GarminEventSampleProvider eventSampleProvider = new GarminEventSampleProvider(gbDevice, session);
+            eventSampleProvider.deleteFakedSleepEvents(fakedFromMillis, fakedToMillis);
+
+            persistAbstractSamples(RawSleepStream.stageSamples(night), new GarminSleepStageSampleProvider(gbDevice, session));
+            persistAbstractSamples(RawSleepStream.sleepEvents(night), eventSampleProvider);
+        } catch (final Exception e) {
+            GB.toast(context, "Error saving estimated sleep", Toast.LENGTH_LONG, GB.ERROR, e);
         }
     }
 
