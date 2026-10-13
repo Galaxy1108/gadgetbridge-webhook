@@ -94,6 +94,6 @@ class WidgetGridLayout @JvmOverloads constructor(
 
     private companion object {
         // A half-step of 64dp plus the 12dp gap between tiles
-        const val ROW_HEIGHT_DP = 76f
+        const val ROW_HEIGHT_DP = 77f
     }
 }
