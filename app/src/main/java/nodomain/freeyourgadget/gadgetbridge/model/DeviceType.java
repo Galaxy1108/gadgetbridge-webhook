@@ -286,6 +286,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.QecnatoS10C
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.R1Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.S52Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.SwissPeakCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.T70Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.Y66Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfit.watches.Y6Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.gloryfitpro.watches.DM58Coordinator;
@@ -1178,6 +1179,7 @@ public enum DeviceType {
     D3(D3Coordinator.class),
     Y6(Y6Coordinator.class),
     Y66(Y66Coordinator.class),
+    T70(T70Coordinator.class),
     DM58(DM58Coordinator.class),
     REALME_BUDS_T110(RealmeBudsT110Coordinator.class),
     REALME_BUDS_T100(RealmeBudsT100Coordinator.class),
