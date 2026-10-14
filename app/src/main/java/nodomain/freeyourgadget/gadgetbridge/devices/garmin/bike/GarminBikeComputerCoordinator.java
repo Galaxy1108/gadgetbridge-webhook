@@ -61,10 +61,4 @@ public abstract class GarminBikeComputerCoordinator extends GarminCoordinator {
     public boolean supportsFindDevice(@NonNull GBDevice device) {
         return true;
     }
-
-    @Override
-    public boolean supportsMusicInfo(@NonNull GBDevice device) {
-        // eg. Edge 840, Edge Explore 2, but not all
-        return true;
-    }
 }

@@ -1585,6 +1585,11 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     }
 
     private void sendMusicState(final MusicStateSpec stateSpec, final int progress) {
+        if (!getCoordinator().supportsMusicInfo(getDevice())) {
+            LOG.warn("sendMusicState: supportsMusicInfo=false");
+            return;
+        }
+
         final int playing;
         final float playRate;
         if (stateSpec.getState() == MusicStateSpec.STATE_PLAYING) {

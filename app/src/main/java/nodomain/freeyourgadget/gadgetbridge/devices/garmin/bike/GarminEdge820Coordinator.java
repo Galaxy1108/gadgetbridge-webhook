@@ -31,11 +31,6 @@ public class GarminEdge820Coordinator extends GarminBikeComputerCoordinator {
     }
 
     @Override
-    public boolean supportsMusicInfo(@NonNull final GBDevice device) {
-        return false;
-    }
-
-    @Override
     public boolean supportsFindDevice(@NonNull final GBDevice device) {
         return false;
     }

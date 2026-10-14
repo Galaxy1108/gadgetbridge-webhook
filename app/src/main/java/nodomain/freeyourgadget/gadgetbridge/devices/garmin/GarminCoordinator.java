@@ -454,6 +454,12 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
         return true;
     }
 
+    @Override
+    public boolean supportsMusicInfo(@NonNull GBDevice device) {
+        return supports(device, GarminCapability.BASIC_MUSIC_CONTROLS)
+            || supports(device, GarminCapability.ADVANCED_MUSIC_CONTROLS);
+    }
+
     @Nullable
     @Override
     public InstallHandler findInstallHandler(Uri uri, Bundle options, Context context) {

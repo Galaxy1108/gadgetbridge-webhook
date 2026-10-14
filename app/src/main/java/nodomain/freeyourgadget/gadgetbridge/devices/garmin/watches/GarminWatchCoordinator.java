@@ -247,11 +247,6 @@ public abstract class GarminWatchCoordinator extends GarminCoordinator {
     }
 
     @Override
-    public boolean supportsMusicInfo(@NonNull GBDevice device) {
-        return true;
-    }
-
-    @Override
     public DeviceKind getDeviceKind(@NonNull GBDevice device) {
         return DeviceKind.WATCH;
     }

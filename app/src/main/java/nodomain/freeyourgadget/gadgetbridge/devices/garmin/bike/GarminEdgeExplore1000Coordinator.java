@@ -41,11 +41,6 @@ public class GarminEdgeExplore1000Coordinator extends GarminBikeComputerCoordina
     }
 
     @Override
-    public boolean supportsMusicInfo(@NonNull final GBDevice device) {
-        return false;
-    }
-
-    @Override
     public boolean supportsFindDevice(@NonNull final GBDevice device) {
         return false;
     }
