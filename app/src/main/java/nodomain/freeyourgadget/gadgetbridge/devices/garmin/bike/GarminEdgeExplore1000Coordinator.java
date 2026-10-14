@@ -39,9 +39,4 @@ public class GarminEdgeExplore1000Coordinator extends GarminBikeComputerCoordina
     public boolean supportsVO2Max(@NonNull final GBDevice device) {
         return false;
     }
-
-    @Override
-    public boolean supportsFindDevice(@NonNull final GBDevice device) {
-        return false;
-    }
 }

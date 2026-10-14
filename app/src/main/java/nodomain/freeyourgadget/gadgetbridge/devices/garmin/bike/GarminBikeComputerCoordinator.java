@@ -56,9 +56,4 @@ public abstract class GarminBikeComputerCoordinator extends GarminCoordinator {
     public boolean supportsWeather(@NonNull final GBDevice device) {
         return true;
     }
-
-    @Override
-    public boolean supportsFindDevice(@NonNull GBDevice device) {
-        return true;
-    }
 }

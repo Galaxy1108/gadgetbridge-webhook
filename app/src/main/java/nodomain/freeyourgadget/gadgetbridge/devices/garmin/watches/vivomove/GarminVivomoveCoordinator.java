@@ -93,12 +93,6 @@ public class GarminVivomoveCoordinator extends GarminWatchCoordinator {
     }
 
     @Override
-    public boolean supportsFindDevice(@NonNull final GBDevice device) {
-        // no vibration motor
-        return false;
-    }
-
-    @Override
     public boolean supportsPai(@NonNull final GBDevice device) {
         return false;
     }

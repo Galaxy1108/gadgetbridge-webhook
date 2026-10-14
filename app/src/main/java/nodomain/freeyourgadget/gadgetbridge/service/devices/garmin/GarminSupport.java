@@ -1317,6 +1317,11 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
     @Override
     public void onFindDevice(boolean start) {
+        if (!getCoordinator().supportsFindDevice(gbDevice)){
+            LOG.warn("onFindDevice: supportsFindDevice=false");
+            return;
+        }
+
         final GdiFindMyWatch.FindMyWatchService.Builder a = GdiFindMyWatch.FindMyWatchService.newBuilder();
         if (start) {
             a.setFindRequest(
