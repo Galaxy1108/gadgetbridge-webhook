@@ -177,10 +177,10 @@
     <string name="title_activity_android_pairing">Appairer l\'appareil</string>
     <string name="android_pairing_hint">Utiliser l\'appairage Bluetooth d\'Android pour jumeler l\'appareil.</string>
     <string name="title_activity_mi_band_pairing">Appairer votre Mi Band</string>
-    <string name="pairing">Jumelage avec %s…</string>
+    <string name="pairing">Appairage avec %s…</string>
     <string name="pairing_creating_bond_with">Création d’un lien avec %1$s (%2$s)</string>
     <string name="pairing_unable_to_pair_with">Impossible se s’appairer avec %1$s (%2$s)</string>
-    <string name="pairing_in_progress">Création du lien en cours : %1$s (%2$s)</string>
+    <string name="pairing_in_progress">Création du lien en cours : %1$s (%2$s)</string>
     <string name="pairing_already_bonded">Déjà lié avec %1$s (%2$s), connexion…</string>
     <string name="message_cannot_pair_no_mac">Aucune adresse MAC fournie, ne peut être appairé.</string>
     <string name="preferences_category_device_specific_settings">Paramètres spécifiques à l\'appareil </string>
@@ -376,9 +376,9 @@
     <!--Strings related to Vibration Activity-->
     <string name="title_activity_vibration">Vibration</string>
     <!--Strings related to Pebble Pairing Activity-->
-    <string name="title_activity_pebble_pairing">Jumelage avec une Pebble</string>
+    <string name="title_activity_pebble_pairing">Appairage avec une Pebble</string>
     <string name="pebble_pairing_hint">Une fenêtre d\'appairage va s’afficher sur votre appareil Android. Sinon, regardez dans vos notifications et acceptez la demande d\'appairage. Acceptez ensuite la demande d\'appairage sur votre Pebble.</string>
-    <string name="pref_title_setup_bt_pairing">Activer le jumelage Bluetooth</string>
+    <string name="pref_title_setup_bt_pairing">Activer l\'appairage Bluetooth</string>
     <string name="pref_summary_setup_bt_pairing">Désactivez ceci si vous avez des problèmes de connexion</string>
     <string name="unit_metric">Métrique</string>
     <string name="unit_imperial">Impériale</string>
@@ -401,7 +401,7 @@
     <string name="discovery_enable_bluetooth">Activez le Bluetooth pour trouver des dispositifs.</string>
     <string name="discovery_successfully_bonded">Lié à %1$s.</string>
     <string name="discovery_pair_title">Appairer avec %1$s ?</string>
-    <string name="discovery_pair_question">Sélectionnez Jumeler pour associer vos dispositifs. Si cela échoue, essayez à nouveau sans jumelage.</string>
+    <string name="discovery_pair_question">Sélectionnez Appairer pour associer vos dispositifs. Si cela échoue, essayez à nouveau sans appairage.</string>
     <string name="discovery_yes_pair">Appairer</string>
     <string name="discovery_dont_pair">Ne pas appairer</string>
     <string name="fw_upgrade_notice_amazfitbip">Vous êtes sur le point d\'installer le micrologiciel %s sur votre Amazfit Bip. 
@@ -922,7 +922,7 @@
     <string name="device_is_currently_bonded">DÉJA LIÉ</string>
     <string name="error_background_service_reason_truncated">Le démarrage du service en arrière-plan n\'a pas réussi à cause de…</string>
     <string name="error_background_service">Impossible de démarrer le service d\'arrière-plan</string>
-    <string name="companiondevice_pairing">Pairage du bracelet</string>
+    <string name="companiondevice_pairing">Appairage du bracelet</string>
     <string name="require_location_provider">La géolocalisation doit être activée</string>
     <string name="error_version_check_extreme_caution">ATTENTION: Erreur lors de la vérification de l\'information de version ! Vous ne devriez pas poursuivre ! Numéro de version \"%s\"</string>
     <string name="permission_granting_mandatory">Toutes ces permissions sont nécessaires et une instabilité peut se produire si elles ne sont pas accordées</string>
@@ -1328,8 +1328,8 @@
     <string name="watchface_dialog_widget_timezone">Fuseau horaire</string>
     <string name="watchface_dialog_widget_timeout_hide_text">Cacher le texte en cas de perte de communication</string>
     <string name="watchface_dialog_widget_update_timeout">Mettre à jour le temps de déconnexion en minutes</string>
-    <string name="qhybrid_title_on_device_confirmation">Activer la confirmation de pairage sur l\'appareil</string>
-    <string name="qhybrid_summary_on_device_confirmation">La confirmation de pairage sur l\'appareil peut être ennuyeuse. Sa désactivation peut entrainer la perte de fonctions.</string>
+    <string name="qhybrid_title_on_device_confirmation">Activer la confirmation d\'appairage sur l\'appareil</string>
+    <string name="qhybrid_summary_on_device_confirmation">Les confirmations d\'appairage sur l\'appareil peuvent devenir lassantes. Sa désactivation peut entrainer la perte de fonctions.</string>
     <string name="title_activity_set_reminders">Configurer les rappels</string>
     <string name="controlcenter_start_configure_reminders">Configurer les rappels</string>
     <string name="reminder_repeat">Répéter</string>
@@ -1364,7 +1364,7 @@
     <string name="minSpeed">Minimum</string>
     <string name="minHR">Fréquence cardiaque minimum</string>
     <string name="maxCadence">Cadence max</string>
-    <string name="activity_prefs_discovery_pairing">Options de découverte et de pairage</string>
+    <string name="activity_prefs_discovery_pairing">Options de découverte et d\'appairage</string>
     <string name="discover_unsupported_devices">Découvrir les appareils non pris en charge</string>
     <string name="add_test_device">Ajouter un appareil de test</string>
     <string name="controlcenter_power_off">Éteindre</string>
@@ -1974,13 +1974,13 @@
     <string name="pref_morning_updates_summary">Afficher les mises à jour tous les matins</string>
     <string name="pref_morning_updates_categories_title">Les catégories de mises à jour du matin</string>
     <string name="pref_morning_updates_categories_summary">Liste des catégories à afficher tous les matins</string>
-    <string name="bluetooth_calls_pairing">Pairage pour les appels Bluetooth</string>
+    <string name="bluetooth_calls_pairing">Appairage pour les appels Bluetooth</string>
     <string name="bluetooth_calls_settings">Configuration appels Bluetooth</string>
     <string name="pref_display_caller_title">Afficher les informations du contact</string>
     <string name="pref_display_caller_summary">Afficher le numéro ou le nom pour les appels entrants</string>
-    <string name="pref_pair_bluetooth_calls_summary">Appuyer ici pour commencer le processus de pairage</string>
+    <string name="pref_pair_bluetooth_calls_summary">Appuyer ici pour commencer le processus d\'appairage</string>
     <string name="pref_pair_bluetooth_calls_help_title">Comment recevoir des appels Bluetooth</string>
-    <string name="pref_pair_bluetooth_calls_help_1">1. Appuyer sur le bouton ci-dessous pour commencer le processus de pairage.</string>
+    <string name="pref_pair_bluetooth_calls_help_1">1. Appuyer sur le bouton ci-dessous pour commencer le processus d\'appairage.</string>
     <string name="pref_pair_bluetooth_calls_help_3">3. Activer les réglages « d\'appel en Bluetooth » ci-dessous.</string>
     <string name="pref_pair_bluetooth_calls_help_warning">AVERTISSEMENT : Si vous activez les appels Bluetooth sans faire d\'appairage avec la seconde instance, les notifications d\'appel pourraient ne pas marcher comme prévu.</string>
     <string name="bluetooth_calls">Appels Bluetooth</string>
@@ -2026,8 +2026,8 @@
 \nA VOS RISQUES ET PÉRILS !</string>
     <string name="fossil_hr_confirm_connection">Merci de confirmer sur le bracelet</string>
     <string name="fossil_hr_connection_not_confirmed">Connexion non confirmée sur l\'appareil, utilisation du mode non identifié</string>
-    <string name="fossil_hr_pairing_successful">Pairage avec l\'appareil réussie</string>
-    <string name="fossil_hr_pairing_failed">Pairage avec l\'appareil raté</string>
+    <string name="fossil_hr_pairing_successful">Appairage avec l\'appareil réussi</string>
+    <string name="fossil_hr_pairing_failed">Appairage avec l\'appareil échoué</string>
     <string name="fossil_hr_confirmation_skipped">Passer la confirmation sur l\'appareil</string>
     <string name="fossil_hr_confirmation_timeout">Hors délai pour la confirmation</string>
     <string name="gpx_route_upload_failed">L\'envoi du tracé Gpx a échoué</string>
@@ -2585,9 +2585,7 @@
     <string name="auto_reconnect_ble_scan_title">Reconnexion par un scan BLE</string>
     <string name="auto_reconnect_ble_scan_summary">Attendre le scan d\'appareil au lieu d\'essayer de reconnecter à l\'aveugle</string>
     <string name="unbind_before_pair_title">Déjà lié</string>
-    <string name="unbind_before_pair_message">Cet appareil est déjà lié dans les réglages Android, ce qui peut rendre le pairage impossible pour certains appareils.
-\n
-\nSi l\'ajout de l\'appareil échoue, merci de le supprimer des réglages Android et essayer de nouveau.</string>
+    <string name="unbind_before_pair_message">Cet appareil est déjà lié dans les réglages Android, ce qui peut rendre l\'appairage impossible pour certains appareils. \n \nSi l\'ajout de l\'appareil échoue, merci de le supprimer des réglages Android et essayer de nouveau.</string>
     <string name="devicetype_scannable">Appareil scannable</string>
     <string name="pref_header_sony_sound_control">Contrôle audio</string>
     <string name="companion_pairing_request_title">Appareil compagnon</string>
@@ -2611,9 +2609,7 @@
     <string name="pref_force_enable_spo2_support_summary">Forcer la prise en charge du SpO₂ \nUTILISER À VOS RISQUES ET PÉRILS</string>
     <string name="widget_name_colored_tile">%1$s (tuile colorée)</string>
     <string name="scan_scanning_single_device">Scan d\'un appareil</string>
-    <string name="companion_pairing_request_description">Pairer cet appareil comme compagnon ?
-\n
-\nCela est conseillé pour certaines fonctions comme retrouver son appareil, et apporte une meilleure connexion.</string>
+    <string name="companion_pairing_request_description">Appairer cet appareil comme compagnon ? \n\nCeci est conseillé pour certaines fonctions comme retrouver son appareil, et apporte une meilleure connexion.</string>
     <string name="state_scanned">Scanné</string>
     <string name="swolfAvg">Swolf moyen</string>
     <string name="swolfMax">Swolf maximum</string>
@@ -2677,7 +2673,7 @@
     <string name="pref_sleepasandroid_enable_summary">Permettre l\'intégration Sleep as Android</string>
     <string name="pref_sleepasandroid_features_summary">Le support varie selon les appareils</string>
     <string name="pref_title_huawei_account">Compte Huawei</string>
-    <string name="pref_summary_huawei_account">Compte Huawei utilisé pour le processus de pairage. Le configurer permet un pairage sans réinitialisation.</string>
+    <string name="pref_summary_huawei_account">Compte Huawei utilisé pour le processus d\'appairage. Le configurer permet un appairage sans réinitialisation.</string>
     <string name="device_name_bicycle_sensor">Capteur vélo</string>
     <string name="title_cycling">Cyclisme</string>
     <string name="pref_title_wheel_diameter">Diamètre de la roue</string>
@@ -2783,7 +2779,7 @@
     <string name="body_energy_gained">Gagnée</string>
     <string name="body_energy_legend_level">Niveau de réserve d\'énergie</string>
     <string name="body_energy">Réserve d\'énergie</string>
-    <string name="find_my_phone_companion_warning">Association comme compagnon est requis pour trouver le téléphone. Cliquez ici pour plus d\'informations.</string>
+    <string name="find_my_phone_companion_warning">Appairage comme compagnon est requis pour trouver le téléphone. Cliquez ici pour plus d\'informations.</string>
     <string name="hrv_status_last_night">Nuit dernière</string>
     <string name="hrv_status_day_avg_legend">Moyenne journalière (ms)</string>
     <string name="hrv_status_seven_days_avg">Moyenne sur 7 jours</string>
@@ -3368,10 +3364,10 @@
     <string name="permission_fine_location_title">Bon emplacement</string>
     <string name="redmi_buds_5_pro_transparency_strength">Force de la transparence</string>
     <string name="music_multiselect_limit">Limite pour la sélection de plus d’un élément atteinte</string>
-    <string name="title_activity_even_realities_g1_pairing">Même jumelage de G1</string>
-    <string name="pairing_even_realities_g1_working">Jumelage avec %1s…</string>
-    <string name="pairing_even_realities_g1_find_both_fail">Échec pour trouver les lentilles droites et gauches. Veuillez scanner à nouveau.</string>
-    <string name="pairing_even_realities_g1_select_next_lens">Lentile %1$s sélectionnée pour l\'appariement. Plusieurs candidats pour l\'objectif %2$s ont été trouvés. Veuillez sélectionner l\'objectif %2$s dans la liste ci-dessous.</string>
+    <string name="title_activity_even_realities_g1_pairing">Même appairage de G1</string>
+    <string name="pairing_even_realities_g1_working">Appairage avec %1s…</string>
+    <string name="pairing_even_realities_g1_find_both_fail">Échec pour trouver les objectifs droit et gauche. Veuillez scanner à nouveau.</string>
+    <string name="pairing_even_realities_g1_select_next_lens">Objectif %1$s sélectionné pour l\'appairage. Plusieurs candidats pour l\'objectif %2$s ont été trouvés. Veuillez sélectionner l\'objectif %2$s dans la liste ci-dessous.</string>
     <string name="pref_vibration_intensity">Intensité vibration</string>
     <string name="serbian_latin">Serbe (Latin)</string>
     <string name="catalan">Catalan</string>
@@ -3390,9 +3386,9 @@
     <string name="activity_type_back">Dos</string>
     <string name="pref_import_activity_files_title">Importer fichiers d’activité</string>
     <string name="pref_import_activity_files_summary">Importer manuellement des fichiers d’activité depuis le stockage du téléphone</string>
-    <string name="gree_pair_status_success">Succès du jumelage.\n\nLier la clé : %s</string>
-    <string name="gree_pair_info">Vous êtes sur le point de jumeler avec %1$s (%2$s). Veuillez saisir les informations relatives au Wi-Fi et au serveur hôte pour le jumelage. Consultez le site Web pour plus d’informations.</string>
-    <string name="gree_pair_status_failure">Jumelage échoué :%s</string>
+    <string name="gree_pair_status_success">Succès de l\'appairage.\n\nLier la clé : %s</string>
+    <string name="gree_pair_info">Vous êtes sur le point d\'appairer avec %1$s (%2$s). Veuillez saisir les informations relatives au Wi-Fi et au serveur hôte pour l\'appairage. Consultez le site Web pour plus d’informations.</string>
+    <string name="gree_pair_status_failure">Appairage échoué :%s</string>
     <string name="earfun_anc_mode">Mode ANC</string>
     <string name="earfun_anc_mode_strong">ANC fort</string>
     <string name="earfun_tap_action_noise_control_all_modes">Contrôle bruit (tous modes)</string>
@@ -3407,7 +3403,7 @@
     <string name="zepp_os_install_map_instructions">Une fois l’installation démarrée sur le téléphone, vous devez également l\'accepter sur la montre.</string>
     <string name="ultrahuman_airplane_mode_on_charger">anneau en charge - mode avion PAS activé</string>
     <string name="ultrahuman_airplane_mode_activated">mode avion activé</string>
-    <string name="pairing_even_realities_g1_bottom_hint">Plusieurs boîtes de dialogue d’appariement s’afficheront sur votre appareil Android. Si ce n’est pas le cas, regardez dans le tiroir des notifications et acceptez la demande d’appariement. Les lentilles gauche et droite devront être jumelées.</string>
+    <string name="pairing_even_realities_g1_bottom_hint">Plusieurs boîtes de dialogue d’appairage s’afficheront sur votre appareil Android. Sinon, regardez dans le tiroir des notifications et acceptez la demande d’appairage. Il faudra appairer les objectifs gauche et droit.</string>
     <string name="earfun_tap_action_noise_control_wind_ambient">Contrôle du bruit (vent, son ambiant)</string>
     <string name="earfun_microphone_mode">Mode microphone</string>
     <string name="banglejs_notification_missed_call_source">Appel entrant</string>
@@ -3472,7 +3468,7 @@
     <string name="earfun_connect_two_devices">Double connexion d’appareil</string>
     <string name="earfun_connect_two_devices_hint">Connectez-vous à deux appareils Bluetooth simultanément. Pour un signal stable, évitez d’utiliser la connexion double appareil et le mode LDAP en même temps.</string>
     <string name="earfun_advanced_audio_mode">Mode audio avancé</string>
-    <string name="earfun_advanced_audio_mode_hint"><b>Google Fast Pair</b> permet le jumelage d’appareils instantanément.\n<b>LE Audio</b> fournit une qualité sonore améliorée, une consommation d’énergie réduite et une prise en charge de plusieurs flux audio.</string>
+    <string name="earfun_advanced_audio_mode_hint"><b>Google Fast Pair</b> permet l\'appairage d’appareils instantané et sans accroc.\n<b>LE Audio</b> fournit une qualité sonore améliorée, une consommation d’énergie réduite et la prise en charge de plusieurs flux audio.</string>
     <string name="earfun_microphone_mode_hint">Lors de l’utilisation du microphone du casque, il peut soit basculer automatiquement entre les écouteurs gauche et droit, soit rester fixé d’un côté selon votre préférence.</string>
     <string name="earfun_find_headphones_hint">Cette option émet un son fort à travers le casque audio pour aider à le localiser. Évitez de porter le casque pour éviter d’éventuels dommages auditifs.</string>
     <string name="earfun_find_headphones">Trouver casque audio</string>
@@ -3641,7 +3637,7 @@
     <string name="track_name_required">Le nom de la piste ne peut pas être vide</string>
     <string name="error_deleting_file">suppression de \"%1$s\" échouée</string>
     <string name="error_deleting_file_exception">suppression \"%1$s\" échouée : %2$s</string>
-    <string name="bluetooth_multipoint_pairing">Appariement multipoint</string>
+    <string name="bluetooth_multipoint_pairing">Appairage multipoint</string>
     <string name="bluetooth_multipoint">Multipoint</string>
     <string name="connect">Connecter</string>
     <string name="pref_new_sync_protocol_title">Nouveau protocole sync</string>
@@ -4450,7 +4446,7 @@
     <string name="ak102_pref_audio_pair_title">Appairage pour le son des appels</string>
     <string name="ak102_prefs_audio_header">Bluetooth pour le son des appels</string>
     <string name="ak102_pref_audio_auto_connect_title">Auto-connecter le son des appels</string>
-    <string name="ak102_audio_connected">Appairage de l\'audio des appels effectué</string>
+    <string name="ak102_audio_connected">Appairage du son des appels effectué</string>
     <string name="ak102_audio_unpaired">Audio des appels désappairé</string>
     <string name="sony_capture_voice_during_call">Capter la voix pendant les appels</string>
     <string name="sony_capture_voice_during_call_summary">Votre voix sera plus facile à entendre pendant les appels. Si votre voix vous paraît trop forte ou si les bruits d\'arrière-plan sont gênants, désactivez ce réglage.</string>
@@ -4875,4 +4871,24 @@
     <string name="map_theme_custom">Personnalisé…</string>
     <string name="map_theme_custom_file_title">Fichier de thème personnalisé</string>
     <string name="map_theme_custom_file_summary">Archive zip contenant le thème et ses icônes, utilisé quand le thème ci-dessus est réglé sur Personnalisé</string>
+    <string name="when_connected">En connexion</string>
+    <string name="alarm_smart_wakeup_interval_minutes">Délai de réveil intelligent (minutes)</string>
+    <string name="sleep_total_value">Sommeil total : %s</string>
+    <string name="pref_title_do_not_archive_activity_data">Ne pas archiver les données d\'activité</string>
+    <string name="pref_summary_do_not_archive_activity_data">Ne pas marquer les activités comme synchronisées sur l\'appareil. Utile si Gadgetbridge est utilisé en même temps que d\'autres applis. Ceci peut entraîner la saturation de la mémoire de la montre et/ou des problèmes de synchronisation.</string>
+    <string name="watchface_install_resolution_matches">La définition de ce cadran correspond à celle de cet appareil. Ce cadran est peut-être compatible, mais Gadgetbridge ne peut pas le confirmer. Un cadran destiné à un autre appareil pourrait bloquer votre appareil.</string>
+    <string name="watchface_install_aspect_ratio_matches">La prévisualisation de ce cadran correspond à l\'écran de cet appareil. Ce cadran est peut-être compatible, mais Gadgetbridge ne peut pas le confirmer. Un cadran destiné à un autre appareil pourrait bloquer votre appareil.</string>
+    <string name="watchface_install_compatibility_unknown">Gadgetbridge ne peut pas confirmer si ce cadran est compatible avec cet appareil. Un cadran destiné à un autre appareil pourrait bloquer votre appareil.</string>
+    <string name="watchface_install_confirm_risk">Je comprends le risque, installer quand même</string>
+    <string name="pref_sleep_respiratory_rate_monitoring">Tracer la respiration pendant le sommeil</string>
+    <string name="pref_heartrate_alert_irregular_rhythm">Alerte de rythme cardiaque irrégulier</string>
+    <string name="stratos4pro_pref_audio_on_call_title">Activer le son des appels seulement lors des appels</string>
+    <string name="stratos4pro_incoming_call">Appel entrant</string>
+    <string name="stratos4pro_pref_audio_auto_connect_title">Maintenir le son des appels activé</string>
+    <string name="stratos4pro_pref_audio_schedule_summary">En dehors de la fenêtre, la montre désactive sa radio, inactivant le son des appels jusqu\'à la réouverture de la fenêtre</string>
+    <string name="sony_reon_pocket_pairing_required">Mettez l\'appareil en mode appairage (appuyez sur le bouton SMART pendant 15 secondes) et reconnectez-vous</string>
+    <string name="mi_hipee_p1_pairing_confirmation">Appuyez sur le bouton de l\'appareil pour confirmer l\'appairage</string>
+    <string name="stratos4pro_audio_rebonding">La montre ne connaît plus ce téléphone, je retire l\'appairage obsolète et je recommence</string>
+    <string name="stratos4pro_password_six_digits">Le mot de passe de la montre doit faire exactement 6 chiffres</string>
+    <string name="stratos4pro_pref_reply_all_apps_title">Répondre à n\'importe quelle appli depuis la montre</string>
 </resources>
