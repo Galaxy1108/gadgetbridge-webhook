@@ -62,11 +62,12 @@ import nodomain.freeyourgadget.gadgetbridge.util.language.impl.ScandinavianTrans
 import nodomain.freeyourgadget.gadgetbridge.util.language.impl.SerbianTransliterator;
 import nodomain.freeyourgadget.gadgetbridge.util.language.impl.TurkishTransliterator;
 import nodomain.freeyourgadget.gadgetbridge.util.language.impl.UkrainianTransliterator;
-
+import nodomain.freeyourgadget.gadgetbridge.util.language.impl.ThaiTransliterator;
 public class LanguageUtils {
     private static final Logger LOG = LoggerFactory.getLogger(LanguageUtils.class);
 
     private static final Map<String, Transliterator> TRANSLITERATORS_MAP = new HashMap<String, Transliterator>() {{
+        put("thai", new ThaiTransliterator());
         put("arabic", new ArabicTransliterator());
         put("bengali", new BengaliTransliterator());
         put("common_symbols", new CommonSymbolsTransliterator());
