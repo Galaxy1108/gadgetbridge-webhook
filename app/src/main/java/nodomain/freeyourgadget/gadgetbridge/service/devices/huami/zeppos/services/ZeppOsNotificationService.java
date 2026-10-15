@@ -19,7 +19,6 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppos.servic
 import static org.apache.commons.lang3.ArrayUtils.subarray;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
@@ -512,7 +511,7 @@ public class ZeppOsNotificationService extends AbstractZeppOsService {
             return;
         }
 
-        final Bitmap bmp = BitmapFactory.decodeFile(picturePath);
+        final Bitmap bmp = BitmapUtil.decodeFileUpright(picturePath);
         if (bmp == null) {
             LOG.warn("Failed to decode bitmap from {}", picturePath);
             ackNotificationAfterPictureSent(packageName, notificationId, false);
