@@ -4469,4 +4469,5 @@
     <string name="duration_short_year">1J</string>
     <string name="pref_header_device_card">Gerätekarte</string>
     <string name="navigation_distance_left">%1$s übrig</string>
+    <string name="navigation_eta">vor. Ankunft: %1$s</string>
 </resources>
