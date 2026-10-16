@@ -18,16 +18,22 @@ package nodomain.freeyourgadget.gadgetbridge.util.sleep
 
 import java.time.Instant
 
-/** What a watch that does not stage sleep said about one minute. */
-enum class SleepMinuteKind {
+/** What a watch that does not stage sleep said about one minute. [code] is what gets stored. */
+enum class SleepMinuteKind(val code: Int) {
     /** Heart rate and movement, left for the phone to classify. */
-    RAW,
+    RAW(0),
 
     /** The watch was sure the wearer was awake. */
-    AWAKE,
+    AWAKE(1),
 
     /** Not worn, or no signal. */
-    UNMEASURABLE,
+    UNMEASURABLE(2),
+    ;
+
+    companion object {
+        @JvmStatic
+        fun fromCode(code: Int): SleepMinuteKind? = entries.firstOrNull { it.code == code }
+    }
 }
 
 /** The estimator's input for one minute. Only movement and heart rate are used. */

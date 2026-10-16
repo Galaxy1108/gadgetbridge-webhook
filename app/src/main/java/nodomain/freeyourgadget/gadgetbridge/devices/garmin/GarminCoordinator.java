@@ -71,6 +71,7 @@ import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminActivitySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminBodyEnergySampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.GarminEstimatedSleepStageSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminEventSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminFitFileDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminHeartRateRestingSampleDao;
@@ -80,6 +81,7 @@ import nodomain.freeyourgadget.gadgetbridge.entities.GarminIntensityMinutesSampl
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminNapSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminRespiratoryRateSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminRestingMetabolicRateSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.GarminRawSleepSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminSleepStageSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminSleepStatsSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminSpo2SampleDao;
@@ -173,6 +175,8 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
             put(session.getGarminBodyEnergySampleDao(), GarminBodyEnergySampleDao.Properties.DeviceId);
             put(session.getGarminSpo2SampleDao(), GarminSpo2SampleDao.Properties.DeviceId);
             put(session.getGarminSleepStageSampleDao(), GarminSleepStageSampleDao.Properties.DeviceId);
+            put(session.getGarminRawSleepSampleDao(), GarminRawSleepSampleDao.Properties.DeviceId);
+            put(session.getGarminEstimatedSleepStageSampleDao(), GarminEstimatedSleepStageSampleDao.Properties.DeviceId);
             put(session.getGarminEventSampleDao(), GarminEventSampleDao.Properties.DeviceId);
             put(session.getGarminFitFileDao(), GarminFitFileDao.Properties.DeviceId);
             put(session.getGarminHeartRateRestingSampleDao(), GarminHeartRateRestingSampleDao.Properties.DeviceId);

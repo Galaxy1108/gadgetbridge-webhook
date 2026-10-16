@@ -117,7 +117,7 @@ class RawSleepStreamTest {
         assertEquals(listOf(night.onset.toEpochMilli(), night.end.toEpochMilli()), events.map { it.timestamp })
         assertTrue(events.all { it.event == Event.DETECT_SLEEP.num })
         assertEquals(listOf(EventType.START.num, EventType.STOP.num), events.map { it.eventType })
-        assertTrue("not the -1 marker of a faked night", events.all { it.data == null })
+        assertTrue("marked as estimated", events.all { it.data == RawSleepStream.ESTIMATED_SLEEP_DATA })
     }
 
     @Test

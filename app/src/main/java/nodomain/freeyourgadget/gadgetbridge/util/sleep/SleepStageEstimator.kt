@@ -89,31 +89,100 @@ data class SleepEstimatorConfig(
 )
 
 /**
- * Estimates one night of sleep from per-minute movement and heart rate, for
- * watches that leave staging to the vendor's servers. Sleep/wake follows
- * actigraphy practice (Cole-Kripke weights, Webster rescoring); stages
- * follow heart rate against its own slow baseline, its variability, and
- * time-of-night priors. Pure and deterministic: the same minutes always
- * give the same night.
+ * The part of a stream one import may replace: every session inside
+ * `[zoneStart, zoneEnd)`, a stretch that begins and ends in a long break, so
+ * no sleep crosses its edges. [sessions] may be empty while the zone is not:
+ * the zone is then known to hold no sleep any more.
+ */
+data class SettledEstimate(
+    val zoneStart: Instant,
+    val zoneEnd: Instant,
+    val sessions: List<EstimatedSleepSession>,
+)
+
+/**
+ * Estimates sleep from per-minute movement and heart rate, for watches that
+ * leave staging to the vendor's servers. Sleep/wake follows actigraphy
+ * practice (Cole-Kripke weights, Webster rescoring); stages follow heart
+ * rate against its own slow baseline, its variability, and time-of-night
+ * priors. Pure and deterministic: the same minutes always give the same
+ * sessions.
  *
  * This is a heuristic without ground truth. Read the stages as "when heart
  * rate was low and steady versus high and variable", not as a sleep lab.
  */
 object SleepStageEstimator {
 
-    /** The night in [minutes], or null when no block qualifies. */
+    /**
+     * How far a minute's sleep/wake label can depend on its neighbours:
+     * Cole-Kripke reads four minutes back and two forward, and the three
+     * Webster passes chain on top of that, to 148 back and 89 forward.
+     */
+    internal const val LABEL_REACH_MINUTES = 150
+
+    /** The session in [minutes] with the most sleep, the earliest on a tie, or null when none qualifies. */
     @JvmStatic
     @JvmOverloads
     fun estimate(
         minutes: List<SleepMinute>,
         config: SleepEstimatorConfig = SleepEstimatorConfig(),
-    ): EstimatedSleepSession? {
-        val grid = MinuteGrid.of(minutes) ?: return null
+    ): EstimatedSleepSession? = estimateAll(minutes, config).maxByOrNull { it.sleepMinutes }
+
+    /** Every session in [minutes], in time order: each stretch between long breaks that holds real sleep. */
+    fun estimateAll(
+        minutes: List<SleepMinute>,
+        config: SleepEstimatorConfig = SleepEstimatorConfig(),
+    ): List<EstimatedSleepSession> {
+        val grid = MinuteGrid.of(minutes) ?: return emptyList()
         val labels = scoreSleepWake(grid, config)
-        val block = findBlocks(labels, config)
-            .sortedWith(compareByDescending<SleepBlock> { it.sleepCount }.thenBy { it.onset })
-            .firstOrNull() ?: return null
-        return sessionOf(grid, labels, block, config)
+        return findBlocks(labels, config).map { sessionOf(grid, labels, it, config) }
+    }
+
+    /**
+     * The sessions of [minutes] that a whole-stream estimate would also find, with the zone
+     * they settle. [minutes] is a stretch of a longer stored stream; [gapBefore] and [gapAfter]
+     * say how many minute slots are missing between it and the nearest stored minute on each
+     * side, null when there is none within a break's length. A missing stretch of
+     * [SleepEstimatorConfig.maxBreakMinutes] or more is a break whatever lies beyond it, so the
+     * stretch is padded with that much gap and its edge settles. Where the stream continues without a gap, the labels near the edge could
+     * still change with the minutes beyond it, so [LABEL_REACH_MINUTES] at that edge are left
+     * unsettled. Null when no break lies in the settled part.
+     */
+    fun estimateSettled(
+        minutes: List<SleepMinute>,
+        gapBefore: Int?,
+        gapAfter: Int?,
+        config: SleepEstimatorConfig = SleepEstimatorConfig(),
+    ): SettledEstimate? {
+        if (minutes.isEmpty()) return null
+        val breakMinutes = config.maxBreakMinutes
+        val padBefore = minOf(gapBefore ?: breakMinutes, breakMinutes)
+        val padAfter = minOf(gapAfter ?: breakMinutes, breakMinutes)
+        // The grid fills what lies between its first and last minute as gap, so one sentinel pads a side.
+        val padded = minutes.toMutableList()
+        if (padBefore > 0) padded += SleepMinute(minutes.minOf { it.time }.minusSeconds(60L * padBefore), SleepMinuteKind.UNMEASURABLE)
+        if (padAfter > 0) padded += SleepMinute(minutes.maxOf { it.time }.plusSeconds(60L * padAfter), SleepMinuteKind.UNMEASURABLE)
+        val grid = MinuteGrid.of(padded) ?: return null
+        val labels = scoreSleepWake(grid, config)
+
+        val settledFrom = if (gapBefore == 0) LABEL_REACH_MINUTES else 0
+        val settledTo = if (gapAfter == 0) grid.size - LABEL_REACH_MINUTES else grid.size
+        val breaks = findBreaks(labels, config)
+        val settledBreaks = breaks.filter { brk ->
+            // At least a whole break's worth of it lies in the settled part.
+            maxOf(brk.start, settledFrom) + breakMinutes <= minOf(brk.end, settledTo)
+        }
+        if (settledBreaks.isEmpty()) return null
+        val firstBreak = settledBreaks.first()
+        val lastBreak = settledBreaks.last()
+        val sessions = findBlocks(labels, breaks, config)
+            .filter { it.onset >= firstBreak.end && it.end <= lastBreak.start }
+            .map { sessionOf(grid, labels, it, config) }
+        return SettledEstimate(
+            zoneStart = grid.timeAt(maxOf(firstBreak.start, settledFrom)),
+            zoneEnd = grid.timeAt(minOf(lastBreak.end, settledTo)),
+            sessions = sessions,
+        )
     }
 
     private fun sessionOf(grid: MinuteGrid, labels: CharArray, block: SleepBlock, config: SleepEstimatorConfig): EstimatedSleepSession {
@@ -168,23 +237,34 @@ object SleepStageEstimator {
         return labels
     }
 
+    /** The breaks: runs of not sleeping (wake or gap mixed) at least maxBreak long, as `[start, end)`. */
+    internal fun findBreaks(labels: CharArray, config: SleepEstimatorConfig): List<LabelSpan> {
+        val breaks = mutableListOf<LabelSpan>()
+        var index = 0
+        while (index < labels.size) {
+            if (labels[index] == SleepLabels.SLEEP) {
+                index++
+                continue
+            }
+            val start = index
+            while (index < labels.size && labels[index] != SleepLabels.SLEEP) index++
+            if (index - start >= config.maxBreakMinutes) breaks.add(LabelSpan(start, index))
+        }
+        return breaks
+    }
+
     /** Candidate sleep blocks: spans between long breaks that hold a real night. */
-    internal fun findBlocks(labels: CharArray, config: SleepEstimatorConfig): List<SleepBlock> {
+    internal fun findBlocks(labels: CharArray, config: SleepEstimatorConfig): List<SleepBlock> =
+        findBlocks(labels, findBreaks(labels, config), config)
+
+    private fun findBlocks(labels: CharArray, breaks: List<LabelSpan>, config: SleepEstimatorConfig): List<SleepBlock> {
         val blocks = mutableListOf<SleepBlock>()
         var spanStart = 0
-        var index = 0
-        while (index <= labels.size) {
-            // A break is a run of not sleeping (wake or gap mixed) at least maxBreak long.
-            val breakStart = index
-            while (index < labels.size && labels[index] != SleepLabels.SLEEP) index++
-            val breakLength = index - breakStart
-            if (breakLength >= config.maxBreakMinutes || index == labels.size) {
-                blockOf(labels, spanStart, breakStart, config)?.let(blocks::add)
-                spanStart = index
-            }
-            if (index == labels.size) break
-            index++
+        for (brk in breaks) {
+            blockOf(labels, spanStart, brk.start, config)?.let(blocks::add)
+            spanStart = brk.end
         }
+        blockOf(labels, spanStart, labels.size, config)?.let(blocks::add)
         return blocks
     }
 
@@ -326,6 +406,9 @@ object SleepStageEstimator {
 
 /** A candidate night: window indices into the grid and how many minutes scored as sleep. */
 internal class SleepBlock(val onset: Int, val end: Int, val sleepCount: Int)
+
+/** Grid indices `[start, end)`. */
+internal class LabelSpan(val start: Int, val end: Int)
 
 internal class StagedWindow(
     val stages: Array<EstimatedStage>,

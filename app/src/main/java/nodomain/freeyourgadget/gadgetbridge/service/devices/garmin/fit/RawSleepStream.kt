@@ -16,8 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit
 
+import nodomain.freeyourgadget.gadgetbridge.entities.GarminEstimatedSleepStageSample
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminEventSample
-import nodomain.freeyourgadget.gadgetbridge.entities.GarminSleepStageSample
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Event
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.EventType
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.SleepLevel
@@ -83,19 +83,27 @@ class RawSleepStream {
         private const val MAX_SAMPLE_SECONDS = 3600
 
         /**
-         * Stage rows as Garmin stores them: each at the end of the span it covers, see
-         * GarminActivitySampleProvider#overlaySleep.
+         * The data of an estimated sleep event. The watch's own sleep events carry a Garmin epoch,
+         * or nothing when the file leaves the field out, and the light sleep faked by earlier
+         * versions carries -1.
+         */
+        const val ESTIMATED_SLEEP_DATA = -2L
+
+        /**
+         * Stage rows as Garmin stores them, each at the end of the span it covers, see
+         * GarminActivitySampleProvider#overlaySleep, but in a table of their own so the
+         * watch's own stages are never overwritten or deleted.
          */
         @JvmStatic
-        fun stageSamples(session: EstimatedSleepSession): List<GarminSleepStageSample> =
+        fun stageSamples(session: EstimatedSleepSession): List<GarminEstimatedSleepStageSample> =
             session.stages.map { span ->
-                GarminSleepStageSample().apply {
+                GarminEstimatedSleepStageSample().apply {
                     timestamp = span.end.toEpochMilli()
                     stage = levelOf(span.stage).num
                 }
             }
 
-        /** Sleep start at the onset and stop at the end, as a watch that stages sleep sends them. */
+        /** Sleep start at the onset and stop at the end, as a watch that stages sleep sends them, marked as estimated. */
         @JvmStatic
         fun sleepEvents(session: EstimatedSleepSession): List<GarminEventSample> =
             listOf(
@@ -107,6 +115,7 @@ class RawSleepStream {
             timestamp = time.toEpochMilli()
             setEvent(Event.DETECT_SLEEP)
             setEventType(type)
+            data = ESTIMATED_SLEEP_DATA
         }
 
         private fun levelOf(stage: EstimatedStage): SleepLevel = when (stage) {

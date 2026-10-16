@@ -207,6 +207,52 @@ class SleepStageEstimatorTest {
         assertTrue(session.share(EstimatedStage.REM) in 0.15f..0.30f)
     }
 
+    // Settling a stretch of a longer stream.
+
+    @Test
+    fun aStretchContinuingOnBothSides_settlesOnlyInsideTheLabelReach() {
+        val first = bedtime.minusSeconds(200 * 60)
+        val minutes = sequence(first, restless(200), night(), restless(200))
+        val last = minutes.last().time
+
+        val settled = SleepStageEstimator.estimateSettled(minutes, gapBefore = 0, gapAfter = 0)!!
+
+        assertEquals(first.plusSeconds(150 * 60L), settled.zoneStart)
+        assertEquals(last.plusSeconds(60L).minusSeconds(150 * 60L), settled.zoneEnd)
+        assertEquals(SleepStageEstimator.estimate(minutes), settled.sessions.single())
+    }
+
+    @Test
+    fun aStretchWithNothingBeyondIt_settlesWhole() {
+        val minutes = sequence(bedtime, night())
+
+        val settled = SleepStageEstimator.estimateSettled(minutes, gapBefore = null, gapAfter = null)!!
+
+        assertTrue(settled.zoneStart <= bedtime)
+        assertTrue(settled.zoneEnd > minutes.last().time)
+        assertEquals(SleepStageEstimator.estimate(minutes), settled.sessions.single())
+    }
+
+    @Test
+    fun aShortHoleBeforeTheStretch_doesNotSettleItsFirstSleep() {
+        // The second half of a night: alone it is a session, but not when ten minutes before it are missing
+        val secondHalf = sequence(bedtime, still(250, ::nightHeartRate), restless(60))
+
+        val adjoining = SleepStageEstimator.estimateSettled(secondHalf, gapBefore = 10, gapAfter = null)!!
+        val afterABreak = SleepStageEstimator.estimateSettled(secondHalf, gapBefore = 60, gapAfter = null)!!
+
+        assertTrue(adjoining.sessions.isEmpty())
+        assertTrue(adjoining.zoneStart >= bedtime.plusSeconds(250 * 60L))
+        assertEquals(1, afterABreak.sessions.size)
+    }
+
+    @Test
+    fun aStretchWithoutASettledBreak_isNotSettled() {
+        val minutes = sequence(bedtime, still(100, ::nightHeartRate))
+
+        assertNull(SleepStageEstimator.estimateSettled(minutes, gapBefore = 0, gapAfter = 0))
+    }
+
     // The Venu SQ fixture: four days of real-shaped data, values rounded and dates shifted.
 
     private fun fixtureMinutes(): Pair<List<SleepMinute>, ZoneOffset> {
@@ -257,6 +303,24 @@ class SleepStageEstimatorTest {
             assertTrue("$night rem ${session.share(EstimatedStage.REM)}", session.share(EstimatedStage.REM) in 0.15f..0.30f)
             assertFalse(session.inProgress)
         }
+    }
+
+    @Test
+    fun theWholeFixture_yieldsExactlyItsThreeNights() {
+        val (minutes, offset) = fixtureMinutes()
+
+        val sessions = SleepStageEstimator.estimateAll(minutes)
+
+        assertEquals(sessions.joinToString { "${it.onset}→${it.end}" }, 3, sessions.size)
+        for (session in sessions) {
+            val onset = session.onset.atOffset(offset).toLocalTime()
+            val end = session.end.atOffset(offset).toLocalTime()
+            assertTrue("onset $onset", onset >= LocalTime.of(21, 0) || onset <= LocalTime.of(0, 30))
+            assertTrue("end $end", end in LocalTime.of(5, 0)..LocalTime.of(9, 0))
+            assertTrue("sleep ${session.sleepMinutes}", session.sleepMinutes >= 360)
+        }
+        assertEquals(sessions.sortedBy { it.onset }, sessions)
+        assertEquals(SleepStageEstimator.estimate(minutes), sessions.maxByOrNull { it.sleepMinutes })
     }
 
     @Test

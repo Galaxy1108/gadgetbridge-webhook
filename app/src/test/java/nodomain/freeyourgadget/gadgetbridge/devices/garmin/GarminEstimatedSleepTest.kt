@@ -1,7 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.garmin
 
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper
-import nodomain.freeyourgadget.gadgetbridge.devices.GarminSleepStageSampleProvider
+import nodomain.freeyourgadget.gadgetbridge.devices.GarminEstimatedSleepStageSampleProvider
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminEventSample
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.RawSleepStream
@@ -61,7 +61,7 @@ class GarminEstimatedSleepTest : TestBase() {
             remThreshold = 0.6f,
         )
         events.deleteFakedSleepEvents(at(0).toEpochMilli(), at(180).toEpochMilli())
-        assertTrue(GarminSleepStageSampleProvider(device, daoSession).persistSamples(RawSleepStream.stageSamples(night), null))
+        assertTrue(GarminEstimatedSleepStageSampleProvider(device, daoSession).persistSamples(RawSleepStream.stageSamples(night), null))
         assertTrue(events.persistSamples(RawSleepStream.sleepEvents(night), null))
 
         val samples = GarminActivitySampleProvider(device, daoSession)
@@ -73,5 +73,10 @@ class GarminEstimatedSleepTest : TestBase() {
         assertEquals(ActivityKind.DEEP_SLEEP, kindAt(75))
         assertEquals(ActivityKind.REM_SLEEP, kindAt(105))
         assertFalse("the faked light sleep up to minute 180 is gone", kindAt(150) in sleepKinds)
+
+        // A chart that ends mid-night still reads the stage running past its end
+        val partial = GarminActivitySampleProvider(device, daoSession)
+            .getAllActivitySamples(at(0).epochSecond.toInt(), at(100).epochSecond.toInt())
+        assertEquals(ActivityKind.REM_SLEEP, partial.single { it.timestamp.toLong() == at(95).epochSecond }.kind)
     }
 }

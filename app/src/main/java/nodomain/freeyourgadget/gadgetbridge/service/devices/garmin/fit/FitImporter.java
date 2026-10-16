@@ -138,8 +138,6 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitUserProfile;
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
-import nodomain.freeyourgadget.gadgetbridge.util.sleep.EstimatedSleepSession;
-import nodomain.freeyourgadget.gadgetbridge.util.sleep.SleepStageEstimator;
 
 public class FitImporter {
     private static final Logger LOG = LoggerFactory.getLogger(FitImporter.class);
@@ -921,9 +919,9 @@ public class FitImporter {
 
     /**
      * As per #4048, devices that do not have a sleep widget send raw sleep samples instead of sleep
-     * stages (the stages they report are all awake or unmeasurable). We estimate the night from the
-     * heart rate and movement in those samples. When no night qualifies, we fake light sleep for the
-     * duration of the raw sleep samples, in order to have some data at all.
+     * stages (the stages they report are all awake or unmeasurable). Their raw stream runs around
+     * the clock and is cut into a new file at midnight and at every sync, so sleep is estimated
+     * from the stored minutes of all the files around this one, see {@link RawSleepNights}.
      */
     private void processRawSleepSamples(final DaoSession session) {
         if (rawSleepStream.getRawCount() == 0) {
@@ -937,53 +935,10 @@ public class FitImporter {
             return;
         }
 
-        final long asleepTimeMillis = Objects.requireNonNull(fileId.getTimeCreated()).intValue() * 1000L;
-        final long wakeTimeMillis = asleepTimeMillis + rawSleepStream.getRawCount() * 60 * 1000L;
-
-        final EstimatedSleepSession night = SleepStageEstimator.estimate(rawSleepStream.minutes());
-        if (night != null) {
-            LOG.debug("Estimated sleep from {} raw sleep samples: {} to {}, {} min asleep", rawSleepStream.getRawCount(), night.getOnset(), night.getEnd(), night.getSleepMinutes());
-            persistEstimatedSleep(session, night, asleepTimeMillis, wakeTimeMillis);
-            return;
-        }
-
-        LOG.debug("Got {} raw sleep samples - faking sleep events from {} to {}", rawSleepStream.getRawCount(), asleepTimeMillis, wakeTimeMillis);
-
-        // We only need to fake sleep start and end times, the sample provider will take care of the rest
         try {
-            final GarminEventSampleProvider sampleProvider = new GarminEventSampleProvider(gbDevice, session);
-
-            final GarminEventSample sampleFallAsleep = new GarminEventSample();
-            sampleFallAsleep.setTimestamp(asleepTimeMillis);
-            sampleFallAsleep.setEvent(Event.DETECT_SLEEP); // sleep
-            sampleFallAsleep.setEventType(EventType.START); // sleep start
-            sampleFallAsleep.setData(-1L); // in actual samples they're a garmin epoch, this way we can identify them
-
-            final GarminEventSample sampleWakeUp = new GarminEventSample();
-            sampleWakeUp.setTimestamp(wakeTimeMillis);
-            sampleWakeUp.setEvent(Event.DETECT_SLEEP); // sleep
-            sampleWakeUp.setEventType(EventType.STOP); // sleep end
-            sampleWakeUp.setData(-1L); // in actual samples they're a garmin epoch, this way we can identify them
-
-            persistAbstractSamples(List.of(sampleFallAsleep, sampleWakeUp), sampleProvider);
+            RawSleepNights.importMinutes(gbDevice, session, context, rawSleepStream.minutes());
         } catch (final Exception e) {
-            GB.toast(context, "Error faking event samples", Toast.LENGTH_LONG, GB.ERROR, e);
-        }
-    }
-
-    private void persistEstimatedSleep(final DaoSession session,
-                                       final EstimatedSleepSession night,
-                                       final long fakedFromMillis,
-                                       final long fakedToMillis) {
-        try {
-            // An import before sleep was estimated may have faked light sleep over this file
-            final GarminEventSampleProvider eventSampleProvider = new GarminEventSampleProvider(gbDevice, session);
-            eventSampleProvider.deleteFakedSleepEvents(fakedFromMillis, fakedToMillis);
-
-            persistAbstractSamples(RawSleepStream.stageSamples(night), new GarminSleepStageSampleProvider(gbDevice, session));
-            persistAbstractSamples(RawSleepStream.sleepEvents(night), eventSampleProvider);
-        } catch (final Exception e) {
-            GB.toast(context, "Error saving estimated sleep", Toast.LENGTH_LONG, GB.ERROR, e);
+            GB.toast(context, "Error estimating sleep", Toast.LENGTH_LONG, GB.ERROR, e);
         }
     }
 

@@ -28,17 +28,20 @@ import java.util.List;
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.Property;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractSampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.GarminEstimatedSleepStageSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminNapSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminSleepStageSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminActivitySampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.GarminEstimatedSleepStageSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminEventSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminNapSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminSleepStageSample;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.RawSleepStream;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.SleepLevel;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.fieldDefinitions.FieldDefinitionSleepLevel;
 import nodomain.freeyourgadget.gadgetbridge.util.RangeMap;
@@ -168,15 +171,32 @@ public class GarminActivitySampleProvider extends AbstractSampleProvider<GarminA
         }
 
         final GarminSleepStageSampleProvider sleepStagesSampleProvider = new GarminSleepStageSampleProvider(getDevice(), getSession());
+        final GarminEstimatedSleepStageSampleProvider estimatedStagesSampleProvider = new GarminEstimatedSleepStageSampleProvider(getDevice(), getSession());
 
         // Retrieve the next stage after this time range
         final GarminEventSample nextSleepStageAfterRange = eventSampleProvider.getNextSleepEventAfter(timestamp_to * 1000L);
         if (nextSleepStageAfterRange != null && nextSleepStageAfterRange.getEventType() == 1) {
             // Sleep session actually ends outside of this range, we need to fetch the next sleep stage
-            final GarminSleepStageSample nextStage = sleepStagesSampleProvider.getNextSampleAfter(timestamp_to * 1000L);
-            if (nextStage != null) {
-                stagesMap.put(nextStage.getTimestamp(), toActivityKind(nextStage));
+            if (isEstimated(nextSleepStageAfterRange)) {
+                final GarminEstimatedSleepStageSample nextStage = estimatedStagesSampleProvider.getNextSampleAfter(timestamp_to * 1000L);
+                if (nextStage != null) {
+                    stagesMap.put(nextStage.getTimestamp(), toActivityKind(nextStage.getStage()));
+                }
+            } else {
+                final GarminSleepStageSample nextStage = sleepStagesSampleProvider.getNextSampleAfter(timestamp_to * 1000L);
+                if (nextStage != null) {
+                    stagesMap.put(nextStage.getTimestamp(), toActivityKind(nextStage.getStage()));
+                }
             }
+        }
+
+        // Stages estimated from raw sleep data (#4048) go first, so the watch's own win where both exist
+        final List<GarminEstimatedSleepStageSample> estimatedStageSamples = estimatedStagesSampleProvider.getAllSamples(
+                timestamp_from * 1000L,
+                timestamp_to * 1000L
+        );
+        for (final GarminEstimatedSleepStageSample stageSample : estimatedStageSamples) {
+            stagesMap.put(stageSample.getTimestamp(), toActivityKind(stageSample.getStage()));
         }
 
         final List<GarminSleepStageSample> stageSamples = sleepStagesSampleProvider.getAllSamples(
@@ -189,7 +209,7 @@ public class GarminActivitySampleProvider extends AbstractSampleProvider<GarminA
             LOG.debug("Found {} sleep stage samples between {} and {}", stageSamples.size(), timestamp_from, timestamp_to);
 
             for (final GarminSleepStageSample stageSample : stageSamples) {
-                stagesMap.put(stageSample.getTimestamp(), toActivityKind(stageSample));
+                stagesMap.put(stageSample.getTimestamp(), toActivityKind(stageSample.getStage()));
             }
         }
 
@@ -233,10 +253,14 @@ public class GarminActivitySampleProvider extends AbstractSampleProvider<GarminA
         }
     }
 
-    private ActivityKind toActivityKind(final GarminSleepStageSample stageSample) {
-        final SleepLevel sleepStage = FieldDefinitionSleepLevel.fromId(stageSample.getStage());
+    private static boolean isEstimated(final GarminEventSample sleepEvent) {
+        return sleepEvent.getData() != null && sleepEvent.getData() == RawSleepStream.ESTIMATED_SLEEP_DATA;
+    }
+
+    private ActivityKind toActivityKind(final int stage) {
+        final SleepLevel sleepStage = FieldDefinitionSleepLevel.fromId(stage);
         if (sleepStage == null) {
-            LOG.error("Unknown sleep stage for {}", stageSample.getStage());
+            LOG.error("Unknown sleep stage for {}", stage);
             return ActivityKind.UNKNOWN;
         }
 
