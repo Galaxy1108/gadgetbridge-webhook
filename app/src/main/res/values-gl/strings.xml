@@ -54,7 +54,7 @@
     <string name="pref_header_datetime">Data e Hora</string>
     <string name="pref_title_datetime_syctimeonconnect">Sincronizar hora</string>
     <string name="pref_summary_datetime_syctimeonconnect">Sincronizar hora ao conectar e ao cambiar o fuso horario no android</string>
-    <string name="pref_title_theme">Tema</string>
+    <string name="pref_title_theme">Decorado</string>
     <string name="pref_theme_light">Claro</string>
     <string name="pref_theme_dark">Escuro</string>
     <string name="pref_title_language">Idioma</string>
@@ -412,7 +412,7 @@
 \nNota: non tes que instalar .res e .gps se estes arquivos son os mesmos que os previamente instalados. 
 \n 
 \nPROCEDE BAIXO A TÚA PROPIA RESPONSABILIDADE!</string>
-    <string name="pref_summary_pebble_forcele">Use soporte experimental do Pebble LE para todos os Pebble nas veces do Bluetooth clásico. Isto require vincular primeiro con Pebble non LE, e despois Pebble LE</string>
+    <string name="pref_summary_pebble_forcele">Usar soporte experimental do Pebble LE para todos os Pebble nas veces do Bluetooth clásico. Isto require vincular primeiro con Pebble non LE, e despois Pebble LE</string>
     <string name="pref_summary_pebble_always_ack_pebblekit">Isto fará que as mensaxes enviadas para apps de terceiros sexan recoñecidas sempre e inmediatamente</string>
     <string name="miband_prefs_device_time_offset_hours">Compensación da hora do dispositivo en horas (para detectar o sono de traballadores a turnos)</string>
     <string name="mi2_prefs_button_press_broadcast_summary">Enviar mensaxe despois dun número definido de pulsacións</string>
@@ -795,7 +795,7 @@
     <string name="pref_title_unit_distance">Unidade de distancia</string>
     <string name="pref_title_unit_temperature">Unidade de temperatura</string>
     <string name="pref_title_unit_weight">Unidade de peso</string>
-    <string name="pref_title_goal_secondary">Meta secundaria</string>
+    <string name="pref_title_goal_secondary">Obxectivo secundario</string>
     <string name="pref_header_notifications_and_calls">Notificacións e chamadas</string>
     <string name="pref_title_notifications_and_calls_repeat_on_call">Repetir a notificación da chamada</string>
     <string name="pref_notifications_and_calls_enable_misscall">Notificar as chamadas perdidas</string>
@@ -1324,4 +1324,32 @@
     <string name="prefs_galaxy_buds_experimental">Experimental</string>
     <string name="prefs_active_noise_cancelling">Supresión activa do ruído</string>
     <string name="prefs_active_noise_cancelling_transparency">Transparencia</string>
+    <string name="map_theme_custom">Persoal…</string>
+    <string name="map_theme_custom_file_title">Ficheiro do decorado persoal...</string>
+    <string name="activity_prefs_charts">Axustes para gráficos</string>
+    <string name="activity_prefs_discovery_pairing">Descubrimento e Emparellamento</string>
+    <string name="add_test_device">Engadir dispositivo en probas</string>
+    <string name="permission_navigation_comaps">%1$s precisa permiso para ler os datos de navegación de CoMaps. Toca en «%2$s» para ir aos axustes do sistema e activar o permiso, despois volve aquí para activar outra vez a opción.</string>
+    <string name="discover_unsupported_devices_description">Ao activar esta opción mostraranse todos os dispositivos Bluetooth descubertos ao escanear. Un toque curto copia o nome do dispositivo e enderezo MAC ao portapapeis. Unha pulsación longa inicia o diálogo «Engadir dispositivo en probas». Pode causar detencións e problemas na app.</string>
+    <string name="pref_theme_dynamic_colors_not_available_warning">As cores dinámicas non están dispoñibles no teu dispositivo, precísase Android +12. Gadgetbridge vai usar as cores predeterminadas de Material 3.</string>
+    <string name="pref_theme_dynamic_colors_explanation">Nota: para o decorado con cores dinámicas tes que activar Cores do fondo ou Abano de cores nos axustes da aparencia do teu Android +12. Se non é así, Gadgetbridge vai usar as cores predeterminadas de Material 3.</string>
+    <string name="pref_navigation_app_gmaps">Google Maps</string>
+    <string name="pref_navigation_app_comaps">CoMaps</string>
+    <string name="auto_reconnect_ble_scan_title">Reconectar co escaneo BLE</string>
+    <string name="maps_not_found">Non se atopan mapas - selecciona nos axustes un cartafol de mapas válido</string>
+    <string name="pref_header_deprecated_functionalities">Funcións abandonadas</string>
+    <string name="pref_header_deprecated_functionalities_warning">As seguintes funcións foron abandonadas e vanse retirar a non moito tardar.\nSe precisas activar algún dos seguintes axustes contacta co equipo de desenvolvemento.</string>
+    <string name="pref_deprecated_media_control_title">Control multimedia antigo</string>
+    <string name="pref_deprecated_media_control_summary">Envia ordes para o control do multimedia como eventos de teclas e non co controlador de medios.</string>
+    <string name="pref_garmin_fake_oauth_warning">Non actives isto se pretendes usar a app oficial ou conectar o reloxo a internet. Ao activar este axuste poderías ter que restablecer o dispositivo aos valores de fábrica e volver a autenticarte.</string>
+    <string name="maps">Mapas</string>
+    <string name="maps_settings">"Axustes dos  mapas"</string>
+    <string name="maps_download_title">Descargar mapas</string>
+    <string name="maps_download_summary">Preme aquí para descargar ficheiros de mapas. Deberían gardarse no cartafol indicado no axuste de arriba.</string>
+    <string name="maps_track_color_title">Cor da ruta</string>
+    <string name="maps_files">Ficheiros de mapas</string>
+    <string name="maps_folder_empty">Non se atoparon ficheiros no cartafol seleccionado</string>
+    <string name="maps_file_invalid">Mapa non válido: %1$s</string>
+    <string name="prefs_key_enable_deprecated_notificationcollectormonitor_title">Activar o servizo antigo de Monitor para Recolector de Notificacións</string>
+    <string name="prefs_key_enable_deprecated_notificationcollectormonitor_summary">Forza o uso dun segundo servizo en primeiro plano para manter o monitor de notificacións activo, activa esta opción se Gadgetbridge deixa de recibir notificacións.| Ten en conta que podería crear unha segunda notificación persistente no sistema.\nReinicia a aplicación despois de activar.</string>
 </resources>
