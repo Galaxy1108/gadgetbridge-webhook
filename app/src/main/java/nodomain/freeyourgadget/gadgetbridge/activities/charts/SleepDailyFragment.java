@@ -563,7 +563,6 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
         binding.sleepchartInfo.setMaxLines(sleepLinesLimit);
 
         binding.sleepchart.setZoomable(true);
-        binding.sleepchart.setEndAxisMinWidthDp(40f);
         binding.sleepchart.dismissSelectionOnTapOutside(rootView);
 
         // refresh immediately instead of use refreshIfVisible(), for perceived performance
