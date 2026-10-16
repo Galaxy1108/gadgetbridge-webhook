@@ -18,6 +18,9 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.charts;
 
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_BPM;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_BREATHS_PER_MIN;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_CELSIUS;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_PERCENTAGE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -46,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -84,6 +86,10 @@ import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 
 public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChartsData> {
     protected static final Logger LOG = LoggerFactory.getLogger(SleepDailyFragment.class);
+
+    private static final String PREF_DAY_CHART = "chart_sleep_day_chart";
+    private static final String DAY_CHART_HYPNOGRAM = "hypnogram";
+    private static final String DAY_CHART_LEGACY = "legacy";
 
     private FragmentSleepchartBinding binding;
 
@@ -154,6 +160,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
         final long tsStart = samples.get(0).getTimestamp() * 1000L;
         final long tsEnd = samples.get(samples.size() - 1).getTimestamp() * 1000L;
         final DeviceCoordinator coordinator = device.getDeviceCoordinator();
+        final WorkoutValueFormatter formatter = new WorkoutValueFormatter();
         switch (currentOverlay) {
             case HEART_RATE: {
                 final List<ChartPoint> points = new ArrayList<>();
@@ -169,7 +176,6 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
                     hrMaximum = hrData.getRight() + hrData.getMiddle() / 2.0;
                 }
                 final int average = Math.round(hrData.getLeft());
-                final WorkoutValueFormatter formatter = new WorkoutValueFormatter();
                 return new SleepStagesChartData.Overlay(
                         HEARTRATE_LABEL, HEARTRATE_COLOR, points, stageSamples.hrMaxGapSeconds, hrMinimum, hrMaximum,
                         SHOW_CHARTS_AVERAGE && average > 0 ? (double) average : null, Color.RED, ChartValueFormat.INTEGER,
@@ -182,7 +188,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
                     points.add(new ChartPoint(sample.getTimestamp() / 1000.0, sample.getSpo2(), null));
                 }
                 return overlay(R.string.menuitem_spo2, ContextCompat.getColor(requireContext(), R.color.spo2_sleep_overlay_color),
-                        points, 68, 100, ChartValueFormat.INTEGER, value -> String.format(Locale.ROOT, "%d%%", Math.round(value)));
+                        points, 68, 100, ChartValueFormat.INTEGER, value -> formatter.formatValue(Math.round(value), UNIT_PERCENTAGE));
             }
             case TEMPERATURE: {
                 final List<ChartPoint> points = new ArrayList<>();
@@ -190,7 +196,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
                     points.add(new ChartPoint(sample.getTimestamp() / 1000.0, sample.getTemperature(), null));
                 }
                 return overlay(R.string.menuitem_temperature, CHART_TEXT_COLOR,
-                        points, 28, 45, ChartValueFormat.ONE_DECIMAL, value -> String.format(Locale.ROOT, "%.1f", value));
+                        points, 28, 45, ChartValueFormat.ONE_DECIMAL, value -> formatter.formatValue(value, UNIT_CELSIUS));
             }
             case RESPIRATORY_RATE: {
                 final List<ChartPoint> points = new ArrayList<>();
@@ -204,7 +210,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
                 }
                 return overlay(R.string.respiratoryrate, ContextCompat.getColor(requireContext(), R.color.respiratory_rate_color),
                         points, accumulator.getMin() / 2, 1.5d * accumulator.getMax(), ChartValueFormat.ONE_DECIMAL,
-                        value -> String.format(Locale.ROOT, "%.1f", value));
+                        value -> formatter.formatValue(value, UNIT_BREATHS_PER_MIN));
             }
             default:
                 return null;
@@ -393,7 +399,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
     private void updateStagesChart(final MyChartsData mcd) {
         final StageSamples samples = mcd.getStageSamples();
         final SleepStagesChartData.Overlay overlay = mcd.getOverlay();
-        final boolean legacy = "legacy".equals(GBApplication.getPrefs().getString("chart_sleep_day_chart", "hypnogram"));
+        final boolean legacy = DAY_CHART_LEGACY.equals(GBApplication.getPrefs().getString(PREF_DAY_CHART, DAY_CHART_HYPNOGRAM));
         final ChartSpec baseSpec = legacy
                 ? stagesSpec(samples.withHeartRate(new long[0], new int[0]), 0, false, 0, 0)
                 : hypnogramSpec(samples);
