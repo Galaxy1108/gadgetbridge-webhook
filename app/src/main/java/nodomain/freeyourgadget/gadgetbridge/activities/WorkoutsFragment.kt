@@ -18,12 +18,8 @@ package nodomain.freeyourgadget.gadgetbridge.activities
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutListFragment
@@ -31,25 +27,17 @@ import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutListFragm
 /**
  * Hosts the aggregated workouts view
  */
-class WorkoutsFragment : Fragment(), MenuProvider {
+class WorkoutsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.activity_workout_list, container, false)
 
         if (savedInstanceState == null) {
-            fragmentManager?.beginTransaction()
-                ?.replace(R.id.workout_list_fragment_container, WorkoutListFragment.newInstance())
-                ?.commit()
+            childFragmentManager.beginTransaction()
+                .replace(R.id.workout_list_fragment_container, WorkoutListFragment.newInstance())
+                .commit()
         }
 
         return view
-    }
-
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-//        menuInflater.inflate(R.menu.dashboard_menu, menu)
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return true
     }
 }

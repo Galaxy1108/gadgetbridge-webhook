@@ -477,8 +477,7 @@ class WorkoutListFragment : Fragment() {
         if (deviceFilter == ActivitySummariesFilter.ALL_DEVICES) {
             GB.toast(
                 requireContext(),
-                // FIXME: make translatable
-                "Select a single device first",
+                getString(R.string.reset_fetch_timestamp_select_device),
                 Toast.LENGTH_LONG,
                 GB.INFO
             )

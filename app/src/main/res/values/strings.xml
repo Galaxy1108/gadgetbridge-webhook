@@ -6290,4 +6290,5 @@
     <string name="pref_itag_alert_level_mild">Mild (0x01)</string>
     <string name="pref_itag_beep_on_disconnect">Beep on disconnect</string>
     <string name="pref_itag_button_press">Action on button press</string>
+    <string name="reset_fetch_timestamp_select_device">Select a single device first</string>
 </resources>
