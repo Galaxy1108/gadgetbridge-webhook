@@ -2,6 +2,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.charts.mpchart
 
 import android.graphics.Canvas
 import android.graphics.LinearGradient
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Shader
@@ -20,12 +21,20 @@ internal class StagesRenderer {
     private val connectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
     private val path = Path()
     private val buffer = FloatArray(4)
+    private val gradientMatrix = Matrix()
+    private val gradients = HashMap<Pair<Int, Int>, LinearGradient>()
+    private var cachedPoints: List<ChartPoint>? = null
+    private var cachedRuns: List<Run> = emptyList()
 
     internal data class Run(val start: Double, val end: Double, val row: Int)
 
     fun draw(c: Canvas, series: ChartSeries, xOrigin: Double, trans: Transformer, viewPort: ViewPortHandler) {
         val style = series.style as SeriesStyle.Stages
-        val runs = runs(series.points, style.colors.size)
+        if (cachedPoints !== series.points) {
+            cachedRuns = runs(series.points, style.colors.size)
+            cachedPoints = series.points
+        }
+        val runs = cachedRuns
         val radius = Utils.convertDpToPixel(CORNER_RADIUS_DP)
         connectionPaint.strokeWidth = Utils.convertDpToPixel(CONNECTION_WIDTH_DP)
 
@@ -47,10 +56,13 @@ internal class StagesRenderer {
             val connectionBottom = maxOf(previousTop, top)
             val upper = if (run.row > previous.row) run.row else previous.row
             val lower = if (run.row > previous.row) previous.row else run.row
-            connectionPaint.shader = LinearGradient(
-                left, connectionTop, left, connectionBottom,
-                style.colors[upper], style.colors[lower], Shader.TileMode.MIRROR,
-            )
+            val gradient = gradients.getOrPut(style.colors[upper] to style.colors[lower]) {
+                LinearGradient(0f, 0f, 0f, 1f, style.colors[upper], style.colors[lower], Shader.TileMode.CLAMP)
+            }
+            gradientMatrix.setScale(1f, connectionBottom - connectionTop)
+            gradientMatrix.postTranslate(left, connectionTop)
+            gradient.setLocalMatrix(gradientMatrix)
+            connectionPaint.shader = gradient
             c.drawLine(left, connectionTop, left, connectionBottom, connectionPaint)
             connectionPaint.shader = null
         }
@@ -140,8 +152,10 @@ internal class StagesRenderer {
         fun cornerFlags(runs: List<Run>, index: Int): Int {
             val row = runs[index].row
             var flags = 0
-            runs.getOrNull(index - 1)?.row?.takeIf { it >= 0 }?.let { flags = flags or if (row < it) TOP_LEFT else BOTTOM_LEFT }
-            runs.getOrNull(index + 1)?.row?.takeIf { it >= 0 }?.let { flags = flags or if (row < it) TOP_RIGHT else BOTTOM_RIGHT }
+            runs.getOrNull(index - 1)?.row?.takeIf { it >= 0 }
+                ?.let { flags = flags or if (row < it) TOP_LEFT else BOTTOM_LEFT }
+            runs.getOrNull(index + 1)?.row?.takeIf { it >= 0 }
+                ?.let { flags = flags or if (row < it) TOP_RIGHT else BOTTOM_RIGHT }
             return flags
         }
     }
