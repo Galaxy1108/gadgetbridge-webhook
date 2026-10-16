@@ -5571,4 +5571,7 @@
     <string name="install_show_running">显示安装</string>
     <string name="install_item_skipped">已跳过</string>
     <string name="install_progress">%1$d/%2$d (%3$d%%)</string>
+    <string name="khmer">高棉语</string>
+    <string name="activity_send_waypoint_paste_hint">粘贴或分享坐标、geo: 链接或 Plus 码 (8FVC9G8F+6X).</string>
+    <string name="activity_send_waypoint_short_plus_code_details">短 Plus 码需要附近位置来找到其地点。在 Gadgetbridge 设置中设定你的位置，或者完整代码（如 8FVC9G8F+6X 而非 9G8F+6X）。</string>
 </resources>
