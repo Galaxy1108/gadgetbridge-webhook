@@ -105,7 +105,7 @@ object PaiWidget : MetricWidget<PaiWidget.Data>() {
             LOG.error("Could not get PAI sample for dashboard widget", e)
         }
 
-        if (config.needsHistory) {
+        if (config.isTall || config.isWide || config.isLargeStyle) {
             val (totals, increases) = week(scope)
             data.days = totals
             data.dayIncreases = increases
@@ -189,7 +189,7 @@ object PaiWidget : MetricWidget<PaiWidget.Data>() {
                 largeChart = bars,
                 axis = axis,
             )
-            else -> model.copy(chart = bars ?: composition)
+            else -> model
         }
     }
 
@@ -238,7 +238,7 @@ object PaiWidget : MetricWidget<PaiWidget.Data>() {
      * Rolling 7-day [total], today's contribution ([today]), and the device's [target] (typically 100). [low],
      * [moderate] and [high] are the PAI earned per intensity today, and the minutes fields the time spent in each.
      * [days] holds the weekly totals of [day]'s week, Monday to Sunday, and [dayIncreases] each day's increase,
-     * for every style but the gauge.
+     * for the tall, wide and large styles.
      */
     class Data(
         var total: Int = 0,
