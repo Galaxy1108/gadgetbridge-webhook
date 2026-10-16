@@ -95,13 +95,20 @@ class MiniChartView @JvmOverloads constructor(
                 rect.set(left, chartHeight - bottomHeight, left + barWidth, chartHeight)
                 canvas.drawRoundRect(rect, radius, radius, fillPaint)
             }
-            val topStart = chartHeight - bottomHeight - if (bottomHeight > 0f) gap else 0f
-            val topHeight = totalHeight - bottomHeight
+            val stackGap = if (bottomHeight > 0f) gap else 0f
+            val topStart = chartHeight - bottomHeight - stackGap
+            val topHeight = if (top > 0f) max(totalHeight - bottomHeight - stackGap, MIN_BAR_DP * density) else 0f
             if (topHeight > 0f) {
                 fillPaint.color = chart.topColor
                 rect.set(left, topStart - topHeight, left + barWidth, topStart)
                 canvas.drawRoundRect(rect, radius, radius, fillPaint)
             }
+        }
+
+        chart.reference?.takeIf { it in 0f..chart.max }?.let {
+            referencePaint.color = chart.referenceColor
+            val y = valueY(it, 0f, chart.max, chartHeight)
+            canvas.drawLine(0f, y, width.toFloat(), y, referencePaint)
         }
     }
 

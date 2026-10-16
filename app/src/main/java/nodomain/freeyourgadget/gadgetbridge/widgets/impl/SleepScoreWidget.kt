@@ -43,6 +43,7 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
         if (config.isTall || config.isLargeStyle) scope.sleepStageMinutes() else null,
         scope.day,
         if (config.isLargeStyle) scope.sleepMinutesTotal() else 0L,
+        SleepWidget.StageSupport.of(scope.devices),
     )
 
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
@@ -64,8 +65,8 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
                 } else {
                     emptyList()
                 },
-                chart = stages?.let { SleepWidget.stageComposition(it) },
-                legend = stages?.let { SleepWidget.stageLegend(context, it) }.orEmpty(),
+                chart = stages?.let { SleepWidget.stageComposition(it, data.support) },
+                legend = stages?.let { SleepWidget.stageLegend(context, it, data.support) }.orEmpty(),
                 largeChart = history,
                 axis = if (history != null) TileAxis.weekdays(data.day, NIGHTS) else emptyList(),
             )
@@ -74,8 +75,8 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
             value = data.value.toString(),
             gauge = GaugeSpec.Progress(WidgetColors.lightSleep, data.value / 100f),
             status = if (config.isTall) null else StatusLine.Chip(WidgetColors.lightSleep, context.getString(bandOf(data.value))),
-            chart = if (config.isTall) stages?.let { SleepWidget.stageComposition(it) } else history,
-            legend = if (config.isTall && stages != null) SleepWidget.stageLegend(context, stages) else emptyList(),
+            chart = if (config.isTall) stages?.let { SleepWidget.stageComposition(it, data.support) } else history,
+            legend = if (config.isTall && stages != null) SleepWidget.stageLegend(context, stages, data.support) else emptyList(),
             largeChart = if (config.isWide) history else null,
             axis = if (config.isWide && history != null) TileAxis.weekdays(data.day, NIGHTS) else emptyList(),
         )
@@ -94,7 +95,7 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
     internal suspend fun latestScore(scope: WidgetDataScope): Int {
         try {
             var latest: SleepScoreSample? = null
-            for (dev in scope.devices) {
+            for (dev in scope.devices.filter { it.deviceCoordinator.supportsSleepScore(it) }) {
                 val sample = scope.db { db ->
                     dev.deviceCoordinator.getSleepScoreProvider(dev, db.daoSession)?.getLatestSample(
                         scope.query.timeTo * 1000L
@@ -143,5 +144,6 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
         val stages: LongArray? = null,
         val day: LocalDate = LocalDate.now(),
         val asleepMinutes: Long = 0,
+        val support: SleepWidget.StageSupport = SleepWidget.StageSupport.ALL,
     )
 }

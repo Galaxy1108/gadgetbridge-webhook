@@ -22,7 +22,6 @@ import android.graphics.PointF
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.HeartRateUtils
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
-import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.heartratezones.HeartRateZonesUtils
 import nodomain.freeyourgadget.gadgetbridge.util.TimeWeightedAverageAccumulator
@@ -64,7 +63,6 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
     private const val GAUGE_MAX = 200
     private const val BUCKET_SECONDS = 15 * 60L
     private const val BUCKETS = 24 * 4
-    private const val ROLLING_BUCKETS = 2
     private const val STALE_SECONDS = 15 * 60L
     private const val CHART_MIN = 40f
     private const val CHART_MIN_TOP = 160f
@@ -99,7 +97,6 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
         var latestHeartRate = 0
         var latestTimestamp = 0
         val day = mutableListOf<TimedValue>()
-        val awake = mutableListOf<TimedValue>()
         var maxGapMinutes = 0
 
         try {
@@ -115,11 +112,7 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
                         latestHeartRate = sample.heartRate
                     }
                     if (config.needsHistory) {
-                        val value = TimedValue(sample.timestamp.toLong(), sample.heartRate.toFloat())
-                        day += value
-                        if (!ActivityKind.isSleep(sample.kind)) {
-                            awake += value
-                        }
+                        day += TimedValue(sample.timestamp.toLong(), sample.heartRate.toFloat())
                     }
                 }
             }
@@ -141,7 +134,7 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
             heartRate = latestHeartRate,
             maxHeartRate = maxHeartRate(),
             line = WidgetHistory.bucketAverages(day, scope.dayStart, BUCKET_SECONDS, BUCKETS),
-            resting = deviceResting(scope) ?: lowestRollingAverage(awake, scope.dayStart),
+            resting = deviceResting(scope) ?: 0,
             minimum = if (hasStats) accumulator.min.roundToInt() else 0,
             maximum = if (hasStats) accumulator.max.roundToInt() else 0,
             average = if (hasStats) accumulator.average.roundToInt() else 0,
@@ -290,20 +283,6 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
         null
     }
 
-    /**
-     * The lowest 30-minute average of the samples taken while awake, or 0 without one.
-     */
-    internal fun lowestRollingAverage(awake: List<TimedValue>, dayStart: Long): Int {
-        val buckets = WidgetHistory.bucketAverages(awake, dayStart, BUCKET_SECONDS, BUCKETS)
-        return buckets.indices.windowed(ROLLING_BUCKETS)
-            .mapNotNull { window ->
-                val values = window.map { buckets[it] }
-                if (values.any { it.isNaN() }) null else values.average()
-            }
-            .minOrNull()
-            ?.roundToInt() ?: 0
-    }
-
     /** Where [bpm] sits on the gauge's 40 to 200 scale. */
     fun gaugeFraction(bpm: Int): Float = ((bpm - GAUGE_MIN).toFloat() / (GAUGE_MAX - GAUGE_MIN)).coerceIn(0f, 1f)
 
@@ -326,7 +305,7 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
 
     /**
      * Every field after [maxHeartRate] is only loaded for styles other than the gauge. [line] holds 15-minute
-     * averages over the day; [resting] comes from the device or else the lowest 30-minute average while awake.
+     * averages over the day; [resting] comes from the device, or is 0 when it reports none.
      */
     class Data(
         val heartRate: Int,

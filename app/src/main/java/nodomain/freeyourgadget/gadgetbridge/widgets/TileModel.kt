@@ -83,6 +83,7 @@ sealed interface MiniChart {
 
     /**
      * Two stacked series per slot, [bottom] below [top], scaled to [max]. Slots from [dataUntil] on draw a stub.
+     * [reference] draws a dashed line across the chart at that value.
      */
     class StackedBars(
         val bottom: FloatArray,
@@ -91,6 +92,8 @@ sealed interface MiniChart {
         val topColor: Int,
         val max: Float,
         val dataUntil: Int = bottom.size,
+        val reference: Float? = null,
+        val referenceColor: Int = 0,
     ) : MiniChart
 
     /**

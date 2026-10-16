@@ -98,18 +98,4 @@ class HeartRateWidgetTest : TestBase() {
         assertEquals((200 - 171) / 160f, segments[5], 1e-6f)
         assertEquals(1f, segments.sum(), 1e-5f)
     }
-
-    @Test
-    fun restingFallbackIsTheLowestThirtyMinuteAverage() {
-        val dayStart = 0L
-        val samples = listOf(
-            nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue(0, 70f),
-            nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue(900, 60f),
-            nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue(1800, 50f),
-            nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue(2700, 80f),
-        )
-
-        assertEquals(55, HeartRateWidget.lowestRollingAverage(samples, dayStart))
-        assertEquals(0, HeartRateWidget.lowestRollingAverage(emptyList(), dayStart))
-    }
 }

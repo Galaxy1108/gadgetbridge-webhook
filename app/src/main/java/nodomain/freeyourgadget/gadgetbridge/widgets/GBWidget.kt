@@ -36,6 +36,11 @@ interface GBWidget<D> {
     @get:StringRes
     val name: Int get() = label
 
+    /**
+     * [name] as text, for widgets whose name depends on the paired devices.
+     */
+    fun displayName(context: Context): String = context.getString(name)
+
     @get:DrawableRes
     val icon: Int
 

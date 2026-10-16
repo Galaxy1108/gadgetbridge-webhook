@@ -25,8 +25,20 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
     private const val REM = 2
     private const val AWAKE = 3
 
+    private val STAGE_COLORS = intArrayOf(WidgetColors.lightSleep, WidgetColors.deepSleep, WidgetColors.remSleep, WidgetColors.awakeSleep)
+    private val STAGE_NAMES = intArrayOf(
+        R.string.sleep_colored_stats_light,
+        R.string.sleep_colored_stats_deep,
+        R.string.sleep_colored_stats_rem,
+        R.string.abstract_chart_fragment_kind_awake_sleep,
+    )
+
     // Hypnogram lanes, top to bottom
+    private const val LANE_AWAKE = 0
+    private const val LANE_REM = 1
     private const val LANE_LIGHT = 2
+    private const val LANE_DEEP = 3
+    private val LANE_COLORS = intArrayOf(WidgetColors.awakeSleep, WidgetColors.remSleep, WidgetColors.lightSleep, WidgetColors.deepSleep)
 
     override val id = "sleep"
     override val label = R.string.menuitem_sleep
@@ -45,8 +57,9 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
             total,
             scope.sleepGoalFactor(total),
             scope.sleepStageMinutes(),
-            SleepScoreWidget.latestScore(scope),
+            if (scope.devices.any { it.deviceCoordinator.supportsSleepScore(it) }) SleepScoreWidget.latestScore(scope) else -1,
             if (config.isFullWidth) scope.sleepStretches() else null,
+            StageSupport.of(scope.devices),
         )
     }
 
@@ -56,8 +69,9 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
         }
         val stages = data.stages
         val hasStages = stages != null && stages[DEEP] + stages[REM] + stages[AWAKE] > 0
+        val support = data.support
         val chart = if (stages != null && hasStages) {
-            stageComposition(stages)
+            stageComposition(stages, support)
         } else {
             MiniChart.Progress(WidgetColors.lightSleep, data.goalFactor)
         }
@@ -73,8 +87,8 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
                     null
                 },
                 valueSuffix = times?.joinToString(" - "),
-                legend = if (stages != null && hasStages) stageLegend(context, stages) else emptyList(),
-                largeChart = night?.let { hypnogram(it, hasStages) },
+                legend = if (stages != null && hasStages) stageLegend(context, stages, support) else emptyList(),
+                largeChart = night?.let { hypnogram(it, hasStages, support) },
             )
         }
         return TileModel(
@@ -87,8 +101,8 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
             },
             // the wide tile shows the night as a hypnogram instead
             chart = if (config.isWide) null else chart,
-            legend = if (config.isTall && stages != null && hasStages) stageLegend(context, stages) else emptyList(),
-            largeChart = night?.let { hypnogram(it, hasStages) },
+            legend = if (config.isTall && stages != null && hasStages) stageLegend(context, stages, support) else emptyList(),
+            largeChart = night?.let { hypnogram(it, hasStages, support) },
             axis = times.orEmpty(),
         )
     }
@@ -96,22 +110,30 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
     /**
      * Deep, light, REM and awake shares of [stages] (light, deep, REM, awake minutes).
      */
-    internal fun stageComposition(stages: LongArray) = MiniChart.Composition(
-        intArrayOf(WidgetColors.deepSleep, WidgetColors.lightSleep, WidgetColors.remSleep, WidgetColors.awakeSleep),
-        floatArrayOf(stages[DEEP].toFloat(), stages[LIGHT].toFloat(), stages[REM].toFloat(), stages[AWAKE].toFloat()),
-    )
+    internal fun stageComposition(stages: LongArray, support: StageSupport = StageSupport.ALL): MiniChart.Composition {
+        val shown = shownStages(support)
+        return MiniChart.Composition(
+            IntArray(shown.size) { STAGE_COLORS[shown[it]] },
+            FloatArray(shown.size) { stages[shown[it]].toFloat() },
+        )
+    }
 
-    internal fun stageLegend(context: Context, stages: LongArray): List<LegendRow> = listOf(
-        LegendRow(WidgetColors.deepSleep, context.getString(R.string.sleep_colored_stats_deep), hoursMinutes(context, stages[DEEP])),
-        LegendRow(WidgetColors.lightSleep, context.getString(R.string.sleep_colored_stats_light), hoursMinutes(context, stages[LIGHT])),
-        LegendRow(WidgetColors.remSleep, context.getString(R.string.sleep_colored_stats_rem), hoursMinutes(context, stages[REM])),
-        LegendRow(WidgetColors.awakeSleep, context.getString(R.string.abstract_chart_fragment_kind_awake_sleep), hoursMinutes(context, stages[AWAKE])),
+    internal fun stageLegend(context: Context, stages: LongArray, support: StageSupport = StageSupport.ALL): List<LegendRow> =
+        shownStages(support).map { stage ->
+            LegendRow(STAGE_COLORS[stage], context.getString(STAGE_NAMES[stage]), hoursMinutes(context, stages[stage]))
+        }
+
+    private fun shownStages(support: StageSupport): List<Int> = listOfNotNull(
+        DEEP,
+        LIGHT,
+        REM.takeIf { support.rem },
+        AWAKE.takeIf { support.awake },
     )
 
     /**
      * The night on the awake, REM, light and deep lanes, or as one bar without stage data.
      */
-    private fun hypnogram(night: List<HypnogramSegment>, hasStages: Boolean): MiniChart.Hypnogram {
+    private fun hypnogram(night: List<HypnogramSegment>, hasStages: Boolean, support: StageSupport): MiniChart.Hypnogram {
         val start = night.first().start
         val end = night.last().end
         if (!hasStages) {
@@ -122,12 +144,32 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
                 intArrayOf(WidgetColors.lightSleep),
             )
         }
+        val lanes = listOfNotNull(
+            LANE_AWAKE.takeIf { support.awake },
+            LANE_REM.takeIf { support.rem },
+            LANE_LIGHT,
+            LANE_DEEP,
+        )
         return MiniChart.Hypnogram(
-            night,
+            night.filter { it.lane in lanes }.map { it.copy(lane = lanes.indexOf(it.lane)) },
             start,
             end,
-            intArrayOf(WidgetColors.awakeSleep, WidgetColors.remSleep, WidgetColors.lightSleep, WidgetColors.deepSleep),
+            IntArray(lanes.size) { LANE_COLORS[lanes[it]] },
         )
+    }
+
+    /**
+     * Whether any of the devices records REM and awake phases.
+     */
+    class StageSupport(val rem: Boolean, val awake: Boolean) {
+        companion object {
+            val ALL = StageSupport(rem = true, awake = true)
+
+            fun of(devices: List<GBDevice>) = StageSupport(
+                rem = devices.any { it.deviceCoordinator.supportsRemSleep(it) },
+                awake = devices.any { it.deviceCoordinator.supportsAwakeSleep(it) },
+            )
+        }
     }
 
     /**
@@ -140,5 +182,6 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
         val stages: LongArray? = null,
         val score: Int = -1,
         val night: List<HypnogramSegment>? = null,
+        val support: StageSupport = StageSupport.ALL,
     )
 }

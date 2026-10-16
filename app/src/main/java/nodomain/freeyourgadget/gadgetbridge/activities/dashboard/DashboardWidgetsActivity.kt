@@ -121,7 +121,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
     private fun showAddWidgetDialog() {
         val collator = Collator.getInstance()
         val available = WidgetRegistry.available().sortedWith { a, b ->
-            collator.compare(getString(a.name), getString(b.name))
+            collator.compare(a.displayName(this), b.displayName(this))
         }
         if (available.isEmpty()) {
             MaterialAlertDialogBuilder(this)
@@ -131,7 +131,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
                 .show()
             return
         }
-        val entries = available.map { IconListAdapter.Entry(it.icon, getString(it.name)) }
+        val entries = available.map { IconListAdapter.Entry(it.icon, it.displayName(this)) }
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.widgets_add_widget)
             .setAdapter(IconListAdapter(this, entries)) { _, which ->
@@ -221,7 +221,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
                 holder.icon.setImageResource(widget.icon)
                 val prefs = Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId))
                 val customTitle = prefs.getString(WidgetConfig.KEY_TITLE, "")
-                holder.title.text = customTitle.ifBlank { holder.itemView.context.getString(widget.name) }
+                holder.title.text = customTitle.ifBlank { widget.displayName(holder.itemView.context) }
             }
 
             holder.overflow.setOnClickListener { anchor -> showOverflowMenu(anchor, instance, widget != null) }
