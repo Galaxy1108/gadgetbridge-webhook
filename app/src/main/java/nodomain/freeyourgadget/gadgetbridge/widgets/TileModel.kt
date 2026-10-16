@@ -21,6 +21,7 @@ data class TileModel(
     val gaugeBesideLegend: Boolean = false,
     val valueDimmed: Boolean = false,
     val valueNote: CharSequence? = null,
+    val notes: List<CharSequence> = emptyList(),
 )
 
 /**
@@ -107,7 +108,8 @@ sealed interface MiniChart {
     ) : MiniChart
 
     /**
-     * A NaN y breaks the line. [reference] draws a dashed line across the chart at that y.
+     * A NaN y breaks the line. [reference] draws a dashed line across the chart at that y. [secondary] is a thinner
+     * line drawn below the main one, [rangeBand] an area whose limits change along x, and [dots] marks every point.
      */
     class Line(
         val points: List<PointF>,
@@ -121,9 +123,18 @@ sealed interface MiniChart {
         val reference: Float? = null,
         val referenceColor: Int = 0,
         val lineWidthDp: Float = 2f,
+        val secondary: List<PointF> = emptyList(),
+        val secondaryColor: Int = 0,
+        val rangeBand: RangeBand? = null,
+        val dots: Boolean = false,
     ) : MiniChart
 }
 
 data class Band(val from: Float, val to: Float, val color: Int)
+
+/**
+ * An area from [low] to [high] at each [x]. A NaN limit breaks the area.
+ */
+class RangeBand(val x: FloatArray, val low: FloatArray, val high: FloatArray, val color: Int)
 
 data class HypnogramSegment(val start: Long, val end: Long, val lane: Int)

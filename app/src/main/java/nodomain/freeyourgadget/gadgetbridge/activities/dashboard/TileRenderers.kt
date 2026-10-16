@@ -110,12 +110,16 @@ object WideTileRenderer : TileRenderer {
         renderChart(view.findViewById(R.id.tile_chart), small, 0f)
         renderChart(view.findViewById(R.id.tile_large_chart), right, LARGE_CHART_HEIGHT_DP)
         renderAxis(view.findViewById(R.id.tile_axis), model.axis, right != null)
+        val note = view.findViewById<TextView>(R.id.tile_note)
+        note.text = model.notes.firstOrNull()
+        note.visibility = if (model.notes.isEmpty()) View.GONE else View.VISIBLE
+        renderLegend(view.findViewById(R.id.tile_legend), model.legend)
     }
 
     override fun renderLoading(view: View, title: String, icon: Int) {
         renderHeader(view, title, icon)
         renderValueLoading(view)
-        for (id in intArrayOf(R.id.tile_status, R.id.tile_chart, R.id.tile_large_chart, R.id.tile_axis)) {
+        for (id in intArrayOf(R.id.tile_status, R.id.tile_chart, R.id.tile_large_chart, R.id.tile_axis, R.id.tile_note, R.id.tile_legend)) {
             view.findViewById<View>(id).visibility = View.GONE
         }
     }
@@ -134,7 +138,14 @@ object LargeTileRenderer : TileRenderer {
         val besideLegend = model.gaugeBesideLegend
         view.findViewById<View>(R.id.tile_gauge_row).visibility = if (besideLegend) View.VISIBLE else View.GONE
         view.findViewById<View>(R.id.tile_value_row).visibility = if (besideLegend) View.GONE else View.VISIBLE
-        if (besideLegend) {
+        val sideInfo = besideLegend && model.notes.isNotEmpty()
+        view.findViewById<View>(R.id.tile_side_info).visibility = if (sideInfo) View.VISIBLE else View.GONE
+        if (sideInfo) {
+            renderArc(view, model, GAUGE_VALUE_SIZE_SP, GAUGE_LONG_VALUE_SIZE_SP)
+            renderSideInfo(view, model)
+            renderLegend(view.findViewById(R.id.tile_side_legend), emptyList(), 1)
+            renderLegend(view.findViewById(R.id.tile_legend), model.legend, LEGEND_COLUMNS)
+        } else if (besideLegend) {
             renderArc(view, model, GAUGE_VALUE_SIZE_SP, GAUGE_LONG_VALUE_SIZE_SP)
             renderLegend(view.findViewById(R.id.tile_side_legend), model.legend, 1)
             renderLegend(view.findViewById(R.id.tile_legend), emptyList(), LEGEND_COLUMNS)
@@ -159,6 +170,23 @@ object LargeTileRenderer : TileRenderer {
         renderAxis(view.findViewById(R.id.tile_axis), model.axis, large != null)
         view.findViewById<View>(R.id.tile_stats).visibility = if (model.stats.isEmpty()) View.GONE else View.VISIBLE
         renderStats(view.findViewById(R.id.tile_stats_row), model.stats, mini = false)
+    }
+
+    /**
+     * The status chip and the first two [TileModel.notes] beside the gauge.
+     */
+    private fun renderSideInfo(view: View, model: TileModel) {
+        val status = view.findViewById<View>(R.id.tile_side_status)
+        val chip = model.status as? StatusLine.Chip
+        status.visibility = if (chip == null) View.GONE else View.VISIBLE
+        if (chip != null) {
+            view.findViewById<View>(R.id.tile_side_status_dot).backgroundTintList = ColorStateList.valueOf(chip.color)
+            view.findViewById<TextView>(R.id.tile_side_status_text).text = chip.text
+        }
+        view.findViewById<TextView>(R.id.tile_side_note).text = model.notes.firstOrNull()
+        val subnote = view.findViewById<TextView>(R.id.tile_side_subnote)
+        subnote.text = model.notes.getOrNull(1)
+        subnote.visibility = if (model.notes.size > 1) View.VISIBLE else View.GONE
     }
 
     override fun renderLoading(view: View, title: String, icon: Int) {
@@ -429,7 +457,7 @@ private const val LEGEND_ITEM_GAP_DP = 12f
 // The luminance of #262626
 private const val DARK_SWATCH_LUMINANCE = 0.019
 
-private val UNIT_REGEX = Regex("[\\p{L}%]+(?:\\s+[\\p{L}%]+)*")
+private val UNIT_REGEX = Regex("[\\p{L}%]+(?:(?:\\s+|/)[\\p{L}%]+)*")
 private const val UNIT_SIZE = 0.5f
 
 /**

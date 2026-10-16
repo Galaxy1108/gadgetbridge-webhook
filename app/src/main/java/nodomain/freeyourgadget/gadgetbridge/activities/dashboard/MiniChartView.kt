@@ -245,6 +245,44 @@ class MiniChartView @JvmOverloads constructor(
             referencePaint.color = chart.referenceColor
             canvas.drawLine(0f, yOf(it), width.toFloat(), yOf(it), referencePaint)
         }
+        chart.rangeBand?.let { band ->
+            fillPaint.color = band.color
+            var start = 0
+            while (start < band.x.size) {
+                var end = start
+                while (end < band.x.size && !band.low[end].isNaN() && !band.high[end].isNaN()) end++
+                if (end > start) {
+                    areaPath.reset()
+                    for (i in start until end) {
+                        val y = yOf(band.high[i].coerceIn(chart.yMin, chart.yMax))
+                        if (i == start) areaPath.moveTo(xOf(band.x[i]), y) else areaPath.lineTo(xOf(band.x[i]), y)
+                    }
+                    for (i in end - 1 downTo start) {
+                        areaPath.lineTo(xOf(band.x[i]), yOf(band.low[i].coerceIn(chart.yMin, chart.yMax)))
+                    }
+                    areaPath.close()
+                    canvas.drawPath(areaPath, fillPaint)
+                }
+                start = end + 1
+            }
+        }
+        if (chart.secondary.isNotEmpty()) {
+            linePath.reset()
+            var down = false
+            for (point in chart.secondary) {
+                if (point.y.isNaN()) {
+                    down = false
+                    continue
+                }
+                val x = xOf(point.x)
+                val y = yOf(point.y.coerceIn(chart.yMin, chart.yMax))
+                if (down) linePath.lineTo(x, y) else linePath.moveTo(x, y)
+                down = true
+            }
+            linePaint.color = chart.secondaryColor
+            linePaint.strokeWidth = SECONDARY_LINE_WIDTH_DP * density
+            canvas.drawPath(linePath, linePaint)
+        }
 
         linePath.reset()
         areaPath.reset()
@@ -282,6 +320,13 @@ class MiniChartView @JvmOverloads constructor(
         linePaint.color = chart.color
         linePaint.strokeWidth = chart.lineWidthDp * density
         canvas.drawPath(linePath, linePaint)
+        if (chart.dots) {
+            fillPaint.color = chart.color
+            val known = chart.points.filter { !it.y.isNaN() }
+            for (point in known.dropLast(1)) {
+                canvas.drawCircle(xOf(point.x), yOf(point.y.coerceIn(chart.yMin, chart.yMax)), SMALL_DOT_RADIUS_DP * density, fillPaint)
+            }
+        }
         if (hasLast) {
             canvas.drawCircle(lastX, lastY, (DOT_RADIUS_DP + DOT_RING_DP) * density, clearPaint)
         }
@@ -313,6 +358,8 @@ class MiniChartView @JvmOverloads constructor(
         private const val LINE_WIDTH_DP = 2f
         private const val DOT_RADIUS_DP = 2.5f
         private const val DOT_RING_DP = 1.5f
+        private const val SMALL_DOT_RADIUS_DP = 1.6f
+        private const val SECONDARY_LINE_WIDTH_DP = 1.5f
         private const val DIMMED_ALPHA = 115
         private const val FILL_ALPHA = 31
         private const val STACK_GAP_DP = 1f

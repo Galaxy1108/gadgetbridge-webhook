@@ -133,6 +133,25 @@
         android:gravity="bottom"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/tile_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:ellipsize="end"
+            android:importantForAccessibility="no"
+            android:maxLines="1"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/tile_legend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" />
+
         <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.MiniChartView
             android:id="@+id/tile_large_chart"
             android:layout_width="match_parent"

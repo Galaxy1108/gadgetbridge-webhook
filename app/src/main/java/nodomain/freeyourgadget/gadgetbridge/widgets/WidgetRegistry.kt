@@ -12,12 +12,15 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.impl.HrvWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.HydrationWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.LastActivityWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.PaiWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.RespiratoryRateWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.SleepScoreWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.SleepWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Spo2Widget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StepsWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StressWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.TodayWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.TrainingLoadWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.TrainingReadinessWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BmiWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BasalMetabolicRateWidget
@@ -49,12 +52,15 @@ object WidgetRegistry {
         LastActivityWidget,
         MuscleMassWidget,
         PaiWidget,
+        RespiratoryRateWidget,
         SleepScoreWidget,
         SleepWidget,
         Spo2Widget,
         StepsWidget,
         StressWidget,
         TodayWidget,
+        TrainingLoadWidget,
+        TrainingReadinessWidget,
         Vo2MaxWidget,
         WeightWidget,
     )

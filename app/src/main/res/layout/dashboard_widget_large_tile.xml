@@ -162,6 +162,66 @@
             android:layout_weight="1"
             android:orientation="vertical" />
 
+        <LinearLayout
+            android:id="@+id/tile_side_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/tile_side_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/tile_side_status_dot"
+                    android:layout_width="7dp"
+                    android:layout_height="7dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/device_status_dot" />
+
+                <TextView
+                    android:id="@+id/tile_side_status_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:importantForAccessibility="no"
+                    android:maxLines="1"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tile_side_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:importantForAccessibility="no"
+                android:maxLines="2"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tile_side_subnote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:importantForAccessibility="no"
+                android:maxLines="1"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.MiniChartView
