@@ -177,8 +177,27 @@ public class GarminWatchAppCommunicator {
     }
 
     private void startNext() {
+        if (!pollNext(null)) {
+            return;
+        }
+        state = State.OPEN;
+        write("open connection", ByteBuffer.allocate(19)
+            .put(TYPE_COMMAND)
+            .put(COMMAND_OPEN)
+            .put(uuidToBytes(currentApp))
+            .put((byte) 0x00)
+            .array());
+    }
+
+    /**
+     * Takes the next message from the queue and encrypts it. If [app] is set, only a message for that app is taken.
+     *
+     * @return false if no message is available
+     */
+    private boolean pollNext(@Nullable final UUID app) {
         PendingMessage pending;
-        while ((pending = pendingMessages.poll()) != null) {
+        while ((pending = pendingMessages.peek()) != null && (app == null || pending.app().equals(app))) {
+            pendingMessages.poll();
             final byte[] blob;
             try {
                 blob = GarminJson.encode(pending.message());
@@ -206,15 +225,19 @@ public class GarminWatchAppCommunicator {
             currentKey = key;
             currentCipher = cipher;
             currentFragmentCount = (cipher.length + FRAGMENT_DATA_SIZE - 1) / FRAGMENT_DATA_SIZE;
-            state = State.OPEN;
-            write("open connection", ByteBuffer.allocate(19)
-                .put(TYPE_COMMAND)
-                .put(COMMAND_OPEN)
-                .put(uuidToBytes(currentApp))
-                .put((byte) 0x00)
-                .array());
-            return;
+            return true;
         }
+        return false;
+    }
+
+    private void exchangeKey() {
+        state = State.KEY;
+        write("exchange key", ByteBuffer.allocate(19)
+            .put(TYPE_DATA)
+            .put(DATA_KEY)
+            .put(currentKey)
+            .put(KEY_FLAG_OUTBOUND)
+            .array());
     }
 
     private void onCommand(final byte[] value) {
@@ -231,13 +254,7 @@ public class GarminWatchAppCommunicator {
                     finish();
                     return;
                 }
-                state = State.KEY;
-                write("exchange key", ByteBuffer.allocate(19)
-                    .put(TYPE_DATA)
-                    .put(DATA_KEY)
-                    .put(currentKey)
-                    .put(KEY_FLAG_OUTBOUND)
-                    .array());
+                exchangeKey();
                 break;
             case COMMAND_CLOSE:
                 if (state == State.CLOSE) {
@@ -341,7 +358,12 @@ public class GarminWatchAppCommunicator {
         } else {
             LOG.debug("Message sent to {}", currentApp);
             reportResult(true);
-            close();
+            // Reuse the connection if the next message is for the same app
+            if (pollNext(currentApp)) {
+                exchangeKey();
+            } else {
+                close();
+            }
         }
     }
 
