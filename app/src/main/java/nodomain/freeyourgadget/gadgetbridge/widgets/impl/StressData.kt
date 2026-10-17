@@ -156,7 +156,7 @@ internal fun stressQuarterBars(context: Context, data: StressData): MiniChart.Ba
 }
 
 /**
- * Time in each zone as shares and as a legend, for the tall style.
+ * Time in each zone as shares and as a legend, for the large style.
  */
 internal fun stressTimeInZones(context: Context, data: StressData, colors: IntArray): Pair<MiniChart.Composition, List<LegendRow>> {
     val labels = intArrayOf(R.string.stress_relaxed, R.string.stress_mild, R.string.stress_moderate, R.string.stress_high)
@@ -182,14 +182,10 @@ internal fun stressZoneColors(context: Context) = intArrayOf(
 )
 
 /**
- * The parts of a stress tile that depend on the style: the zone chip, the tall style's time in zones, the wide
- * style's 15-minute bars, or both beside the gauge in the large style.
+ * The parts of a stress tile that depend on the style: the zone chip and 15-minute bars, or the time in zones beside
+ * the gauge in the large style.
  */
 internal fun stressTile(context: Context, config: WidgetConfig, data: StressData, value: CharSequence, gauge: GaugeSpec): TileModel {
-    if (config.isTall) {
-        val (composition, legend) = stressTimeInZones(context, data, stressZoneColors(context))
-        return TileModel(value = value, gauge = gauge, chart = composition, legend = legend)
-    }
     val quarters = stressQuarterBars(context, data)
     if (config.isLargeStyle) {
         return TileModel(

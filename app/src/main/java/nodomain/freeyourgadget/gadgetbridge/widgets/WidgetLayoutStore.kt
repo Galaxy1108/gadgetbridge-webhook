@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.util.gson.GsonSerialized
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.ActiveCaloriesWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.CaloriesWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StressWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxWidget
@@ -300,7 +301,7 @@ object WidgetLayoutStore {
                 "stress_segmented" -> StressWidget.id to StressWidget.SEGMENTED.id
                 "stress_simple" -> StressWidget.id to StressWidget.SIMPLE.id
                 "stress_breakdown" -> StressWidget.id to StressWidget.BREAKDOWN.id
-                "calories_active" -> CaloriesWidget.id to CaloriesWidget.ACTIVE.id
+                "calories_active" -> ActiveCaloriesWidget.id to WidgetVariant.GAUGE.id
                 "calories_segmented" -> CaloriesWidget.id to CaloriesWidget.SEGMENTED.id
                 "vo2max_running" -> {
                     setVo2MaxSport(entry.id, Vo2MaxWidget.SPORT_RUNNING)

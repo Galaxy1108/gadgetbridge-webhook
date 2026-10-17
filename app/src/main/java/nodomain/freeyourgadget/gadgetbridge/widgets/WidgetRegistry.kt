@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.ActiveCaloriesWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.ActiveTimeWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BloodPressureWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BodyEnergyWidget
@@ -36,6 +37,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.impl.WeightWidget
  */
 object WidgetRegistry {
     private val common: List<GBWidget<*>> = listOf(
+        ActiveCaloriesWidget,
         ActiveTimeWidget,
         BasalMetabolicRateWidget,
         BloodPressureWidget,

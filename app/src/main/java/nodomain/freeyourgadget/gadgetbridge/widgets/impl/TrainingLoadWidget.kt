@@ -14,7 +14,6 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.MetricSample
 import nodomain.freeyourgadget.gadgetbridge.model.TrainingLoadStatus
 import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
-import nodomain.freeyourgadget.gadgetbridge.widgets.LegendRow
 import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
 import nodomain.freeyourgadget.gadgetbridge.widgets.RangeBand
 import nodomain.freeyourgadget.gadgetbridge.widgets.Stat
@@ -160,7 +159,7 @@ object TrainingLoadWidget : MetricWidget<TrainingLoadWidget.Data>() {
         if (data.acute <= 0) {
             val empty = emptyModel(context, gauge)
             return when {
-                config.isLargeStyle || config.isWide -> empty.copy(largeChart = chart, axis = axis)
+                config.isLargeStyle || config.isWide || config.isTall -> empty.copy(largeChart = chart, axis = axis)
                 else -> empty
             }
         }
@@ -172,14 +171,6 @@ object TrainingLoadWidget : MetricWidget<TrainingLoadWidget.Data>() {
             contentDescription = describe(context, config, data),
         )
         return when {
-            config.isTall -> model.copy(
-                status = null,
-                legend = listOf(
-                    LegendRow(colors.acute, context.getString(R.string.training_acute_load), data.acute.toString(), square = true),
-                    LegendRow(colors.chronic, context.getString(R.string.training_chronic_load), data.chronic.takeIf { it > 0 }?.toString() ?: context.getString(R.string.stats_empty_value), square = true),
-                    LegendRow(colors.optimal, context.getString(R.string.training_optimal_load), range, square = true),
-                ),
-            )
             config.isLargeStyle -> model.copy(
                 miniStats = listOfNotNull(
                     data.chronic.takeIf { it > 0 }?.let { Stat(it.toString(), context.getString(R.string.widget_stat_chronic)) },
@@ -188,7 +179,7 @@ object TrainingLoadWidget : MetricWidget<TrainingLoadWidget.Data>() {
                 largeChart = chart,
                 axis = axis,
             )
-            config.isWide -> model.copy(largeChart = chart, axis = axis)
+            config.isTall || config.isWide -> model.copy(largeChart = chart, axis = axis)
             else -> model.copy(chart = data.acuteDays?.let { sparkline(it, colors.acute) })
         }
     }

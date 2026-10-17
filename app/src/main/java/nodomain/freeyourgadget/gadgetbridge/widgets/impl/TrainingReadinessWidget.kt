@@ -14,6 +14,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
 import nodomain.freeyourgadget.gadgetbridge.widgets.LegendRow
 import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
 import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileAxis
 import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
 import nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
@@ -22,6 +23,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -75,6 +77,7 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
             report = shown,
             isToday = scope.isToday,
             history = if (config.needsHistory) WidgetHistory.dailyLatest(history, scope.day, DAYS, scope.zone) else null,
+            day = scope.day,
         )
     }
 
@@ -91,10 +94,14 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
                 highlightLast = true,
             )
         }
+        val axis = if (bars != null) TileAxis.weekdays(data.day, DAYS) else emptyList()
         if (report == null || score == null) {
-            return emptyModel(context, GaugeSpec.Zones(zoneColors, TrainingReadinessReport.ZONE_SEGMENTS)).copy(
-                chart = if (config.variant.id == WidgetVariant.NUMBER.id) bars else null,
-            )
+            val empty = emptyModel(context, GaugeSpec.Zones(zoneColors, TrainingReadinessReport.ZONE_SEGMENTS))
+            return when {
+                config.isTall -> empty.copy(largeChart = bars, axis = axis)
+                config.variant.id == WidgetVariant.NUMBER.id -> empty.copy(chart = bars)
+                else -> empty
+            }
         }
         val zone = TrainingReadinessReport.zoneIndexForScore(score)
         val advice = context.getString(TrainingReadinessReport.ZONE_DESC_RES[zone])
@@ -106,7 +113,7 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
             contentDescription = describe(context, config, score, zone, advice, factors),
         )
         return when {
-            config.isTall -> model.copy(status = null, legend = factors.take(SHORT_FACTORS))
+            config.isTall -> model.copy(largeChart = bars, axis = axis)
             config.isLargeStyle -> model.copy(
                 gaugeBesideLegend = true,
                 notes = listOfNotNull(advice, if (data.isToday) report.timestamp?.let { updatedText(context, it, System.currentTimeMillis()) } else null),
@@ -208,5 +215,6 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
         val report: TrainingReadinessReport? = null,
         val isToday: Boolean = true,
         val history: FloatArray? = null,
+        val day: LocalDate = LocalDate.now(),
     )
 }

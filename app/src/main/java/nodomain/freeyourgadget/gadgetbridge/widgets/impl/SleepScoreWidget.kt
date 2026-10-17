@@ -40,7 +40,7 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data = Data(
         latestScore(scope),
         if (config.needsHistory) nights(scope) else null,
-        if (config.isTall || config.isLargeStyle) scope.sleepStageMinutes() else null,
+        if (config.isLargeStyle) scope.sleepStageMinutes() else null,
         scope.day,
         if (config.isLargeStyle) scope.sleepMinutesTotal() else 0L,
         SleepWidget.StageSupport.of(scope.devices),
@@ -74,11 +74,10 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
         return TileModel(
             value = data.value.toString(),
             gauge = GaugeSpec.Progress(WidgetColors.lightSleep, data.value / 100f),
-            status = if (config.isTall) null else StatusLine.Chip(WidgetColors.lightSleep, context.getString(bandOf(data.value))),
-            chart = if (config.isTall) stages?.let { SleepWidget.stageComposition(it, data.support) } else history,
-            legend = if (config.isTall && stages != null) SleepWidget.stageLegend(context, stages, data.support) else emptyList(),
-            largeChart = if (config.isWide) history else null,
-            axis = if (config.isWide && history != null) TileAxis.weekdays(data.day, NIGHTS) else emptyList(),
+            status = StatusLine.Chip(WidgetColors.lightSleep, context.getString(bandOf(data.value))),
+            chart = history,
+            largeChart = if (config.isWide || config.isTall) history else null,
+            axis = if ((config.isWide || config.isTall) && history != null) TileAxis.weekdays(data.day, NIGHTS) else emptyList(),
         )
     }
 

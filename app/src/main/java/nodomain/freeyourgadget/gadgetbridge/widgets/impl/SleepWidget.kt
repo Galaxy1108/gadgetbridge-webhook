@@ -58,7 +58,7 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
             scope.sleepGoalFactor(total),
             scope.sleepStageMinutes(),
             if (scope.devices.any { it.deviceCoordinator.supportsSleepScore(it) }) SleepScoreWidget.latestScore(scope) else -1,
-            if (config.isFullWidth) scope.sleepStretches() else null,
+            if (config.isFullWidth || config.isTall) scope.sleepStretches() else null,
             StageSupport.of(scope.devices),
         )
     }
@@ -94,14 +94,13 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
         return TileModel(
             value = String.format(Locale.ROOT, "%d:%02d", data.total / 60, data.total % 60),
             gauge = GaugeSpec.Progress(WidgetColors.lightSleep, data.goalFactor),
-            status = if (data.score > 0 && !config.isTall) {
+            status = if (data.score > 0) {
                 StatusLine.Chip(WidgetColors.lightSleep, context.getString(R.string.sleep_score_value, data.score))
             } else {
                 null
             },
-            // the wide tile shows the night as a hypnogram instead
-            chart = if (config.isWide) null else chart,
-            legend = if (config.isTall && stages != null && hasStages) stageLegend(context, stages, support) else emptyList(),
+            // the wide and tall tiles show the night as a hypnogram instead
+            chart = if (config.isWide || config.isTall) null else chart,
             largeChart = night?.let { hypnogram(it, hasStages, support) },
             axis = times.orEmpty(),
         )

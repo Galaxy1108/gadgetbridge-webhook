@@ -26,7 +26,6 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.heartratezones.HeartRateZonesUtils
 import nodomain.freeyourgadget.gadgetbridge.util.TimeWeightedAverageAccumulator
 import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
-import nodomain.freeyourgadget.gadgetbridge.widgets.LegendRow
 import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
 import nodomain.freeyourgadget.gadgetbridge.widgets.Stat
 import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
@@ -72,8 +71,6 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
     private val COLOR = Color.rgb(0xEF, 0x44, 0x44)
     private val COLOR_RESTING_LINE = Color.rgb(0x5A, 0x2A, 0x2A)
     private val COLOR_NEUTRAL = Color.rgb(0x8F, 0x8F, 0x8F)
-    private val COLOR_MIN = Color.rgb(0x4F, 0xB3, 0xF0)
-    private val COLOR_MAX = Color.rgb(0xD6, 0x3A, 0x3A)
 
     // Rest, then zones 1 to 5
     private val ZONE_COLORS = intArrayOf(
@@ -147,9 +144,7 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
         val floors = zoneFloors(data.maxHeartRate.coerceAtLeast(1))
         val segments = gaugeSegments(floors)
         if (data.heartRate <= 0) {
-            return emptyModel(context, GaugeSpec.Zones(ZONE_COLORS, segments)).copy(
-                legend = if (config.isTall) statsLegend(context, data) else emptyList(),
-            )
+            return emptyModel(context, GaugeSpec.Zones(ZONE_COLORS, segments))
         }
 
         val now = System.currentTimeMillis() / 1000L
@@ -178,7 +173,6 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
             contentDescription = describe(context, config, data, stale, measuredAt),
         )
         return when {
-            config.isTall -> model.copy(legend = statsLegend(context, data))
             config.isLargeStyle -> model.copy(
                 miniStats = listOfNotNull(
                     data.resting.takeIf { it > 0 }?.let { Stat(withUnit(context, it), context.getString(R.string.hr_resting)) },
@@ -188,7 +182,7 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
                 largeChart = data.line?.let { dayLine(it, data, withResting = true) },
                 axis = TileAxis.HOURS,
             )
-            config.isWide -> model.copy(
+            config.isTall || config.isWide -> model.copy(
                 status = restingChip,
                 largeChart = data.line?.let { dayLine(it, data, withResting = true) },
                 axis = TileAxis.HOURS,
@@ -205,21 +199,6 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
      */
     private fun withUnit(context: Context, bpm: Int): String =
         if (bpm > 0) "$bpm ${context.getString(R.string.bpm)}" else context.getString(R.string.stats_empty_value)
-
-    /**
-     * Resting, minimum, average and maximum with square swatches, for the tall style.
-     */
-    private fun statsLegend(context: Context, data: Data): List<LegendRow> {
-        val text = { value: Int -> withUnit(context, value) }
-        return listOfNotNull(
-            data.resting.takeIf { it > 0 }?.let {
-                LegendRow(COLOR_RESTING_LINE, context.getString(R.string.hr_resting), text(it), square = true)
-            },
-            LegendRow(COLOR_MIN, context.getString(R.string.hr_minimum), text(data.minimum), square = true),
-            LegendRow(COLOR_NEUTRAL, context.getString(R.string.hr_average), text(data.average), square = true),
-            LegendRow(COLOR_MAX, context.getString(R.string.hr_maximum), text(data.maximum), square = true),
-        )
-    }
 
     /**
      * The day's 15-minute averages. A single empty bucket is bridged, longer gaps break the line.

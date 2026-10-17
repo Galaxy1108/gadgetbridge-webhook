@@ -37,7 +37,7 @@ object StressWidget : MetricWidget<StressData?>() {
         device.deviceCoordinator.supportsStressMeasurement(device)
 
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): StressData? =
-        computeStress(scope, config.needsHistory, config.isFullWidth)
+        computeStress(scope, config.needsHistory, config.isFullWidth || config.isTall)
 
     override fun model(context: Context, config: WidgetConfig, data: StressData?): TileModel = when (config.variant.id) {
         SIMPLE.id -> simple(context, data)

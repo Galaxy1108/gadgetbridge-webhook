@@ -1,7 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.PointF
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -10,7 +9,6 @@ import nodomain.freeyourgadget.gadgetbridge.activities.charts.SleepAnalysis
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.widgets.Band
 import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
-import nodomain.freeyourgadget.gadgetbridge.widgets.LegendRow
 import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
 import nodomain.freeyourgadget.gadgetbridge.widgets.Stat
 import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
@@ -41,8 +39,6 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
     private const val BUCKET_SECONDS = 15 * 60L
     private const val BUCKETS = 24 * 4
     private const val LINE_WIDTH_DP = 1.5f
-
-    private val COLOR_OUT_OF_RANGE = Color.rgb(0xF5, 0xA6, 0x23)
 
     override val id = "respiratoryrate"
     override val label = R.string.respiratoryrate
@@ -110,13 +106,13 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
 
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val color = ContextCompat.getColor(context, R.color.respiratory_rate_color)
-        val gaugeColors = intArrayOf(COLOR_OUT_OF_RANGE, color, COLOR_OUT_OF_RANGE)
+        val gaugeColors = intArrayOf(color, color, color)
         val segments = floatArrayOf(NORMAL_LOW / GAUGE_MAX, (NORMAL_HIGH - NORMAL_LOW) / GAUGE_MAX, (GAUGE_MAX - NORMAL_HIGH) / GAUGE_MAX)
         val line = data.line?.let { dayLine(it, data, color) }
         if (data.current <= 0) {
             return emptyModel(context, GaugeSpec.Zones(gaugeColors, segments))
         }
-        val value = "${data.current} ${context.getString(R.string.breaths_per_min)}"
+        val value = "${data.current} ${context.getString(R.string.bpm)}"
         val sleepAvg = data.sleepAvg.takeIf { it > 0 }?.let { context.getString(R.string.widget_status_sleep_avg, it) }
         val model = TileModel(
             value = value,
@@ -124,20 +120,12 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
                 gaugeColors,
                 segments,
                 (data.current / GAUGE_MAX).coerceIn(0f, 1f),
-                markerColor = if (data.current in NORMAL_LOW until NORMAL_HIGH) color else COLOR_OUT_OF_RANGE,
+                markerColor = color,
             ),
             contentDescription = describe(context, config, data),
         )
         val text = { rate: Int -> if (rate > 0) rate.toString() else context.getString(R.string.stats_empty_value) }
         return when {
-            config.isTall -> model.copy(
-                legend = listOf(
-                    LegendRow(Color.TRANSPARENT, context.getString(R.string.widget_stat_awake_avg), text(data.awakeAvg)),
-                    LegendRow(Color.TRANSPARENT, context.getString(R.string.widget_stat_sleep_avg), text(data.sleepAvg)),
-                    LegendRow(Color.TRANSPARENT, context.getString(R.string.lowest), text(data.lowest)),
-                    LegendRow(Color.TRANSPARENT, context.getString(R.string.highest), text(data.highest)),
-                ),
-            )
             config.isLargeStyle -> model.copy(
                 miniStats = listOf(
                     Stat(text(data.awakeAvg), context.getString(R.string.widget_stat_awake_avg)),
@@ -147,7 +135,7 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
                 largeChart = line,
                 axis = if (line != null) TileAxis.HOURS else emptyList(),
             )
-            config.isWide -> model.copy(
+            config.isTall || config.isWide -> model.copy(
                 status = sleepAvg?.let { StatusLine.Chip(color, it) },
                 largeChart = line,
                 axis = if (line != null) TileAxis.HOURS else emptyList(),

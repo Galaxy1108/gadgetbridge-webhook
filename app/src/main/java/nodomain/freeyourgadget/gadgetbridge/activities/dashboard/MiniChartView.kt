@@ -89,13 +89,13 @@ class MiniChartView @JvmOverloads constructor(
                 continue
             }
             val totalHeight = barHeight(total, 0f, chart.max, chartHeight, MIN_BAR_DP * density)
-            val bottomHeight = totalHeight * bottom / total
+            val stackGap = if (bottom > 0f && top > 0f) gap else 0f
+            val bottomHeight = (totalHeight - stackGap).coerceAtLeast(0f) * bottom / total
             if (bottomHeight > 0f) {
                 fillPaint.color = chart.bottomColor
                 rect.set(left, chartHeight - bottomHeight, left + barWidth, chartHeight)
                 canvas.drawRoundRect(rect, radius, radius, fillPaint)
             }
-            val stackGap = if (bottomHeight > 0f) gap else 0f
             val topStart = chartHeight - bottomHeight - stackGap
             val topHeight = if (top > 0f) max(totalHeight - bottomHeight - stackGap, MIN_BAR_DP * density) else 0f
             if (topHeight > 0f) {
