@@ -1202,6 +1202,11 @@ public interface DeviceCoordinator {
     Set<BarcodeFormat> getSupportedBarcodeFormats(@NonNull final GBDevice device);
 
     /**
+     * Whether the device can request a sync of loyalty cards.
+     */
+    boolean supportsLoyaltyCardsSyncRequest(@NonNull final GBDevice device);
+
+    /**
      * @return delay in ms for this device to wait before a reconnection attempt is made.
      */
     int getReconnectionDelay();

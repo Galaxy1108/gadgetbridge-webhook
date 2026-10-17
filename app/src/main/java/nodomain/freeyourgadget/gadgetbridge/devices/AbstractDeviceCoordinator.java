@@ -1371,6 +1371,11 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     }
 
     @Override
+    public boolean supportsLoyaltyCardsSyncRequest(@NonNull final GBDevice device) {
+        return false;
+    }
+
+    @Override
     public int getReconnectionDelay() {
         // 2 seconds.
         return 2000;

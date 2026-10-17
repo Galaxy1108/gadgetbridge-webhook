@@ -398,6 +398,11 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsLoyaltyCardsSyncRequest(@NonNull final GBDevice device) {
+        return isAppInstalled(device, GarminLoyaltyCardsApp.APP_UUID);
+    }
+
+    @Override
     public boolean supportsAppsManagement(@NonNull final GBDevice device) {
         // FIXME: experimental until better polished
         return experimentalSettingEnabled(device, "garmin_experimental_app_management");
