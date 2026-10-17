@@ -38,18 +38,22 @@ class HuamiSleepSessionProvider(
             val stages = ArrayList<SleepStage>(rawSession.stages.size)
             for (stage in rawSession.stages) {
                 val start = (rawSession.timestampMidnight - 24 * 3600 + stage.start * 60) * 1000L
-                val end = (rawSession.timestampMidnight - 24 * 3600 + stage.end * 60) * 1000L
+                // Huami includes both endpoint minutes in each native stage.
+                val end = (rawSession.timestampMidnight - 24 * 3600 + (stage.end + 1) * 60) * 1000L
                 stages.add(SleepStage(stage.asActivityKind(), start, end))
             }
 
-            sleepSessions.add(SleepSession(stages))
+            val candidate = SleepSession(stages)
+            // Reports are ordered by report time. Revised sleep bounds can shift, so identify
+            // revisions by overlap before filtering the requested window, not by exact start.
+            sleepSessions.removeAll {
+                it.startTime < candidate.endTime && candidate.startTime < it.endTime
+            }
+            sleepSessions.add(candidate)
         }
 
         return sleepSessions
             .filter { (it.startTime / 1000L) in tsFrom..<tsTo }
-            // Ascending report times: retain the latest revision of each sleep session.
-            .associateBy { it.startTime }
-            .values
             .sortedBy { it.startTime }
     }
 

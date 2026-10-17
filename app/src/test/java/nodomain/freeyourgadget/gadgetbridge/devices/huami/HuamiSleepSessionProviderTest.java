@@ -55,7 +55,8 @@ public class HuamiSleepSessionProviderTest extends TestBase {
         data.position(0x56);
         for (int[] stage : stages) {
             data.putShort((short) stage[0]);
-            data.putShort((short) stage[1]);
+            // Test ranges are half-open; Huami encodes the last minute inclusively.
+            data.putShort((short) (stage[1] - 1));
             data.put((byte) stage[2]);
         }
         daoSession.getHuamiSleepSessionSampleDao().insertOrReplace(new HuamiSleepSessionSample(
@@ -151,6 +152,57 @@ public class HuamiSleepSessionProviderTest extends TestBase {
                 .getAllActivitySamples(timestamp, timestamp + 60);
         final var sample = samples.stream().filter(it -> it.getTimestamp() == timestamp).findFirst().orElseThrow();
         assertEquals(ActivityKind.DEEP_SLEEP, sample.getKind());
+    }
+
+    @Test
+    public void laterReportWithShiftedStartReplacesEarlierNight() {
+        seedNight(END + 3600);
+        seed(END + 2 * 3600, MIDNIGHT, new int[][] {{1321, 1800, 4}});
+        final List<SleepSession> sessions = provider().getSleepSessions(START, END + 3 * 3600);
+        assertEquals(1, sessions.size());
+        assertEquals((START + 60) * 1000L, sessions.get(0).getStartTime());
+        assertEquals(479 * 60, sessions.get(0).getTotalSleepDuration());
+    }
+
+    @Test
+    public void revisionOutsideQueryWindowSuppressesStaleCopyInsideIt() {
+        seed(END + 3600, MIDNIGHT, new int[][] {{1321, 1800, 4}});
+        seedNight(END + 2 * 3600);
+        assertEquals(0, provider().getSleepSessions(START + 60, END + 3 * 3600).size());
+    }
+
+    @Test
+    public void adjacentSessionsRemainSeparate() {
+        seed(END + 3600, MIDNIGHT, new int[][] {{1320, 1380, 4}});
+        seed(END + 2 * 3600, MIDNIGHT, new int[][] {{1380, 1440, 4}});
+        final List<SleepSession> sessions = provider().getSleepSessions(START, END + 3 * 3600);
+        assertEquals(2, sessions.size());
+        assertEquals(sessions.get(0).getEndTime(), sessions.get(1).getStartTime());
+    }
+
+    @Test
+    public void singleMinuteStagesHaveTheirFullDuration() {
+        seed(END + 3600, MIDNIGHT, new int[][] {
+                {1320, 1321, 5}, {1321, 1322, 4}, {1322, 1323, 8}, {1323, 1324, 7}
+        });
+        final SleepSession session = provider().getSleepSessions(START, END + 2 * 3600).get(0);
+        assertEquals(60, session.getDeepSleepDuration());
+        assertEquals(60, session.getLightSleepDuration());
+        assertEquals(60, session.getRemSleepDuration());
+        assertEquals(60, session.getAwakeSleepDuration());
+        assertEquals(180, session.getTotalSleepDuration());
+        assertEquals((START + 4 * 60) * 1000L, session.getEndTime());
+    }
+
+    @Test
+    public void newerReportsCanSplitAnOlderBroadSession() {
+        seedNight(END + 3600);
+        seed(END + 2 * 3600, MIDNIGHT, new int[][] {{1320, 1440, 4}});
+        seed(END + 3 * 3600, MIDNIGHT, new int[][] {{1560, 1800, 4}});
+        final List<SleepSession> sessions = provider().getSleepSessions(START, END + 4 * 3600);
+        assertEquals(2, sessions.size());
+        assertEquals(2 * 3600, sessions.get(0).getTotalSleepDuration());
+        assertEquals(4 * 3600, sessions.get(1).getTotalSleepDuration());
     }
 
 }
