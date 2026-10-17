@@ -46,6 +46,8 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpec
 import nodomain.freeyourgadget.gadgetbridge.capabilities.password.PasswordCapabilityImpl;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractBLEDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.ComputedHrvSummarySampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.DefaultSleepSessionProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.FallbackSleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GenericHrvValueSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GenericTemperatureSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.HuamiHeartRateManualSampleProvider;
@@ -204,9 +206,14 @@ public abstract class HuamiCoordinator extends AbstractBLEDeviceCoordinator {
         return new MiBand2SampleProvider(device, session);
     }
 
+    @NonNull
     @Override
-    public SleepSessionProvider getSleepSessionProvider(GBDevice device, DaoSession session) {
-        return new HuamiSleepSessionProvider(device, session);
+    public SleepSessionProvider getSleepSessionProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
+        return new FallbackSleepSessionProvider(
+            new HuamiSleepSessionProvider(device, session),
+            // For watches that do not report sleep sessions
+            new DefaultSleepSessionProvider(device, session)
+        );
     }
 
     @Override

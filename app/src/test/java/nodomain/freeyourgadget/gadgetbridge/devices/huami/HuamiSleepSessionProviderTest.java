@@ -11,8 +11,11 @@ import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.CsvSampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.DefaultSleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.FallbackSleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.FixedSampleDeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.SleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuamiSleepSessionSample;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
@@ -45,6 +48,10 @@ public class HuamiSleepSessionProviderTest extends TestBase {
 
     private HuamiSleepSessionProvider provider() {
         return new HuamiSleepSessionProvider(device, daoSession);
+    }
+
+    private SleepSessionProvider providerWithFallback() {
+        return new FallbackSleepSessionProvider(provider(), new DefaultSleepSessionProvider(device, daoSession));
     }
 
     private void seed(int recordTimestamp, int midnight, int[][] stages) {
@@ -124,11 +131,22 @@ public class HuamiSleepSessionProviderTest extends TestBase {
     @Test
     public void fallsBackToActivitySamplesWhenNativeRecordsAreMissing() {
         final int start = 1705356000; // The existing realistic-night CSV fixture.
-        final List<SleepSession> sessions = provider().getSleepSessions(start - 60, start + 60);
+        final List<SleepSession> sessions = providerWithFallback().getSleepSessions(start - 60, start + 60);
         assertEquals(1, sessions.size());
         assertEquals(start * 1000L, sessions.get(0).getStartTime());
         assertEquals(1705376460_000L, sessions.get(0).getEndTime());
     }
+
+    @Test
+    public void fallbackNightIsAlsoReturnedInARangeWithNativeRecords() {
+        seedNight(END + 3600);
+        final int fallbackStart = 1705356000; // The existing realistic-night CSV fixture.
+        final List<SleepSession> sessions = providerWithFallback().getSleepSessions(START, fallbackStart + 60);
+        assertEquals(2, sessions.size());
+        assertEquals(START * 1000L, sessions.get(0).getStartTime());
+        assertEquals(fallbackStart * 1000L, sessions.get(1).getStartTime());
+    }
+
     @Test
     public void laterNativeReportReplacesEarlierCopyOfTheSameNight() {
         seedNight(END + 3600);

@@ -1,6 +1,5 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.huami
 
-import nodomain.freeyourgadget.gadgetbridge.devices.DefaultSleepSessionProvider
 import nodomain.freeyourgadget.gadgetbridge.devices.SleepSessionProvider
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
@@ -12,14 +11,6 @@ class HuamiSleepSessionProvider(
     private val session: DaoSession
 ) : SleepSessionProvider {
     override fun getSleepSessions(tsFrom: Int, tsTo: Int): List<SleepSession> {
-        val nativeSessions = getNativeSleepSessions(tsFrom, tsTo)
-        return nativeSessions.ifEmpty {
-            DefaultSleepSessionProvider(device, session).getSleepSessions(tsFrom, tsTo)
-        }
-    }
-
-    /** Native records only, so activity overlays do not recursively request their own fallback. */
-    fun getNativeSleepSessions(tsFrom: Int, tsTo: Int): List<SleepSession> {
         val sleepSessions = ArrayList<SleepSession>()
 
         val fromMillis: Long = (tsFrom - LOOK_BACK_SECONDS) * 1000L
