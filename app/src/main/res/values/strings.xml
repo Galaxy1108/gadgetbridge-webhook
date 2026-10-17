@@ -286,7 +286,9 @@
     <string name="map_theme_motorider">Motorider</string>
     <string name="map_theme_biker">Biker</string>
     <string name="map_theme_indigo">Indigo</string>
+    <string name="map_theme_dark_low_contrast">Dark (low contrast)</string>
     <string name="map_theme_custom">Custom…</string>
+    <string name="map_theme_dark_title">Theme in dark mode</string>
     <string name="map_theme_custom_file_title">Custom theme file</string>
     <string name="map_theme_custom_file_summary">Zip archive with the render theme and its icons, used when the theme above is set to Custom</string>
     <string name="map_theme_custom_file_invalid">Not a valid mapsforge render theme: %1$s</string>
