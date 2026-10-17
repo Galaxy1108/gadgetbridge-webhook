@@ -27,9 +27,11 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.FitFile
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.FitImporter
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.RawSleepStream
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.RecordData
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Event
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.EventType
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.SleepLevel
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.AbstractFitSleepDataRaw
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitEvent
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitFileId
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitSleepDataInfo
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.messages.FitSleepLevel
@@ -60,7 +62,8 @@ class GarminRawSleepFitImportTest : TestBase() {
 
     private val offset: ZoneOffset = ZoneOffset.ofHours(2)
     private val bedtime: Instant = LocalDate.of(2024, 3, 4).atTime(22, 30).toInstant(offset)
-    private val sleepKinds = setOf(ActivityKind.LIGHT_SLEEP, ActivityKind.DEEP_SLEEP, ActivityKind.REM_SLEEP, ActivityKind.AWAKE_SLEEP)
+    private val sleepKinds =
+        setOf(ActivityKind.LIGHT_SLEEP, ActivityKind.DEEP_SLEEP, ActivityKind.REM_SLEEP, ActivityKind.AWAKE_SLEEP)
     private var nextAddress = 0x50
     private var nextFile = 0
 
@@ -86,6 +89,7 @@ class GarminRawSleepFitImportTest : TestBase() {
         }
 
     /** Cuts minutes into files at local midnight and after every [syncEvery] minutes. */
+    @Suppress("SameParameterValue")
     private fun files(minutes: List<SleepMinute>, syncEvery: Int): List<List<SleepMinute>> {
         val files = mutableListOf(mutableListOf<SleepMinute>())
         for (minute in minutes) {
@@ -119,9 +123,13 @@ class GarminRawSleepFitImportTest : TestBase() {
 
     /**
      * One sleep file: a file id, the sleep data info at the first minute, a row per minute, and
-     * any [stages] a staging watch would add.
+     * any [stages] and sleep [events] a staging watch would add.
      */
-    private fun sleepFile(minutes: List<SleepMinute>, stages: List<Pair<Instant, SleepLevel>> = emptyList()): File {
+    private fun sleepFile(
+        minutes: List<SleepMinute>,
+        stages: List<Pair<Instant, SleepLevel>> = emptyList(),
+        events: List<Pair<Instant, EventType>> = emptyList(),
+    ): File {
         val start = minutes.first().time.epochSecond
         val records = mutableListOf<RecordData>()
         records += FitFileId.Builder()
@@ -136,15 +144,24 @@ class GarminRawSleepFitImportTest : TestBase() {
             .setSampleLength(60)
             .setLocalTimestamp(start + offset.totalSeconds)
             .build(1)
-        for (minute in minutes) {
-            records += when (minute.kind) {
-                SleepMinuteKind.RAW -> AbstractFitSleepDataRaw.Builder().setFieldByNumber(0, *rawRow(minute.movement, minute.heartRate)).build(2)
-                SleepMinuteKind.AWAKE -> FitSleepLevel.Builder().setTimestamp(minute.time.epochSecond).setSleepLevel(SleepLevel.AWAKE).build(3)
-                SleepMinuteKind.UNMEASURABLE -> FitSleepLevel.Builder().setTimestamp(minute.time.epochSecond).setSleepLevel(SleepLevel.UNMEASURABLE).build(3)
+        for ((time, kind, movement, heartRate) in minutes) {
+            records += when (kind) {
+                SleepMinuteKind.RAW -> AbstractFitSleepDataRaw.Builder()
+                    .setFieldByNumber(0, *rawRow(movement, heartRate)).build(2)
+
+                SleepMinuteKind.AWAKE -> FitSleepLevel.Builder().setTimestamp(time.epochSecond)
+                    .setSleepLevel(SleepLevel.AWAKE).build(3)
+
+                SleepMinuteKind.UNMEASURABLE -> FitSleepLevel.Builder().setTimestamp(time.epochSecond)
+                    .setSleepLevel(SleepLevel.UNMEASURABLE).build(3)
             }
         }
         for ((time, level) in stages) {
             records += FitSleepLevel.Builder().setTimestamp(time.epochSecond).setSleepLevel(level).build(3)
+        }
+        for ((time, type) in events) {
+            records += FitEvent.Builder().setTimestamp(time.epochSecond).setEvent(Event.DETECT_SLEEP).setEventType(type)
+                .build(4)
         }
         val file = File(app.cacheDir, "sleep-${nextFile++}.fit")
         file.writeBytes(FitFile(records).outgoingMessage)
@@ -179,12 +196,24 @@ class GarminRawSleepFitImportTest : TestBase() {
 
         val expected = SleepStageEstimator.estimateAll(minutes).single()
         assertEquals(
-            listOf(expected.onset.toEpochMilli() to EventType.START.num, expected.end.toEpochMilli() to EventType.STOP.num),
+            listOf(
+                expected.onset.toEpochMilli() to EventType.START.num,
+                expected.end.toEpochMilli() to EventType.STOP.num
+            ),
             estimatedEvents(device),
         )
-        assertEquals(expected.stages.size, GarminEstimatedSleepStageSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).size)
-        assertTrue("the watch's own stage table is left alone", GarminSleepStageSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).isEmpty())
-        assertEquals(minutes.size, GarminRawSleepSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).size)
+        assertEquals(
+            expected.stages.size,
+            GarminEstimatedSleepStageSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).size
+        )
+        assertTrue(
+            "the watch's own stage table is left alone",
+            GarminSleepStageSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).isEmpty()
+        )
+        assertEquals(
+            minutes.size,
+            GarminRawSleepSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).size
+        )
 
         // What the charts read: sleep inside the session, none before or after it
         assertFalse(kindAt(device, bedtime) in sleepKinds)
@@ -203,11 +232,22 @@ class GarminRawSleepFitImportTest : TestBase() {
             bedtime.plusSeconds(480 * 60) to SleepLevel.AWAKE,
         )
 
-        FitImporter(app, device).importFile(sleepFile(minutes, stages), false)
+        val events = listOf(
+            bedtime to EventType.START,
+            bedtime.plusSeconds(480 * 60) to EventType.STOP,
+        )
 
-        assertEquals(stages.map { it.first.toEpochMilli() }, GarminSleepStageSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).map { it.timestamp })
+        FitImporter(app, device).importFile(sleepFile(minutes, stages, events), false)
+
+        assertEquals(
+            stages.map { it.first.toEpochMilli() },
+            GarminSleepStageSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).map { it.timestamp })
         assertTrue("no estimate next to real stages", estimatedEvents(device).isEmpty())
-        assertEquals("raw minutes of a staging watch are not kept", 0, GarminRawSleepSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).size)
+        assertEquals(
+            "raw minutes of a staging watch are not kept",
+            0,
+            GarminRawSleepSampleProvider(device, daoSession).getAllSamples(0, Long.MAX_VALUE).size
+        )
         assertEquals(ActivityKind.DEEP_SLEEP, kindAt(device, bedtime.plusSeconds(90 * 60)))
     }
 }
