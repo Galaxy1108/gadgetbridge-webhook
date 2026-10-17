@@ -47,9 +47,6 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsTrainingReadiness(device)
 
-    override fun labelFor(variant: WidgetVariant, config: WidgetConfig): Int =
-        if (variant.id == WidgetVariant.METRIC_LARGE.id) label else R.string.widget_readiness
-
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         val until = scope.query.timeTo * 1000L
         val from = (scope.dayStart - (DAYS - 1) * SECONDS_PER_DAY) * 1000L

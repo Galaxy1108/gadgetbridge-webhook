@@ -17,6 +17,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.toSpannable
+import androidx.core.view.doOnLayout
 import com.google.android.material.color.MaterialColors
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
@@ -44,9 +45,9 @@ object GaugeTileRenderer : TileRenderer {
     override val layout = R.layout.dashboard_widget_gauge_tile
 
     override fun render(view: View, title: String, icon: Int, model: TileModel) =
-        renderGauge(view, title, model, GAUGE_VALUE_SIZE_SP, GAUGE_LONG_VALUE_SIZE_SP)
+        renderGauge(view, title, icon, model)
 
-    override fun renderLoading(view: View, title: String, icon: Int) = renderGaugeLoading(view, title)
+    override fun renderLoading(view: View, title: String, icon: Int) = renderGaugeLoading(view, title, icon)
 }
 
 object NumberTileRenderer : TileRenderer {
@@ -76,7 +77,7 @@ object TallTileRenderer : TileRenderer {
     override val layout = R.layout.dashboard_widget_tall_tile
 
     override fun render(view: View, title: String, icon: Int, model: TileModel) {
-        renderGauge(view, title, model, GAUGE_VALUE_SIZE_SP, GAUGE_LONG_VALUE_SIZE_SP)
+        renderGauge(view, title, icon, model)
         renderStatus(view, model.status, model.trailing)
         renderChart(view.findViewById(R.id.tile_chart), model.chart?.takeIf { isBar(it) }, 0f)
         renderChart(view.findViewById(R.id.tile_large_chart), model.largeChart, LARGE_CHART_HEIGHT_DP)
@@ -85,7 +86,7 @@ object TallTileRenderer : TileRenderer {
     }
 
     override fun renderLoading(view: View, title: String, icon: Int) {
-        renderGaugeLoading(view, title)
+        renderGaugeLoading(view, title, icon)
         for (id in intArrayOf(R.id.tile_status, R.id.tile_chart, R.id.tile_large_chart, R.id.tile_axis, R.id.tile_legend)) {
             view.findViewById<View>(id).visibility = View.GONE
         }
@@ -201,8 +202,6 @@ object LargeTileRenderer : TileRenderer {
         }
     }
 
-    private const val GAUGE_VALUE_SIZE_SP = 26f
-    private const val GAUGE_LONG_VALUE_SIZE_SP = 24f
     private const val LEGEND_COLUMNS = 2
     private const val BARS_HEIGHT_DP = 44f
     private const val STACKED_HEIGHT_DP = 70f
@@ -210,8 +209,11 @@ object LargeTileRenderer : TileRenderer {
     private const val LINE_HEIGHT_DP = 80f
 }
 
-private const val GAUGE_VALUE_SIZE_SP = 28f
-private const val GAUGE_LONG_VALUE_SIZE_SP = 26f
+private const val GAUGE_VALUE_SIZE_SP = 26f
+private const val GAUGE_LONG_VALUE_SIZE_SP = 24f
+private const val GAUGE_WIDTH_DP = 104f
+private const val HEADER_TEXT_SIZE_SP = 13f
+private const val HEADER_MIN_TEXT_SIZE_SP = 12f
 private const val BAR_HEIGHT_DP = 6f
 private const val ZONE_BAR_HEIGHT_DP = 10f
 private const val GAUGE_LONG_VALUE_LENGTH = 5
@@ -219,9 +221,15 @@ private const val GAUGE_LONG_VALUE_LENGTH = 5
 private fun isBar(chart: MiniChart) =
     chart is MiniChart.Progress || chart is MiniChart.Composition || chart is MiniChart.ZoneBar
 
-private fun renderGauge(view: View, title: String, model: TileModel, valueSizeSp: Float, longValueSizeSp: Float) {
-    view.findViewById<TextView>(R.id.gauge_label).text = title
-    renderArc(view, model, valueSizeSp, longValueSizeSp)
+private fun renderGauge(view: View, title: String, icon: Int, model: TileModel) {
+    renderHeader(view, title, icon)
+    sizeGauge(view)
+    renderArc(view, model, GAUGE_VALUE_SIZE_SP, GAUGE_LONG_VALUE_SIZE_SP)
+}
+
+private fun sizeGauge(view: View) {
+    view.findViewById<ArcGaugeView>(R.id.gauge_bar).maxGaugeWidth =
+        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, GAUGE_WIDTH_DP, view.resources.displayMetrics).roundToInt()
 }
 
 private fun renderArc(view: View, model: TileModel, valueSizeSp: Float, longValueSizeSp: Float) {
@@ -238,14 +246,26 @@ private fun renderArc(view: View, model: TileModel, valueSizeSp: Float, longValu
     }
 }
 
-private fun renderGaugeLoading(view: View, title: String) {
-    view.findViewById<TextView>(R.id.gauge_label).text = title
+private fun renderGaugeLoading(view: View, title: String, icon: Int) {
+    renderHeader(view, title, icon)
+    sizeGauge(view)
     view.findViewById<TextView>(R.id.gauge_value).text = ""
     view.findViewById<ArcGaugeView>(R.id.gauge_bar).setProgress(0, -1f)
 }
 
+/**
+ * Shows the icon and the full widget name, shrunk from 13 to 12sp rather than cut when it is too long.
+ */
 internal fun renderHeader(view: View, title: String, icon: Int) {
-    view.findViewById<TextView>(R.id.tile_label).text = title
+    val label = view.findViewById<TextView>(R.id.tile_label)
+    label.ellipsize = null
+    label.text = title
+    label.setTextSize(TypedValue.COMPLEX_UNIT_SP, HEADER_TEXT_SIZE_SP)
+    label.doOnLayout {
+        if (label.paint.measureText(title) > label.width - label.paddingStart - label.paddingEnd) {
+            label.setTextSize(TypedValue.COMPLEX_UNIT_SP, HEADER_MIN_TEXT_SIZE_SP)
+        }
+    }
     view.findViewById<ImageView>(R.id.tile_icon).setImageResource(icon)
 }
 

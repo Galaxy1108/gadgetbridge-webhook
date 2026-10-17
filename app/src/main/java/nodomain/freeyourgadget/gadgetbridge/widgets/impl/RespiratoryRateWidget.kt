@@ -18,7 +18,6 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
@@ -47,9 +46,6 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
 
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsRespiratoryRate(device)
-
-    override fun labelFor(variant: WidgetVariant, config: WidgetConfig): Int =
-        if (variant.id == WidgetVariant.NUMBER.id || variant.id == WidgetVariant.WIDE.id) R.string.widget_respiration else label
 
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         val samples = mutableListOf<RateSample>()

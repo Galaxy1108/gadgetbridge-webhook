@@ -31,7 +31,7 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
 
     override val id = "sleepscore"
     override val label = R.string.sleep_score
-    override val icon = R.drawable.ic_star_gray
+    override val icon = R.drawable.ic_widget_sleep_score
     override val chartTab = "sleep"
 
     override fun isSupportedBy(device: GBDevice): Boolean =

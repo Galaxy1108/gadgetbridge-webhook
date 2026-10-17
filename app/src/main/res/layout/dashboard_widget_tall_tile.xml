@@ -9,10 +9,13 @@
     android:padding="12dp"
     tools:context=".widgets.impl.MetricWidget">
 
+    <include layout="@layout/dashboard_widget_header" />
+
     <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.ArcGaugeView
         android:id="@+id/gauge_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:importantForAccessibility="no">
 
         <TextView
@@ -28,15 +31,6 @@
 
     </nodomain.freeyourgadget.gadgetbridge.activities.dashboard.ArcGaugeView>
 
-    <TextView
-        android:id="@+id/gauge_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:importantForAccessibility="no"
-        android:maxLines="1"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:textSize="14sp" />
 
     <Space
         android:layout_width="match_parent"
