@@ -379,7 +379,7 @@
     <string name="miband2_prefs_timeformat">Mi2: Tidsformat</string>
     <string name="mi2_fw_installhandler_fw53_hint">Du må installere versjon %1$s før du installerer denne firmware!</string>
     <string name="mi2_enable_text_notifications">Tekstvarsler</string>
-    <string name="mi2_enable_text_notifications_summary"><![CDATA[Krever firmware >= 1.0.1.28 og Mili_pro.ft* installert.]]></string>
+    <string name="mi2_enable_text_notifications_summary"><![CDATA[Krever firmware &gt;= 1.0.1.28 og Mili_pro.ft* installert.]]></string>
     <string name="off">Av</string>
     <string name="mi2_dnd_off">Av</string>
     <string name="mi2_dnd_automatic">Automatisk (søvndeteksjon)</string>
@@ -1845,7 +1845,7 @@
     <string name="prefs_relaxation_reminder_description">Vibrer båndet for å varsle deg hvis stressverdien er høyere enn 80</string>
     <string name="prefs_spo2_monitoring_title">Blodoksygenovervåking</string>
     <string name="prefs_spo2_monitoring_description">Automatisk overvåk blodoksygennivåer gjennom dagen</string>
-    <string name="prefs_spo2_alert_threshold">SPO2-alarmterskel</string>
+    <string name="prefs_spo2_alert_threshold">SpO2-alarmgrense</string>
     <string name="prefs_activity_monitoring_title">Aktivitetsmonitorering</string>
     <string name="prefs_activity_monitoring_description">Automatisk øk hjertefrekvensdeteksjonsfrekvensen når båndet oppdager fysisk trening, for å øke nøyaktigheten i hjertefrekvensfangst.</string>
     <string name="notif_battery_full_title">Gadgetbatteri fullt!</string>
@@ -1993,7 +1993,7 @@
     <string name="serbian_latin">Serbisk (latin)</string>
     <string name="catalan">Katalansk</string>
     <string name="finnish">Finsk</string>
-    <string name="bahasa_melayu">Bahasa Melayu</string>
+    <string name="bahasa_melayu">Malayisk (Bahasa Melayu)</string>
     <string name="activity_prefs_goals">Mål</string>
     <string name="activity_prefs_date_birth">Fødselsdato</string>
     <string name="activity_prefs_height_inches">Høyde i tommer</string>
