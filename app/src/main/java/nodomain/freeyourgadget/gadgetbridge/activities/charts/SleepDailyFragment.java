@@ -373,9 +373,18 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
     }
 
     private void updateStagesChart(final MyChartsData mcd) {
-        final StageSamples samples = mcd.getStageSamples();
+        final StageSamples activitySamples = mcd.getStageSamples();
         final SleepStagesChartData.Overlay overlay = mcd.getOverlay();
         final boolean legacy = DAY_CHART_LEGACY.equals(GBApplication.getPrefs().getString(PREF_DAY_CHART, DAY_CHART_HYPNOGRAM));
+        final StageSamples samples;
+        if (legacy) {
+            samples = activitySamples;
+        } else {
+            final SleepStagesChartData.SessionSamples stages = SleepStagesChartData.sessionSamples(
+                    mcd.getPieData().getSleepSessions(), this::getIndexOfActivity, getIndexOfActivity(ActivityKind.ACTIVITY));
+            samples = new StageSamples(stages.getSeconds(), stages.getStages(), new double[stages.getSeconds().length],
+                    activitySamples.hrSeconds, activitySamples.heartRates, activitySamples.hrMaxGapSeconds);
+        }
         final ChartSpec baseSpec = legacy
                 ? stagesSpec(samples.withHeartRate(new long[0], new int[0]), 0, false, 0, 0)
                 : hypnogramSpec(samples);
