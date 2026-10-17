@@ -17,7 +17,8 @@ interface SleepSessionProvider {
 
     companion object {
         /**
-         * Sanitizes a list of sleep stages, into a known sleep session start /end times.
+         * Sanitizes a list of sleep stages, into a known sleep session start /end times. Returns null
+         * if the session ends at or before its start.
          * <p>
          * Devices sometimes report overlapping/duplicate stage samples (e.g. a stage re-sent
          * with a slightly different start after a later sync). This function will:
@@ -33,7 +34,11 @@ interface SleepSessionProvider {
             stages: List<SleepStage>,
             startTime: Long,
             endTime: Long
-        ): SleepSession {
+        ): SleepSession? {
+            if (endTime <= startTime) {
+                return null
+            }
+
             val sanitized = ArrayList<SleepStage>(stages.size)
 
             val firstStageTimestamp = stages.firstOrNull()?.startTime
@@ -60,7 +65,7 @@ interface SleepSessionProvider {
                     sanitized.add(SleepStage(kind, start, end))
                 }
             }
-            if (stages.isEmpty()) {
+            if (sanitized.isEmpty()) {
                 // No stages sent by the watch, or none usable - add a single stage for the entire duration
                 sanitized.add(SleepStage(ActivityKind.LIGHT_SLEEP, startTime, endTime))
             }

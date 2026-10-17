@@ -47,13 +47,11 @@ class CmfSleepSessionProvider(
                 )
             }
 
-            sleepSessions.add(
-                SleepSessionProvider.sanitizeStages(
-                    unsanitizedStages,
-                    sessionSample.timestamp,
-                    sessionSample.wakeupTime!!
-                )
-            )
+            SleepSessionProvider.sanitizeStages(
+                unsanitizedStages,
+                sessionSample.timestamp,
+                sessionSample.wakeupTime!!
+            )?.let { sleepSessions.add(it) }
         }
 
         return sleepSessions

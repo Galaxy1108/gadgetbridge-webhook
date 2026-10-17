@@ -29,10 +29,6 @@ class HuaweiSleepSessionProvider(
         for (statsSample in sleepStatsSamples) {
             val startMillis = statsSample.timestamp
             val endMillis = statsSample.wakeupTime
-            if (endMillis <= startMillis) {
-                continue
-            }
-
             val stageSamples = sleepStagesSampleProvider.getAllSamples(startMillis, endMillis)
 
             val unsanitizedStages = stageSamples.map {
@@ -43,13 +39,11 @@ class HuaweiSleepSessionProvider(
                 )
             }
 
-            sleepSessions.add(
-                SleepSessionProvider.sanitizeStages(
-                    unsanitizedStages,
-                    startMillis,
-                    endMillis
-                )
-            )
+            SleepSessionProvider.sanitizeStages(
+                unsanitizedStages,
+                startMillis,
+                endMillis
+            )?.let { sleepSessions.add(it) }
         }
 
         return sleepSessions
