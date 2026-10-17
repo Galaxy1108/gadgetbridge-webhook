@@ -734,7 +734,7 @@ public abstract class AbstractSampleProvider<T extends AbstractActivitySample> i
                 }
             }
         } else {
-            for (int ts = timestamp_from; ts <= timestamp_to; ts += 60) {
+            for (int ts = firstWholeMinute(timestamp_from); ts <= timestamp_to; ts += 60) {
                 final T sample = createDummySample(ts);
                 final ActivityKind sleepType = sleepKindAt(sleepSessions, ts * 1000L);
                 if (sleepType != null) {
@@ -757,7 +757,7 @@ public abstract class AbstractSampleProvider<T extends AbstractActivitySample> i
                 timestamp_to
         );
 
-        for (int ts = timestamp_from; ts <= timestamp_to; ts += 60) {
+        for (int ts = firstWholeMinute(timestamp_from); ts <= timestamp_to; ts += 60) {
             final ActivityKind sleepKind = sleepKindAt(sleepSessions, ts * 1000L);
             if (sleepKind == null) {
                 continue;
@@ -773,6 +773,10 @@ public abstract class AbstractSampleProvider<T extends AbstractActivitySample> i
             sample.setRawKind(toRawActivityKind(sleepKind));
             sample.setRawIntensity(ActivitySample.NOT_MEASURED);
         }
+    }
+
+    private static int firstWholeMinute(final int timestamp) {
+        return (timestamp + 59) / 60 * 60;
     }
 
     @Nullable
