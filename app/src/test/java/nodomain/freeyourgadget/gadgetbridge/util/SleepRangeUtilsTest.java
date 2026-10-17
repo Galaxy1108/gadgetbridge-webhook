@@ -70,6 +70,26 @@ public class SleepRangeUtilsTest {
         }
     }
 
+
+    @Test
+    public void fixedRangesStayAdjacentAcrossDaylightSavingChanges() {
+        final java.util.TimeZone previous = java.util.TimeZone.getDefault();
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Australia/Melbourne"));
+        try {
+            for (int[] date : new int[][] {{Calendar.APRIL, 5}, {Calendar.OCTOBER, 4}}) {
+                for (SleepRangeMode mode : new SleepRangeMode[] {SleepRangeMode.NOON, SleepRangeMode.EVENING}) {
+                    final int before = anchorAt(2026, date[0], date[1] - 1, 20, 0);
+                    final int after = anchorAt(2026, date[0], date[1], 20, 0);
+                    final int[] first = SleepRangeUtils.getSleepRange(before, mode);
+                    final int[] next = SleepRangeUtils.getSleepRange(after, mode);
+                    assertEquals(mode + " " + date[0], first[1], next[0]);
+                }
+            }
+        } finally {
+            java.util.TimeZone.setDefault(previous);
+        }
+    }
+
     @SuppressWarnings("SameParameterValue")
     private static int anchorAt(int year, int month, int day, int hour, int minute) {
         final Calendar calendar = new GregorianCalendar(year, month, day, hour, minute, 0);

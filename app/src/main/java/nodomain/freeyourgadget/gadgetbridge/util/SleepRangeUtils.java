@@ -30,7 +30,7 @@ public final class SleepRangeUtils {
     }
 
     /**
-     * Returns the 24-hour sleep window {@code {from, to}} (epoch seconds, to exclusive) ending at
+     * Returns the sleep window (one local day for fixed ranges, 24 hours for rolling) {@code {from, to}} (epoch seconds, to exclusive) ending at
      * anchorTs, per the current {@code chart_sleep_range_mode} preference.
      */
     public static int[] getSleepRange(final int anchorTs) {
@@ -43,7 +43,13 @@ public final class SleepRangeUtils {
             case EVENING -> snapToHour(anchorTs, 18);
             default -> anchorTs;
         };
-        return new int[]{to - 24 * 60 * 60, to};
+        if (mode == SleepRangeMode.ROLLING_24H) {
+            return new int[]{to - 24 * 60 * 60, to};
+        }
+        final Calendar start = new GregorianCalendar();
+        start.setTimeInMillis(to * 1000L);
+        start.add(Calendar.DATE, -1);
+        return new int[]{(int) (start.getTimeInMillis() / 1000L), to};
     }
 
     private static int snapToHour(final int ts, final int hourOfDay) {
