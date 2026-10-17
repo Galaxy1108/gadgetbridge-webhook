@@ -33,6 +33,7 @@ open class GloryFitActivitySampleProvider(private val device: GBDevice, private 
 
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(GloryFitActivitySampleProvider::class.java)
+        private const val SLEEP_LOOK_BACK_SECONDS = 12 * 60 * 60
     }
 
     private val stepsProvider: GloryFitStepsSampleProvider = GloryFitStepsSampleProvider(device, session)
@@ -143,7 +144,7 @@ open class GloryFitActivitySampleProvider(private val device: GBDevice, private 
 
     fun overlaySleep(samples: MutableList<GenericActivitySample>, timestampFrom: Int, timestampTo: Int) {
         val sleepSessionProvider = GloryFitSleepSessionProvider(device, session)
-        val sleepSessions = sleepSessionProvider.getSleepSessions(timestampFrom, timestampTo)
+        val sleepSessions = sleepSessionProvider.getSleepSessions(timestampFrom - SLEEP_LOOK_BACK_SECONDS, timestampTo)
 
         if (sleepSessions.isEmpty()) {
             return
