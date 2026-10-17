@@ -61,14 +61,14 @@ class HuaweiSleepSessionProvider(
         private const val LOOK_BACK_SECONDS: Int = 12 * 60 * 60
 
         @JvmStatic
-        fun sleepStageToActivityKind(stage: Int): ActivityKind? {
+        fun sleepStageToActivityKind(stage: Int): ActivityKind {
             return when (stage) {
                 1 -> ActivityKind.LIGHT_SLEEP
                 2 -> ActivityKind.REM_SLEEP
                 3 -> ActivityKind.DEEP_SLEEP
                 4 -> ActivityKind.AWAKE_SLEEP
                 5 -> ActivityKind.LIGHT_SLEEP // Nap
-                else -> null
+                else -> ActivityKind.UNKNOWN
             }
         }
     }
