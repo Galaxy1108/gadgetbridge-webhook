@@ -40,6 +40,8 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.ComputedHrvSummarySampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.DefaultSleepSessionProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.FallbackSleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.HuaweiStressSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.InstallHandler;
 import nodomain.freeyourgadget.gadgetbridge.devices.SampleProvider;
@@ -424,7 +426,11 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
     @NonNull
     @Override
     public SleepSessionProvider getSleepSessionProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
-        return new HuaweiSleepSessionProvider(device, session);
+        return new FallbackSleepSessionProvider(
+            new HuaweiSleepSessionProvider(device, session),
+            // For non-TruSleep watches
+            new DefaultSleepSessionProvider(device, session)
+        );
     }
 
     @Override
