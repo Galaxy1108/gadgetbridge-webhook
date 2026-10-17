@@ -39,6 +39,7 @@ import nodomain.freeyourgadget.gadgetbridge.entities.XiaomiActivitySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.XiaomiSleepStageSample;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
+import nodomain.freeyourgadget.gadgetbridge.util.RangeMap;
 
 public class XiaomiSampleProvider extends AbstractSampleProvider<XiaomiActivitySample> {
 

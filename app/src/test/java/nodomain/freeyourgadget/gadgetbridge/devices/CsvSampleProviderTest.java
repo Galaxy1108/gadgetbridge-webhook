@@ -70,10 +70,10 @@ public class CsvSampleProviderTest {
                 """
                         # a fixture describing one short session
                         timestamp,kind
-                        
+
                         # the session itself
                         1000,LIGHT_SLEEP
-                        
+
                         """
         );
 
