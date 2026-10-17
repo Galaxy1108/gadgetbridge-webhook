@@ -124,8 +124,8 @@ public class SleepPeriodFragment extends SleepFragment<SleepPeriodFragment.MyCha
         final Calendar firstDay = (Calendar) day.clone();
         firstDay.add(Calendar.DATE, -TOTAL_DAYS + 1);
 
-        final int[] firstRange = SleepRangeUtils.getSleepRange((int) (firstDay.getTimeInMillis() / 1000));
-        final int[] lastRange = SleepRangeUtils.getSleepRange((int) (day.getTimeInMillis() / 1000));
+        final int[] firstRange = SleepRangeUtils.getSleepRange(firstDay);
+        final int[] lastRange = SleepRangeUtils.getSleepRange(day);
 
         final List<SleepSession> allSessions = device.getDeviceCoordinator()
                 .getSleepSessionProvider(device, db.getDaoSession())
@@ -134,7 +134,7 @@ public class SleepPeriodFragment extends SleepFragment<SleepPeriodFragment.MyCha
         final List<List<SleepSession>> result = new ArrayList<>(TOTAL_DAYS);
         final Calendar cursor = (Calendar) firstDay.clone();
         for (int counter = 0; counter < TOTAL_DAYS; counter++) {
-            final int[] range = SleepRangeUtils.getSleepRange((int) (cursor.getTimeInMillis() / 1000));
+            final int[] range = SleepRangeUtils.getSleepRange(cursor);
             final List<SleepSession> daySessions = new ArrayList<>();
             for (SleepSession session : allSessions) {
                 final long startSeconds = session.getStartTime() / 1000L;

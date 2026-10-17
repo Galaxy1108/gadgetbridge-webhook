@@ -132,7 +132,7 @@ public class DailyTotals implements Serializable {
     }
 
     private static long[] getTotalsSleepForDay(final DBHandler db, final Calendar day, final GBDevice device) {
-        final int[] range = SleepRangeUtils.getSleepRange((int) (day.getTimeInMillis() / 1000));
+        final int[] range = SleepRangeUtils.getSleepRange(day);
         final SleepSessionProvider provider = device.getDeviceCoordinator().getSleepSessionProvider(device, db.getDaoSession());
 
         long totalSecondsLightSleep = 0;

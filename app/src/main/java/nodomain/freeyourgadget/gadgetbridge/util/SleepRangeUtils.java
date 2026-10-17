@@ -38,27 +38,29 @@ public final class SleepRangeUtils {
     }
 
     public static int[] getSleepRange(final int anchorTs, final SleepRangeMode mode) {
-        final int to = switch (mode) {
-            case NOON -> snapToHour(anchorTs, 12);
-            case EVENING -> snapToHour(anchorTs, 18);
-            default -> anchorTs;
-        };
+        final Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(anchorTs * 1000L);
+        return getSleepRange(calendar, mode);
+    }
+
+    public static int[] getSleepRange(final Calendar anchor) {
+        return getSleepRange(anchor, getMode());
+    }
+
+    public static int[] getSleepRange(final Calendar anchor, final SleepRangeMode mode) {
+        final Calendar end = (Calendar) anchor.clone();
+        if (mode != SleepRangeMode.ROLLING_24H) {
+            end.set(Calendar.HOUR_OF_DAY, mode == SleepRangeMode.NOON ? 12 : 18);
+            end.set(Calendar.MINUTE, 0);
+            end.set(Calendar.SECOND, 0);
+            end.set(Calendar.MILLISECOND, 0);
+        }
+        final int to = (int) (end.getTimeInMillis() / 1000L);
         if (mode == SleepRangeMode.ROLLING_24H) {
             return new int[]{to - 24 * 60 * 60, to};
         }
-        final Calendar start = new GregorianCalendar();
-        start.setTimeInMillis(to * 1000L);
+        final Calendar start = (Calendar) end.clone();
         start.add(Calendar.DATE, -1);
         return new int[]{(int) (start.getTimeInMillis() / 1000L), to};
-    }
-
-    private static int snapToHour(final int ts, final int hourOfDay) {
-        final Calendar calendar = new GregorianCalendar();
-        calendar.setTimeInMillis(ts * 1000L);
-        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return (int) (calendar.getTimeInMillis() / 1000L);
     }
 }
