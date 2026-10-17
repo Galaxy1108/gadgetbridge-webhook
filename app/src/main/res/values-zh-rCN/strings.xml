@@ -5577,4 +5577,7 @@
     <string name="pref_title_chart_sleep_day_chart">睡眠图表</string>
     <string name="pref_chart_sleep_day_chart_hypnogram">睡眠图</string>
     <string name="pref_chart_sleep_day_chart_legacy">旧式睡眠图</string>
+    <string name="workout_upload_toast_already_uploaded">%1$s 已经有这个锻炼</string>
+    <string name="workout_upload_toast_updated">于 %1$s 更新了该活动</string>
+    <string name="workout_upload_toast_no_payload">无法构建文件来上传到 %1$s</string>
 </resources>
