@@ -99,6 +99,9 @@ public class ControlCenterv2 extends AppCompatActivity
     private BarShade.ScrollListener barShades;
     private View toolbarShade;
 
+    private boolean dashboardTabVisible = false;
+    private boolean workoutsTabVisible = false;
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -122,6 +125,7 @@ public class ControlCenterv2 extends AppCompatActivity
                     if (dev != null && !dev.isBusy()) {
                         swipeLayout.setRefreshing(false);
                     }
+                    determineTabVisibility();
                     break;
             }
         }
@@ -166,6 +170,23 @@ public class ControlCenterv2 extends AppCompatActivity
         }
     }
 
+    private void determineTabVisibility() {
+        // Determine availability of device with activity tracking and/or recording functionality
+        List<GBDevice> devices = GBApplication.app().getDeviceManager().getDevices();
+        for (GBDevice dev : devices) {
+            if (dev.getDeviceCoordinator().supportsActivityTracking(dev)) {
+                dashboardTabVisible = true;
+            }
+            if (dev.getDeviceCoordinator().supportsRecordedActivities(dev)) {
+                workoutsTabVisible = true;
+            }
+            if (dashboardTabVisible && workoutsTabVisible) break;
+        }
+        BottomNavigationView navigationView = findViewById(R.id.bottom_nav_bar);
+        navigationView.getMenu().getItem(0).setVisible(dashboardTabVisible);
+        navigationView.getMenu().getItem(1).setVisible(workoutsTabVisible);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // installSplashScreen must run before init sets the real theme
@@ -175,16 +196,8 @@ public class ControlCenterv2 extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         GBPrefs prefs = GBApplication.getPrefs();
+        determineTabVisibility();
 
-        // Determine availability of device with activity tracking functionality
-        boolean activityTrackerAvailable = false;
-        List<GBDevice> devices = GBApplication.app().getDeviceManager().getDevices();
-        for (GBDevice dev : devices) {
-            if (dev.getDeviceCoordinator().supportsActivityTracking(dev)) {
-                activityTrackerAvailable = true;
-                break;
-            }
-        }
         if (savedInstanceState != null) {
             if (savedInstanceState.getBoolean("cl")) {
                 GBChangeLog cl = GBChangeLog.createChangeLog(this);
@@ -212,19 +225,28 @@ public class ControlCenterv2 extends AppCompatActivity
 
         // Initialize bottom navigation
         BottomNavigationView navigationView = findViewById(R.id.bottom_nav_bar);
-        if (activityTrackerAvailable && prefs.getBoolean("display_bottom_navigation_bar", true)) {
+        if ((dashboardTabVisible || workoutsTabVisible) && prefs.getBoolean("display_bottom_navigation_bar", true)) {
             navigationView.setVisibility(View.VISIBLE);
         } else {
             navigationView.setVisibility(View.GONE);
         }
         navigationView.setOnItemSelectedListener(menuItem -> {
+            final int workoutsItem = dashboardTabVisible ? 1 : 0;
+            int devicesItem = 2;
+            if (dashboardTabVisible && !workoutsTabVisible) {
+                devicesItem = 1;
+            } else if (!dashboardTabVisible && workoutsTabVisible) {
+                devicesItem = 1;
+            } else if (!dashboardTabVisible) {
+                devicesItem = 0;
+            }
             final int itemId = menuItem.getItemId();
             if (itemId == R.id.bottom_nav_dashboard) {
                 viewPager.setCurrentItem(0, true);
             } else if (itemId == R.id.bottom_nav_workouts) {
-                viewPager.setCurrentItem(1, true);
+                viewPager.setCurrentItem(workoutsItem, true);
             } else if (itemId == R.id.bottom_nav_devices) {
-                viewPager.setCurrentItem(2, true);
+                viewPager.setCurrentItem(devicesItem, true);
             }
             return true;
         });
@@ -274,9 +296,15 @@ public class ControlCenterv2 extends AppCompatActivity
         viewPager = findViewById(R.id.dashboard_viewpager);
         pagerAdapter = new MainFragmentsPagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
-        if (!prefs.getBoolean("dashboard_as_default_view", true) || !activityTrackerAvailable) {
-            viewPager.setCurrentItem(1, false);
-            navigationView.getMenu().getItem(1).setChecked(true);
+        if (!prefs.getBoolean("dashboard_as_default_view", true)) {
+            int devicesTabItem = 2;
+            if (!dashboardTabVisible && workoutsTabVisible) {
+                devicesTabItem = 1;
+            } else if (dashboardTabVisible && !workoutsTabVisible) {
+                devicesTabItem = 1;
+            }
+            viewPager.setCurrentItem(devicesTabItem, false);
+            navigationView.getMenu().getItem(devicesTabItem).setChecked(true);
         }
         // A page's fragment, and its view, are created after the page is selected
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
@@ -302,6 +330,10 @@ public class ControlCenterv2 extends AppCompatActivity
 
             @Override
             public void onPageSelected(int position) {
+                // Shift position past any unavailable tabs
+                if (!dashboardTabVisible) position++;
+                if (!workoutsTabVisible && position > 0) position++;
+
                 navigationView.getMenu().getItem(position).setChecked(true);
                 bindTopShade();
 
@@ -512,20 +544,23 @@ public class ControlCenterv2 extends AppCompatActivity
             super(fa);
         }
 
+        @NonNull
         @Override
         public Fragment createFragment(int position) {
-            if (position == 0) {
-                return new DashboardFragment();
-            } else if (position == 1) {
-                return new WorkoutsFragment();
-            } else {
-                return new DevicesFragment();
-            }
+            // Shift position past any unavailable tabs
+            if (!dashboardTabVisible) position++;
+            if (!workoutsTabVisible && position > 0) position++;
+
+            return switch (position) {
+                case 0 -> new DashboardFragment();
+                case 1 -> new WorkoutsFragment();
+                default -> new DevicesFragment();
+            };
         }
 
         @Override
         public int getItemCount() {
-            return 3;
+            return 1 + (dashboardTabVisible ? 1 : 0) + (workoutsTabVisible ? 1 : 0);
         }
     }
 }
