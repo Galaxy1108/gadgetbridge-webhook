@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
@@ -35,6 +36,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.SleepSession;
 
 abstract class RespiratoryRateFragment<T extends ChartsData> extends AbstractChartFragment<T> {
     protected static final Logger LOG = LoggerFactory.getLogger(RespiratoryRateFragment.class);
+    private static final int SLEEP_LOOK_BACK_SECONDS = 12 * 60 * 60;
 
     protected int CHART_TEXT_COLOR;
     protected int TEXT_COLOR;
@@ -75,9 +77,12 @@ abstract class RespiratoryRateFragment<T extends ChartsData> extends AbstractCha
             day.add(Calendar.HOUR, 0);
             startTs = (int) (day.getTimeInMillis() / 1000);
             endTs = startTs + 24 * 60 * 60 - 1;
-            List<SleepSession> sleepSessions = device.getDeviceCoordinator()
-                    .getSleepSessionProvider(device, db.getDaoSession())
-                    .getSleepSessions(startTs, endTs);
+            final List<SleepSession> sleepSessions = device.getDeviceCoordinator()
+                .getSleepSessionProvider(device, db.getDaoSession())
+                .getSleepSessions(startTs - SLEEP_LOOK_BACK_SECONDS, endTs)
+                .stream()
+                .filter(session -> session.getEndTime() > startTs * 1000L)
+                .collect(Collectors.toList());
             List<? extends RespiratoryRateSample> samples = getRespiratoryRateSamples(db, device, startTs, endTs);
             Calendar d = (Calendar) day.clone();
             daysData.add(new RespiratoryRateDay(d, samples, sleepSessions, supportsDayRespiratoryRate));
