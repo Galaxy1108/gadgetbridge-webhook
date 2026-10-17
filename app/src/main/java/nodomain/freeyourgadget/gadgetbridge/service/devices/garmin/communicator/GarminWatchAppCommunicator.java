@@ -1,5 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.communicator;
 
+import static nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSupport.calcMaxWriteChunk;
+
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.os.Handler;
@@ -93,7 +95,7 @@ public class GarminWatchAppCommunicator {
     private Consumer<Boolean> currentResultCallback;
     private byte[] currentKey;
     private byte[] currentCipher;
-    private int currentFragmentCount;
+    private int fragmentDataSize = FRAGMENT_DATA_SIZE;
 
     private final Deque<PendingMessage> pendingMessages = new ArrayDeque<>();
 
@@ -130,6 +132,12 @@ public class GarminWatchAppCommunicator {
 
         builder.notify(characteristicReceive, true);
         return true;
+    }
+
+    public synchronized void onMtuChanged(final int mtu) {
+        // The first byte of each fragment is the fragment header
+        fragmentDataSize = calcMaxWriteChunk(mtu) - 1;
+        LOG.debug("Fragment data size is {} for mtu {}", fragmentDataSize, mtu);
     }
 
     public synchronized void dispose() {
@@ -224,7 +232,6 @@ public class GarminWatchAppCommunicator {
             currentResultCallback = pending.onResult();
             currentKey = key;
             currentCipher = cipher;
-            currentFragmentCount = (cipher.length + FRAGMENT_DATA_SIZE - 1) / FRAGMENT_DATA_SIZE;
             return true;
         }
         return false;
@@ -368,17 +375,19 @@ public class GarminWatchAppCommunicator {
     }
 
     private void sendFragments() {
+        final int fragmentCount = (currentCipher.length + fragmentDataSize - 1) / fragmentDataSize;
+        LOG.debug("Sending {} bytes in {} fragments", currentCipher.length, fragmentCount);
         final TransactionBuilder builder = mSupport.createTransactionBuilder("send message fragments");
-        for (int i = 0; i < currentFragmentCount; i++) {
-            final int from = i * FRAGMENT_DATA_SIZE;
-            final int to = Math.min(from + FRAGMENT_DATA_SIZE, currentCipher.length);
+        for (int i = 0; i < fragmentCount; i++) {
+            final int from = i * fragmentDataSize;
+            final int to = Math.min(from + fragmentDataSize, currentCipher.length);
             final byte[] fragment = new byte[1 + to - from];
             fragment[0] = (byte) ((i << 4) | 0x01);
             System.arraycopy(currentCipher, from, fragment, 1, to - from);
             builder.write(characteristicSend, fragment);
         }
         final int crc = ChecksumCalculator.computeCrc(currentCipher, 0, currentCipher.length);
-        builder.write(characteristicSend, TYPE_DATA, DATA_LAST, (byte) currentFragmentCount, (byte) crc, (byte) (crc >> 8));
+        builder.write(characteristicSend, TYPE_DATA, DATA_LAST, (byte) fragmentCount, (byte) crc, (byte) (crc >> 8));
         builder.queue();
         restartTimeout();
     }
