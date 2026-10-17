@@ -90,7 +90,7 @@ public class HuamiExtendedSampleProvider extends AbstractSampleProvider<HuamiExt
         }
 
         final HuamiSleepSessionProvider sleepSessionProvider = new HuamiSleepSessionProvider(getDevice(), getSession());
-        final List<SleepSession> sleepSessions = sleepSessionProvider.getSleepSessions(timestamp_from, timestamp_to);
+        final List<SleepSession> sleepSessions = sleepSessionProvider.getNativeSleepSessions(timestamp_from - 24 * 3600, timestamp_to);
 
         if (!sleepSessions.isEmpty()) {
             // The device reports the sleep stage durations - overlay them
