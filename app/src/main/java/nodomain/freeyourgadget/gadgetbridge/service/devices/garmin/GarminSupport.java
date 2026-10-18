@@ -2040,6 +2040,13 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                                 fileDate = new Date(GarminTimeUtils.garminTimestampToJavaMillis(ts));
                             }
                         }
+                        if (fileDate == null && gdiFile != null && gdiFile.hasId()) {
+                            // The upper 32 bits of id1 are the creation time of the file
+                            final int idTimestamp = (int) (gdiFile.getId().getId1() >>> 32);
+                            if (idTimestamp != 0 && idTimestamp != -1) {
+                                fileDate = new Date(GarminTimeUtils.garminTimestampToJavaMillis(idTimestamp));
+                            }
+                        }
                         String suffix = "";
                         if(gdiFile != null && gdiFile.hasId()) {
                             suffix = new UUID(gdiFile.getId().getId1(), gdiFile.getId().getId2()).toString();
