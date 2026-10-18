@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -34,6 +36,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.app.NotificationCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -49,6 +52,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -70,8 +74,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
+import nodomain.freeyourgadget.gadgetbridge.BuildConfig;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.appmanager.config.DynamicAppConfig;
+import nodomain.freeyourgadget.gadgetbridge.activities.files.TextFileViewerActivity;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.LoyaltyCard;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.repository.WorkoutTemplateRepository;
@@ -1914,6 +1920,39 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         );
     }
 
+    private void notifyConnectIqErrorReport(final File file, final byte[] content) {
+        final String text = new String(content, StandardCharsets.UTF_8);
+        final int errorStart = text.lastIndexOf("Error: ");
+        final String error;
+        if (errorStart >= 0) {
+            final int errorEnd = text.indexOf('\n', errorStart);
+            error = text.substring(errorStart, errorEnd >= 0 ? errorEnd : text.length());
+        } else {
+            error = file.getName();
+        }
+
+        final Intent viewIntent = new Intent(getContext(), TextFileViewerActivity.class);
+        viewIntent.putExtra(TextFileViewerActivity.EXTRA_PATH, file.getAbsolutePath());
+        final PendingIntent viewPendingIntent = PendingIntent.getActivity(
+                getContext(),
+                0,
+                viewIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        final Notification notification = new NotificationCompat.Builder(getContext(), GB.NOTIFICATION_CHANNEL_ID_DEVICE_WARNINGS)
+                .setSmallIcon(R.drawable.ic_warning)
+                .setContentTitle(getContext().getString(R.string.garmin_connect_iq_error_report))
+                .setContentText(error)
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(true)
+                .setContentIntent(viewPendingIntent)
+                .addAction(0, getContext().getString(R.string.view_file), viewPendingIntent)
+                .build();
+
+        GB.notify("connect_iq_error_report_" + getDevice().getAddress(), 0, notification, getContext());
+    }
+
     @Override
     public void onHeartRateTest() {
         communicator.onHeartRateTest();
@@ -2062,6 +2101,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                         FileUtils.writeToFile(inflated, outputFile);
                         if (fileDate != null) {
                             outputFile.setLastModified(fileDate.getTime());
+                        }
+                        if (BuildConfig.DEBUG && "IQErrorReports".equals(typeName)) {
+                            notifyConnectIqErrorReport(outputFile, inflated);
                         }
                     } catch (final IOException e) {
                         LOG.error("Failed to save file", e);
