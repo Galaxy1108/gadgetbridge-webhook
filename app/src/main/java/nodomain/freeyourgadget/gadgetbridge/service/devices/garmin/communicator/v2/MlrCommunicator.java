@@ -220,6 +220,10 @@ public class MlrCommunicator {
 
         lastRcvAck = reqNum;
 
+        // Recover from a retransmission backoff
+        retransmissionTimeout = INITIAL_RETRANSMISSION_TIMEOUT;
+        maxNumUnackedSend = Math.min(maxNumUnackedSend + numAcked, INITIAL_MAX_UNACKED_SEND);
+
         // Restart retransmission timer if there are still unacked packets
         if (lastRcvAck != nextSendSeq) {
             startRetransmissionTimerLocked();
@@ -268,17 +272,15 @@ public class MlrCommunicator {
             return;
         }
 
-        // Check if we can send more packets
-        final int numSentUnacked = (nextSendSeq - lastRcvAck + MAX_SEQ_NUM + 1) % (MAX_SEQ_NUM + 1);
+        Fragment fragment;
+        while ((fragment = fragmentQueue.peek()) != null) {
+            final int numSentUnacked = (nextSendSeq - lastRcvAck + MAX_SEQ_NUM + 1) % (MAX_SEQ_NUM + 1);
+            if (numSentUnacked >= maxNumUnackedSend) {
+                LOG.debug("Cannot send more packets: {} unacked, max {}", numSentUnacked, maxNumUnackedSend);
+                return;
+            }
+            fragmentQueue.poll();
 
-        if (numSentUnacked >= maxNumUnackedSend) {
-            LOG.debug("Cannot send more packets: {} unacked, max {}", numSentUnacked, maxNumUnackedSend);
-            return;
-        }
-
-        // Send next fragment if available
-        final Fragment fragment = fragmentQueue.poll();
-        if (fragment != null) {
             // Update the fragment with the current reqNum before storing it
             final Fragment fragmentWithReqNum = new Fragment(fragment.taskName, fragment.num, fragment.data, nextRcvSeq);
             final byte[] packet = createPacket(nextRcvSeq, nextSendSeq, fragment.data);
