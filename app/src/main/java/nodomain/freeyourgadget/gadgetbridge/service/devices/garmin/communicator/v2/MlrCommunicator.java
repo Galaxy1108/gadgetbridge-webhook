@@ -29,7 +29,7 @@ public class MlrCommunicator {
     private static final int INITIAL_MAX_UNACKED_SEND = 0x20;
     private static final int MAX_RETRANSMISSION_TIMEOUT = 20000;
     private static final int INITIAL_RETRANSMISSION_TIMEOUT = 1000;
-    private static final int ACK_TIMEOUT = 250;
+    private static final int ACK_TIMEOUT = 20;
     private static final int ACK_TRIGGER_THRESHOLD = 5;
 
     private final int handle;
