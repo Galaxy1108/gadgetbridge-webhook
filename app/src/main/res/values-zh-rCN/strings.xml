@@ -5580,4 +5580,8 @@
     <string name="workout_upload_toast_already_uploaded">%1$s 已经有这个锻炼</string>
     <string name="workout_upload_toast_updated">于 %1$s 更新了该活动</string>
     <string name="workout_upload_toast_no_payload">无法构建文件来上传到 %1$s</string>
+    <string name="map_theme_dark_low_contrast">深色 （低对比度）</string>
+    <string name="map_theme_dark_title">深色模式主题</string>
+    <string name="loyalty_cards_sync_watch_request_title">自动同步</string>
+    <string name="loyalty_cards_sync_watch_request_summary">允许手表自动同步最新卡片</string>
 </resources>
