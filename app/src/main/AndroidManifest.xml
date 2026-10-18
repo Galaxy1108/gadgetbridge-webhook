@@ -846,8 +846,9 @@
             android:label="@string/pref_title_authkey"
             android:parentActivityName=".activities.discovery.DiscoveryActivityV2" />
         <activity
-            android:name=".activities.AndroidPairingActivity"
-            android:label="@string/title_activity_android_pairing" />
+            android:name=".activities.pairing.DevicePairingActivity"
+            android:label="@string/title_activity_android_pairing"
+            android:parentActivityName=".activities.discovery.DiscoveryActivityV2" />
         <activity
             android:name=".devices.banglejs.AppsManagementActivity"
             android:label="@string/title_activity_appmanager"

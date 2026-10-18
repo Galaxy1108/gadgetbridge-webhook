@@ -630,6 +630,8 @@ public class DeviceCommunicationService extends Service implements SharedPrefere
                     LOG.debug("connectToDevice - create new device support for {} ({})", deviceAddress, gbDevice.getType());
                     deviceSupport = mFactory.createDeviceSupport(gbDevice);
                     LOG.debug("connectToDevice - created {} for {}", deviceSupport != null ? deviceSupport.getClass().getSimpleName() : "(null)", deviceAddress);
+                    // The struct might still contain the device from the previous support, which stays NOT_CONNECTED
+                    registeredStruct.setDevice(gbDevice);
                     registeredStruct.setDeviceSupport(deviceSupport);
                 }
 
