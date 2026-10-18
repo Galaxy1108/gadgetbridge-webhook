@@ -235,7 +235,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         addSupportedService(CommunicatorV1.UUID_SERVICE_GARMIN_GFDI_V0);
         addSupportedService(CommunicatorV1.UUID_SERVICE_GARMIN_GFDI_V1);
         addSupportedService(CommunicatorV2.UUID_SERVICE_GARMIN_ML_GFDI);
-        addSupportedService(GarminWatchAppCommunicator.UUID_SERVICE);
+        addSupportedService(GarminWatchAppCommunicator.UUID_SERVICE_GARMIN_WATCH_APPS);
         protocolBufferHandler = new ProtocolBufferHandler(this);
         fileTransferHandler = new FileTransferHandler(this);
         filesToDownload = new LinkedList<>();
@@ -384,7 +384,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
     @Override
     public void onServicesDiscovered(final BluetoothGatt gatt) {
-        watchAppService = gatt.getService(GarminWatchAppCommunicator.UUID_SERVICE);
+        watchAppService = gatt.getService(GarminWatchAppCommunicator.UUID_SERVICE_GARMIN_WATCH_APPS);
         super.onServicesDiscovered(gatt);
     }
 

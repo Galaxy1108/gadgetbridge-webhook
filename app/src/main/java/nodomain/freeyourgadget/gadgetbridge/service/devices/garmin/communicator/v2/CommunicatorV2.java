@@ -64,8 +64,23 @@ import nodomain.freeyourgadget.gadgetbridge.util.GB;
 public class CommunicatorV2 implements ICommunicator {
     private static final Logger LOG = LoggerFactory.getLogger(CommunicatorV2.class);
 
-    public static final String BASE_UUID = "6A4E%04X-667B-11E3-949A-0800200C9A66";
-    public static final UUID UUID_SERVICE_GARMIN_ML_GFDI = UUID.fromString(String.format(BASE_UUID, 0x2800));
+    public static final UUID UUID_SERVICE_GARMIN_ML_GFDI = UUID.fromString("6a4e2800-667b-11e3-949a-0800200c9a66");
+
+    public static final UUID[] UUID_CHARACTERISITC_GARMIN_ML_RX = {
+        UUID.fromString("6a4e2810-667b-11e3-949a-0800200c9a66"),
+        UUID.fromString("6a4e2811-667b-11e3-949a-0800200c9a66"),
+        UUID.fromString("6a4e2812-667b-11e3-949a-0800200c9a66"),
+        UUID.fromString("6a4e2813-667b-11e3-949a-0800200c9a66"),
+        UUID.fromString("6a4e2814-667b-11e3-949a-0800200c9a66")
+    };
+
+    public static final UUID[] UUID_CHARACTERISITC_GARMIN_ML_TX = {
+        UUID.fromString("6a4e2820-667b-11e3-949a-0800200c9a66"),
+        UUID.fromString("6a4e2821-667b-11e3-949a-0800200c9a66"),
+        UUID.fromString("6a4e2822-667b-11e3-949a-0800200c9a66"),
+        UUID.fromString("6a4e2823-667b-11e3-949a-0800200c9a66"),
+        UUID.fromString("6a4e2824-667b-11e3-949a-0800200c9a66")
+    };
 
     private static final long GADGETBRIDGE_CLIENT_ID = 2L;
 
@@ -107,9 +122,9 @@ public class CommunicatorV2 implements ICommunicator {
     public boolean initializeDevice(final TransactionBuilder builder) {
         // Iterate through the known ML characteristics until we find a known pair
         // send characteristic = read characteristic + 0x10 (eg. 2810 / 2820)
-        for (int i = 0x2810; i <= 0x2814; i++) {
-            characteristicReceive = mSupport.getCharacteristic(UUID.fromString(String.format(BASE_UUID, i)));
-            characteristicSend = mSupport.getCharacteristic(UUID.fromString(String.format(BASE_UUID, i + 0x10)));
+        for (int i = 0; i < UUID_CHARACTERISITC_GARMIN_ML_RX.length; i++) {
+            characteristicReceive = mSupport.getCharacteristic(UUID_CHARACTERISITC_GARMIN_ML_RX[i]);
+            characteristicSend = mSupport.getCharacteristic(UUID_CHARACTERISITC_GARMIN_ML_TX[i]);
 
             if (characteristicSend != null && characteristicReceive != null) {
                 LOG.debug("Using characteristics receive/send = {}/{}", characteristicReceive.getUuid(), characteristicSend.getUuid());

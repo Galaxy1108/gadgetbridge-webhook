@@ -22,10 +22,7 @@
 -keepclassmembers class nodomain.freeyourgadget.gadgetbridge.model.CallSpec {
     public static *;
 }
-# Required for reflection in method GattCharacteristic.initDebugMap()
--keepclassmembers class nodomain.freeyourgadget.gadgetbridge.service.btle.GattCharacteristic {
-    public static *;
-}
+
 # Keep constructors for support classes, as they're called by reflection in DeviceSupportFactory#createServiceDeviceSupport
 -keep public class * extends nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 -keepclassmembers class * extends nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport {
