@@ -238,18 +238,21 @@ public abstract class AbstractBTLESingleDeviceSupport extends AbstractBTLEDevice
      * @param aSupportedService supported service uuid
      * @see #getCharacteristic(UUID)
      */
-    protected void addSupportedService(UUID aSupportedService) {
+    protected final void addSupportedService(UUID aSupportedService) {
+        // called in constructors -> make it final
         mSupportedServices.add(aSupportedService);
     }
 
-    protected void addSupportedProfile(AbstractBleProfile<?> profile) {
+    protected final void addSupportedProfile(AbstractBleProfile<?> profile) {
+        //called in constructors -> make it final
         mSupportedProfiles.add(profile);
     }
 
     /**
      * Subclasses should call this method to add server services they support.
      */
-    protected void addSupportedServerService(BluetoothGattService service) {
+    protected final void addSupportedServerService(BluetoothGattService service) {
+        // called in constructors -> make it final
         mSupportedServerServices.add(service);
     }
 
