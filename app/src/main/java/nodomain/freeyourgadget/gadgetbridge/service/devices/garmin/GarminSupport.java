@@ -793,9 +793,8 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 Smart.newBuilder().setInstalledAppsService(
                         GdiInstalledAppsService.InstalledAppsService.newBuilder().setDeleteAppRequest(
                                 GdiInstalledAppsService.InstalledAppsService.DeleteAppRequest.newBuilder()
-                                        .setNativeAppId(app.getNativeAppId())
-                                        .setAppType(app.getType())
                                         .setStoreAppId(app.getStoreAppId())
+                                        .setAppType(app.getType())
                         )
                 ).build());
     }
