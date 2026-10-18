@@ -40,7 +40,9 @@ class DevicePairingViewModel(
     val candidate: GBDeviceCandidate,
 ) : AndroidViewModel(application) {
     val coordinator: DeviceCoordinator = DeviceHelper.getInstance().resolveCoordinator(candidate)
-    private val device: GBDevice = DeviceHelper.getInstance().toSupportedDevice(candidate)
+    private val device: GBDevice = GBApplication.app().deviceManager.getDeviceByAddress(candidate.macAddress)
+        ?.takeIf { it.deviceCoordinator == coordinator }
+        ?: DeviceHelper.getInstance().toSupportedDevice(candidate)
 
     private val _state = MutableStateFlow(PairingState())
     val state: StateFlow<PairingState> = _state.asStateFlow()
