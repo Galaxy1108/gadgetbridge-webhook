@@ -109,7 +109,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
 
         final List<SleepSession> sleepSessions = device.getDeviceCoordinator()
                 .getSleepSessionProvider(device, db.getDaoSession())
-                .getSleepSessions(range[0], range[1]);
+                .getSleepSessionsEndingIn(range[0], range[1]);
 
         // In ROLLING_24H mode, or when there is nothing to anchor on, the chart spans the whole
         // requested range. Otherwise, it spans exactly the sessions found in that range, so the chart

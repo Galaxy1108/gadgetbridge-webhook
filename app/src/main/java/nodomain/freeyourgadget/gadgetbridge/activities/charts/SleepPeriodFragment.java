@@ -129,7 +129,7 @@ public class SleepPeriodFragment extends SleepFragment<SleepPeriodFragment.MyCha
 
         final List<SleepSession> allSessions = device.getDeviceCoordinator()
                 .getSleepSessionProvider(device, db.getDaoSession())
-                .getSleepSessions(firstRange[0], lastRange[1]);
+                .getSleepSessionsEndingIn(firstRange[0], lastRange[1]);
 
         final List<List<SleepSession>> result = new ArrayList<>(TOTAL_DAYS);
         final Calendar cursor = (Calendar) firstDay.clone();
@@ -137,8 +137,8 @@ public class SleepPeriodFragment extends SleepFragment<SleepPeriodFragment.MyCha
             final int[] range = SleepRangeUtils.getSleepRange(cursor);
             final List<SleepSession> daySessions = new ArrayList<>();
             for (SleepSession session : allSessions) {
-                final long startSeconds = session.getStartTime() / 1000L;
-                if (startSeconds >= range[0] && startSeconds < range[1]) {
+                final long endSeconds = session.getEndTime() / 1000L;
+                if (endSeconds > range[0] && endSeconds <= range[1]) {
                     daySessions.add(session);
                 }
             }
