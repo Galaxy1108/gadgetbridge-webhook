@@ -65,6 +65,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -1898,25 +1899,34 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             return;
         }
 
+        final FileTransferHandler.UploadListener listener = new FileTransferHandler.UploadListener() {
+            @Override
+            public void onProgress(final int percentage) {
+                session.progress(item, percentage);
+            }
+
+            @Override
+            public void onComplete(final boolean success) {
+                if (success) {
+                    session.installed(item);
+                } else {
+                    session.failed(item, null);
+                }
+                installItem(session, items, index + 1);
+            }
+        };
+
+        final String taskName = "upload prg " + item.getDisplayName();
+        if (communicator instanceof CommunicatorV2 communicatorV2 && mlrEnabled()
+                && getDevicePrefs().getBoolean(GarminPreferences.PREF_GARMIN_PRG_TRANSFER_MLR, false)) {
+            installPrgViaMlr(communicatorV2, bytes, taskName, listener);
+            return;
+        }
+
         LOG.debug("Uploading {} bytes for {}", bytes.length, item.getDisplayName());
         communicator.sendMessage(
-                "upload prg " + item.getDisplayName(),
-                fileTransferHandler.initiateUpload(bytes, FileType.FILETYPE.PRG, new FileTransferHandler.UploadListener() {
-                    @Override
-                    public void onProgress(final int percentage) {
-                        session.progress(item, percentage);
-                    }
-
-                    @Override
-                    public void onComplete(final boolean success) {
-                        if (success) {
-                            session.installed(item);
-                        } else {
-                            session.failed(item, null);
-                        }
-                        installItem(session, items, index + 1);
-                    }
-                }).getOutgoingMessage()
+                taskName,
+                fileTransferHandler.initiateUpload(bytes, FileType.FILETYPE.PRG, listener).getOutgoingMessage()
         );
     }
 
@@ -2149,6 +2159,148 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 transferNotification.setChunkProgress(baos.size());
             }
         });
+    }
+
+    private PendingItemPush pendingItemPush;
+
+    private record PendingItemPush(CommunicatorV2 communicatorV2,
+                                   byte[] compressed,
+                                   String taskName,
+                                   FileTransferHandler.UploadListener listener) {
+    }
+
+    /**
+     * Upload a PRG through a MLR file transfer, after a {@code PushItemRequest} reserves the transfer slot.
+     * <p>
+     * The data starts with a control message, with the token from {@code PushItemResponse}, followed by the PRG,
+     * compressed with zlib, with a 1 KB window. The vendor app uses a better compression, but the Java deflater
+     * does not support a window size different from the 32 KB default, which the watch does not accept.
+     * <p>
+     * The vendor app sends a header before the PRG:
+     * - 00:00:00:1d
+     * - the header length (u32) - 28 bytes on Fenix 3, 33 bytes on Venu 3
+     * - the store version (u32)
+     * - the 16-byte store app UUID
+     * - zero padding up to the header length.
+     * <p>
+     * The watch then reports this version and UUID. This is required for app settings to work. However, the watch
+     * only accepts the header if the store signature of the PRG is valid for the same UUID and version. Since
+     * self-signed PRG files will never have a store signature, we do not replicate the logic.
+     */
+    private void installPrgViaMlr(final CommunicatorV2 communicatorV2,
+                                  final byte[] rawPrgBytes,
+                                  final String taskName,
+                                  final FileTransferHandler.UploadListener listener) {
+        final PendingItemPush pending = pendingItemPush;
+        if (pending != null) {
+            // TODO we could have a queue
+            LOG.error("Will not {}, already pending {}", taskName, pending.taskName);
+            listener.onComplete(false);
+            return;
+        }
+        final FileType.FILETYPE prgFileType = GarminPrgFile.getFileType(rawPrgBytes);
+        if (prgFileType == null) {
+            listener.onComplete(false);
+            return;
+        }
+
+        final byte[] compressed = CompressionUtils.INSTANCE.deflateStored(rawPrgBytes, 1024);
+
+        LOG.info("{} via MLR transfer ({} bytes raw, {} bytes compressed)", taskName, rawPrgBytes.length, compressed.length);
+
+        pendingItemPush = new PendingItemPush(communicatorV2, compressed, taskName, listener);
+
+        final GdiFileSyncService.FileId fileId = GdiFileSyncService.FileId.newBuilder()
+                .setId1(-1L)
+                .setId2(new Random().nextLong())
+                .build();
+        final GdiFileSyncService.FileType fileType = GdiFileSyncService.FileType.newBuilder()
+                .setCode(0)
+                .setName(prgFileType.typeName)
+                .build();
+        final GdiFileSyncService.File file = GdiFileSyncService.File.newBuilder()
+                .setId(fileId)
+                .setType(fileType)
+                .setSize(rawPrgBytes.length)
+                .build();
+
+        sendProtobufRequest("reserve app install slot for " + taskName,
+                Smart.newBuilder().setFileSyncService(
+                        GdiFileSyncService.FileSyncService.newBuilder().setPushItemRequest(
+                                GdiFileSyncService.PushItemRequest.newBuilder()
+                                        .setFile(file)
+                                        .setUnk2(37)
+                                        .setUnk3(0)
+                                        .setUnk4(15)
+                        )
+                ).build());
+    }
+
+    public void onPushItemResponse(final GdiFileSyncService.PushItemResponse response) {
+        final PendingItemPush pending = pendingItemPush;
+        if (pending == null) {
+            LOG.warn("Got push item response, but no push is pending: {}", response);
+            return;
+        }
+        pendingItemPush = null;
+
+        final int token = response.getToken();
+        LOG.info("Got push item response token {} for {}", token, pending.taskName());
+
+        pending.communicatorV2().startTransfer(new CommunicatorV2.ServiceCallback() {
+            private CommunicatorV2.ServiceWriter writer;
+            private boolean dataQueued = false;
+            private boolean fullySent = false;
+            private long totalAckedBytes = 0;
+            private int lastPercentage = -1;
+
+            @Override
+            public void onConnect(final CommunicatorV2.ServiceWriter writer) {
+                this.writer = writer;
+
+                final ByteBuffer ctrl = ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN);
+                ctrl.put((byte) 0x00);
+                ctrl.put((byte) 0x01);
+                ctrl.putShort((short) token);
+                ctrl.put((byte) 0x00);
+                ctrl.put((byte) 0x00);
+
+                writer.write(pending.taskName(), ctrl.array());
+            }
+
+            @Override
+            public void onMessage(final byte[] value) {
+                LOG.debug("PRG install transfer message ({} bytes): {}", value.length, GB.hexdump(value));
+                if (dataQueued) {
+                    return;
+                }
+                if (value.length == 0 || value[0] != 0) {
+                    LOG.warn("Watch rejected the transfer for {}", pending.taskName());
+                    writer.close();
+                    return;
+                }
+                dataQueued = true;
+                writer.setAckListener((ackedBytes, allAcked) -> {
+                    totalAckedBytes += ackedBytes;
+                    final int percentage = (int) (100L * totalAckedBytes / pending.compressed().length);
+                    if (percentage != lastPercentage) {
+                        lastPercentage = percentage;
+                        pending.listener().onProgress(Math.min(percentage, 100));
+                    }
+                    if (allAcked) {
+                        fullySent = true;
+                        writer.close();
+                    }
+                });
+                writer.write(pending.taskName(), pending.compressed());
+            }
+
+            @Override
+            public void onClose() {
+                LOG.info("PRG file transfer for {} closed, fully sent = {}", pending.taskName(), fullySent);
+                pending.listener().onComplete(fullySent);
+            }
+        }, true);
     }
 
     @Override
