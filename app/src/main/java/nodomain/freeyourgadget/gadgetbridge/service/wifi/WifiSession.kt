@@ -128,9 +128,11 @@ abstract class WifiSession<C : Closeable, S : Enum<S>>(
      * [release] call.
      */
     fun acquireIfOpen(): C? {
-        val current = connection ?: return null
-        addRef()
-        return current
+        synchronized(refLock) {
+            val current = connection ?: return null
+            addRef()
+            return current
+        }
     }
 
     fun release() {
@@ -235,7 +237,7 @@ abstract class WifiSession<C : Closeable, S : Enum<S>>(
                 state,
                 e
             )
-            teardown()
+            teardown(detachConnection())
             if (e is InterruptedException || Thread.interrupted()) {
                 throw IOException(context.getString(R.string.wifi_ftp_error_closed), e)
             }
@@ -258,34 +260,42 @@ abstract class WifiSession<C : Closeable, S : Enum<S>>(
             cancelIdleTeardown()
         }
         synchronized(connectionLock) {
-            teardown()
+            teardown(detachConnection())
         }
     }
 
     private fun closeIfIdle() {
-        synchronized(refLock) {
-            if (refCount > 0) {
-                return
-            }
-        }
         synchronized(connectionLock) {
-            if (connection != null) {
-                LOG.info("Closing idle session for {}", device.address)
-                teardown()
-            }
+            // Check the reference count and detach the connection in one refLock block, so that
+            // acquireIfOpen cannot get a connection that is closed
+            val idle = synchronized(refLock) {
+                if (refCount > 0) {
+                    return
+                }
+                detachConnection()
+            } ?: return
+            LOG.info("Closing idle session for {}", device.address)
+            teardown(idle)
         }
     }
 
-    private fun teardown() {
+    private fun detachConnection(): C? {
+        synchronized(refLock) {
+            val current = connection
+            connection = null
+            return current
+        }
+    }
+
+    private fun teardown(current: C?) {
         if (state != stoppedState) {
             LOG.info("Stopping session for {} in state {}", device.address, state)
         }
         try {
-            connection?.close()
+            current?.close()
         } catch (e: IOException) {
             LOG.warn("Failed to close the connection to {}", device.address, e)
         }
-        connection = null
         if (state != stoppedState) {
             shutdown()
         }
