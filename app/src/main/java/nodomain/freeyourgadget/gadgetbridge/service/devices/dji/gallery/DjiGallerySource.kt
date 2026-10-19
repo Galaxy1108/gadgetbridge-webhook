@@ -2,10 +2,12 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.dji.gallery
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import nodomain.freeyourgadget.gadgetbridge.kaitai.DumlCamera
 import nodomain.freeyourgadget.gadgetbridge.kaitai.DumlGeneral
@@ -105,19 +107,20 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
                         DjiFileCommands.listRequest(id, cursor, filter)
                     )
                 )
-                val received = withTimeoutOrNull(TRANSFER_TIMEOUT_MS.milliseconds) { end.await() } != null
-                try {
-                    channel.request(
-                        DumlAddress.CAMERA,
-                        DumlCmdSet.GENERAL,
-                        GeneralCmd.FILE_TRANSFER,
-                        DjiFileCommands.transferAck(id)
-                    )
-                } catch (e: IOException) {
-                    LOG.warn("No reply to the transfer ack of transfer {}", id, e)
-                }
-                received
+                withTimeoutOrNull(TRANSFER_TIMEOUT_MS.milliseconds) { end.await() } != null
             } finally {
+                withContext(NonCancellable) {
+                    try {
+                        channel.request(
+                            DumlAddress.CAMERA,
+                            DumlCmdSet.GENERAL,
+                            GeneralCmd.FILE_TRANSFER,
+                            DjiFileCommands.transferAck(id)
+                        )
+                    } catch (e: IOException) {
+                        LOG.warn("No reply to the transfer ack of transfer {}", id, e)
+                    }
+                }
                 channel.removeRequestListener(listener)
             }
             if (!complete) {
