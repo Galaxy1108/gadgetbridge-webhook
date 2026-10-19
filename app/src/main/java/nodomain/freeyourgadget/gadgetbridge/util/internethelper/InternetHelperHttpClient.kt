@@ -74,11 +74,20 @@ object InternetHelperHttpClient {
         timeoutMs: Long,
     ): InternetHelperHttpResponse {
         val latch = CountDownLatch(1)
+        val lock = Any()
+        var abandoned = false
         var result: HttpResponse? = null
         var error: String? = null
         val callback = object : IHttpCallback.Stub() {
             override fun onResponse(response: HttpResponse) {
-                result = response
+                synchronized(lock) {
+                    if (abandoned) {
+                        LOG.debug("Closing the late response to GET {}", request.url)
+                        response.body?.close()
+                        return
+                    }
+                    result = response
+                }
                 latch.countDown()
             }
 
@@ -107,8 +116,26 @@ object InternetHelperHttpClient {
             throw InternetHelperException(e.message ?: "Failed to send GET ${request.url}")
         }
 
-        if (!latch.await(timeoutMs, TimeUnit.MILLISECONDS)) {
+        fun abandon() {
+            synchronized(lock) {
+                abandoned = true
+                result?.body?.close()
+            }
+        }
+
+        // The Internet Helper does not cancel a request - it writes the body into the pipe until the pipe is
+        // closed. The body of an abandoned request must be closed, otherwise the Internet Helper will run
+        // out of threads.
+        val answered = try {
+            latch.await(timeoutMs, TimeUnit.MILLISECONDS)
+        } catch (e: InterruptedException) {
+            LOG.debug("Interrupted while waiting for GET {}", request.url)
+            abandon()
+            throw e
+        }
+        if (!answered) {
             LOG.error("Timeout after {} ms for GET {}", timeoutMs, request.url)
+            abandon()
             throw InternetHelperException("Timeout for GET ${request.url}")
         }
         error?.let {

@@ -27,6 +27,7 @@ interface GallerySource {
     /**
      * Opens [length] bytes of a variant of a Media File, from [offset]. A length of -1 means up to
      * the end of the file. Blocks until the device answers.
+     * It does not open the connection: the caller must hold an [acquire] call, else it throws an [IOException].
      */
     @Throws(IOException::class)
     fun open(file: MediaFile, variant: Variant, offset: Long, length: Long): InputStream

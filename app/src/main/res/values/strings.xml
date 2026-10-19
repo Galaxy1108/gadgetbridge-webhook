@@ -5619,6 +5619,13 @@
     <string name="dji_wifi_state_opening_control_channel">Connecting to the camera…</string>
     <string name="dji_wifi_error_credentials">The camera did not send the name and password for its Wi-Fi</string>
     <string name="dji_wifi_error_control_channel">The camera did not answer over Wi-Fi</string>
+    <string name="photo_gallery">Gallery</string>
+    <string name="gallery_filter_all">All</string>
+    <string name="gallery_filter_photos">Photos</string>
+    <string name="gallery_filter_videos">Videos</string>
+    <string name="gallery_filter_favorites">Favorites</string>
+    <string name="gallery_empty">No photos or videos</string>
+    <string name="gallery_clear_cache">Clear cache</string>
     <string name="toast_error_invalid_api_key">Invalid API key</string>
     <string name="eco">Eco</string>
     <string name="prefs_title_offgrid_mode">Off-grid mode</string>

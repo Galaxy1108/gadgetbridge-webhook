@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A reference-counted connection [C] to a device, over the Wi-Fi hotspot of the device.
- * [S] is the set of connection steps of the subclass.
+ * [S] is the set of connection steps of the subclass, in the order they occur from [stoppedState] to [connectedState].
  */
 abstract class WifiSession<C : Closeable, S : Enum<S>>(
     protected val context: Context,
@@ -27,7 +27,7 @@ abstract class WifiSession<C : Closeable, S : Enum<S>>(
     private val stoppedState: S,
     private val connectedState: S,
 ) {
-    fun interface Listener<S> {
+    fun interface Listener<in S> {
         fun onStateChanged(state: S)
     }
 
@@ -38,9 +38,35 @@ abstract class WifiSession<C : Closeable, S : Enum<S>>(
         fun release()
     }
 
+    /**
+     * The connection step while the connection starts.
+     *
+     * @property step the step number, from 1 to [stepCount]
+     */
+    class Progress(@StringRes val text: Int, val step: Int, val stepCount: Int)
+
     @Volatile
     var state: S = stoppedState
         private set
+
+    val isStopped: Boolean
+        get() = state == stoppedState
+
+    /**
+     * The progress of the current state, or null when the session is stopped or connected.
+     */
+    val progress: Progress?
+        get() {
+            val current = state
+            if (current == stoppedState || current == connectedState) {
+                return null
+            }
+            return Progress(
+                stateText(current),
+                current.ordinal - stoppedState.ordinal,
+                connectedState.ordinal - stoppedState.ordinal - 1
+            )
+        }
 
     private val listeners = CopyOnWriteArrayList<Listener<S>>()
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -53,6 +79,8 @@ abstract class WifiSession<C : Closeable, S : Enum<S>>(
 
     // Guards the connection. It is held while the connection starts.
     private val connectionLock = Any()
+
+    @Volatile
     private var connection: C? = null
 
     @Volatile
@@ -93,6 +121,16 @@ abstract class WifiSession<C : Closeable, S : Enum<S>>(
             release()
             throw e
         }
+    }
+
+    /**
+     * Returns the connection when it is open, and does not start it. Each non-null result must have one
+     * [release] call.
+     */
+    fun acquireIfOpen(): C? {
+        val current = connection ?: return null
+        addRef()
+        return current
     }
 
     fun release() {

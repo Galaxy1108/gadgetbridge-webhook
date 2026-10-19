@@ -21,7 +21,9 @@ object GallerySourceRegistry {
     @JvmStatic
     fun unregister(address: String, source: GallerySource) {
         LOG.debug("Unregistering gallery source for {}", address)
-        sources.remove(address, source)
+        if (sources.remove(address, source)) {
+            GalleryImageLoaders.shutdown(address)
+        }
     }
 
     @JvmStatic

@@ -4,6 +4,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import nodomain.freeyourgadget.gadgetbridge.kaitai.DumlCamera
 import nodomain.freeyourgadget.gadgetbridge.kaitai.DumlGeneral
@@ -58,6 +60,9 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
 
     private val listedRecords = ConcurrentHashMap<String, DjiFileList.Record>()
 
+    // The camera does not complete a file list transfer while another one is in progress
+    private val listMutex = Mutex()
+
     override suspend fun acquire() {
         acquireChannel()
     }
@@ -66,64 +71,69 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
         session.release()
     }
 
-    override suspend fun listPage(filter: GalleryFilter, after: String?): GalleryPage = withChannel { channel ->
-        val cursor = after?.toLong(16) ?: FIRST_CURSOR
-        val id = transferId.incrementAndGet() and 0xffff
-        val transfer = DjiFileList.Transfer(id)
-        val end = CompletableDeferred<Unit>()
-        val listener = DjiControlChannel.RequestListener { packet ->
-            if (packet.cmdSet == DumlCmdSet.GENERAL && packet.cmd == GeneralCmd.FILE_TRANSFER_DATA) {
-                val message = DumlCommand.decode(packet).payload
-                if (message is DumlGeneral.FileTransferDataRequest && transfer.onMessage(message)) {
-                    end.complete(Unit)
+    override suspend fun listPage(filter: GalleryFilter, after: String?): GalleryPage = listMutex.withLock {
+        withChannel { channel ->
+            val cursor = after?.toLong(16) ?: FIRST_CURSOR
+            val id = transferId.incrementAndGet() and 0xffff
+            val transfer = DjiFileList.Transfer(id)
+            val end = CompletableDeferred<Unit>()
+            val listener = DjiControlChannel.RequestListener { packet ->
+                if (packet.cmdSet == DumlCmdSet.GENERAL && packet.cmd == GeneralCmd.FILE_TRANSFER_DATA) {
+                    val message = DumlCommand.decode(packet).payload
+                    if (message is DumlGeneral.FileTransferDataRequest && transfer.onMessage(message)) {
+                        end.complete(Unit)
+                    }
                 }
             }
-        }
 
-        LOG.debug("Listing {} after {}, transfer {}", filter, after, id)
-        channel.addRequestListener(listener)
-        val complete = try {
-            checkStatus(
-                channel.request(
-                    DumlAddress.CAMERA,
-                    DumlCmdSet.GENERAL,
-                    GeneralCmd.FILE_TRANSFER,
-                    DjiFileCommands.listRequest(id, cursor, filter)
+            LOG.debug("Listing {} after {}, transfer {}", filter, after, id)
+            channel.addRequestListener(listener)
+            val complete = try {
+                checkStatus(
+                    channel.request(
+                        DumlAddress.CAMERA,
+                        DumlCmdSet.GENERAL,
+                        GeneralCmd.FILE_TRANSFER,
+                        DjiFileCommands.listRequest(id, cursor, filter)
+                    )
                 )
-            )
-            val received = withTimeoutOrNull(TRANSFER_TIMEOUT_MS.milliseconds) { end.await() } != null
-            try {
-                channel.request(
-                    DumlAddress.CAMERA,
-                    DumlCmdSet.GENERAL,
-                    GeneralCmd.FILE_TRANSFER,
-                    DjiFileCommands.transferAck(id)
-                )
-            } catch (e: IOException) {
-                LOG.warn("No reply to the transfer ack of transfer {}", id, e)
+                val received = withTimeoutOrNull(TRANSFER_TIMEOUT_MS.milliseconds) { end.await() } != null
+                try {
+                    channel.request(
+                        DumlAddress.CAMERA,
+                        DumlCmdSet.GENERAL,
+                        GeneralCmd.FILE_TRANSFER,
+                        DjiFileCommands.transferAck(id)
+                    )
+                } catch (e: IOException) {
+                    LOG.warn("No reply to the transfer ack of transfer {}", id, e)
+                }
+                received
+            } finally {
+                channel.removeRequestListener(listener)
             }
-            received
-        } finally {
-            channel.removeRequestListener(listener)
-        }
-        if (!complete) {
-            throw IOException("The camera did not send the complete file list")
-        }
+            if (!complete) {
+                throw IOException("The camera did not send the complete file list")
+            }
 
-        val pageRecords = DjiFileList.parseRecords(transfer.data())
-        LOG.debug("Received {} records in transfer {}", pageRecords.size, id)
-        for (record in pageRecords) {
-            LOG.debug("Received record {}", record)
-        }
-        val files = pageRecords
-            .filterIndexed { index, record -> !(index == 0 && after != null && record.fileId == cursor) }
-            .map { record ->
-                val file = toMediaFile(record)
-                listedRecords[file.id] = record
-                file
+            val pageRecords = DjiFileList.parseRecords(transfer.data())
+            LOG.debug("Received {} records in transfer {}", pageRecords.size, id)
+            for (record in pageRecords) {
+                LOG.debug("Received record {}", record)
             }
-        val next = if (pageRecords.size < DjiFileCommands.MAX_RECORDS || files.isEmpty()) null else files.last().id
-        GalleryPage(files, next)
+            if (after == null) {
+                listedRecords.clear()
+            }
+            val files = pageRecords
+                .filterIndexed { index, record -> !(index == 0 && after != null && record.fileId == cursor) }
+                .map { record ->
+                    val file = toMediaFile(record)
+                    listedRecords[file.id] = record
+                    file
+                }
+            val next = if (pageRecords.size < DjiFileCommands.MAX_RECORDS || files.isEmpty()) null else files.last().id
+            GalleryPage(files, next)
+        }
     }
 
     override fun open(file: MediaFile, variant: Variant, offset: Long, length: Long): InputStream {
@@ -143,7 +153,7 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
             emptyMap()
         }
 
-        session.acquire()
+        session.acquireIfOpen() ?: throw IOException("The Wi-Fi session is not open")
         try {
             val response = InternetHelperHttpClient.get(
                 "http://${DjiWifiSession.CAMERA_HOST}/v2?storage=0&path=$path",
@@ -156,7 +166,7 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
                 throw IOException("HTTP status ${response.status} for $path")
             }
             return SessionInputStream(response)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             session.release()
             throw e
         }

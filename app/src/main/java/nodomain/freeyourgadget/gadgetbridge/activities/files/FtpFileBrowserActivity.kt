@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity
-import nodomain.freeyourgadget.gadgetbridge.activities.wififtp.WifiFtpSessionScreen
+import nodomain.freeyourgadget.gadgetbridge.activities.wifi.WifiSessionScreen
 import nodomain.freeyourgadget.gadgetbridge.databinding.ActivityFtpFileBrowserBinding
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.ftp.WifiFtpSession
@@ -43,7 +43,7 @@ class FtpFileBrowserActivity : AbstractGBActivity(), MenuProvider {
     private lateinit var session: WifiFtpSession
     private lateinit var adapter: FtpFileBrowserAdapter
 
-    private lateinit var sessionScreen: WifiFtpSessionScreen
+    private lateinit var sessionScreen: WifiSessionScreen
 
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
@@ -87,7 +87,7 @@ class FtpFileBrowserActivity : AbstractGBActivity(), MenuProvider {
         this.device = device
         this.session = session
         path = session.rootDir
-        sessionScreen = WifiFtpSessionScreen(this, device)
+        sessionScreen = WifiSessionScreen(this, device)
 
         binding = ActivityFtpFileBrowserBinding.inflate(layoutInflater)
         setContentView(binding.root)

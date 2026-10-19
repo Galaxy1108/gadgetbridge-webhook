@@ -394,29 +394,37 @@ class DjiControlChannel private constructor(private val onLost: Runnable) : Clos
 
     private fun onDumlMessages(packet: DjiUdpPacket) {
         for (duml in packet.dumlMessages()) {
-            if (duml.packetType == DumlPacketType.RESPONSE) {
-                onResponse(duml)
-                continue
+            try {
+                onDumlMessage(duml)
+            } catch (e: Exception) {
+                LOG.error("Failed to handle {}", duml, e)
             }
-            val answer = if (duml.cmdSet == DumlCmdSet.GENERAL) CAMERA_REQUEST_ANSWERS[duml.cmd] else null
-            if (answer != null) {
-                sendDuml(
-                    DumlPacket(
-                        sender = duml.receiver,
-                        receiver = duml.sender,
-                        seq = duml.seq,
-                        ack = answer.ack,
-                        packetType = DumlPacketType.RESPONSE,
-                        cmdSet = DumlCmdSet.GENERAL,
-                        cmd = duml.cmd,
-                        payload = answer.payload,
-                    )
+        }
+    }
+
+    private fun onDumlMessage(duml: DumlPacket) {
+        if (duml.packetType == DumlPacketType.RESPONSE) {
+            onResponse(duml)
+            return
+        }
+        val answer = if (duml.cmdSet == DumlCmdSet.GENERAL) CAMERA_REQUEST_ANSWERS[duml.cmd] else null
+        if (answer != null) {
+            sendDuml(
+                DumlPacket(
+                    sender = duml.receiver,
+                    receiver = duml.sender,
+                    seq = duml.seq,
+                    ack = answer.ack,
+                    packetType = DumlPacketType.RESPONSE,
+                    cmdSet = DumlCmdSet.GENERAL,
+                    cmd = duml.cmd,
+                    payload = answer.payload,
                 )
-                continue
-            }
-            for (listener in requestListeners) {
-                listener.onRequest(duml)
-            }
+            )
+            return
+        }
+        for (listener in requestListeners) {
+            listener.onRequest(duml)
         }
     }
 

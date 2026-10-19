@@ -341,6 +341,7 @@ dependencies {
     implementation libs.mpandroidchart
     implementation libs.durationformatter
     implementation libs.ckchangelog
+    implementation libs.coil
     implementation libs.solarpositioning
     implementation libs.cbor
     // use pristine greendao instead of our custom version, since our custom jitpack-packaged

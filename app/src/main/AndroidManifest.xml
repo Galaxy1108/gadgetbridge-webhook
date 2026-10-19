@@ -274,6 +274,9 @@
             android:name=".activities.files.FtpFileBrowserActivity"
             android:label="@string/ftp_file_browser" />
         <activity
+            android:name=".activities.gallery.GalleryActivity"
+            android:label="@string/photo_gallery" />
+        <activity
             android:name=".activities.fit.FitViewerActivity"
             android:exported="true"
             android:label="@string/fit_file_viewer" />
