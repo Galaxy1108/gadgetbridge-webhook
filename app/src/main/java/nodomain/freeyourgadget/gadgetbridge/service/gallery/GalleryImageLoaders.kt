@@ -28,31 +28,45 @@ object GalleryImageLoaders {
         MemoryCache.Builder().maxSizePercent(GBApplication.getContext()).build()
     }
 
+    /**
+     * Returns the loader of the device. When [source] is not registered, the loader is not kept and has no
+     * disk cache.
+     */
     fun get(device: GBDevice, source: GallerySource): ImageLoader {
         synchronized(loaders) {
+            // GallerySourceRegistry.unregister removes the source before it shuts down the loader
+            if (GallerySourceRegistry.get(device.address) !== source) {
+                LOG.warn("The gallery source of {} is not registered", device.address)
+                return build(device, source, null)
+            }
             return loaders.getOrPut(device.address) {
-                val directory = File(device.deviceCoordinator.getDeviceCacheDir(device), THUMBNAIL_DIR)
-                LOG.debug("Creating image loader for {} in {}", device.address, directory)
-                ImageLoader.Builder(GBApplication.getContext())
-                    .components {
-                        add(GalleryImageFetcher.CacheKeyer(memoryKeyPrefix(device.address)))
-                        add(
-                            GalleryImageFetcher.Factory(
-                                source,
-                                Dispatchers.IO.limitedParallelism(MAX_PARALLEL_FETCHES)
-                            )
-                        )
-                    }
-                    .memoryCache(memoryCache)
-                    .diskCache {
-                        DiskCache.Builder()
-                            .directory(directory.toOkioPath())
-                            .maxSizeBytes(DISK_CACHE_SIZE)
-                            .build()
-                    }
-                    .build()
+                build(device, source, File(device.deviceCoordinator.getDeviceCacheDir(device), THUMBNAIL_DIR))
             }
         }
+    }
+
+    private fun build(device: GBDevice, source: GallerySource, directory: File?): ImageLoader {
+        LOG.debug("Creating image loader for {} in {}", device.address, directory)
+        return ImageLoader.Builder(GBApplication.getContext())
+            .components {
+                add(GalleryImageFetcher.CacheKeyer(memoryKeyPrefix(device.address)))
+                add(
+                    GalleryImageFetcher.Factory(
+                        source,
+                        Dispatchers.IO.limitedParallelism(MAX_PARALLEL_FETCHES)
+                    )
+                )
+            }
+            .memoryCache(memoryCache)
+            .diskCache {
+                directory?.let {
+                    DiskCache.Builder()
+                        .directory(it.toOkioPath())
+                        .maxSizeBytes(DISK_CACHE_SIZE)
+                        .build()
+                }
+            }
+            .build()
     }
 
     /**
