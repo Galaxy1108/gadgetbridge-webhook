@@ -125,10 +125,21 @@ class ZoomableImageView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        if (oldw > 0 && oldh > 0) {
-            zoomMatrix.postTranslate((w - oldw) / 2f, (h - oldh) / 2f)
-        }
+        // The image point at the old center, read before updateBaseMatrix replaces the old base matrix
+        val focus = floatArrayOf(oldw / 2f, oldh / 2f)
+        val inverse = Matrix()
+        drawMatrix.set(baseMatrix)
+        drawMatrix.postConcat(zoomMatrix)
+        val keepFocus = oldw > 0 && oldh > 0 && hasImage() && drawMatrix.invert(inverse)
+        inverse.mapPoints(focus)
         updateBaseMatrix()
+        if (keepFocus) {
+            baseMatrix.mapPoints(focus)
+            val scale = currentScale()
+            zoomMatrix.setScale(scale, scale)
+            zoomMatrix.postTranslate(w / 2f - scale * focus[0], h / 2f - scale * focus[1])
+            applyMatrix()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
