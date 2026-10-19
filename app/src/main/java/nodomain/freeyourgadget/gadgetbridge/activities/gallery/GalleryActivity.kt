@@ -389,7 +389,9 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
     private fun showSnackbar(text: String) {
         // The viewer is a dialog above the grid
         val viewer = supportFragmentManager.findFragmentByTag(GalleryViewerFragment.TAG)?.view
-        Snackbar.make(viewer ?: binding.root, text, Snackbar.LENGTH_LONG).show()
+        Snackbar.make(viewer ?: binding.root, text, Snackbar.LENGTH_LONG).apply {
+            viewer?.findViewById<View>(R.id.gallery_viewer_actions)?.takeIf { it.isVisible }?.let { anchorView = it }
+        }.show()
     }
 
     fun confirmThenDelete(files: List<MediaFile>) {

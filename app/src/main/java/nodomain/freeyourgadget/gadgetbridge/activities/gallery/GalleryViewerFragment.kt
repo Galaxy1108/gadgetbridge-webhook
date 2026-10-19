@@ -2,20 +2,26 @@ package nodomain.freeyourgadget.gadgetbridge.activities.gallery
 
 import android.app.Dialog
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.LayoutInflater
-import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.ComponentDialog
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.DrawableRes
+import androidx.annotation.IdRes
 import androidx.annotation.OptIn
+import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.DialogFragment
@@ -30,6 +36,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.viewpager2.widget.ViewPager2
 import coil3.size.Size
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.R
@@ -66,8 +73,11 @@ class GalleryViewerFragment : DialogFragment() {
     // The downloaded files whose local original failed to open or to play, and that display the preview
     private val failedOriginals = HashSet<String>()
 
-    // The toolbar and the system bars are hidden
+    // The toolbar, the action bar and the system bars are hidden
     private var immersive = false
+
+    // The actions are in the toolbar menu, and the action bar is not displayed
+    private var landscape = false
 
     // Immersive in the landscape orientation, from the fullscreen button of a video
     private var videoFullscreen = false
@@ -90,8 +100,8 @@ class GalleryViewerFragment : DialogFragment() {
     private var positioned = false
     private var acquired = false
 
-    // The state that the download item displays
-    private var downloadStatus: DownloadStatus? = null
+    // The states that the actions display
+    private val actionStates = HashMap<ViewerAction, ActionState>()
 
     private val playerListener = object : Player.Listener {
         override fun onPlayerError(error: PlaybackException) {
@@ -152,41 +162,41 @@ class GalleryViewerFragment : DialogFragment() {
             onPhotoClick = { setImmersive(!immersive, false) },
             onControlsVisibilityChange = { visible ->
                 controlsVisible = visible
-                updateToolbarVisibility(true)
+                updateBarsVisibility(true)
             }
         )
 
+        landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { root, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-            root.updatePadding(bars.left, bars.top, bars.right, bars.bottom)
+            root.updatePadding(left = bars.left, top = bars.top, right = bars.right)
+            if (landscape) {
+                adapter.setControlsBottomPadding(bars.bottom)
+            } else {
+                // The action bar background extends below the navigation bar
+                binding.galleryViewerActions.updatePadding(bottom = bars.bottom)
+            }
             WindowInsetsCompat.CONSUMED
         }
         binding.galleryViewerToolbar.setNavigationOnClickListener { dismiss() }
-        binding.galleryViewerToolbar.inflateMenu(R.menu.menu_gallery_viewer)
-        val menu = binding.galleryViewerToolbar.menu
-        menu.findItem(R.id.gallery_favorite).isVisible = GalleryCapability.FAVORITE in viewModel.source.capabilities
-        menu.findItem(R.id.gallery_delete).isVisible = GalleryCapability.DELETE in viewModel.source.capabilities
-        binding.galleryViewerToolbar.setOnMenuItemClickListener { item ->
-            val file = viewModel.state.value.files.firstOrNull { it.id == activeId }
-                ?: return@setOnMenuItemClickListener false
-            val activity = requireActivity() as GalleryActivity
-            when (item.itemId) {
-                R.id.gallery_download -> {
-                    activity.download(listOf(file))
-                    true
+        if (landscape) {
+            binding.galleryViewerActions.isVisible = false
+            binding.galleryViewerToolbar.inflateMenu(R.menu.menu_gallery_viewer)
+            binding.galleryViewerToolbar.setOnMenuItemClickListener { item ->
+                val action = ViewerAction.entries.firstOrNull { it.menuId == item.itemId }
+                    ?: return@setOnMenuItemClickListener false
+                onAction(action)
+                true
+            }
+        } else {
+            ViewerAction.entries.forEach { action ->
+                actionButton(binding, action).setOnClickListener { onAction(action) }
+            }
+            binding.galleryViewerActions.addOnLayoutChangeListener { actions, _, top, _, bottom, _, oldTop, _, oldBottom ->
+                if (bottom - top != oldBottom - oldTop) {
+                    // The adapter must not change the layout of the pages during this layout pass
+                    actions.post { adapter.setControlsBottomPadding(actions.height) }
                 }
-
-                R.id.gallery_favorite -> {
-                    viewModel.setFavorite(listOf(file), !file.favorite)
-                    true
-                }
-
-                R.id.gallery_delete -> {
-                    activity.confirmThenDelete(listOf(file))
-                    true
-                }
-
-                else -> false
             }
         }
         binding.galleryViewerPager.adapter = adapter
@@ -235,7 +245,7 @@ class GalleryViewerFragment : DialogFragment() {
     override fun onDestroyView() {
         binding = null
         positioned = false
-        downloadStatus = null
+        actionStates.clear()
         super.onDestroyView()
     }
 
@@ -328,24 +338,40 @@ class GalleryViewerFragment : DialogFragment() {
             activeId = file.id
             adapter.setActive(file.id, player)
             controlsVisible = false
-            updateToolbarVisibility(true)
+            updateBarsVisibility(true)
             preparePlayer()
         }
     }
 
+    private fun onAction(action: ViewerAction) {
+        val file = viewModel.state.value.files.firstOrNull { it.id == activeId } ?: return
+        when (action) {
+            ViewerAction.DOWNLOAD -> (requireActivity() as GalleryActivity).download(listOf(file))
+            ViewerAction.FAVORITE -> viewModel.setFavorite(listOf(file), !file.favorite)
+            ViewerAction.DELETE -> (requireActivity() as GalleryActivity).confirmThenDelete(listOf(file))
+        }
+    }
+
     private fun updateToolbar(file: MediaFile) {
-        val toolbar = binding?.galleryViewerToolbar ?: return
+        val binding = binding ?: return
+        val toolbar = binding.galleryViewerToolbar
         val time = DateUtils.formatDateTime(
             requireContext(),
             file.time,
             DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_YEAR
         )
         toolbar.title = file.name
-        toolbar.menu.findItem(R.id.gallery_favorite)?.apply {
-            setIcon(if (file.favorite) R.drawable.ic_star_gold else R.drawable.ic_star_gray)
-            setTitle(if (file.favorite) R.string.gallery_unfavorite else R.string.gallery_favorite)
+        ViewerAction.entries.forEach { action ->
+            val state = actionState(action, file)
+            if (actionStates.put(action, state) == state) {
+                return@forEach
+            }
+            if (landscape) {
+                toolbar.menu.findItem(action.menuId)?.let { applyActionState(it, state) }
+            } else {
+                applyActionState(actionButton(binding, action), state)
+            }
         }
-        updateDownloadItem(toolbar.menu, viewModel.state.value.downloadStatus(file.id))
         toolbar.subtitle = if (file.type == MediaType.VIDEO) {
             getString(R.string.date_placeholders__date__time, time, GalleryAdapter.formatDuration(file.duration))
         } else {
@@ -353,21 +379,63 @@ class GalleryViewerFragment : DialogFragment() {
         }
     }
 
-    private fun updateDownloadItem(menu: Menu, status: DownloadStatus) {
-        if (status == downloadStatus) {
-            return
+    private fun actionState(action: ViewerAction, file: MediaFile): ActionState {
+        val capabilities = viewModel.source.capabilities
+        return when (action) {
+            ViewerAction.DOWNLOAD -> when (viewModel.state.value.downloadStatus(file.id)) {
+                DownloadStatus.NONE ->
+                    ActionState(R.drawable.ic_download, R.string.ftp_file_browser_download)
+
+                DownloadStatus.QUEUED ->
+                    ActionState(R.drawable.ic_access_time, R.string.gallery_download_queued, enabled = false)
+
+                DownloadStatus.DOWNLOADING ->
+                    ActionState(R.drawable.ic_downloading, R.string.busy_task_downloading, enabled = false)
+
+                DownloadStatus.DOWNLOADED ->
+                    ActionState(R.drawable.ic_download_done, R.string.gallery_downloaded, enabled = false)
+            }
+
+            ViewerAction.FAVORITE -> if (file.favorite) {
+                ActionState(
+                    R.drawable.ic_star_gold,
+                    R.string.gallery_unfavorite,
+                    visible = GalleryCapability.FAVORITE in capabilities,
+                    tinted = false
+                )
+            } else {
+                ActionState(
+                    R.drawable.ic_star_gray,
+                    R.string.gallery_favorite,
+                    visible = GalleryCapability.FAVORITE in capabilities
+                )
+            }
+
+            ViewerAction.DELETE ->
+                ActionState(R.drawable.ic_delete, R.string.delete, visible = GalleryCapability.DELETE in capabilities)
         }
-        downloadStatus = status
-        val item = menu.findItem(R.id.gallery_download) ?: return
-        val (icon, title) = when (status) {
-            DownloadStatus.NONE -> R.drawable.ic_download to R.string.ftp_file_browser_download
-            DownloadStatus.QUEUED -> R.drawable.ic_access_time to R.string.gallery_download_queued
-            DownloadStatus.DOWNLOADING -> R.drawable.ic_downloading to R.string.busy_task_downloading
-            DownloadStatus.DOWNLOADED -> R.drawable.ic_download_done to R.string.gallery_downloaded
-        }
-        item.setIcon(icon)
-        item.setTitle(title)
-        item.isEnabled = status == DownloadStatus.NONE
+    }
+
+    private fun applyActionState(item: MenuItem, state: ActionState) {
+        item.setIcon(state.icon)
+        item.setTitle(state.label)
+        item.isEnabled = state.enabled
+        item.isVisible = state.visible
+    }
+
+    private fun applyActionState(button: MaterialButton, state: ActionState) {
+        button.iconTint =
+            if (state.tinted) ContextCompat.getColorStateList(button.context, R.color.gallery_viewer_action) else null
+        button.setIconResource(state.icon)
+        button.setText(state.label)
+        button.isEnabled = state.enabled
+        button.isVisible = state.visible
+    }
+
+    private fun actionButton(binding: FragmentGalleryViewerBinding, action: ViewerAction) = when (action) {
+        ViewerAction.DOWNLOAD -> binding.galleryViewerDownload
+        ViewerAction.FAVORITE -> binding.galleryViewerFavorite
+        ViewerAction.DELETE -> binding.galleryViewerDelete
     }
 
     /**
@@ -457,8 +525,8 @@ class GalleryViewerFragment : DialogFragment() {
     }
 
     /**
-     * When immersive, hides the system bars and the toolbar. In video fullscreen, also sets the landscape
-     * orientation. Else, displays the system bars and the toolbar.
+     * When immersive, hides the system bars and the bars of the viewer. In video fullscreen, also sets the
+     * landscape orientation. Else, displays the system bars and the bars of the viewer.
      */
     private fun applyImmersive(animate: Boolean) {
         if (videoFullscreen) {
@@ -467,7 +535,7 @@ class GalleryViewerFragment : DialogFragment() {
         }
         immersiveBackCallback.isEnabled = immersive
         adapter.setFullscreen(videoFullscreen)
-        updateToolbarVisibility(animate)
+        updateBarsVisibility(animate)
         val window = dialog?.window ?: return
         val controller = WindowCompat.getInsetsController(window, window.decorView)
         if (immersive) {
@@ -479,25 +547,51 @@ class GalleryViewerFragment : DialogFragment() {
     }
 
     /**
-     * Displays the toolbar when not immersive, or together with the controls of the active video.
+     * Displays the toolbar, and the action bar in portrait, when not immersive or together with the controls
+     * of the active video.
      */
-    private fun updateToolbarVisibility(animate: Boolean) {
-        val toolbar = binding?.galleryViewerToolbar ?: return
+    private fun updateBarsVisibility(animate: Boolean) {
+        val binding = binding ?: return
         val visible = !immersive || controlsVisible
-        toolbar.animate().cancel()
-        if (!animate) {
-            toolbar.alpha = 1f
-            toolbar.isVisible = visible
-        } else if (visible) {
-            if (!toolbar.isVisible) {
-                toolbar.alpha = 0f
-                toolbar.isVisible = true
-            }
-            toolbar.animate().alpha(1f).setDuration(TOOLBAR_FADE_MS)
-        } else if (toolbar.isVisible) {
-            toolbar.animate().alpha(0f).setDuration(TOOLBAR_FADE_MS).withEndAction { toolbar.isVisible = false }
+        fade(binding.galleryViewerToolbar, visible, animate)
+        if (!landscape) {
+            fade(binding.galleryViewerActions, visible, animate)
         }
     }
+
+    private fun fade(view: View, visible: Boolean, animate: Boolean) {
+        view.animate().cancel()
+        if (!animate) {
+            view.alpha = 1f
+            view.isInvisible = !visible
+        } else if (visible) {
+            if (view.isInvisible) {
+                view.alpha = 0f
+                view.isInvisible = false
+            }
+            view.animate().alpha(1f).setDuration(BARS_FADE_MS)
+        } else if (!view.isInvisible) {
+            view.animate().alpha(0f).setDuration(BARS_FADE_MS).withEndAction { view.isInvisible = true }
+        }
+    }
+
+    private enum class ViewerAction(@IdRes val menuId: Int) {
+        DOWNLOAD(R.id.gallery_download),
+        FAVORITE(R.id.gallery_favorite),
+        DELETE(R.id.gallery_delete),
+    }
+
+    /**
+     * The state of a [ViewerAction] for the active file. When not tinted, the icon keeps its own colors in the
+     * action bar.
+     */
+    private data class ActionState(
+        @DrawableRes val icon: Int,
+        @StringRes val label: Int,
+        val enabled: Boolean = true,
+        val visible: Boolean = true,
+        val tinted: Boolean = true,
+    )
 
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(GalleryViewerFragment::class.java)
@@ -512,7 +606,7 @@ class GalleryViewerFragment : DialogFragment() {
         private const val KEY_ORIENTATION_BEFORE_FULLSCREEN = "orientation_before_fullscreen"
         private const val URI_SCHEME = "gallery"
         private const val LOAD_AHEAD_PAGES = 5
-        private const val TOOLBAR_FADE_MS = 200L
+        private const val BARS_FADE_MS = 200L
 
         // The local original of a photo is decoded at most at this multiple of the screen size
         private const val ORIGINAL_SCALE = 2

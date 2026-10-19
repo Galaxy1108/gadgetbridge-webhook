@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.annotation.OptIn
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
@@ -66,6 +67,7 @@ class GalleryViewerAdapter(
     private var activeId: String? = null
     private var player: Player? = null
     private var fullscreen = false
+    private var controlsBottomPadding = 0
 
     // The IDs of the files whose local originals the photo pages display
     private var local: Set<String> = emptySet()
@@ -84,6 +86,11 @@ class GalleryViewerAdapter(
         videoHolders.forEach {
             it.binding.galleryViewerPlayer.setFullscreenButtonState(fullscreen)
         }
+    }
+
+    fun setControlsBottomPadding(padding: Int) {
+        controlsBottomPadding = padding
+        videoHolders.forEach { updateControlsPadding(it) }
     }
 
     /**
@@ -188,6 +195,12 @@ class GalleryViewerAdapter(
             playerView.hideController()
         }
         playerView.setFullscreenButtonState(fullscreen)
+        updateControlsPadding(holder)
+    }
+
+    private fun updateControlsPadding(holder: VideoHolder) {
+        val controls = holder.binding.galleryViewerPlayer.findViewById<View>(androidx.media3.ui.R.id.exo_controller)
+        controls?.updatePadding(bottom = controlsBottomPadding)
     }
 
     private fun bindPhoto(holder: PhotoHolder, file: MediaFile) {
