@@ -5584,4 +5584,14 @@
     <string name="map_theme_dark_title">深色模式主题</string>
     <string name="loyalty_cards_sync_watch_request_title">自动同步</string>
     <string name="loyalty_cards_sync_watch_request_summary">允许手表自动同步最新卡片</string>
+    <string name="pairing_step_bond">蓝牙连接</string>
+    <string name="pairing_failed_connect">无法连接到 %1$s。</string>
+    <string name="pairing_success">已和 %1$s 配对</string>
+    <string name="pairing_change_auth_key">更改认证密钥</string>
+    <string name="pref_sleep_stage_estimation_title">预估睡眠阶段</string>
+    <string name="pref_sleep_stage_estimation_summary">根据移动和心率估算浅睡眠、深睡眠和快速眼动睡眠，取代设备报告的任何睡眠信息。</string>
+    <string name="text_file_viewer">文本文件查看器</string>
+    <string name="garmin_connect_iq_error_report">连接 IQ 错误报告</string>
+    <string name="garmin_prg_transfer_mlr_title">用 MLR 安装 PRG 文件</string>
+    <string name="garmin_prg_transfer_mlr_summary">文件传输速度更快，但可能不稳定。</string>
 </resources>
