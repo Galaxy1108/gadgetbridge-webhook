@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryActionException
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryDownloadQueue
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryDownloadQueues
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryFilter
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryImageLoaders
@@ -41,12 +42,21 @@ class GalleryViewModel(
         DELETE,
     }
 
+    enum class DownloadStatus {
+        NONE,
+        QUEUED,
+        DOWNLOADING,
+        DOWNLOADED,
+    }
+
     /**
      * @property acquired true while the [GallerySource] is acquired
      * @property error the message of the last load failure, or null
      * @property complete true when the last page is loaded
      * @property selected the IDs of the selected [MediaFile]s
      * @property action the [Action] that runs on the device, or null
+     * @property downloaded the IDs of the [MediaFile]s whose originals are in the download folder
+     * @property downloads the state of the download queue of the device
      */
     data class State(
         val filter: GalleryFilter = GalleryFilter.ALL,
@@ -57,7 +67,16 @@ class GalleryViewModel(
         val complete: Boolean = false,
         val selected: Set<String> = emptySet(),
         val action: Action? = null,
-    )
+        val downloaded: Set<String> = emptySet(),
+        val downloads: GalleryDownloadQueue.State = GalleryDownloadQueue.State(),
+    ) {
+        fun downloadStatus(id: String): DownloadStatus = when {
+            id == downloads.current -> DownloadStatus.DOWNLOADING
+            id in downloads.queued -> DownloadStatus.QUEUED
+            id in downloaded -> DownloadStatus.DOWNLOADED
+            else -> DownloadStatus.NONE
+        }
+    }
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
@@ -74,11 +93,34 @@ class GalleryViewModel(
     // A page that was requested before a delete can contain the deleted files
     private val deletedIds = HashSet<String>()
 
+    private val downloadQueue = GalleryDownloadQueues.get(device, source)
+
+    init {
+        downloadQueue?.let { queue ->
+            viewModelScope.launch {
+                var seen = queue.state.value.completed
+                queue.state.collect { downloads ->
+                    val completed = downloads.completed - seen
+                    seen = downloads.completed
+                    _state.update {
+                        it.copy(
+                            downloaded = if (completed.isEmpty()) it.downloaded else it.downloaded + completed,
+                            downloads = downloads
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     /**
-     * Acquires the [GallerySource]. Then, loads the next page if no page is loaded, or if the last load failed.
+     * Checks the downloaded state of the loaded files again. Then, acquires the [GallerySource], and loads the
+     * next page if no page is loaded, or if the last load failed.
      */
     fun onVisible() {
         val current = _state.value
+        // The user can delete the downloaded files in another app
+        checkDownloaded(current.files)
         if (current.acquired || acquireJob?.isActive == true) {
             return
         }
@@ -135,6 +177,7 @@ class GalleryViewModel(
                         complete = page.next == null
                     )
                 }
+                checkDownloaded(loaded)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -171,7 +214,9 @@ class GalleryViewModel(
                 loading = acquireJob?.isActive == true,
                 acquired = it.acquired,
                 error = if (it.acquired) null else it.error,
-                action = it.action
+                action = it.action,
+                downloaded = it.downloaded,
+                downloads = it.downloads
             )
         }
         loadMore()
@@ -266,6 +311,41 @@ class GalleryViewModel(
     }
 
     /**
+     * Finds the files whose originals are in the download folder, with one media store query for each page,
+     * and updates [State.downloaded] for them.
+     */
+    private fun checkDownloaded(files: List<MediaFile>) {
+        val queue = downloadQueue ?: return
+        if (files.isEmpty()) {
+            return
+        }
+        viewModelScope.launch {
+            for (page in files.chunked(PAGE_SIZE)) {
+                val completedBefore = queue.state.value.completed
+                val found = try {
+                    withContext(Dispatchers.IO) { queue.store.findDownloaded(page) }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    LOG.error("Failed to find the downloaded files", e)
+                    return@launch
+                }
+                LOG.debug(
+                    "Found {} of {} files from {} to {} in the download folder",
+                    found.size,
+                    page.size,
+                    page.first().name,
+                    page.last().name
+                )
+                // A file that completes during the query is downloaded, also when the query did not find it
+                val completed = queue.state.value.completed - completedBefore
+                val notFound = page.mapTo(HashSet()) { it.id } - found - completed
+                _state.update { it.copy(downloaded = it.downloaded - notFound + found) }
+            }
+        }
+    }
+
+    /**
      * Removes the deleted files from the download queue and from the caches of the device.
      */
     private suspend fun removeDeleted(files: List<MediaFile>) {
@@ -314,5 +394,7 @@ class GalleryViewModel(
 
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(GalleryViewModel::class.java)
+
+        private const val PAGE_SIZE = 45
     }
 }

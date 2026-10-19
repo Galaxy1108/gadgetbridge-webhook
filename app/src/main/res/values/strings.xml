@@ -5640,6 +5640,16 @@
     <string name="gallery_updating_favorites">Updating favorites…</string>
     <string name="gallery_delete_error">Delete failed: %1$s</string>
     <string name="gallery_favorite_error">Favorite change failed: %1$s</string>
+    <string name="gallery_download_queued">Queued</string>
+    <string name="gallery_downloaded">Downloaded</string>
+    <plurals name="gallery_download_added">
+        <item quantity="one">%d file added to downloads</item>
+        <item quantity="other">%d files added to downloads</item>
+    </plurals>
+    <plurals name="gallery_download_already_downloaded">
+        <item quantity="one">%d file is already downloaded</item>
+        <item quantity="other">%d files are already downloaded</item>
+    </plurals>
     <string name="toast_error_invalid_api_key">Invalid API key</string>
     <string name="eco">Eco</string>
     <string name="prefs_title_offgrid_mode">Off-grid mode</string>

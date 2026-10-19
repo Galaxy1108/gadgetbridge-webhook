@@ -19,7 +19,7 @@ object GalleryDownloadNotification {
     private val LOG: Logger = LoggerFactory.getLogger(GalleryDownloadNotification::class.java)
 
     /**
-     * Shows the download of file [index] of [count], with the progress, in bytes, of that file.
+     * Shows the download of file [index] of [count], with the progress, in bytes, of all the files.
      * A [length] of 0 or less displays an indeterminate progress.
      */
     fun progress(context: Context, address: String, index: Int, count: Int, name: String, bytes: Long, length: Long) {

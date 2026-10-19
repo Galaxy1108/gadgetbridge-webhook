@@ -49,13 +49,14 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
     }
 
     private val folder = deviceName.replace(INVALID_CHARS, "_")
+    private val relativePath = "${Environment.DIRECTORY_DCIM}/$ROOT_FOLDER/$folder/"
 
     /**
      * Creates the [Target] for the original of [file], or returns null when the file is already in the folder.
      */
     @Throws(IOException::class)
     fun create(file: MediaFile): Target? {
-        val name = file.name.replace(INVALID_CHARS, "_")
+        val name = displayName(file)
         val mimeType = MimeTypeMap.getSingleton()
             .getMimeTypeFromExtension(name.substringAfterLast('.', "").lowercase(Locale.ROOT))
             ?: if (file.type == MediaType.VIDEO) "video/mp4" else "image/jpeg"
@@ -66,6 +67,28 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
         }
     }
 
+    /**
+     * Returns the IDs of the files whose originals are in the folder.
+     */
+    fun findDownloaded(files: List<MediaFile>): Set<String> {
+        if (files.isEmpty()) {
+            return emptySet()
+        }
+        val found = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val names = files.mapTo(LinkedHashSet()) { displayName(it) }.toList()
+            val collection = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            val rows = queryRows(context.contentResolver, collection, names).filter { !it.pending }
+            files.filter { file -> rows.any { it.name == displayName(file) && matches(file, it.size) } }
+        } else {
+            val directory = legacyDirectory()
+            files.filter { file ->
+                val target = File(directory, displayName(file))
+                target.isFile && matches(file, target.length())
+            }
+        }
+        return found.mapTo(HashSet()) { it.id }
+    }
+
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun createScoped(file: MediaFile, name: String, mimeType: String): Target? {
         val resolver = context.contentResolver
@@ -74,14 +97,13 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
         } else {
             MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         }
-        val relativePath = "${Environment.DIRECTORY_DCIM}/$ROOT_FOLDER/$folder/"
 
-        for (row in queryRows(resolver, collection, relativePath, name)) {
+        for (row in queryRows(resolver, collection, listOf(name))) {
             if (row.pending) {
                 // Only the rows for this app are visible while they are pending
                 LOG.debug("Deleting the pending row {} of {}", row.uri, name)
                 resolver.delete(row.uri, null, null)
-            } else if (file.size <= 0 || row.size == file.size) {
+            } else if (matches(file, row.size)) {
                 LOG.info("Skipping {}: {} is in the media store with {} bytes", file.id, row.uri, row.size)
                 return null
             } else {
@@ -131,14 +153,17 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun queryRows(resolver: ContentResolver, collection: Uri, relativePath: String, name: String): List<Row> {
+    private fun queryRows(resolver: ContentResolver, collection: Uri, names: List<String>): List<Row> {
         val projection = arrayOf(
             MediaStore.MediaColumns._ID,
+            MediaStore.MediaColumns.DISPLAY_NAME,
             MediaStore.MediaColumns.SIZE,
             MediaStore.MediaColumns.IS_PENDING,
         )
-        val selection = "${MediaStore.MediaColumns.RELATIVE_PATH} = ? AND ${MediaStore.MediaColumns.DISPLAY_NAME} = ?"
-        val selectionArgs = arrayOf(relativePath, name)
+        val placeholders = names.joinToString(",") { "?" }
+        val selection =
+            "${MediaStore.MediaColumns.RELATIVE_PATH} = ? AND ${MediaStore.MediaColumns.DISPLAY_NAME} IN ($placeholders)"
+        val selectionArgs = arrayOf(relativePath, *names.toTypedArray())
         val cursor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val queryArgs = Bundle().apply {
                 putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection)
@@ -154,7 +179,14 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
         return cursor?.use {
             val rows = ArrayList<Row>()
             while (it.moveToNext()) {
-                rows.add(Row(ContentUris.withAppendedId(collection, it.getLong(0)), it.getLong(1), it.getInt(2) != 0))
+                rows.add(
+                    Row(
+                        ContentUris.withAppendedId(collection, it.getLong(0)),
+                        it.getString(1),
+                        it.getLong(2),
+                        it.getInt(3) != 0
+                    )
+                )
             }
             rows
         } ?: emptyList()
@@ -166,16 +198,12 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
         ) {
             throw IOException("No permission to write to the external storage")
         }
-        @Suppress("DEPRECATION")
-        val directory = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-            "$ROOT_FOLDER/$folder"
-        )
+        val directory = legacyDirectory()
         if (!directory.isDirectory && !directory.mkdirs()) {
             throw IOException("Failed to create $directory")
         }
         val target = File(directory, name)
-        if (target.isFile && (file.size <= 0 || target.length() == file.size)) {
+        if (target.isFile && matches(file, target.length())) {
             LOG.info("Skipping {}: {} exists with {} bytes", file.id, target, target.length())
             return null
         }
@@ -214,7 +242,18 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
         }
     }
 
-    private class Row(val uri: Uri, val size: Long, val pending: Boolean)
+    @Suppress("DEPRECATION")
+    private fun legacyDirectory() =
+        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "$ROOT_FOLDER/$folder")
+
+    private fun displayName(file: MediaFile) = file.name.replace(INVALID_CHARS, "_")
+
+    /**
+     * Returns true when a stored file with [size] bytes is the original of [file].
+     */
+    private fun matches(file: MediaFile, size: Long) = file.size <= 0 || size == file.size
+
+    private class Row(val uri: Uri, val name: String?, val size: Long, val pending: Boolean)
 
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(GalleryMediaStore::class.java)

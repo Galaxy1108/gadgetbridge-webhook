@@ -9,6 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils
@@ -34,8 +38,26 @@ class GalleryDownloadQueue(
         FAILED,
     }
 
-    private val store = GalleryMediaStore(context, deviceName)
+    /**
+     * The files of the queue.
+     *
+     * @property queued the IDs of the files that wait for their download
+     * @property current the ID of the file that downloads, or null
+     * @property progress the percentage of the current file that is downloaded
+     * @property completed the IDs of the files that this queue downloaded or skipped
+     */
+    data class State(
+        val queued: Set<String> = emptySet(),
+        val current: String? = null,
+        val progress: Int = 0,
+        val completed: Set<String> = emptySet(),
+    )
+
+    val store = GalleryMediaStore(context, deviceName)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val _state = MutableStateFlow(State())
+    val state: StateFlow<State> = _state.asStateFlow()
 
     // Guards all the fields below
     private val lock = Any()
@@ -49,6 +71,11 @@ class GalleryDownloadQueue(
     private var skipped = 0
     private var failed = 0
     private var lastUri: Uri? = null
+    private var completed: Set<String> = emptySet()
+
+    // The sum of the sizes of the files of the run, and of the files that are downloaded
+    private var totalBytes = 0L
+    private var doneBytes = 0L
 
     @Volatile
     private var stopReason = Stop.NONE
@@ -58,26 +85,32 @@ class GalleryDownloadQueue(
 
     /**
      * Adds the files that are not in the queue to its end, and starts the queue if it is not running.
+     * Returns the number of files that were added.
      */
-    fun enqueue(files: List<MediaFile>) {
+    fun enqueue(files: List<MediaFile>): Int {
         synchronized(lock) {
             if (shutDown) {
                 LOG.warn("The download queue for {} is shut down", address)
-                return
+                return 0
             }
             val known = queue.mapTo(HashSet()) { it.id }
             current?.let { known.add(it.id) }
             val added = files.filter { known.add(it.id) }
             LOG.debug("Queued {} of {} files for download from {}", added.size, files.size, address)
             if (added.isEmpty()) {
-                return
+                return 0
             }
             queue.addAll(added)
+            // A file that completes again must change the completed set
+            completed = completed - added.mapTo(HashSet()) { it.id }
             if (worker == null) {
                 start()
             } else {
                 count += added.size
+                totalBytes += sizeOf(added)
             }
+            publish()
+            return added.size
         }
     }
 
@@ -87,15 +120,16 @@ class GalleryDownloadQueue(
      */
     fun remove(ids: Set<String>) {
         val stream = synchronized(lock) {
-            val queued = queue.size
+            val removed = queue.filter { it.id in ids }
             queue.removeAll { it.id in ids }
-            val removed = queued - queue.size
             val stopCurrent = !currentRemoved && current?.let { it.id in ids } == true
-            if (removed == 0 && !stopCurrent) {
+            if (removed.isEmpty() && !stopCurrent) {
                 return
             }
-            LOG.debug("Removed {} files from the download queue of {}, current={}", removed, address, stopCurrent)
-            count -= removed
+            LOG.debug("Removed {} files from the download queue of {}, current={}", removed.size, address, stopCurrent)
+            count -= removed.size
+            totalBytes -= sizeOf(removed)
+            publish()
             // The current file leaves the count only when its download stops before the commit
             if (stopCurrent) {
                 currentRemoved = true
@@ -125,6 +159,8 @@ class GalleryDownloadQueue(
 
     private fun start() {
         count = queue.size
+        totalBytes = sizeOf(queue)
+        doneBytes = 0
         downloaded = 0
         skipped = 0
         failed = 0
@@ -144,6 +180,7 @@ class GalleryDownloadQueue(
                 failed += queue.size
             }
             queue.clear()
+            publish()
             currentStream
         }
         closeStream(stream)
@@ -196,6 +233,8 @@ class GalleryDownloadQueue(
         currentRemoved = false
         if (file == null) {
             finish()
+        } else {
+            publish()
         }
         file
     }
@@ -208,7 +247,12 @@ class GalleryDownloadQueue(
             val created = store.create(file)
             target = created
             if (created == null) {
-                synchronized(lock) { skipped++ }
+                synchronized(lock) {
+                    skipped++
+                    totalBytes -= sizeOf(file)
+                    completed = completed + file.id
+                    publish()
+                }
                 return
             }
             val (bytes, length) = source.open(file, Variant.ORIGINAL, 0, -1).use { stream ->
@@ -237,9 +281,12 @@ class GalleryDownloadQueue(
             LOG.info("Downloaded {}, {} bytes, to {}", file.name, bytes, uri)
             synchronized(lock) {
                 downloaded++
+                doneBytes += sizeOf(file)
                 if (uri != null) {
                     lastUri = uri
                 }
+                completed = completed + file.id
+                publish()
             }
         } catch (e: Exception) {
             target?.delete()
@@ -249,6 +296,7 @@ class GalleryDownloadQueue(
                 } else if (currentRemoved) {
                     LOG.info("Stopped the download of {}, it is removed from the queue", file.name)
                     count--
+                    totalBytes -= sizeOf(file)
                 } else {
                     LOG.error("Failed to download {}", file.name, e)
                     failed += 1 + queue.size
@@ -291,10 +339,43 @@ class GalleryDownloadQueue(
         }
     }
 
+    /**
+     * Shows the progress of the run, with [bytes] of [length] of the current [file].
+     */
     private fun notifyProgress(file: MediaFile, bytes: Long, length: Long) {
-        val (index, total) = synchronized(lock) { downloaded + skipped + failed + 1 to count }
-        GalleryDownloadNotification.progress(context, address, index, total, file.name, bytes, length)
+        val percent = if (length > 0) (bytes * 100 / length).toInt().coerceIn(0, 100) else 0
+        _state.update { if (it.current == file.id) it.copy(progress = percent) else it }
+        val index: Int
+        val total: Int
+        val runBytes: Long
+        val runLength: Long
+        synchronized(lock) {
+            index = downloaded + skipped + failed + 1
+            total = count
+            // A file with an unknown size is not in totalBytes
+            runBytes = doneBytes + bytes.coerceAtMost(sizeOf(file))
+            runLength = totalBytes
+        }
+        GalleryDownloadNotification.progress(context, address, index, total, file.name, runBytes, runLength)
     }
+
+    /**
+     * Publishes the [State]. The caller must hold [lock].
+     */
+    private fun publish() {
+        val currentId = current?.id
+        val previous = _state.value
+        _state.value = State(
+            queued = queue.mapTo(LinkedHashSet()) { it.id },
+            current = currentId,
+            progress = if (currentId == previous.current) previous.progress else 0,
+            completed = completed
+        )
+    }
+
+    private fun sizeOf(file: MediaFile) = file.size.coerceAtLeast(0)
+
+    private fun sizeOf(files: Collection<MediaFile>) = files.sumOf { sizeOf(it) }
 
     /**
      * Shows the summary, and starts a new run for the files that were queued after the queue stopped.
@@ -327,6 +408,7 @@ class GalleryDownloadQueue(
         if (queue.isNotEmpty() && !shutDown) {
             start()
         }
+        publish()
     }
 
     companion object {

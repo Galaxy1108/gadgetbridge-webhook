@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.OptIn
@@ -23,6 +24,7 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.activities.gallery.GalleryViewModel.DownloadStatus
 import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentGalleryViewerBinding
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryCapability
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryPreviewCaches
@@ -53,6 +55,9 @@ class GalleryViewerFragment : DialogFragment() {
     // The pager is at the start file
     private var positioned = false
     private var acquired = false
+
+    // The state that the download item displays
+    private var downloadStatus: DownloadStatus? = null
 
     private val playerListener = object : Player.Listener {
         override fun onPlayerError(error: PlaybackException) {
@@ -153,6 +158,7 @@ class GalleryViewerFragment : DialogFragment() {
     override fun onDestroyView() {
         binding = null
         positioned = false
+        downloadStatus = null
         super.onDestroyView()
     }
 
@@ -232,11 +238,29 @@ class GalleryViewerFragment : DialogFragment() {
             setIcon(if (file.favorite) R.drawable.ic_star_gold else R.drawable.ic_star_gray)
             setTitle(if (file.favorite) R.string.gallery_unfavorite else R.string.gallery_favorite)
         }
+        updateDownloadItem(toolbar.menu, viewModel.state.value.downloadStatus(file.id))
         toolbar.subtitle = if (file.type == MediaType.VIDEO) {
             getString(R.string.date_placeholders__date__time, time, GalleryAdapter.formatDuration(file.duration))
         } else {
             time
         }
+    }
+
+    private fun updateDownloadItem(menu: Menu, status: DownloadStatus) {
+        if (status == downloadStatus) {
+            return
+        }
+        downloadStatus = status
+        val item = menu.findItem(R.id.gallery_download) ?: return
+        val (icon, title) = when (status) {
+            DownloadStatus.NONE -> R.drawable.ic_download to R.string.ftp_file_browser_download
+            DownloadStatus.QUEUED -> R.drawable.ic_access_time to R.string.gallery_download_queued
+            DownloadStatus.DOWNLOADING -> R.drawable.ic_downloading to R.string.busy_task_downloading
+            DownloadStatus.DOWNLOADED -> R.drawable.ic_download_done to R.string.gallery_downloaded
+        }
+        item.setIcon(icon)
+        item.setTitle(title)
+        item.isEnabled = status == DownloadStatus.NONE
     }
 
     /**

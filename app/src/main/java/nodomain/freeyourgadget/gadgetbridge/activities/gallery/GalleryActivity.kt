@@ -304,6 +304,7 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
         filterChipIds[state.filter]?.let { binding.galleryFilters.check(it) }
         adapter.submitList(state.files) { loadMoreIfNearEnd() }
         adapter.setSelected(state.selected)
+        adapter.setDownloadState(state)
         footerAdapter.loading = state.loading
 
         binding.galleryEmpty.isVisible = state.complete && state.files.isEmpty() && state.error == null
@@ -375,9 +376,13 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
         } else {
             R.string.gallery_favorite_error
         }
+        showSnackbar(getString(text, error.message))
+    }
+
+    private fun showSnackbar(text: String) {
         // The viewer is a dialog above the grid
         val viewer = supportFragmentManager.findFragmentByTag(GalleryViewerFragment.TAG)?.view
-        Snackbar.make(viewer ?: binding.root, getString(text, error.message), Snackbar.LENGTH_LONG).show()
+        Snackbar.make(viewer ?: binding.root, text, Snackbar.LENGTH_LONG).show()
     }
 
     fun confirmThenDelete(files: List<MediaFile>) {
@@ -394,7 +399,7 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
     }
 
     /**
-     * Adds the files to the device's download queue.
+     * Adds the files that are not downloaded to the device's download queue.
      */
     fun download(files: List<MediaFile>) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
@@ -410,8 +415,16 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
             finishNotConnected()
             return
         }
-        LOG.debug("Downloading {} files", files.size)
-        queue.enqueue(files)
+        val downloaded = viewModel.state.value.downloaded
+        val missing = files.filter { it.id !in downloaded }
+        LOG.debug("Downloading {} of {} files", missing.size, files.size)
+        val text = if (missing.isEmpty()) {
+            resources.getQuantityString(R.plurals.gallery_download_already_downloaded, files.size, files.size)
+        } else {
+            val added = queue.enqueue(missing)
+            resources.getQuantityString(R.plurals.gallery_download_added, added, added)
+        }
+        showSnackbar(text)
     }
 
     private fun loadMoreIfNearEnd() {
