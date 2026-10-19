@@ -196,11 +196,18 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
                     openViewer(file)
                 }
             },
-            onLongClick = { file -> viewModel.toggleSelection(file) }
+            onLongClick = { file -> viewModel.toggleSelection(file) },
+            onHeaderClick = { header ->
+                if (viewModel.state.value.selected.isNotEmpty()) {
+                    viewModel.toggleSelection(header.ids)
+                }
+            },
+            onHeaderLongClick = { header -> viewModel.toggleSelection(header.ids) }
         )
         val layoutManager = GridLayoutManager(this, spanCount)
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(position: Int) = if (position < adapter.itemCount) 1 else spanCount
+            override fun getSpanSize(position: Int) =
+                if (position < adapter.itemCount && !adapter.isHeader(position)) 1 else spanCount
         }
         binding.galleryGrid.layoutManager = layoutManager
         binding.galleryGrid.adapter = ConcatAdapter(adapter, footerAdapter)
@@ -302,7 +309,7 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
 
     private fun render(state: GalleryViewModel.State) {
         filterChipIds[state.filter]?.let { binding.galleryFilters.check(it) }
-        adapter.submitList(state.files) { loadMoreIfNearEnd() }
+        adapter.submitFiles(state.files) { loadMoreIfNearEnd() }
         adapter.setSelected(state.selected)
         adapter.setDownloadState(state)
         footerAdapter.loading = state.loading
@@ -429,6 +436,7 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
 
     private fun loadMoreIfNearEnd() {
         val layoutManager = binding.galleryGrid.layoutManager as GridLayoutManager
+        // The positions and the item count include the day headers
         if (layoutManager.findLastVisibleItemPosition() >= adapter.itemCount - LOAD_AHEAD_ITEMS) {
             viewModel.loadMore()
         }

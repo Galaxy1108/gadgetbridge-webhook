@@ -230,6 +230,16 @@ class GalleryViewModel(
         }
     }
 
+    /**
+     * Selects the files in [ids]. When all of them are selected, deselects them.
+     */
+    fun toggleSelection(ids: Collection<String>) {
+        _state.update {
+            val selected = if (it.selected.containsAll(ids)) it.selected - ids.toSet() else it.selected + ids
+            it.copy(selected = selected)
+        }
+    }
+
     fun clearSelection() {
         _state.update { it.copy(selected = emptySet()) }
     }
