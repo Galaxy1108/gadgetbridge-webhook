@@ -3,12 +3,14 @@ package nodomain.freeyourgadget.gadgetbridge.activities.gallery
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.annotation.OptIn
 import androidx.core.view.isVisible
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.ImageLoader
@@ -18,6 +20,7 @@ import coil3.request.CachePolicy
 import coil3.request.error
 import coil3.request.placeholder
 import coil3.size.Precision
+import coil3.size.Scale
 import coil3.size.Size
 import java.io.FileNotFoundException
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +52,7 @@ class GalleryViewerAdapter(
     private val onOriginalFailed: (MediaFile, Boolean) -> Unit,
     private val onFullscreenButtonClick: (Boolean) -> Unit,
     private val onPhotoClick: () -> Unit,
+    private val onControlsVisibilityChange: (Boolean) -> Unit,
 ) : ListAdapter<MediaFile, RecyclerView.ViewHolder>(GalleryAdapter.DIFF) {
     class PhotoHolder(val binding: ItemGalleryViewerPhotoBinding) : RecyclerView.ViewHolder(binding.root) {
         var fileId: String? = null
@@ -107,10 +111,17 @@ class GalleryViewerAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return if (viewType == MediaType.VIDEO.ordinal) {
-            VideoHolder(ItemGalleryViewerVideoBinding.inflate(inflater, parent, false)).also {
-                it.binding.galleryViewerPlayer.setFullscreenButtonClickListener { fullscreen ->
+            VideoHolder(ItemGalleryViewerVideoBinding.inflate(inflater, parent, false)).also { holder ->
+                holder.binding.galleryViewerPlayer.setFullscreenButtonClickListener { fullscreen ->
                     onFullscreenButtonClick(fullscreen)
                 }
+                holder.binding.galleryViewerPlayer.setControllerVisibilityListener(
+                    PlayerView.ControllerVisibilityListener { visibility ->
+                        if (holder.fileId == activeId) {
+                            onControlsVisibilityChange(visibility == View.VISIBLE)
+                        }
+                    }
+                )
             }
         } else {
             PhotoHolder(ItemGalleryViewerPhotoBinding.inflate(inflater, parent, false)).also {
@@ -162,9 +173,21 @@ class GalleryViewerAdapter(
         }
     }
 
+    override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
+        // A page that leaves the screen displays its photo at fit-center when it comes back
+        if (holder is PhotoHolder) {
+            holder.binding.galleryViewerImage.resetZoom()
+        }
+    }
+
     private fun bindPlayer(holder: VideoHolder) {
-        holder.binding.galleryViewerPlayer.player = if (holder.fileId == activeId) player else null
-        holder.binding.galleryViewerPlayer.setFullscreenButtonState(fullscreen)
+        val playerView = holder.binding.galleryViewerPlayer
+        playerView.player = if (holder.fileId == activeId) player else null
+        // A page that becomes active again starts with hidden controls
+        if (playerView.player == null) {
+            playerView.hideController()
+        }
+        playerView.setFullscreenButtonState(fullscreen)
     }
 
     private fun bindPhoto(holder: PhotoHolder, file: MediaFile) {
@@ -173,6 +196,9 @@ class GalleryViewerAdapter(
         holder.job = null
         // The page displays its current image until the new image is decoded
         val placeholder = if (holder.fileId == file.id) binding.galleryViewerImage.drawable else null
+        if (holder.fileId != file.id) {
+            binding.galleryViewerImage.resetZoom()
+        }
         holder.fileId = file.id
         binding.galleryViewerImage.contentDescription = file.name
         if (file.id !in local) {
@@ -195,6 +221,8 @@ class GalleryViewerAdapter(
             binding.galleryViewerImage.load(uri, imageLoader) {
                 size(originalSize)
                 precision(Precision.INEXACT)
+                // Coil reads the MATRIX scale type of the view as FILL, which decodes a larger bitmap
+                scale(Scale.FIT)
                 // The original is a local file, and it must not use the caches of the device
                 memoryCachePolicy(CachePolicy.DISABLED)
                 diskCachePolicy(CachePolicy.DISABLED)

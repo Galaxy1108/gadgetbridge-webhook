@@ -3,12 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
+    <nodomain.freeyourgadget.gadgetbridge.activities.gallery.ZoomableImageView
         android:id="@+id/gallery_viewer_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="no"
-        android:scaleType="fitCenter" />
+        android:layout_height="match_parent" />
 
     <ProgressBar
         android:id="@+id/gallery_viewer_progress"

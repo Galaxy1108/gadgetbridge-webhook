@@ -66,12 +66,19 @@ class GalleryViewerFragment : DialogFragment() {
     // The downloaded files whose local original failed to open or to play, and that display the preview
     private val failedOriginals = HashSet<String>()
 
-    private var fullscreen = false
+    // The toolbar and the system bars are hidden
+    private var immersive = false
+
+    // Immersive in the landscape orientation, from the fullscreen button of a video
+    private var videoFullscreen = false
     private var orientationBeforeFullscreen = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
-    private val fullscreenBackCallback = object : OnBackPressedCallback(false) {
+    // The controls of the active video are visible
+    private var controlsVisible = false
+
+    private val immersiveBackCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
-            setFullscreen(false)
+            setImmersive(immersive = false, videoFullscreen = false)
         }
     }
 
@@ -109,14 +116,15 @@ class GalleryViewerFragment : DialogFragment() {
         activeId = savedInstanceState?.getString(KEY_FILE_ID) ?: requireArguments().getString(KEY_FILE_ID)
         resumeId = savedInstanceState?.getString(KEY_RESUME_ID)
         resumePosition = savedInstanceState?.getLong(KEY_RESUME_POSITION) ?: 0L
-        fullscreen = savedInstanceState?.getBoolean(KEY_FULLSCREEN) ?: false
+        immersive = savedInstanceState?.getBoolean(KEY_IMMERSIVE) ?: false
+        videoFullscreen = savedInstanceState?.getBoolean(KEY_VIDEO_FULLSCREEN) ?: false
         orientationBeforeFullscreen = savedInstanceState?.getInt(KEY_ORIENTATION_BEFORE_FULLSCREEN)
             ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState) as ComponentDialog
-        dialog.onBackPressedDispatcher.addCallback(this, fullscreenBackCallback)
+        dialog.onBackPressedDispatcher.addCallback(this, immersiveBackCallback)
         return dialog
     }
 
@@ -135,8 +143,17 @@ class GalleryViewerFragment : DialogFragment() {
             Size(metrics.widthPixels * ORIGINAL_SCALE, metrics.heightPixels * ORIGINAL_SCALE),
             findOriginal = { viewModel.findOriginal(it) },
             onOriginalFailed = { file, missing -> onOriginalFailed(file, missing) },
-            onFullscreenButtonClick = { setFullscreen(it) },
-            onPhotoClick = { setFullscreen(false) }
+            onFullscreenButtonClick = { enabled ->
+                // The button state of a page also changes when the adapter sets it
+                if (enabled != videoFullscreen) {
+                    setImmersive(enabled, enabled)
+                }
+            },
+            onPhotoClick = { setImmersive(!immersive, false) },
+            onControlsVisibilityChange = { visible ->
+                controlsVisible = visible
+                updateToolbarVisibility(true)
+            }
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { root, insets ->
@@ -189,7 +206,7 @@ class GalleryViewerFragment : DialogFragment() {
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        applyFullscreen()
+        applyImmersive(false)
         val newPlayer = ExoPlayer.Builder(requireContext()).build()
         newPlayer.addListener(playerListener)
         player = newPlayer
@@ -224,7 +241,7 @@ class GalleryViewerFragment : DialogFragment() {
 
     override fun onDestroy() {
         val activity = activity
-        if (fullscreen && activity != null && !activity.isChangingConfigurations) {
+        if (videoFullscreen && activity != null && !activity.isChangingConfigurations) {
             activity.requestedOrientation = orientationBeforeFullscreen
         }
         super.onDestroy()
@@ -241,7 +258,8 @@ class GalleryViewerFragment : DialogFragment() {
         outState.putString(KEY_FILE_ID, activeId)
         outState.putString(KEY_RESUME_ID, resumeId)
         outState.putLong(KEY_RESUME_POSITION, resumePosition)
-        outState.putBoolean(KEY_FULLSCREEN, fullscreen)
+        outState.putBoolean(KEY_IMMERSIVE, immersive)
+        outState.putBoolean(KEY_VIDEO_FULLSCREEN, videoFullscreen)
         outState.putInt(KEY_ORIENTATION_BEFORE_FULLSCREEN, orientationBeforeFullscreen)
     }
 
@@ -309,6 +327,8 @@ class GalleryViewerFragment : DialogFragment() {
         if (file.id != activeId) {
             activeId = file.id
             adapter.setActive(file.id, player)
+            controlsVisible = false
+            updateToolbarVisibility(true)
             preparePlayer()
         }
     }
@@ -420,40 +440,62 @@ class GalleryViewerFragment : DialogFragment() {
         }
     }
 
-    private fun setFullscreen(enabled: Boolean) {
-        if (enabled == fullscreen) {
+    private fun setImmersive(immersive: Boolean, videoFullscreen: Boolean) {
+        if (immersive == this.immersive && videoFullscreen == this.videoFullscreen) {
             return
         }
-        LOG.debug("Fullscreen: {}", enabled)
-        fullscreen = enabled
+        LOG.debug("Immersive: {}, video fullscreen: {}", immersive, videoFullscreen)
         val activity = requireActivity()
-        if (enabled) {
+        if (videoFullscreen && !this.videoFullscreen) {
             orientationBeforeFullscreen = activity.requestedOrientation
-        } else {
+        } else if (!videoFullscreen && this.videoFullscreen) {
             activity.requestedOrientation = orientationBeforeFullscreen
         }
-        applyFullscreen()
+        this.immersive = immersive
+        this.videoFullscreen = videoFullscreen
+        applyImmersive(true)
     }
 
     /**
-     * In fullscreen, sets the landscape orientation and hides the system bars and the toolbar.
-     * In the normal state, displays the system bars and the toolbar.
+     * When immersive, hides the system bars and the toolbar. In video fullscreen, also sets the landscape
+     * orientation. Else, displays the system bars and the toolbar.
      */
-    private fun applyFullscreen() {
-        if (fullscreen) {
+    private fun applyImmersive(animate: Boolean) {
+        if (videoFullscreen) {
             // The orientation request is lost when the process is restored
             requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
-        fullscreenBackCallback.isEnabled = fullscreen
-        binding?.galleryViewerToolbar?.isVisible = !fullscreen
-        adapter.setFullscreen(fullscreen)
+        immersiveBackCallback.isEnabled = immersive
+        adapter.setFullscreen(videoFullscreen)
+        updateToolbarVisibility(animate)
         val window = dialog?.window ?: return
         val controller = WindowCompat.getInsetsController(window, window.decorView)
-        if (fullscreen) {
+        if (immersive) {
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(WindowInsetsCompat.Type.systemBars())
         } else {
             controller.show(WindowInsetsCompat.Type.systemBars())
+        }
+    }
+
+    /**
+     * Displays the toolbar when not immersive, or together with the controls of the active video.
+     */
+    private fun updateToolbarVisibility(animate: Boolean) {
+        val toolbar = binding?.galleryViewerToolbar ?: return
+        val visible = !immersive || controlsVisible
+        toolbar.animate().cancel()
+        if (!animate) {
+            toolbar.alpha = 1f
+            toolbar.isVisible = visible
+        } else if (visible) {
+            if (!toolbar.isVisible) {
+                toolbar.alpha = 0f
+                toolbar.isVisible = true
+            }
+            toolbar.animate().alpha(1f).setDuration(TOOLBAR_FADE_MS)
+        } else if (toolbar.isVisible) {
+            toolbar.animate().alpha(0f).setDuration(TOOLBAR_FADE_MS).withEndAction { toolbar.isVisible = false }
         }
     }
 
@@ -465,10 +507,12 @@ class GalleryViewerFragment : DialogFragment() {
         private const val KEY_FILE_ID = "file_id"
         private const val KEY_RESUME_ID = "resume_id"
         private const val KEY_RESUME_POSITION = "resume_position"
-        private const val KEY_FULLSCREEN = "fullscreen"
+        private const val KEY_IMMERSIVE = "immersive"
+        private const val KEY_VIDEO_FULLSCREEN = "video_fullscreen"
         private const val KEY_ORIENTATION_BEFORE_FULLSCREEN = "orientation_before_fullscreen"
         private const val URI_SCHEME = "gallery"
         private const val LOAD_AHEAD_PAGES = 5
+        private const val TOOLBAR_FADE_MS = 200L
 
         // The local original of a photo is decoded at most at this multiple of the screen size
         private const val ORIGINAL_SCALE = 2
