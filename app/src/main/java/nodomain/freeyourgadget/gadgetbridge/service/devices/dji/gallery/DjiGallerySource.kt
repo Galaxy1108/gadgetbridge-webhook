@@ -57,6 +57,7 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
     private val transferId = AtomicInteger(Random.nextInt(0x10000))
     private val requestCounter = AtomicLong(0)
 
+    // A new listing does not clear it, because a queued download can open a file of another filter
     private val listedRecords = ConcurrentHashMap<String, DjiFileList.Record>()
 
     // The camera does not complete a file list transfer while another one is in progress
@@ -119,9 +120,6 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
             LOG.debug("Received {} records in transfer {}", pageRecords.size, id)
             for (record in pageRecords) {
                 LOG.debug("Received record {}", record)
-            }
-            if (after == null) {
-                listedRecords.clear()
             }
             val files = pageRecords
                 .filterIndexed { index, record -> !(index == 0 && after != null && record.fileId == cursor) }

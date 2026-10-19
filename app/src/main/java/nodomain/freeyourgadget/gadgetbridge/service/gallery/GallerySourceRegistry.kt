@@ -23,9 +23,13 @@ object GallerySourceRegistry {
         LOG.debug("Unregistering gallery source for {}", address)
         if (sources.remove(address, source)) {
             try {
-                GalleryImageLoaders.shutdown(address)
+                GalleryDownloadQueues.shutdown(address)
             } finally {
-                GalleryPreviewCaches.release(address)
+                try {
+                    GalleryImageLoaders.shutdown(address)
+                } finally {
+                    GalleryPreviewCaches.release(address)
+                }
             }
         }
     }

@@ -83,6 +83,20 @@ class GalleryViewerFragment : DialogFragment() {
             WindowInsetsCompat.CONSUMED
         }
         binding.galleryViewerToolbar.setNavigationOnClickListener { dismiss() }
+        binding.galleryViewerToolbar.inflateMenu(R.menu.menu_gallery_viewer)
+        binding.galleryViewerToolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.gallery_download -> {
+                    val file = viewModel.state.value.files.firstOrNull { it.id == activeId }
+                    if (file != null) {
+                        (requireActivity() as GalleryActivity).download(listOf(file))
+                    }
+                    true
+                }
+
+                else -> false
+            }
+        }
         binding.galleryViewerPager.adapter = adapter
         binding.galleryViewerPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {

@@ -5626,6 +5626,10 @@
     <string name="gallery_filter_favorites">Favorites</string>
     <string name="gallery_empty">No photos or videos</string>
     <string name="gallery_clear_cache">Clear cache</string>
+    <string name="gallery_download_progress">Downloading %1$d/%2$d</string>
+    <string name="gallery_download_summary">%1$d downloaded, %2$d skipped, %3$d failed</string>
+    <string name="gallery_download_failed">Download failed</string>
+    <string name="gallery_download_error_storage_permission">Storage permission not granted</string>
     <string name="toast_error_invalid_api_key">Invalid API key</string>
     <string name="eco">Eco</string>
     <string name="prefs_title_offgrid_mode">Off-grid mode</string>

@@ -1,9 +1,12 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.gallery
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -11,8 +14,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.view.ActionMode
+import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -33,6 +38,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.wifi.WifiSessionScreen
 import nodomain.freeyourgadget.gadgetbridge.databinding.ActivityGalleryBinding
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryCapability
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryDownloadQueues
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryFilter
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryImageLoaders
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GallerySourceRegistry
@@ -73,11 +79,25 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
     }
 
     private val actionModeCallback = object : ActionMode.Callback {
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu) = true
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.menuInflater.inflate(R.menu.menu_gallery_selection, menu)
+            return true
+        }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
 
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem) = false
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            return when (item.itemId) {
+                R.id.gallery_download -> {
+                    val state = viewModel.state.value
+                    download(state.files.filter { it.id in state.selected })
+                    mode.finish()
+                    true
+                }
+
+                else -> false
+            }
+        }
 
         override fun onDestroyActionMode(mode: ActionMode) {
             actionMode = null
@@ -87,6 +107,25 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
             }
         }
     }
+
+    private var filesWaitingForPermission: List<MediaFile>? = null
+
+    private val storagePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val files = filesWaitingForPermission
+            filesWaitingForPermission = null
+            if (!granted) {
+                LOG.warn("The storage permission is not granted")
+                GB.toast(
+                    this,
+                    getString(R.string.gallery_download_error_storage_permission),
+                    Toast.LENGTH_LONG,
+                    GB.ERROR
+                )
+            } else if (files != null) {
+                download(files)
+            }
+        }
 
     // The [GallerySource] is unregistered before the service broadcasts the device change
     private val deviceReceiver = object : BroadcastReceiver() {
@@ -260,6 +299,27 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
         }
         val mode = actionMode ?: startSupportActionMode(actionModeCallback)?.also { actionMode = it } ?: return
         mode.title = getString(R.string.number_selected_items, count)
+    }
+
+    /**
+     * Adds the files to the device's download queue.
+     */
+    fun download(files: List<MediaFile>) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            filesWaitingForPermission = files
+            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            return
+        }
+        val queue = GalleryDownloadQueues.get(device, viewModel.source)
+        if (queue == null) {
+            finishNotConnected()
+            return
+        }
+        LOG.debug("Downloading {} files", files.size)
+        queue.enqueue(files)
     }
 
     private fun loadMoreIfNearEnd() {
