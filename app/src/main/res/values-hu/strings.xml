@@ -4589,4 +4589,15 @@
     <string name="accent_color_pink">Rózsaszín</string>
     <string name="accent_color_white">Fehér</string>
     <string name="pref_title_contrasting_surfaces">Kontrasztos felületek</string>
+    <string name="pref_title_do_not_archive_activity_data">Ne archiválja tevékenységi adatokat</string>
+    <string name="pref_summary_do_not_archive_activity_data">Ne jelölje a tevékenységeket szinkronizáltnak az eszközön. Akkor hasznos, ha a Gadgetbridge-t más alkalmazásokkal párhuzamosan használja. Ez azonban okozhatja az óra háttértárának megtelítődését és emiatt nem fog szinkronizálni.</string>
+    <string name="watchface_install_resolution_matches">A számlap felbontás megegyezik az eszközével. Ha a számlap kompatibilis is, a Gadgetbridge nem tudja megállapítani teljes biztonsággal. Egy más termékre készült számlap könnyen tönkre teheti eszközét.</string>
+    <string name="watchface_install_aspect_ratio_matches">A számlap előnézet megegyezik az eszközével. Ha a számlap kompatibilis is, a Gadgetbridge nem tudja megállapítani teljes biztonsággal. Egy más termékre készült számlap könnyen tönkre teheti eszközét.</string>
+    <string name="watchface_install_compatibility_unknown">A Gadgetbridge nem tudja megállapítani teljes biztonsággal, hogy a számlap kompatibilis e az eszközével. Egy más termékre készült számlap könnyen tönkre teheti eszközét.</string>
+    <string name="watchface_install_confirm_risk">Tisztában vagyok a kockázattal, mindenképp telepítse</string>
+    <string name="pref_sleep_stage_estimation_title">Hozzávetőleges alvási ciklusok</string>
+    <string name="pref_sleep_stage_estimation_summary">Hozzávetőleges könnyű, mély és REM alvás meghatározása a mozgásból és pulzusszámból, finomítva az eszköz által jelentett alvási információkat.</string>
+    <string name="pref_sleep_respiratory_rate_monitoring">Alvási levegővétel figyelés</string>
+    <string name="pref_heartrate_alert_irregular_rhythm">Rendellenes szívritmus figyelmeztetés</string>
+    <string name="ak102_prefs_audio_header">Bluetooth hanghívás</string>
 </resources>
