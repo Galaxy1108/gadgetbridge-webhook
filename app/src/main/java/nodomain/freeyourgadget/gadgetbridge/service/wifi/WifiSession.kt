@@ -221,6 +221,10 @@ abstract class WifiSession<C : Closeable, S : Enum<S>>(
 
     private fun start(): C {
         startingThread = Thread.currentThread()
+        if (disposed) {
+            startingThread = null
+            throw IOException(context.getString(R.string.wifi_ftp_error_closed))
+        }
         val start = System.currentTimeMillis()
         LOG.info("Opening session for {}", device.address)
         try {
