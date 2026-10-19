@@ -5,7 +5,7 @@ package nodomain.freeyourgadget.gadgetbridge.service.gallery
  */
 data class GalleryImage(val file: MediaFile, val variant: Variant) {
     /**
-     * The key of the image in the disk cache of its device.
+     * The key of the variant in the disk caches of its device.
      */
     val cacheKey: String
         get() = "$variant:${file.id}:${file.size}"

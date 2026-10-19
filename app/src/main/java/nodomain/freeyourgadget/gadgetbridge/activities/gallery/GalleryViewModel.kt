@@ -13,8 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryFilter
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryImageLoaders
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryPreviewCaches
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GallerySource
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.MediaFile
 import org.slf4j.Logger
@@ -24,7 +26,7 @@ import org.slf4j.LoggerFactory
  * The gallery of one [GallerySource]: the pages loaded for the current filter, and the selection.
  */
 class GalleryViewModel(
-    private val address: String,
+    val device: GBDevice,
     val source: GallerySource,
     val imageLoader: ImageLoader,
 ) : ViewModel() {
@@ -164,16 +166,22 @@ class GalleryViewModel(
     }
 
     /**
-     * Clears the thumbnails of the device from the memory cache and from the disk cache.
+     * Clears the gallery cache of the device, from the memory cache and from the disk cache.
+     * Includes both the thumbnails and previews.
      */
     suspend fun clearCache() {
-        LOG.debug("Clearing the thumbnail caches of {}", address)
+        LOG.debug("Clearing the gallery caches of {}", device.address)
         withContext(Dispatchers.IO) {
             try {
-                GalleryImageLoaders.clearCache(address)
+                GalleryImageLoaders.clearCache(device.address)
             } catch (e: Exception) {
                 // The disk cache is closed when the device disconnects
                 LOG.warn("Failed to clear the disk cache", e)
+            }
+            try {
+                GalleryPreviewCaches.clearCache(device)
+            } catch (e: Exception) {
+                LOG.warn("Failed to clear the preview cache", e)
             }
         }
     }

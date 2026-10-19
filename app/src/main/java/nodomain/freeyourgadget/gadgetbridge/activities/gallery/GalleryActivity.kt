@@ -36,8 +36,11 @@ import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryCapability
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryFilter
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryImageLoaders
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GallerySourceRegistry
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.MediaFile
 import nodomain.freeyourgadget.gadgetbridge.util.GB
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.EnumMap
 import kotlin.math.max
 
@@ -60,11 +63,11 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
     // runWhenReady can run its action after onStop, for example after the asynchronous Wi-Fi check
     private var started = false
 
-    private val viewModel: GalleryViewModel by viewModels {
+    val viewModel: GalleryViewModel by viewModels {
         viewModelFactory {
             initializer {
                 val source = GallerySourceRegistry.get(device.address)!!
-                GalleryViewModel(device.address, source, GalleryImageLoaders.get(device, source))
+                GalleryViewModel(device, source, GalleryImageLoaders.get(device, source))
             }
         }
     }
@@ -118,6 +121,8 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
             onClick = { file ->
                 if (viewModel.state.value.selected.isNotEmpty()) {
                     viewModel.toggleSelection(file)
+                } else {
+                    openViewer(file)
                 }
             },
             onLongClick = { file -> viewModel.toggleSelection(file) }
@@ -264,6 +269,15 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
         }
     }
 
+    private fun openViewer(file: MediaFile) {
+        val fragments = supportFragmentManager
+        if (fragments.isStateSaved || fragments.findFragmentByTag(GalleryViewerFragment.TAG) != null) {
+            return
+        }
+        LOG.debug("Opening the viewer for {}", file.id)
+        GalleryViewerFragment.newInstance(file.id).show(fragments, GalleryViewerFragment.TAG)
+    }
+
     private fun isSourceRegistered() = GallerySourceRegistry.get(device.address) === viewModel.source
 
     private fun finishNotConnected() {
@@ -278,6 +292,8 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
     }
 
     companion object {
+        private val LOG: Logger = LoggerFactory.getLogger(GalleryActivity::class.java)
+
         private const val CELL_WIDTH_DP = 120
         private const val MIN_SPAN_COUNT = 2
         private const val LOAD_AHEAD_ITEMS = 45

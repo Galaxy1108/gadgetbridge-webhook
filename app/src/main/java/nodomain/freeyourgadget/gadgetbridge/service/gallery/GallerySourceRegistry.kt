@@ -22,7 +22,11 @@ object GallerySourceRegistry {
     fun unregister(address: String, source: GallerySource) {
         LOG.debug("Unregistering gallery source for {}", address)
         if (sources.remove(address, source)) {
-            GalleryImageLoaders.shutdown(address)
+            try {
+                GalleryImageLoaders.shutdown(address)
+            } finally {
+                GalleryPreviewCaches.release(address)
+            }
         }
     }
 

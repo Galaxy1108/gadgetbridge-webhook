@@ -96,16 +96,16 @@ class GalleryAdapter(
         return if (position == RecyclerView.NO_POSITION) null else getItem(position)
     }
 
-    private fun formatDuration(seconds: Int): String {
-        return String.format(Locale.ROOT, "%d:%02d", seconds / 60, seconds % 60)
-    }
-
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(GalleryAdapter::class.java)
 
         private const val PAYLOAD_SELECTION = "selection"
 
-        private val DIFF = object : DiffUtil.ItemCallback<MediaFile>() {
+        fun formatDuration(seconds: Int): String {
+            return String.format(Locale.ROOT, "%d:%02d", seconds / 60, seconds % 60)
+        }
+
+        val DIFF = object : DiffUtil.ItemCallback<MediaFile>() {
             override fun areItemsTheSame(oldItem: MediaFile, newItem: MediaFile) = oldItem.id == newItem.id
             override fun areContentsTheSame(oldItem: MediaFile, newItem: MediaFile) = oldItem == newItem
         }

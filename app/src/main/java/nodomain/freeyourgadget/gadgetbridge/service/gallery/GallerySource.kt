@@ -1,5 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.service.gallery
 
+import java.io.FilterInputStream
 import java.io.IOException
 import java.io.InputStream
 
@@ -30,7 +31,7 @@ interface GallerySource {
      * It does not open the connection: the caller must hold an [acquire] call, else it throws an [IOException].
      */
     @Throws(IOException::class)
-    fun open(file: MediaFile, variant: Variant, offset: Long, length: Long): InputStream
+    fun open(file: MediaFile, variant: Variant, offset: Long, length: Long): GalleryStream
 
     @Throws(IOException::class)
     suspend fun setFavorite(files: List<MediaFile>, favorite: Boolean)
@@ -64,3 +65,10 @@ enum class Variant {
  * The [MediaFile]s of one listing request. [next] is the Page key of the next Page, or null at the end.
  */
 data class GalleryPage(val files: List<MediaFile>, val next: String?)
+
+/**
+ * The bytes of a variant of a [MediaFile], from [GallerySource.open].
+ *
+ * @property length the number of bytes in the stream, or -1 when the device does not report it
+ */
+open class GalleryStream(input: InputStream, val length: Long) : FilterInputStream(input)

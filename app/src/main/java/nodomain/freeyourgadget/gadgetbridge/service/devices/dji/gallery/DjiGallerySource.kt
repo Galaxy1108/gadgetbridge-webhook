@@ -21,6 +21,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryCapability
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryFilter
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryPage
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GallerySource
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryStream
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.MediaFile
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.MediaType
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.Variant
@@ -29,9 +30,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.internethelper.InternetHelperHt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
-import java.io.FilterInputStream
 import java.io.IOException
-import java.io.InputStream
 import java.util.EnumSet
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -136,10 +135,10 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
         }
     }
 
-    override fun open(file: MediaFile, variant: Variant, offset: Long, length: Long): InputStream {
+    override fun open(file: MediaFile, variant: Variant, offset: Long, length: Long): GalleryStream {
         val record = listedRecords[file.id] ?: throw IOException("Unknown file ${file.id}")
         if (length == 0L) {
-            return ByteArrayInputStream(ByteArray(0))
+            return GalleryStream(ByteArrayInputStream(ByteArray(0)), 0)
         }
         val path = when (variant) {
             Variant.THUMBNAIL -> "${record.thumbnailPath}.scr"
@@ -165,7 +164,9 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
                 response.close()
                 throw IOException("HTTP status ${response.status} for $path")
             }
-            return SessionInputStream(response)
+            val stream = SessionInputStream(response, contentLength(response.headers))
+            LOG.debug("Receiving {} bytes of {} from {}", stream.length, path, offset)
+            return stream
         } catch (e: Exception) {
             session.release()
             throw e
@@ -256,8 +257,17 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
         )
     }
 
-    private inner class SessionInputStream(private val response: InternetHelperHttpResponse) :
-        FilterInputStream(response.body) {
+    /**
+     * Returns the length of the response body, from the Content-Length or the Content-Range header, or -1.
+     */
+    private fun contentLength(headers: Map<String, String>): Long {
+        headers["content-length"]?.trim()?.toLongOrNull()?.let { return it }
+        val range = headers["content-range"]?.let { CONTENT_RANGE.matchEntire(it.trim()) } ?: return -1
+        return range.groupValues[2].toLong() - range.groupValues[1].toLong() + 1
+    }
+
+    private inner class SessionInputStream(private val response: InternetHelperHttpResponse, length: Long) :
+        GalleryStream(response.body, length) {
         private val closed = AtomicBoolean(false)
 
         override fun close() {
@@ -279,5 +289,6 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
         private const val TRANSFER_TIMEOUT_MS = 10_000L
         private const val HTTP_OK = 200
         private const val HTTP_PARTIAL_CONTENT = 206
+        private val CONTENT_RANGE = Regex("""bytes (\d+)-(\d+)/(\d+|\*)""")
     }
 }
