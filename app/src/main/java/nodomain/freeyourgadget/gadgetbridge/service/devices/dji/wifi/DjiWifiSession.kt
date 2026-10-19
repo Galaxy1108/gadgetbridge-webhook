@@ -152,6 +152,10 @@ class DjiWifiSession(
             } catch (_: InterruptedException) {
                 LOG.debug("Handshake interrupted")
             }
+            if (controlChannel !== channel) {
+                LOG.debug("Control Channel replaced, not closing the session")
+                return@thread
+            }
             LOG.warn("Control Channel not available, closing the session")
             close()
         }
