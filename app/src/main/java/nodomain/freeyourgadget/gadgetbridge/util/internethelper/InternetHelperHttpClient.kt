@@ -51,7 +51,7 @@ object InternetHelperHttpClient {
      * selects the default network.
      */
     @JvmStatic
-    @Throws(IOException::class)
+    @Throws(IOException::class, InterruptedException::class)
     fun get(
         url: String,
         headers: Map<String, String> = emptyMap(),
@@ -61,9 +61,12 @@ object InternetHelperHttpClient {
         val binding = InternetHelperBinding.bind(ACTION, { IHttpService.Stub.asInterface(it) })
         try {
             return send(binding, HttpRequest(url, HttpRequest.Method.GET, headers), networkRequestId, timeoutMs)
+        } catch (e: InterruptedException) {
+            binding.unbind()
+            throw e
         } catch (e: Exception) {
             binding.unbind()
-            throw e as? IOException ?: InternetHelperException(e.message ?: e.javaClass.simpleName)
+            throw InternetHelperException(e.message ?: e.javaClass.simpleName)
         }
     }
 
