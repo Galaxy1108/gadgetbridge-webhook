@@ -4859,8 +4859,6 @@
     <string name="bottom_nav_dashboard">Dashboard</string>
     <string name="bottom_nav_workouts">Workouts</string>
     <string name="bottom_nav_devices">Devices</string>
-    <string name="pref_dashboard_first_title">Show dashboard first</string>
-    <string name="pref_dashboard_first_summary">Show the dashboard when Gadgetbridge starts, instead of the devices screen</string>
     <string name="pref_dashboard_cards_title">Show widgets on cards</string>
     <string name="pref_dashboard_cards_summary">Draw cards around the widgets on the dashboard</string>
     <string name="pref_dashboard_widget_settings">Widget settings</string>
@@ -6292,4 +6290,7 @@
     <string name="pref_itag_beep_on_disconnect">Beep on disconnect</string>
     <string name="pref_itag_button_press">Action on button press</string>
     <string name="reset_fetch_timestamp_select_device">Select a single device first</string>
+    <string name="pref_main_screens_title">Main screens</string>
+    <string name="pref_main_screens_summary">Select and order the main screens of the app. Note that even when enabled, Dashboard and Workouts can remain hidden if no devices providing the necessary data are available.</string>
+    <string name="pref_default_main_screen_title">First screen on startup</string>
 </resources>
