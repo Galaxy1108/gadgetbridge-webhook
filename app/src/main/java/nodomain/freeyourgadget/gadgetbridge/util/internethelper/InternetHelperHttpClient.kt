@@ -66,7 +66,7 @@ object InternetHelperHttpClient {
             throw e
         } catch (e: Exception) {
             binding.unbind()
-            throw InternetHelperException(e.message ?: e.javaClass.simpleName)
+            throw e as? IOException ?: InternetHelperException(e.message ?: e.javaClass.simpleName)
         }
     }
 
