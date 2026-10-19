@@ -2,6 +2,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.gallery
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory
 import java.util.Locale
 
 /**
- * The grid cells of the [MediaFile]s, with the thumbnail, the video duration and the favorite flag.
+ * The grid cells of the [MediaFile]s: thumbnail, video duration, favorite flag, selection mark.
  */
 class GalleryAdapter(
     private val imageLoader: ImageLoader,
@@ -63,7 +64,7 @@ class GalleryAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_SELECTION || it == PAYLOAD_FAVORITE }) {
             val file = getItem(position)
-            holder.binding.root.isChecked = file.id in selected
+            bindSelection(holder.binding, file)
             holder.binding.galleryFileFavorite.isVisible = file.favorite
             return
         }
@@ -74,7 +75,7 @@ class GalleryAdapter(
         val file = getItem(position)
         val binding = holder.binding
         binding.root.contentDescription = file.name
-        binding.root.isChecked = file.id in selected
+        bindSelection(binding, file)
         binding.galleryFileThumbnail.load(GalleryImage(file, Variant.THUMBNAIL), imageLoader) {
             // Without a size, Coil waits for a pre-draw pass in which the new cell has a size.
             // This would not display anything until the user tried to scroll.
@@ -91,6 +92,14 @@ class GalleryAdapter(
 
     override fun onViewRecycled(holder: ViewHolder) {
         holder.binding.galleryFileThumbnail.dispose()
+    }
+
+    private fun bindSelection(binding: ItemGalleryFileBinding, file: MediaFile) {
+        val checked = file.id in selected
+        binding.root.isChecked = checked
+        binding.galleryFileSelectedOverlay.isInvisible = !checked
+        binding.galleryFileCheck.isInvisible = selected.isEmpty()
+        binding.galleryFileCheck.isActivated = checked
     }
 
     private fun fileAt(holder: ViewHolder): MediaFile? {

@@ -9,7 +9,10 @@
     android:focusable="true"
     app:cardCornerRadius="4dp"
     app:cardElevation="0dp"
-    app:strokeWidth="0dp">
+    app:cardForegroundColor="@android:color/transparent"
+    app:checkedIcon="@null"
+    app:strokeColor="@color/gallery_cell_stroke"
+    app:strokeWidth="3dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -66,6 +69,31 @@
             android:src="@drawable/ic_star_gold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <View
+            android:id="@+id/gallery_file_selected_overlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#66000000"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/gallery_file_check"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_gallery_check"
+            android:importantForAccessibility="no"
+            android:padding="3dp"
+            android:src="@drawable/ic_gallery_check"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@android:color/white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
