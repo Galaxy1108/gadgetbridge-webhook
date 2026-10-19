@@ -216,13 +216,21 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
             LOG.info("Skipping {}: {} exists with {} bytes", file.id, target, target.length())
             return null
         }
-        val stream = FileOutputStream(target)
-        LOG.debug("Created {}", target)
+        val partial = File(directory, "$name$PARTIAL_SUFFIX")
+        val stream = FileOutputStream(partial)
+        LOG.debug("Created {}", partial)
 
         return object : Target {
             override val output = stream
 
             override fun commit(): Uri? {
+                if (target.exists() && !target.delete()) {
+                    throw IOException("Failed to delete $target")
+                }
+                if (!partial.renameTo(target)) {
+                    throw IOException("Failed to rename $partial to $target")
+                }
+                LOG.debug("Renamed {} to {}", partial, target)
                 if (file.time > 0 && !target.setLastModified(file.time)) {
                     LOG.warn("Failed to set the time of {}", target)
                 }
@@ -242,10 +250,10 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
                 try {
                     stream.close()
                 } catch (e: IOException) {
-                    LOG.warn("Failed to close {}", target, e)
+                    LOG.warn("Failed to close {}", partial, e)
                 }
-                if (!target.delete()) {
-                    LOG.warn("Failed to delete {}", target)
+                if (partial.exists() && !partial.delete()) {
+                    LOG.warn("Failed to delete {}", partial)
                 }
             }
         }
@@ -272,6 +280,7 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
 
         private const val ROOT_FOLDER = "Gadgetbridge"
         private const val SCAN_TIMEOUT_S = 10L
+        private const val PARTIAL_SUFFIX = ".part"
 
         // The media store replaces these characters, therefore a name with them would not match its row
         private val INVALID_CHARS = Regex("[\\x00-\\x1f\\x7f\"*/:<>?\\\\|]")
