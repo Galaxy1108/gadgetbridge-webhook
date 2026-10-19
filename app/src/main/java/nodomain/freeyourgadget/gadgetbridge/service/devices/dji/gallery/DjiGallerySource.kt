@@ -178,10 +178,11 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
 
         session.acquireIfOpen() ?: throw IOException("The Wi-Fi session is not open")
         try {
+            val networkRequestId = session.networkRequestId ?: throw IOException("The Wi-Fi network is not available")
             val response = InternetHelperHttpClient.get(
                 "http://${DjiWifiSession.CAMERA_HOST}/v2?storage=0&path=$path",
                 headers,
-                session.networkRequestId
+                networkRequestId
             )
             val expected = if (headers.isEmpty()) HTTP_OK else HTTP_PARTIAL_CONTENT
             if (response.status != expected) {
