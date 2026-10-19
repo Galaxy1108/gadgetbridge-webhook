@@ -1,4 +1,4 @@
-package nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.q30;
+package nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.devices;
 
 import android.content.SharedPreferences;
 
@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
+import nodomain.freeyourgadget.gadgetbridge.devices.soundcore.SoundcoreEarbudsCoordinator.AmbientSoundMode;
+import nodomain.freeyourgadget.gadgetbridge.devices.soundcore.SoundcoreEarbudsCoordinator.AncMode;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEvent;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.protocol.impl.v1.SoundcoreProtocolImplV1;
@@ -18,7 +20,6 @@ public class SoundcoreQ30Protocol extends SoundcoreProtocolImplV1 {
     private static final Logger LOG = LoggerFactory.getLogger(SoundcoreQ30Protocol.class);
 
     private static final short CMD_SET_EQUALIZER = (short) 0x8102;
-    private static final int BATTERY_MULTIPLIER = 20;
 
     public SoundcoreQ30Protocol(GBDevice device) {
         super(device);
@@ -34,18 +35,10 @@ public class SoundcoreQ30Protocol extends SoundcoreProtocolImplV1 {
         decodeEqualizer(Arrays.copyOfRange(payload, 2, 12));
         decodeAudioMode(Arrays.copyOfRange(payload, 35, 39));
 
-        final String firmware1 = readString(payload, 39, 5);
-        final String serialNumber = readString(payload, 44, 16);
         return new GBDeviceEvent[]{
-                handleBatteryInfo(payload[0], 0, BATTERY_MULTIPLIER)[0],
-                buildVersionInfo(firmware1, "", serialNumber)
+                handleBatteryInfo(payload[0], 0)[0],
+                buildVersionInfo(payload, 39)
         };
-    }
-
-    @Override
-    protected GBDeviceEvent[] decodeAudioMode(final byte[] payload) {
-        decodeAudioModePayload(payload);
-        return new GBDeviceEvent[0];
     }
 
     /** Q30 reports its single battery in CMD_GET_DEVICE_INFO, not the earbud/case notification layout. */
@@ -60,8 +53,7 @@ public class SoundcoreQ30Protocol extends SoundcoreProtocolImplV1 {
             decodeEqualizer(payload);
             return new GBDeviceEvent[0];
         }
-        LOG.debug("Unknown incoming message - command: {} ({} bytes)", command, payload.length);
-        return new GBDeviceEvent[0];
+        return super.decodeCommand(command, payload);
     }
 
 
@@ -71,12 +63,9 @@ public class SoundcoreQ30Protocol extends SoundcoreProtocolImplV1 {
             case DeviceSettingsPreferenceConst.PREF_SOUNDCORE_AMBIENT_SOUND_CONTROL:
             case DeviceSettingsPreferenceConst.PREF_SOUNDCORE_ANC_MODE:
                 return encodeAudioMode();
-
             default:
-                LOG.debug("Unsupported CONFIG: " + config);
+                return super.encodeSendConfiguration(config);
         }
-
-        return super.encodeSendConfiguration(config);
     }
 
     /**
@@ -91,63 +80,44 @@ public class SoundcoreQ30Protocol extends SoundcoreProtocolImplV1 {
     private byte[] encodeAudioMode() {
         Prefs prefs = getDevicePrefs();
 
-        final Byte ambient_sound_mode = encodeAmbientSoundMode(prefs.getString(
+        final AmbientSoundMode ambientSoundMode = AmbientSoundMode.fromPreference(
+            prefs.getString(
                 DeviceSettingsPreferenceConst.PREF_SOUNDCORE_AMBIENT_SOUND_CONTROL,
-                "off"
-        ));
+                AmbientSoundMode.OFF.toString()
+            )
+        );
 
-        if (ambient_sound_mode == null) {
-            LOG.error("Invalid Ambient Mode selected");
-            return null;
-        }
+        final AncMode ancMode = AncMode.fromPreference(
+            prefs.getString(
+                DeviceSettingsPreferenceConst.PREF_SOUNDCORE_ANC_MODE,
+                AncMode.TRANSPORT.toString()
+            )
+        );
 
-        byte anc_mode;
-        switch (prefs.getString(DeviceSettingsPreferenceConst.PREF_SOUNDCORE_ANC_MODE, "transport")) {
-            case "transport":
-                anc_mode = 0x00;
-                break;
-            case "outdoor":
-                anc_mode = 0x01;
-                break;
-            case "indoor":
-                anc_mode = 0x02;
-                break;
-            default:
-                LOG.error("Invalid ANC Mode selected");
-                return null;
-        }
-
-        byte[] payload = new byte[]{ambient_sound_mode.byteValue(), anc_mode, 0x01};
+        byte[] payload = new byte[]{ambientSoundMode.toByte(), ancMode.toByte(), 0x01};
         return encodeCommand(CMD_SET_AUDIO_MODE, payload);
     }
 
     /**
      * Gets triggered when the button on the device is pressed or transparency toggled with the right palm.
      */
-    private void decodeAudioModePayload(byte[] payload) {
+    @Override
+    protected void decodeAudioMode(final byte[] payload) {
         if (payload.length < 2) {
             LOG.warn("Audio mode payload too short: {} bytes", payload.length);
             return;
         }
         SharedPreferences prefs = getDevicePrefs().getPreferences();
         SharedPreferences.Editor editor = prefs.edit();
-        String ambient_sound_mode = decodeAmbientSoundMode(payload[0]);
-        String anc_mode = "transport";
-
-        if (payload[1] == 0x00) {
-            anc_mode = "transport";
-        } else if (payload[1] == 0x01) {
-            anc_mode = "outdoor";
-        } else if (payload[1] == 0x02) {
-            anc_mode = "indoor";
-        }
+        final AmbientSoundMode ambientSoundMode = AmbientSoundMode.fromByte(payload[0]);
+        final AncMode ancMode = AncMode.fromByte(payload[1]);
 
         // payload has two more bytes
         // payload[2] always 1 ?
         // payload[3] checksum ?
 
-        editor.putString(DeviceSettingsPreferenceConst.PREF_SOUNDCORE_AMBIENT_SOUND_CONTROL, ambient_sound_mode);
-        editor.putString(DeviceSettingsPreferenceConst.PREF_SOUNDCORE_ANC_MODE, anc_mode);
+        editor.putString(DeviceSettingsPreferenceConst.PREF_SOUNDCORE_AMBIENT_SOUND_CONTROL, ambientSoundMode.toString());
+        editor.putString(DeviceSettingsPreferenceConst.PREF_SOUNDCORE_ANC_MODE, (ancMode != null ? ancMode : AncMode.TRANSPORT).toString());
         editor.apply();
     }
 
@@ -182,10 +152,5 @@ public class SoundcoreQ30Protocol extends SoundcoreProtocolImplV1 {
         int band6 = Byte.toUnsignedInt(payload[7]);
         int band7 = Byte.toUnsignedInt(payload[8]);
         int band8 = Byte.toUnsignedInt(payload[9]);
-    }
-
-
-    byte[] encodeMysteryDataRequest2() {
-        return encodeRequest(CMD_GET_EXTENDED_INFO);
     }
 }

@@ -14,12 +14,11 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.devices.soundcore.a30i
+package nodomain.freeyourgadget.gadgetbridge.devices.soundcore
 
 import nodomain.freeyourgadget.gadgetbridge.R
-import nodomain.freeyourgadget.gadgetbridge.devices.soundcore.SoundcoreEarbudsCoordinator
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
-import nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.a30i.SoundcoreA30iProtocol
+import nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.devices.SoundcoreA30iProtocol
 import java.util.regex.Pattern
 
 class SoundcoreA30iCoordinator : SoundcoreEarbudsCoordinator() {
@@ -46,10 +45,12 @@ class SoundcoreA30iCoordinator : SoundcoreEarbudsCoordinator() {
         Capability.TouchTone,
     )
 
-    override fun getNoiseCancellationLevelRange(): IntRange = 1..5
+    override fun getNoiseCancellationLevelRange(): ByteArray = byteArrayOf(0x00, 0x15, 0x25, 0x35, 0x45, 0x51)
 
     /* Battery case not reported */
     override fun getBatteryCount(device: GBDevice): Int = 2
+
+    override fun getBatteryProperties(): BatteryProperties = BatteryProperties(multiplier = 10, offset = 1)
 
     override fun createProtocol(device: GBDevice): SoundcoreA30iProtocol = SoundcoreA30iProtocol(device)
 }

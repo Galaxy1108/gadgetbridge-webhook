@@ -14,13 +14,12 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.motion300;
+package nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.devices;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,18 +47,12 @@ public class SoundcoreMotion300Protocol extends SoundcoreProtocolImplV1 {
     private static final short CMD_GET_EQUALIZER = (short)0x8902;
     private static final short CMD_GET_CURRENT_DIRECTION = (short)0x8c02;
 
-    private static final short CMD_SET_VOICE_PROMPTS = (short)0x9001;
-    private static final short CMD_SET_BUTTON_BRIGHTNESS = (short)0x9210;
-    private static final short CMD_SET_LDAC_MODE = (short)0xff01;
-    private static final short CMD_SET_ADAPTIVE_DIRECTION = (short)0x8a02;
-    private static final short CMD_SET_EQUALIZER_PRESET = (short)0x8b02;
     private static final short CMD_SET_EQUALIZER_CUSTOM = (short)0x8d02;
 
     private static final short CMD_NOTIFY_VOLUME_INFO = (short)0x0901;
     private static final short CMD_NOTIFY_PLAYBACK_INFO = (short)0x2101;
     private static final short CMD_NOTIFY_BASS_MODE = (short)0x8e02;
 
-    private static final short CMD_POWER_OFF = (short)0x8901;
 
     public static final String[] EQUALIZER_PREFS_FREQ = new String[] {
         PREF_SOUNDCORE_EQUALIZER_BAND1_FREQ,
@@ -89,6 +82,11 @@ public class SoundcoreMotion300Protocol extends SoundcoreProtocolImplV1 {
 
     public SoundcoreMotion300Protocol(GBDevice device) {
         super(device);
+    }
+
+    @Override
+    protected void decodeAudioMode(final byte[] payload) {
+        // Motion 300 does not use the shared earbud audio-mode layout.
     }
 
     @Override
@@ -133,19 +131,9 @@ public class SoundcoreMotion300Protocol extends SoundcoreProtocolImplV1 {
         byte voicePrompts = buf.get();
         byte autoPowerOffEnabled = buf.get();
         byte autoPowerOffDuration = buf.get();
-        byte[] firmwareBytes = new byte[5];
-        byte[] serialBytes = new byte[17];
-
-        buf.get(firmwareBytes);
-        buf.get(serialBytes);
-
-        String fwVersion = new String(firmwareBytes, StandardCharsets.UTF_8);
-        String serialNumber = new String(serialBytes, StandardCharsets.UTF_8);
-
-        GBDeviceEventVersionInfo versionInfo = new GBDeviceEventVersionInfo();
-        versionInfo.fwVersion = fwVersion;
+        final GBDeviceEventVersionInfo versionInfo = buildVersionInfo(payload, 7, 17);
         batteryInfo.state = batteryCharging == (byte)0x00 ? BatteryState.BATTERY_NORMAL : BatteryState.BATTERY_CHARGING;
-        batteryInfo.level = batteryLevel * 20;
+        batteryInfo.level = decodeBatteryLevel(batteryLevel);
 
         LOG.debug(
             "Device info: volume={}, battery={}, charging={}, playing={}, prompts={}, autoOff={}, autoOffDuration={}",
@@ -155,7 +143,6 @@ public class SoundcoreMotion300Protocol extends SoundcoreProtocolImplV1 {
         return new GBDeviceEvent[] {
             versionInfo,
             batteryInfo,
-            new GBDeviceEventUpdateDeviceInfo("SERIAL: ", serialNumber),
             new GBDeviceEventUpdatePreferences(PREF_SOUNDCORE_VOICE_PROMPTS, voicePrompts != (byte)0x00),
             new GBDeviceEventUpdatePreferences(PREF_SOUNDCORE_AUTO_POWER_OFF, String.valueOf(autoPowerOffDuration + 1)),
             new GBDeviceEventSendBytes(encodeRequest(CMD_GET_LDAC_MODE)),
@@ -237,7 +224,7 @@ public class SoundcoreMotion300Protocol extends SoundcoreProtocolImplV1 {
         if (payload.length != 1)
             return null;
 
-        batteryInfo.level = payload[0] * 20;
+        batteryInfo.level = decodeBatteryLevel(payload[0]);
 
         return new GBDeviceEvent[] { batteryInfo };
     }
@@ -256,18 +243,6 @@ public class SoundcoreMotion300Protocol extends SoundcoreProtocolImplV1 {
         Prefs prefs = getDevicePrefs();
 
         switch (config) {
-            case PREF_SOUNDCORE_VOICE_PROMPTS:
-                return encodeBooleanPreference(prefs, PREF_SOUNDCORE_VOICE_PROMPTS, CMD_SET_VOICE_PROMPTS);
-            case PREF_SOUNDCORE_BUTTON_BRIGHTNESS:
-                return encodeBytePreference(prefs, PREF_SOUNDCORE_BUTTON_BRIGHTNESS, CMD_SET_BUTTON_BRIGHTNESS);
-            case PREF_SOUNDCORE_AUTO_POWER_OFF:
-                return encodeAutoPowerOffPreference(prefs);
-            case PREF_SOUNDCORE_LDAC_MODE:
-                return encodeBooleanPreference(prefs, PREF_SOUNDCORE_LDAC_MODE, CMD_SET_LDAC_MODE);
-            case PREF_SOUNDCORE_ADAPTIVE_DIRECTION:
-                return encodeBooleanPreference(prefs, PREF_SOUNDCORE_ADAPTIVE_DIRECTION, CMD_SET_ADAPTIVE_DIRECTION);
-            case PREF_SOUNDCORE_EQUALIZER_PRESET:
-                return encodeBytePreference(prefs, PREF_SOUNDCORE_EQUALIZER_PRESET, CMD_SET_EQUALIZER_PRESET);
             case PREF_SOUNDCORE_EQUALIZER_DIRECTION:
                 return encodeRequest(CMD_GET_EQUALIZER);
             case PREF_SOUNDCORE_EQUALIZER_BAND1_FREQ:
@@ -295,23 +270,9 @@ public class SoundcoreMotion300Protocol extends SoundcoreProtocolImplV1 {
     }
 
     @Override
-    public byte[] encodePowerOff() {
-        return encodeRequest(CMD_POWER_OFF);
-    }
-
-    private byte[] encodeBooleanPreference(Prefs prefs, String pref, short cmd) {
-        boolean enabled = prefs.getBoolean(pref, true);
-        return encodeBooleanCommand(cmd, enabled);
-    }
-
-    private byte[] encodeBytePreference(Prefs prefs, String pref, short cmd) {
-        byte value = (byte)Integer.parseInt(prefs.getString(pref, "0"));
-        return encodeByteCommand(cmd, value);
-    }
-
-    private byte[] encodeAutoPowerOffPreference(Prefs prefs) {
+    public byte[] encodeAutoPowerOffConfiguration(Prefs prefs) {
         final int duration = Integer.parseInt(prefs.getString(PREF_SOUNDCORE_AUTO_POWER_OFF, "2"));
-        return encodeAutoPowerOff(CMD_SET_AUTO_POWER_OFF, duration, (byte)0x00);
+        return encodeAutoPowerOff(CMD_SET_AUTO_POWER_OFF, duration, (byte) 0x00);
     }
 
     private byte[] encodeCustomEqualizer(Prefs prefs) {

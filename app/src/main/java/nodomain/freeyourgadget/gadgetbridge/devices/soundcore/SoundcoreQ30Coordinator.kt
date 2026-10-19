@@ -14,40 +14,41 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.devices.soundcore.aerofit
+package nodomain.freeyourgadget.gadgetbridge.devices.soundcore
 
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
-import nodomain.freeyourgadget.gadgetbridge.devices.soundcore.SoundcoreEarbudsCoordinator
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
-import nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.aeroFit.SoundcoreAeroFitProtocol
+import nodomain.freeyourgadget.gadgetbridge.service.devices.soundcore.devices.SoundcoreQ30Protocol
+import java.util.UUID
 import java.util.regex.Pattern
 
-class SoundcoreAeroFit2Coordinator : SoundcoreEarbudsCoordinator() {
-    override fun getModelName(): String = "A3874"
+open class SoundcoreQ30Coordinator : SoundcoreEarbudsCoordinator() {
+    override fun getModelName(): String = "A3028"
 
-    override fun getSupportedDeviceName(): Pattern = Pattern.compile("soundcore AeroFit 2")
+    override fun getSupportedDeviceName(): Pattern = Pattern.compile("Soundcore +Q30", Pattern.CASE_INSENSITIVE)
 
-    override fun getDeviceNameResource(): Int = R.string.devicetype_soundcore_aerofit2
+    override fun getDeviceNameResource(): Int = R.string.devicetype_soundcore_q30
 
-    override fun getDefaultIconResource(): Int = R.drawable.ic_device_sony_wf_800n
+    override fun getDefaultIconResource(): Int = R.drawable.ic_device_headphones
 
     override fun getDeviceKind(device: GBDevice): DeviceCoordinator.DeviceKind =
         DeviceCoordinator.DeviceKind.HEADPHONES
 
-    override fun getDefaultCapabilities(): Set<Capability> = setOf(
-        Capability.FindDevice,
-        Capability.AutoPowerOff,
-        Capability.GamingMode,
-        Capability.TouchControlDisable,
-        Capability.TouchTone,
-        Capability.BatteryLowTone,
-    )
+    override fun getBatteryCount(device: GBDevice): Int = 1
 
-    override fun createProtocol(device: GBDevice): SoundcoreAeroFitProtocol =
-        SoundcoreAeroFitProtocol(device)
+    override fun getServiceUUID(): UUID =
+        UUID.fromString("00001101-0000-1000-8000-00805f9b34fb")
+
+    override fun createProtocol(device: GBDevice): SoundcoreQ30Protocol = SoundcoreQ30Protocol(device)
 
     override fun supportsExtendedInfoRequest(): Boolean = false
 
     override fun supportsSessionInitRequest(): Boolean = false
+
+    override fun getDefaultCapabilities(): Set<Capability> = setOf(
+        Capability.NoiseControl,
+        Capability.AmbientSound,
+        Capability.NoiseCancellationModes,
+    )
 }
