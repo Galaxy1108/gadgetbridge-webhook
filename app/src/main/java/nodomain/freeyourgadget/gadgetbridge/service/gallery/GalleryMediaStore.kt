@@ -80,13 +80,22 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
             val rows = queryRows(context.contentResolver, collection, names).filter { !it.pending }
             files.filter { file -> rows.any { it.name == displayName(file) && matches(file, it.size) } }
         } else {
-            val directory = legacyDirectory()
-            files.filter { file ->
-                val target = File(directory, displayName(file))
-                target.isFile && matches(file, target.length())
-            }
+            files.filter { legacyOriginal(it) != null }
         }
         return found.mapTo(HashSet()) { it.id }
+    }
+
+    /**
+     * Returns the URI of the original of [file] in the folder, or null when it is not in the folder.
+     */
+    fun findOriginal(file: MediaFile): Uri? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return legacyOriginal(file)?.let { Uri.fromFile(it) }
+        }
+        val collection = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        return queryRows(context.contentResolver, collection, listOf(displayName(file)))
+            .firstOrNull { !it.pending && matches(file, it.size) }
+            ?.uri
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -241,6 +250,9 @@ class GalleryMediaStore(private val context: Context, deviceName: String) {
             }
         }
     }
+
+    private fun legacyOriginal(file: MediaFile): File? =
+        File(legacyDirectory(), displayName(file)).takeIf { it.isFile && matches(file, it.length()) }
 
     @Suppress("DEPRECATION")
     private fun legacyDirectory() =

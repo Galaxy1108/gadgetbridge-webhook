@@ -1,17 +1,28 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.gallery
 
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.annotation.OptIn
 import androidx.core.view.isVisible
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.ImageLoader
 import coil3.dispose
 import coil3.load
+import coil3.request.CachePolicy
 import coil3.request.error
+import coil3.request.placeholder
+import coil3.size.Precision
 import coil3.size.Size
+import java.io.FileNotFoundException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.databinding.ItemGalleryViewerPhotoBinding
 import nodomain.freeyourgadget.gadgetbridge.databinding.ItemGalleryViewerVideoBinding
@@ -23,13 +34,26 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * The full-screen pages of the [MediaFile]s: the preview of a photo, or the player of a video.
+ * The full-screen pages of the [MediaFile]s: the photo, or the player of a video.
+ * A photo page displays the local original when the file is present locally, else the preview.
  * Only the page of the active file has the player.
+ *
+ * @param originalSize the maximum size to decode a local original
  */
+@OptIn(UnstableApi::class)
 class GalleryViewerAdapter(
     private val imageLoader: ImageLoader,
+    private val scope: CoroutineScope,
+    private val originalSize: Size,
+    private val findOriginal: suspend (MediaFile) -> Uri?,
+    private val onOriginalFailed: (MediaFile, Boolean) -> Unit,
+    private val onFullscreenButtonClick: (Boolean) -> Unit,
+    private val onPhotoClick: () -> Unit,
 ) : ListAdapter<MediaFile, RecyclerView.ViewHolder>(GalleryAdapter.DIFF) {
-    class PhotoHolder(val binding: ItemGalleryViewerPhotoBinding) : RecyclerView.ViewHolder(binding.root)
+    class PhotoHolder(val binding: ItemGalleryViewerPhotoBinding) : RecyclerView.ViewHolder(binding.root) {
+        var fileId: String? = null
+        var job: Job? = null
+    }
 
     class VideoHolder(val binding: ItemGalleryViewerVideoBinding) : RecyclerView.ViewHolder(binding.root) {
         var fileId: String? = null
@@ -37,6 +61,10 @@ class GalleryViewerAdapter(
 
     private var activeId: String? = null
     private var player: Player? = null
+    private var fullscreen = false
+
+    // The IDs of the files whose local originals the photo pages display
+    private var local: Set<String> = emptySet()
 
     // The player must leave a page at once, before the player is released
     private val videoHolders = HashSet<VideoHolder>()
@@ -45,6 +73,29 @@ class GalleryViewerAdapter(
         activeId = id
         this.player = player
         videoHolders.forEach { bindPlayer(it) }
+    }
+
+    fun setFullscreen(fullscreen: Boolean) {
+        this.fullscreen = fullscreen
+        videoHolders.forEach {
+            it.binding.galleryViewerPlayer.setFullscreenButtonState(fullscreen)
+        }
+    }
+
+    /**
+     * Sets the IDs of the downloaded files, and loads the photo pages again whose source changed.
+     */
+    fun setLocal(ids: Set<String>) {
+        if (ids == local) {
+            return
+        }
+        val changed = (ids - local) + (local - ids)
+        local = ids
+        currentList.forEachIndexed { position, file ->
+            if (file.type != MediaType.VIDEO && file.id in changed) {
+                notifyItemChanged(position, PAYLOAD_SOURCE)
+            }
+        }
     }
 
     fun reloadImages() {
@@ -56,27 +107,26 @@ class GalleryViewerAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return if (viewType == MediaType.VIDEO.ordinal) {
-            VideoHolder(ItemGalleryViewerVideoBinding.inflate(inflater, parent, false))
+            VideoHolder(ItemGalleryViewerVideoBinding.inflate(inflater, parent, false)).also {
+                it.binding.galleryViewerPlayer.setFullscreenButtonClickListener { fullscreen ->
+                    onFullscreenButtonClick(fullscreen)
+                }
+            }
         } else {
-            PhotoHolder(ItemGalleryViewerPhotoBinding.inflate(inflater, parent, false))
+            PhotoHolder(ItemGalleryViewerPhotoBinding.inflate(inflater, parent, false)).also {
+                it.binding.galleryViewerImage.setOnClickListener { onPhotoClick() }
+            }
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val file = getItem(position)
         when (holder) {
-            is PhotoHolder -> {
-                val binding = holder.binding
-                binding.galleryViewerImage.contentDescription = file.name
-                binding.galleryViewerProgress.isVisible = true
-                loadImage(binding.galleryViewerImage, file, Variant.PREVIEW) {
-                    binding.galleryViewerProgress.isVisible = false
-                }
-            }
+            is PhotoHolder -> bindPhoto(holder, file)
 
             is VideoHolder -> {
                 holder.binding.galleryViewerPlayer.contentDescription = file.name
-                loadImage(holder.binding.galleryViewerImage, file, Variant.THUMBNAIL) {}
+                loadImage(holder.binding.galleryViewerImage, file, Variant.THUMBNAIL, null) {}
                 holder.fileId = file.id
                 videoHolders.add(holder)
                 bindPlayer(holder)
@@ -94,7 +144,15 @@ class GalleryViewerAdapter(
 
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         when (holder) {
-            is PhotoHolder -> holder.binding.galleryViewerImage.dispose()
+            is PhotoHolder -> {
+                holder.job?.cancel()
+                holder.job = null
+                holder.fileId = null
+                holder.binding.galleryViewerImage.dispose()
+                // A pooled page must not keep the decoded original
+                holder.binding.galleryViewerImage.setImageDrawable(null)
+            }
+
             is VideoHolder -> {
                 holder.binding.galleryViewerImage.dispose()
                 holder.binding.galleryViewerPlayer.player = null
@@ -106,12 +164,79 @@ class GalleryViewerAdapter(
 
     private fun bindPlayer(holder: VideoHolder) {
         holder.binding.galleryViewerPlayer.player = if (holder.fileId == activeId) player else null
+        holder.binding.galleryViewerPlayer.setFullscreenButtonState(fullscreen)
     }
 
-    private fun loadImage(view: ImageView, file: MediaFile, variant: Variant, onDone: () -> Unit) {
+    private fun bindPhoto(holder: PhotoHolder, file: MediaFile) {
+        val binding = holder.binding
+        holder.job?.cancel()
+        holder.job = null
+        // The page displays its current image until the new image is decoded
+        val placeholder = if (holder.fileId == file.id) binding.galleryViewerImage.drawable else null
+        holder.fileId = file.id
+        binding.galleryViewerImage.contentDescription = file.name
+        if (file.id !in local) {
+            LOG.debug("Displaying the preview of {}", file.id)
+            loadPreview(holder, file, placeholder)
+            return
+        }
+
+        binding.galleryViewerImage.dispose()
+        binding.galleryViewerImage.setImageDrawable(placeholder)
+        binding.galleryViewerProgress.isVisible = placeholder == null
+        holder.job = scope.launch {
+            val uri = findOriginal(file)
+            if (uri == null) {
+                LOG.warn("The original of {} is not in the download folder, displaying the preview", file.id)
+                displayPreviewInstead(holder, file, placeholder, true)
+                return@launch
+            }
+            LOG.debug("Displaying the original of {} from {}", file.id, uri)
+            binding.galleryViewerImage.load(uri, imageLoader) {
+                size(originalSize)
+                precision(Precision.INEXACT)
+                // The original is a local file, and it must not use the caches of the device
+                memoryCachePolicy(CachePolicy.DISABLED)
+                diskCachePolicy(CachePolicy.DISABLED)
+                placeholder(placeholder)
+                listener(
+                    onSuccess = { _, _ -> binding.galleryViewerProgress.isVisible = false },
+                    onError = { _, result ->
+                        LOG.warn("Failed to load the original of {}, displaying the preview", file.id, result.throwable)
+                        displayPreviewInstead(holder, file, placeholder, result.throwable is FileNotFoundException)
+                    }
+                )
+            }
+        }
+    }
+
+    private fun displayPreviewInstead(holder: PhotoHolder, file: MediaFile, placeholder: Drawable?, missing: Boolean) {
+        local = local - file.id
+        onOriginalFailed(file, missing)
+        if (holder.fileId == file.id) {
+            loadPreview(holder, file, placeholder)
+        }
+    }
+
+    private fun loadPreview(holder: PhotoHolder, file: MediaFile, placeholder: Drawable?) {
+        val binding = holder.binding
+        binding.galleryViewerProgress.isVisible = placeholder == null
+        loadImage(binding.galleryViewerImage, file, Variant.PREVIEW, placeholder) {
+            binding.galleryViewerProgress.isVisible = false
+        }
+    }
+
+    private fun loadImage(
+        view: ImageView,
+        file: MediaFile,
+        variant: Variant,
+        placeholder: Drawable?,
+        onDone: () -> Unit
+    ) {
         view.load(GalleryImage(file, variant), imageLoader) {
             // Without a size, Coil waits for a pre-draw pass of the page
             size(Size.ORIGINAL)
+            placeholder(placeholder)
             error(R.drawable.ic_remove_image)
             listener(
                 onSuccess = { _, _ -> onDone() },
@@ -125,5 +250,7 @@ class GalleryViewerAdapter(
 
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(GalleryViewerAdapter::class.java)
+
+        private const val PAYLOAD_SOURCE = "source"
     }
 }

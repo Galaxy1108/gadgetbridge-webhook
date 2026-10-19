@@ -1,5 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.gallery
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.ImageLoader
@@ -343,6 +344,29 @@ class GalleryViewModel(
                 _state.update { it.copy(downloaded = it.downloaded - notFound + found) }
             }
         }
+    }
+
+    /**
+     * Returns the URI of the original of [file] in the download folder, or null when it is not there.
+     */
+    suspend fun findOriginal(file: MediaFile): Uri? {
+        val queue = downloadQueue ?: return null
+        return try {
+            withContext(Dispatchers.IO) { queue.store.findOriginal(file) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            LOG.error("Failed to find the original of {}", file.id, e)
+            null
+        }
+    }
+
+    /**
+     * Removes [file] from [State.downloaded].
+     */
+    fun setNotDownloaded(file: MediaFile) {
+        LOG.debug("The original of {} is not in the download folder", file.id)
+        _state.update { it.copy(downloaded = it.downloaded - file.id) }
     }
 
     /**
