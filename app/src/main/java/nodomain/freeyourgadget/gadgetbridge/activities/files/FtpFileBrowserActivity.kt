@@ -20,7 +20,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.wififtp.WifiFtpSessionScr
 import nodomain.freeyourgadget.gadgetbridge.databinding.ActivityFtpFileBrowserBinding
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.ftp.WifiFtpSession
-import nodomain.freeyourgadget.gadgetbridge.service.ftp.WifiFtpSessionRegistry
+import nodomain.freeyourgadget.gadgetbridge.service.wifi.WifiSessionRegistry
 import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils
 import nodomain.freeyourgadget.gadgetbridge.util.GB
@@ -78,7 +78,7 @@ class FtpFileBrowserActivity : AbstractGBActivity(), MenuProvider {
         super.onCreate(savedInstanceState)
 
         val device: GBDevice? = intent.getParcelableCompat(GBDevice.EXTRA_DEVICE)
-        val session = device?.let { WifiFtpSessionRegistry.get(it.address) }
+        val session = device?.let { WifiSessionRegistry.get(it.address) as? WifiFtpSession }
         if (device == null || session == null) {
             GB.toast(this, getString(R.string.fwapp_install_device_not_ready), Toast.LENGTH_LONG, GB.ERROR)
             finish()

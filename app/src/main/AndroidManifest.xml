@@ -752,7 +752,7 @@
         </receiver>
 
         <receiver
-            android:name=".service.ftp.WifiFtpSessionStopReceiver"
+            android:name=".service.wifi.WifiSessionStopReceiver"
             android:exported="false" />
         <receiver
             android:name=".service.receivers.GBMusicControlReceiver"

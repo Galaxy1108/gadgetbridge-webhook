@@ -17,8 +17,8 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.ftp.WifiFtpSession
-import nodomain.freeyourgadget.gadgetbridge.service.ftp.WifiFtpSessionNotification
-import nodomain.freeyourgadget.gadgetbridge.service.ftp.WifiFtpSessionRegistry
+import nodomain.freeyourgadget.gadgetbridge.service.wifi.WifiSession
+import nodomain.freeyourgadget.gadgetbridge.service.wifi.WifiSessionRegistry
 import nodomain.freeyourgadget.gadgetbridge.util.internethelper.InternetHelperException
 import nodomain.freeyourgadget.gadgetbridge.util.internethelper.InternetHelperWifiConnection
 import nodomain.freeyourgadget.gadgetbridge.util.internethelper.WifiDisabledException
@@ -37,8 +37,8 @@ class WifiFtpSessionScreen(
 ) : DefaultLifecycleObserver {
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
-    private var screenHold: WifiFtpSession.Hold? = null
-    private var pickerHold: WifiFtpSession.Hold? = null
+    private var screenHold: WifiSession.Hold? = null
+    private var pickerHold: WifiSession.Hold? = null
     private var listenedSession: WifiFtpSession? = null
 
     private var progressDialog: AlertDialog? = null
@@ -48,7 +48,7 @@ class WifiFtpSessionScreen(
     private var pendingAction: Runnable? = null
     private var pendingCancel: Runnable? = null
 
-    private val listener = WifiFtpSession.Listener { state -> onStateChanged(state) }
+    private val listener = WifiSession.Listener<WifiFtpSession.State> { state -> onStateChanged(state) }
 
     private val wifiSettingsLauncher = activity.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -64,7 +64,7 @@ class WifiFtpSessionScreen(
     }
 
     private val session: WifiFtpSession?
-        get() = WifiFtpSessionRegistry.get(device.address)
+        get() = WifiSessionRegistry.get(device.address) as? WifiFtpSession
 
     init {
         activity.lifecycle.addObserver(this)
@@ -194,6 +194,7 @@ class WifiFtpSessionScreen(
                 return
             }
         }
+        val stateText = session?.stateText(state) ?: return
 
         if (progressDialog == null) {
             val view = LayoutInflater.from(activity).inflate(R.layout.dialog_progress, null)
@@ -207,7 +208,7 @@ class WifiFtpSessionScreen(
         }
         progressText?.text = activity.getString(
             R.string.wifi_ftp_progress_step,
-            activity.getString(WifiFtpSessionNotification.stateText(state)),
+            activity.getString(stateText),
             step,
             STEP_COUNT
         )

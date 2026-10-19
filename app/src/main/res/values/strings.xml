@@ -5616,6 +5616,9 @@
     <string name="wifi_ftp_explainer">To transfer files, Gadgetbridge starts a Wi-Fi hotspot on the device, and the Internet Helper connects the phone to it. Android asks you to confirm this connection.\n\nWhile the connection is open, the phone can disconnect from other Wi-Fi networks, and the device uses more battery. The connection will be closed automatically when you leave the screen. You can also close it from the notification.</string>
     <string name="wifi_ftp_turn_on_wifi">Turn on Wi-Fi</string>
     <string name="wifi_ftp_progress_step">%1$s (%2$d/%3$d)</string>
+    <string name="dji_wifi_state_opening_control_channel">Connecting to the camera…</string>
+    <string name="dji_wifi_error_credentials">The camera did not send the name and password for its Wi-Fi</string>
+    <string name="dji_wifi_error_control_channel">The camera did not answer over Wi-Fi</string>
     <string name="toast_error_invalid_api_key">Invalid API key</string>
     <string name="eco">Eco</string>
     <string name="prefs_title_offgrid_mode">Off-grid mode</string>

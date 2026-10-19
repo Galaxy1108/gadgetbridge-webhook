@@ -1,11 +1,12 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.dji.ble
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.content.Context
 import android.os.Bundle
 import io.kaitai.struct.KaitaiStruct
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
-import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventUpdateDeviceState
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.kaitai.DumlWifi
@@ -22,15 +23,53 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.duml.DumlPacketT
 import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.duml.messages.DumlCommand
 import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.duml.messages.WifiCmd
 import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.duml.messages.toPacket
+import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.gallery.DjiGallerySource
+import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.wifi.DjiWifiSession
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GallerySourceRegistry
+import nodomain.freeyourgadget.gadgetbridge.service.wifi.WifiSessionRegistry
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class DjiBleSupport : AbstractBTLESingleDeviceSupport(LOG) {
     private val reassembler = DumlFrameReassembler()
     private var nextSeq: Int = 0
+    private var wifiSession: DjiWifiSession? = null
+    private var gallerySource: DjiGallerySource? = null
 
     init {
         addSupportedService(UUID_SERVICE_DJI)
+    }
+
+    override fun setContext(gbDevice: GBDevice, btAdapter: BluetoothAdapter, context: Context) {
+        super.setContext(gbDevice, btAdapter, context)
+        if (!coordinator.supportsGallery(gbDevice)) {
+            return
+        }
+        val session = DjiWifiSession(context, gbDevice) { cmd, payload ->
+            sendPacket(
+                "wifi 0x%02x".format(cmd),
+                receiver = DumlAddress.WIFI,
+                cmdSet = DumlCmdSet.WIFI,
+                cmd = cmd,
+                payload = payload
+            )
+        }
+        val source = DjiGallerySource(session)
+        wifiSession = session
+        gallerySource = source
+        WifiSessionRegistry.register(gbDevice.address, session)
+        GallerySourceRegistry.register(gbDevice.address, source)
+    }
+
+    override fun dispose() {
+        gallerySource?.let { GallerySourceRegistry.unregister(gbDevice.address, it) }
+        gallerySource = null
+        wifiSession?.let {
+            WifiSessionRegistry.unregister(gbDevice.address, it)
+            it.dispose()
+        }
+        wifiSession = null
+        super.dispose()
     }
 
     override fun useAutoConnect(): Boolean = true
@@ -112,10 +151,15 @@ class DjiBleSupport : AbstractBTLESingleDeviceSupport(LOG) {
                 }
             }
 
+            is DumlWifi.ApSsidGetResponse -> wifiSession?.onApSsidGetResponse(payload)
+
+            is DumlWifi.ApPassphraseGetResponse -> wifiSession?.onApPassphraseGetResponse(payload)
+
             else -> LOG.warn("Unhandled DUML command {}", cmd)
         }
     }
 
+    @Synchronized
     private fun allocateSeq(): Int {
         val s = nextSeq
         nextSeq = (nextSeq + 1) and 0xFFFF

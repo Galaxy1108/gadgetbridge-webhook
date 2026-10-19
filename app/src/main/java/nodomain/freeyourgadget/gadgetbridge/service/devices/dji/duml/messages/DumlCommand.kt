@@ -32,6 +32,8 @@ class DumlCommand(
         // one packetType might not match the other. One entry per cmdSet file; add the
         // new file's table here when it's created.
         private val DECODERS: Map<Int, Map<Pair<Int, DumlPacketType>, (ByteArray) -> Any>> = mapOf(
+            DumlCmdSet.GENERAL to GENERAL_DECODERS,
+            DumlCmdSet.CAMERA to CAMERA_DECODERS,
             DumlCmdSet.WIFI to WIFI_DECODERS,
         )
 
