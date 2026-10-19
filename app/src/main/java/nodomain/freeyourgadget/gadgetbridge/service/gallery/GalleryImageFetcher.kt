@@ -15,6 +15,8 @@ import okio.Buffer
 import okio.source
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.EOFException
+import java.io.IOException
 
 class GalleryImageFetcher(
     private val source: GallerySource,
@@ -56,9 +58,11 @@ class GalleryImageFetcher(
                 val snapshot = try {
                     val size = runInterruptible(dispatcher) {
                         source.open(image.file, image.variant, 0, -1).use { input ->
-                            cache.fileSystem.write(editor.data) {
+                            val written = cache.fileSystem.write(editor.data) {
                                 writeAll(input.source())
                             }
+                            checkLength(written, input.length, key)
+                            written
                         }
                     }
                     LOG.debug("Stored {} bytes of {} in the disk cache", size, key)
@@ -78,7 +82,9 @@ class GalleryImageFetcher(
         }
 
         val bytes = runInterruptible(dispatcher) {
-            source.open(image.file, image.variant, 0, -1).use { it.readBytes() }
+            source.open(image.file, image.variant, 0, -1).use { input ->
+                input.readBytes().also { checkLength(it.size.toLong(), input.length, key) }
+            }
         }
         LOG.debug("Received {} bytes of {}", bytes.size, key)
         return SourceFetchResult(
@@ -86,6 +92,13 @@ class GalleryImageFetcher(
             null,
             DataSource.NETWORK
         )
+    }
+
+    @Throws(IOException::class)
+    private fun checkLength(received: Long, expected: Long, key: String) {
+        if (expected >= 0 && received != expected) {
+            throw EOFException("Received $received of $expected bytes of $key")
+        }
     }
 
     private fun fileResult(
