@@ -17,6 +17,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.duml.messages.Du
 import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.duml.messages.GeneralCmd
 import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.wifi.DjiControlChannel
 import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.wifi.DjiWifiSession
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryActionException
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryCapability
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryFilter
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryPage
@@ -60,6 +61,9 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
     // A new listing does not clear it, because a queued download can open a file of another filter
     private val listedRecords = ConcurrentHashMap<String, DjiFileList.Record>()
 
+    // The File IDs of the current listing, in order
+    private val listing = ArrayList<String>()
+
     // The camera does not complete a file list transfer while another one is in progress
     private val listMutex = Mutex()
 
@@ -73,7 +77,11 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
 
     override suspend fun listPage(filter: GalleryFilter, after: String?): GalleryPage = listMutex.withLock {
         withChannel { channel ->
-            val cursor = after?.toLong(16) ?: FIRST_CURSOR
+            val key = after?.let { cursorKey(it) }
+            if (key == null) {
+                listing.clear()
+            }
+            val cursor = key?.toLong(16) ?: FIRST_CURSOR
             val id = transferId.incrementAndGet() and 0xffff
             val transfer = DjiFileList.Transfer(id)
             val end = CompletableDeferred<Unit>()
@@ -86,7 +94,7 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
                 }
             }
 
-            LOG.debug("Listing {} after {}, transfer {}", filter, after, id)
+            LOG.debug("Listing {} after {}, transfer {}", filter, key, id)
             channel.addRequestListener(listener)
             val complete = try {
                 checkStatus(
@@ -122,15 +130,30 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
                 LOG.debug("Received record {}", record)
             }
             val files = pageRecords
-                .filterIndexed { index, record -> !(index == 0 && after != null && record.fileId == cursor) }
+                .filterIndexed { index, record -> !(index == 0 && key != null && record.fileId == cursor) }
                 .map { record ->
                     val file = toMediaFile(record)
                     listedRecords[file.id] = record
+                    listing.add(file.id)
                     file
                 }
             val next = if (pageRecords.size < DjiFileCommands.MAX_RECORDS || files.isEmpty()) null else files.last().id
             GalleryPage(files, next)
         }
+    }
+
+    /**
+     * Returns [after], or the last file before it in the listing that is not deleted.
+     * Returns null when no such file exists.
+     */
+    private fun cursorKey(after: String): String? {
+        if (listedRecords.containsKey(after)) {
+            return after
+        }
+        val index = listing.lastIndexOf(after)
+        val key = if (index > 0) listing.subList(0, index).lastOrNull { listedRecords.containsKey(it) } else null
+        LOG.debug("The cursor {} is deleted, using {}", after, key)
+        return key
     }
 
     override fun open(file: MediaFile, variant: Variant, offset: Long, length: Long): GalleryStream {
@@ -172,33 +195,59 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
     }
 
     override suspend fun setFavorite(files: List<MediaFile>, favorite: Boolean) = withChannel { channel ->
-        for (chunk in files.map { it.id.toLong(16) }.chunked(DjiFileCommands.MAX_RECORDS)) {
-            LOG.debug("Setting favorite={} for {} files", favorite, chunk.size)
+        forEachChunk(files) { chunk ->
+            LOG.debug("Setting favorite={} for files {}", favorite, chunk.joinToString { it.id })
+            val ids = chunk.map { it.id.toLong(16) }
             checkStatus(
                 channel.request(
                     DumlAddress.CAMERA,
                     DumlCmdSet.CAMERA,
                     CameraCmd.FILE_STAR_FLAG_SET,
-                    DjiFileCommands.setFavorite(chunk, favorite, requestCounter.incrementAndGet())
+                    DjiFileCommands.setFavorite(ids, favorite, requestCounter.incrementAndGet())
                 )
             )
+            LOG.debug("The camera set favorite={} for {} files", favorite, chunk.size)
         }
     }
 
     override suspend fun delete(files: List<MediaFile>) = withChannel { channel ->
-        for (chunk in files.map { it.id.toLong(16) }.chunked(DjiFileCommands.MAX_RECORDS)) {
-            LOG.debug("Deleting {} files", chunk.size)
+        forEachChunk(files) { chunk ->
+            LOG.debug("Deleting files {}", chunk.joinToString { it.id })
+            val ids = chunk.map { it.id.toLong(16) }
             checkStatus(
                 channel.request(
                     DumlAddress.CAMERA,
                     DumlCmdSet.GENERAL,
                     GeneralCmd.FILE_TRANSFER_DELETE,
-                    DjiFileCommands.delete(chunk, requestCounter.incrementAndGet())
+                    DjiFileCommands.delete(ids, requestCounter.incrementAndGet()),
+                    retries = 0,
+                    attemptTimeoutMs = DELETE_TIMEOUT_MS
                 )
             )
+            LOG.debug("The camera deleted {} files", chunk.size)
+            for ((id) in chunk) {
+                listedRecords.remove(id)
+            }
         }
-        for ((id) in files) {
-            listedRecords.remove(id)
+    }
+
+    /**
+     * Runs [command] for each chunk of at most [DjiFileCommands.MAX_RECORDS] files, in order.
+     * When a chunk fails after other chunks, it throws a [GalleryActionException] with the files of those chunks.
+     */
+    private suspend fun forEachChunk(files: List<MediaFile>, command: suspend (List<MediaFile>) -> Unit) {
+        val applied = ArrayList<MediaFile>()
+        for (chunk in files.chunked(DjiFileCommands.MAX_RECORDS)) {
+            try {
+                command(chunk)
+            } catch (e: IOException) {
+                if (applied.isEmpty()) {
+                    throw e
+                }
+                val message = "Applied to ${applied.size} of ${files.size} files: ${e.message}"
+                throw GalleryActionException(applied, message, e)
+            }
+            applied.addAll(chunk)
         }
     }
 
@@ -285,6 +334,7 @@ class DjiGallerySource(private val session: DjiWifiSession) : GallerySource {
 
         private const val FIRST_CURSOR = 1L
         private const val TRANSFER_TIMEOUT_MS = 10_000L
+        private const val DELETE_TIMEOUT_MS = 10_000L
         private const val HTTP_OK = 200
         private const val HTTP_PARTIAL_CONTENT = 206
         private val CONTENT_RANGE = Regex("""bytes (\d+)-(\d+)/(\d+|\*)""")

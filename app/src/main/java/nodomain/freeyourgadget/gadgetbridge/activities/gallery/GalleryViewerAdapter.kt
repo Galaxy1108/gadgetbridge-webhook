@@ -84,6 +84,14 @@ class GalleryViewerAdapter(
         }
     }
 
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+        // The pages do not display the favorite flag
+        if (payloads.isNotEmpty() && payloads.all { it == GalleryAdapter.PAYLOAD_FAVORITE }) {
+            return
+        }
+        super.onBindViewHolder(holder, position, payloads)
+    }
+
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         when (holder) {
             is PhotoHolder -> holder.binding.galleryViewerImage.dispose()

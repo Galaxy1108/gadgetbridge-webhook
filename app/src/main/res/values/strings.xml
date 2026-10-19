@@ -5630,6 +5630,16 @@
     <string name="gallery_download_summary">%1$d downloaded, %2$d skipped, %3$d failed</string>
     <string name="gallery_download_failed">Download failed</string>
     <string name="gallery_download_error_storage_permission">Storage permission not granted</string>
+    <string name="gallery_favorite">Favorite</string>
+    <string name="gallery_unfavorite">Unfavorite</string>
+    <plurals name="gallery_delete_confirm">
+        <item quantity="one">Delete %d file from the camera?</item>
+        <item quantity="other">Delete %d files from the camera?</item>
+    </plurals>
+    <string name="gallery_deleting">Deleting…</string>
+    <string name="gallery_updating_favorites">Updating favorites…</string>
+    <string name="gallery_delete_error">Delete failed: %1$s</string>
+    <string name="gallery_favorite_error">Favorite change failed: %1$s</string>
     <string name="toast_error_invalid_api_key">Invalid API key</string>
     <string name="eco">Eco</string>
     <string name="prefs_title_offgrid_mode">Off-grid mode</string>

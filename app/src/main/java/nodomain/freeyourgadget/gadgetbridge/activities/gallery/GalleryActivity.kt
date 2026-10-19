@@ -16,6 +16,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
@@ -30,12 +31,14 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity
 import nodomain.freeyourgadget.gadgetbridge.activities.wifi.WifiSessionScreen
 import nodomain.freeyourgadget.gadgetbridge.databinding.ActivityGalleryBinding
+import nodomain.freeyourgadget.gadgetbridge.databinding.DialogProgressBinding
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryCapability
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryDownloadQueues
@@ -64,6 +67,11 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
 
     private var actionMode: ActionMode? = null
     private var errorSnackbar: Snackbar? = null
+    private var actionDialog: AlertDialog? = null
+    private var deleteDialog: AlertDialog? = null
+
+    // Whether the selection has a favorite / a file that is not a favorite
+    private var selectionFavorites: Pair<Boolean, Boolean>? = null
     private var acquired = false
 
     // runWhenReady can run its action after onStop, for example after the asynchronous Wi-Fi check
@@ -84,14 +92,37 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
             return true
         }
 
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            val capabilities = viewModel.source.capabilities
+            val (hasFavorite, hasOther) = selectionFavorites ?: (false to false)
+            menu.findItem(R.id.gallery_favorite).isVisible = GalleryCapability.FAVORITE in capabilities && hasOther
+            menu.findItem(R.id.gallery_unfavorite).isVisible = GalleryCapability.FAVORITE in capabilities && hasFavorite
+            menu.findItem(R.id.gallery_delete).isVisible = GalleryCapability.DELETE in capabilities
+            return true
+        }
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            val state = viewModel.state.value
+            val files = state.files.filter { it.id in state.selected }
             return when (item.itemId) {
                 R.id.gallery_download -> {
-                    val state = viewModel.state.value
-                    download(state.files.filter { it.id in state.selected })
+                    download(files)
                     mode.finish()
+                    true
+                }
+
+                R.id.gallery_favorite -> {
+                    viewModel.setFavorite(files, true)
+                    true
+                }
+
+                R.id.gallery_unfavorite -> {
+                    viewModel.setFavorite(files, false)
+                    true
+                }
+
+                R.id.gallery_delete -> {
+                    confirmThenDelete(files)
                     true
                 }
 
@@ -101,6 +132,7 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
 
         override fun onDestroyActionMode(mode: ActionMode) {
             actionMode = null
+            selectionFavorites = null
             // render() starts the action mode again after the recreation
             if (!isChangingConfigurations) {
                 viewModel.clearSelection()
@@ -187,11 +219,20 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
                 viewModel.state.collect { render(it) }
             }
         }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.actionErrors.collect { showActionError(it) }
+            }
+        }
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(deviceReceiver, IntentFilter(GBDevice.ACTION_DEVICE_CHANGED))
     }
 
     override fun onDestroy() {
+        actionDialog?.dismiss()
+        actionDialog = null
+        deleteDialog?.dismiss()
+        deleteDialog = null
         LocalBroadcastManager.getInstance(this).unregisterReceiver(deviceReceiver)
         super.onDestroy()
     }
@@ -282,7 +323,8 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
             errorSnackbar = null
         }
 
-        updateActionMode(state.selected.size)
+        updateActionMode(state)
+        renderAction(state.action)
 
         // The thumbnail fetch fails while the [GallerySource] is not acquired
         if (state.acquired && !acquired) {
@@ -292,13 +334,63 @@ class GalleryActivity : AbstractGBActivity(), MenuProvider {
         acquired = state.acquired
     }
 
-    private fun updateActionMode(count: Int) {
-        if (count == 0) {
+    private fun updateActionMode(state: GalleryViewModel.State) {
+        if (state.selected.isEmpty()) {
             actionMode?.finish()
             return
         }
+        val selectedFiles = state.files.filter { it.id in state.selected }
+        val favorites = selectedFiles.any { it.favorite } to selectedFiles.any { !it.favorite }
+        val changed = favorites != selectionFavorites
+        selectionFavorites = favorites
         val mode = actionMode ?: startSupportActionMode(actionModeCallback)?.also { actionMode = it } ?: return
-        mode.title = getString(R.string.number_selected_items, count)
+        mode.title = getString(R.string.number_selected_items, state.selected.size)
+        if (changed) {
+            mode.invalidate()
+        }
+    }
+
+    private fun renderAction(action: GalleryViewModel.Action?) {
+        if (action == null) {
+            actionDialog?.dismiss()
+            actionDialog = null
+            return
+        }
+        if (actionDialog != null) {
+            return
+        }
+        val dialogBinding = DialogProgressBinding.inflate(layoutInflater)
+        dialogBinding.progressText.setText(
+            if (action == GalleryViewModel.Action.DELETE) R.string.gallery_deleting else R.string.gallery_updating_favorites
+        )
+        actionDialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogBinding.root)
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun showActionError(error: GalleryViewModel.ActionError) {
+        val text = if (error.action == GalleryViewModel.Action.DELETE) {
+            R.string.gallery_delete_error
+        } else {
+            R.string.gallery_favorite_error
+        }
+        // The viewer is a dialog above the grid
+        val viewer = supportFragmentManager.findFragmentByTag(GalleryViewerFragment.TAG)?.view
+        Snackbar.make(viewer ?: binding.root, getString(text, error.message), Snackbar.LENGTH_LONG).show()
+    }
+
+    fun confirmThenDelete(files: List<MediaFile>) {
+        if (files.isEmpty()) {
+            return
+        }
+        deleteDialog?.dismiss()
+        deleteDialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.delete)
+            .setMessage(resources.getQuantityString(R.plurals.gallery_delete_confirm, files.size, files.size))
+            .setPositiveButton(R.string.delete) { _, _ -> viewModel.delete(files) }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     /**

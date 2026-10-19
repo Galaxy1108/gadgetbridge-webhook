@@ -6,4 +6,19 @@
         android:icon="@drawable/ic_download"
         android:title="@string/ftp_file_browser_download"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/gallery_favorite"
+        android:icon="@drawable/ic_star_gold"
+        android:title="@string/gallery_favorite"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/gallery_unfavorite"
+        android:icon="@drawable/ic_star_gray"
+        android:title="@string/gallery_unfavorite"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/gallery_delete"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/delete"
+        app:showAsAction="ifRoom" />
 </menu>

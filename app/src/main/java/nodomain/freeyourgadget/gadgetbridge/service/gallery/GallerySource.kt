@@ -33,12 +33,27 @@ interface GallerySource {
     @Throws(IOException::class)
     fun open(file: MediaFile, variant: Variant, offset: Long, length: Long): GalleryStream
 
+    /**
+     * Sets or clears the favorite flag of the files on the device. Returns after the device acks.
+     * Throws a [GalleryActionException] when the device applied the change to only some of the files.
+     */
     @Throws(IOException::class)
     suspend fun setFavorite(files: List<MediaFile>, favorite: Boolean)
 
+    /**
+     * Deletes the files from the device. Returns after the device acks.
+     * Throws a [GalleryActionException] when the device deleted only some of the files.
+     */
     @Throws(IOException::class)
     suspend fun delete(files: List<MediaFile>)
 }
+
+/**
+ * A [GallerySource.setFavorite] or [GallerySource.delete] call that failed after the device applied
+ * it to the files in [applied].
+ */
+class GalleryActionException(val applied: List<MediaFile>, message: String, cause: Throwable) :
+    IOException(message, cause)
 
 enum class GalleryCapability {
     FAVORITE,

@@ -41,6 +41,13 @@ object GalleryDownloadQueues {
         queue.cancel()
     }
 
+    /**
+     * Removes the files from the queue of the device, if the device has one.
+     */
+    fun remove(address: String, ids: Set<String>) {
+        synchronized(queues) { queues[address] }?.remove(ids)
+    }
+
     fun shutdown(address: String) {
         val queue = synchronized(queues) { queues.remove(address) } ?: return
         LOG.debug("Shutting down the download queue of {}", address)

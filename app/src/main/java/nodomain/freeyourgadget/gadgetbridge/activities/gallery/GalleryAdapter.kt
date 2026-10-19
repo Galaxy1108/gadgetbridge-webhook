@@ -61,8 +61,10 @@ class GalleryAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
-        if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_SELECTION }) {
-            holder.binding.root.isChecked = getItem(position).id in selected
+        if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_SELECTION || it == PAYLOAD_FAVORITE }) {
+            val file = getItem(position)
+            holder.binding.root.isChecked = file.id in selected
+            holder.binding.galleryFileFavorite.isVisible = file.favorite
             return
         }
         super.onBindViewHolder(holder, position, payloads)
@@ -100,6 +102,7 @@ class GalleryAdapter(
         private val LOG: Logger = LoggerFactory.getLogger(GalleryAdapter::class.java)
 
         private const val PAYLOAD_SELECTION = "selection"
+        const val PAYLOAD_FAVORITE = "favorite"
 
         fun formatDuration(seconds: Int): String {
             return String.format(Locale.ROOT, "%d:%02d", seconds / 60, seconds % 60)
@@ -108,6 +111,11 @@ class GalleryAdapter(
         val DIFF = object : DiffUtil.ItemCallback<MediaFile>() {
             override fun areItemsTheSame(oldItem: MediaFile, newItem: MediaFile) = oldItem.id == newItem.id
             override fun areContentsTheSame(oldItem: MediaFile, newItem: MediaFile) = oldItem == newItem
+
+            // The images do not change - their cache keys do not contain the favorite flag
+            override fun getChangePayload(oldItem: MediaFile, newItem: MediaFile): Any? {
+                return if (oldItem.copy(favorite = newItem.favorite) == newItem) PAYLOAD_FAVORITE else null
+            }
         }
     }
 }

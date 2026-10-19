@@ -24,6 +24,7 @@ import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentGalleryViewerBinding
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryCapability
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryPreviewCaches
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.MediaFile
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.MediaType
@@ -84,13 +85,26 @@ class GalleryViewerFragment : DialogFragment() {
         }
         binding.galleryViewerToolbar.setNavigationOnClickListener { dismiss() }
         binding.galleryViewerToolbar.inflateMenu(R.menu.menu_gallery_viewer)
+        val menu = binding.galleryViewerToolbar.menu
+        menu.findItem(R.id.gallery_favorite).isVisible = GalleryCapability.FAVORITE in viewModel.source.capabilities
+        menu.findItem(R.id.gallery_delete).isVisible = GalleryCapability.DELETE in viewModel.source.capabilities
         binding.galleryViewerToolbar.setOnMenuItemClickListener { item ->
+            val file = viewModel.state.value.files.firstOrNull { it.id == activeId }
+                ?: return@setOnMenuItemClickListener false
+            val activity = requireActivity() as GalleryActivity
             when (item.itemId) {
                 R.id.gallery_download -> {
-                    val file = viewModel.state.value.files.firstOrNull { it.id == activeId }
-                    if (file != null) {
-                        (requireActivity() as GalleryActivity).download(listOf(file))
-                    }
+                    activity.download(listOf(file))
+                    true
+                }
+
+                R.id.gallery_favorite -> {
+                    viewModel.setFavorite(listOf(file), !file.favorite)
+                    true
+                }
+
+                R.id.gallery_delete -> {
+                    activity.confirmThenDelete(listOf(file))
                     true
                 }
 
@@ -167,6 +181,13 @@ class GalleryViewerFragment : DialogFragment() {
                 }
                 binding.galleryViewerPager.setCurrentItem(index, false)
                 positioned = true
+            } else if (adapter.itemCount == 0) {
+                LOG.debug("No more files in the gallery")
+                dismissAllowingStateLoss()
+                return@submitList
+            } else if (binding.galleryViewerPager.currentItem >= adapter.itemCount) {
+                // After a delete of the last file, the viewer displays the file before it
+                binding.galleryViewerPager.setCurrentItem(adapter.itemCount - 1, false)
             }
             onPageChanged()
         }
@@ -207,6 +228,10 @@ class GalleryViewerFragment : DialogFragment() {
             DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_YEAR
         )
         toolbar.title = file.name
+        toolbar.menu.findItem(R.id.gallery_favorite)?.apply {
+            setIcon(if (file.favorite) R.drawable.ic_star_gold else R.drawable.ic_star_gray)
+            setTitle(if (file.favorite) R.string.gallery_unfavorite else R.string.gallery_favorite)
+        }
         toolbar.subtitle = if (file.type == MediaType.VIDEO) {
             getString(R.string.date_placeholders__date__time, time, GalleryAdapter.formatDuration(file.duration))
         } else {

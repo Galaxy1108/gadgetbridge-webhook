@@ -68,6 +68,20 @@ object GalleryImageLoaders {
     }
 
     /**
+     * Removes the images of the files from the memory cache and from the disk cache of the device.
+     * Blocks while it deletes the files.
+     */
+    fun remove(address: String, files: List<MediaFile>) {
+        val diskKeys = files.flatMap { file -> Variant.entries.map { GalleryImage(file, it).cacheKey } }
+        val memoryKeys = diskKeys.mapTo(HashSet()) { memoryKeyPrefix(address) + it }
+        val keys = memoryCache.keys.filter { it.key in memoryKeys }
+        LOG.debug("Removing {} images of {} files of {} from the caches", keys.size, files.size, address)
+        keys.forEach { memoryCache.remove(it) }
+        val diskCache = synchronized(loaders) { loaders[address] }?.diskCache ?: return
+        diskKeys.forEach { diskCache.remove(it) }
+    }
+
+    /**
      * Stops the image loader for the device and closes its disk cache.
      */
     fun shutdown(address: String) {

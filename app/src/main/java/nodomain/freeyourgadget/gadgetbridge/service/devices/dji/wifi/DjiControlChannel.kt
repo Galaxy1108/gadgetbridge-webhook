@@ -45,6 +45,8 @@ class DjiControlChannel private constructor(private val onLost: Runnable) : Clos
     private class PendingRequest(
         val packet: DumlPacket,
         val continuation: CancellableContinuation<DumlPacket>,
+        val retries: Int,
+        val attemptTimeoutMs: Long,
     ) {
         var attempts = 0
 
@@ -134,10 +136,18 @@ class DjiControlChannel private constructor(private val onLost: Runnable) : Clos
 
     /**
      * Sends a DUML request and suspends until the reply arrives. Retries with the same DUML sequence
-     * number when no reply arrives in time. Cancellation stops only the wait.
+     * number up to [retries] times, when no reply arrives in [attemptTimeoutMs].
+     * Cancellation stops only the wait.
      */
     @Throws(IOException::class)
-    suspend fun request(receiver: DumlAddress, cmdSet: Int, cmd: Int, payload: ByteArray): DumlPacket =
+    suspend fun request(
+        receiver: DumlAddress,
+        cmdSet: Int,
+        cmd: Int,
+        payload: ByteArray,
+        retries: Int = RETRIES,
+        attemptTimeoutMs: Long = RETRY_MS,
+    ): DumlPacket =
         suspendCancellableCoroutine { continuation ->
             val request = PendingRequest(
                 DumlPacket(
@@ -150,7 +160,9 @@ class DjiControlChannel private constructor(private val onLost: Runnable) : Clos
                     cmd = cmd,
                     payload = payload,
                 ),
-                continuation
+                continuation,
+                retries,
+                attemptTimeoutMs
             )
             continuation.invokeOnCancellation { removePending(request) }
             if (state != State.OPEN) {
@@ -232,7 +244,7 @@ class DjiControlChannel private constructor(private val onLost: Runnable) : Clos
         if (pending[seq] !== request) {
             return
         }
-        if (request.attempts > RETRIES) {
+        if (request.attempts > request.retries) {
             LOG.warn("No reply after {} attempts to {}", request.attempts, request.packet)
             completeWithError(request, IOException("No reply from the camera"))
             return
@@ -244,7 +256,7 @@ class DjiControlChannel private constructor(private val onLost: Runnable) : Clos
             return
         }
         try {
-            request.retry = scheduler.schedule({ attempt(request) }, RETRY_MS, TimeUnit.MILLISECONDS)
+            request.retry = scheduler.schedule({ attempt(request) }, request.attemptTimeoutMs, TimeUnit.MILLISECONDS)
         } catch (_: RejectedExecutionException) {
             completeWithError(request, IOException("The control channel is closed"))
         }
@@ -429,7 +441,11 @@ class DjiControlChannel private constructor(private val onLost: Runnable) : Clos
     }
 
     private fun onResponse(response: DumlPacket) {
-        val request = pending[response.seq] ?: return
+        val request = pending[response.seq]
+        if (request == null) {
+            LOG.debug("Received a reply without a pending request {}", response)
+            return
+        }
         if (request.packet.cmdSet != response.cmdSet || request.packet.cmd != response.cmd) {
             return
         }

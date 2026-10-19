@@ -7,13 +7,18 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryActionException
+import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryDownloadQueues
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryFilter
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryImageLoaders
 import nodomain.freeyourgadget.gadgetbridge.service.gallery.GalleryPreviewCaches
@@ -30,11 +35,18 @@ class GalleryViewModel(
     val source: GallerySource,
     val imageLoader: ImageLoader,
 ) : ViewModel() {
+    enum class Action {
+        FAVORITE,
+        UNFAVORITE,
+        DELETE,
+    }
+
     /**
      * @property acquired true while the [GallerySource] is acquired
-     * @property error the message of the last failure, or null
+     * @property error the message of the last load failure, or null
      * @property complete true when the last page is loaded
      * @property selected the IDs of the selected [MediaFile]s
+     * @property action the [Action] that runs on the device, or null
      */
     data class State(
         val filter: GalleryFilter = GalleryFilter.ALL,
@@ -44,14 +56,23 @@ class GalleryViewModel(
         val error: String? = null,
         val complete: Boolean = false,
         val selected: Set<String> = emptySet(),
+        val action: Action? = null,
     )
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
 
+    data class ActionError(val action: Action, val message: String)
+
+    private val _actionErrors = Channel<ActionError>(Channel.BUFFERED)
+    val actionErrors: Flow<ActionError> = _actionErrors.receiveAsFlow()
+
     private var next: String? = null
     private var acquireJob: Job? = null
     private var loadJob: Job? = null
+
+    // A page that was requested before a delete can contain the deleted files
+    private val deletedIds = HashSet<String>()
 
     /**
      * Acquires the [GallerySource]. Then, loads the next page if no page is loaded, or if the last load failed.
@@ -106,9 +127,10 @@ class GalleryViewModel(
                 val page = source.listPage(filter, after)
                 LOG.debug("Loaded {} files for {} after {}, next {}", page.files.size, filter, after, page.next)
                 next = page.next
+                val loaded = page.files.filter { file -> file.id !in deletedIds }
                 _state.update {
                     it.copy(
-                        files = (it.files + page.files).distinctBy { file -> file.id },
+                        files = (it.files + loaded).distinctBy { file -> file.id },
                         loading = false,
                         complete = page.next == null
                     )
@@ -148,7 +170,8 @@ class GalleryViewModel(
                 filter = filter,
                 loading = acquireJob?.isActive == true,
                 acquired = it.acquired,
-                error = if (it.acquired) null else it.error
+                error = if (it.acquired) null else it.error,
+                action = it.action
             )
         }
         loadMore()
@@ -163,6 +186,103 @@ class GalleryViewModel(
 
     fun clearSelection() {
         _state.update { it.copy(selected = emptySet()) }
+    }
+
+    /**
+     * Sets or clears the favorite flag of the files on the device. The list changes after the device acks.
+     */
+    fun setFavorite(files: List<MediaFile>, favorite: Boolean) {
+        runAction(if (favorite) Action.FAVORITE else Action.UNFAVORITE, files) { source.setFavorite(files, favorite) }
+    }
+
+    /**
+     * Deletes the files from the device. The list changes after the device acks.
+     */
+    fun delete(files: List<MediaFile>) {
+        runAction(Action.DELETE, files) { source.delete(files) }
+    }
+
+    /**
+     * Runs [command] when no other [Action] runs. Then, applies the action to the files that the device changed.
+     */
+    private fun runAction(action: Action, files: List<MediaFile>, command: suspend () -> Unit) {
+        val current = _state.value
+        if (files.isEmpty() || current.action != null || !current.acquired) {
+            LOG.warn(
+                "Ignoring {} for {} files, action={}, acquired={}",
+                action,
+                files.size,
+                current.action,
+                current.acquired
+            )
+            return
+        }
+        LOG.debug("Starting {} for {} files", action, files.size)
+        _state.update { it.copy(action = action) }
+        viewModelScope.launch {
+            val applied = try {
+                command()
+                LOG.debug("{} done for {} files", action, files.size)
+                files
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: GalleryActionException) {
+                LOG.error("{} failed after {} of {} files", action, e.applied.size, files.size, e)
+                _actionErrors.trySend(ActionError(action, errorMessage(e)))
+                e.applied
+            } catch (e: Exception) {
+                LOG.error("{} failed for {} files", action, files.size, e)
+                _actionErrors.trySend(ActionError(action, errorMessage(e)))
+                emptyList()
+            }
+            val ids = applied.mapTo(HashSet()) { it.id }
+            if (action == Action.DELETE) {
+                deletedIds.addAll(ids)
+            }
+            _state.update { it.withApplied(action, ids, applied.size == files.size) }
+            if (action == Action.DELETE && applied.isNotEmpty()) {
+                removeDeleted(applied)
+            }
+        }
+    }
+
+    /**
+     * Returns the state after the device applied [action] to the files in [ids].
+     * When [complete] is true, the selection ends.
+     */
+    private fun State.withApplied(action: Action, ids: Set<String>, complete: Boolean): State {
+        val removed = action == Action.DELETE || (action == Action.UNFAVORITE && filter == GalleryFilter.FAVORITES)
+        val updated = when {
+            ids.isEmpty() -> files
+            removed -> files.filter { it.id !in ids }
+            else -> files.map { if (it.id in ids) it.copy(favorite = action == Action.FAVORITE) else it }
+        }
+        val present = updated.mapTo(HashSet()) { it.id }
+        return copy(
+            files = updated,
+            action = null,
+            selected = if (complete) emptySet() else selected.filterTo(HashSet()) { it in present }
+        )
+    }
+
+    /**
+     * Removes the deleted files from the download queue and from the caches of the device.
+     */
+    private suspend fun removeDeleted(files: List<MediaFile>) {
+        GalleryDownloadQueues.remove(device.address, files.mapTo(HashSet()) { it.id })
+        withContext(Dispatchers.IO) {
+            try {
+                GalleryImageLoaders.remove(device.address, files)
+            } catch (e: Exception) {
+                // The disk cache is closed when the device disconnects
+                LOG.warn("Failed to remove the deleted files from the image caches", e)
+            }
+            try {
+                GalleryPreviewCaches.remove(device, source, files)
+            } catch (e: Exception) {
+                LOG.warn("Failed to remove the deleted files from the preview cache", e)
+            }
+        }
     }
 
     /**

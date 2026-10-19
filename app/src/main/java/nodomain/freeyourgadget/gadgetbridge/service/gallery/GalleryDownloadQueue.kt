@@ -53,6 +53,9 @@ class GalleryDownloadQueue(
     @Volatile
     private var stopReason = Stop.NONE
 
+    @Volatile
+    private var currentRemoved = false
+
     /**
      * Adds the files that are not in the queue to its end, and starts the queue if it is not running.
      */
@@ -76,6 +79,30 @@ class GalleryDownloadQueue(
                 count += added.size
             }
         }
+    }
+
+    /**
+     * Removes the files from the queue. When the current download is one of them, it stops that download,
+     * deletes its partial file and continues with the next file.
+     */
+    fun remove(ids: Set<String>) {
+        val stream = synchronized(lock) {
+            val queued = queue.size
+            queue.removeAll { it.id in ids }
+            val removed = queued - queue.size
+            val stopCurrent = !currentRemoved && current?.let { it.id in ids } == true
+            if (removed == 0 && !stopCurrent) {
+                return
+            }
+            LOG.debug("Removed {} files from the download queue of {}, current={}", removed, address, stopCurrent)
+            count -= removed
+            // The current file leaves the count only when its download stops before the commit
+            if (stopCurrent) {
+                currentRemoved = true
+            }
+            if (stopCurrent) currentStream else null
+        }
+        closeStream(stream)
     }
 
     /**
@@ -119,6 +146,10 @@ class GalleryDownloadQueue(
             queue.clear()
             currentStream
         }
+        closeStream(stream)
+    }
+
+    private fun closeStream(stream: GalleryStream?) {
         // A read that is blocked on the stream fails when the stream closes
         try {
             stream?.close()
@@ -162,6 +193,7 @@ class GalleryDownloadQueue(
     private fun next(): MediaFile? = synchronized(lock) {
         val file = if (stopReason == Stop.NONE) queue.removeFirstOrNull() else null
         current = file
+        currentRemoved = false
         if (file == null) {
             finish()
         }
@@ -181,8 +213,8 @@ class GalleryDownloadQueue(
             }
             val (bytes, length) = source.open(file, Variant.ORIGINAL, 0, -1).use { stream ->
                 synchronized(lock) {
-                    if (stopReason != Stop.NONE) {
-                        throw IOException("The download queue is stopped")
+                    if (stopReason != Stop.NONE || currentRemoved) {
+                        throw IOException("The download is stopped")
                     }
                     currentStream = stream
                 }
@@ -214,6 +246,9 @@ class GalleryDownloadQueue(
             synchronized(lock) {
                 if (stopReason == Stop.CANCELLED) {
                     LOG.info("Cancelled the download of {}", file.name)
+                } else if (currentRemoved) {
+                    LOG.info("Stopped the download of {}, it is removed from the queue", file.name)
+                    count--
                 } else {
                     LOG.error("Failed to download {}", file.name, e)
                     failed += 1 + queue.size
@@ -235,8 +270,8 @@ class GalleryDownloadQueue(
         var loggedBytes = 0L
         var notifiedAt = SystemClock.elapsedRealtime()
         while (true) {
-            if (stopReason != Stop.NONE) {
-                throw IOException("The download queue is stopped")
+            if (stopReason != Stop.NONE || currentRemoved) {
+                throw IOException("The download is stopped")
             }
             val read = input.read(buffer)
             if (read < 0) {

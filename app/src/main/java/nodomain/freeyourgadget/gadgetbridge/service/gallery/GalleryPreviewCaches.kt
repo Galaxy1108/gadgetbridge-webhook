@@ -77,6 +77,17 @@ object GalleryPreviewCaches {
     }
 
     /**
+     * Removes the previews of the files from the cache of the device. Blocks while it deletes the files.
+     */
+    fun remove(device: GBDevice, source: GallerySource, files: List<MediaFile>) {
+        synchronized(caches) {
+            val cache = get(device, source) ?: return
+            LOG.debug("Removing the previews of {} files of {} from the preview cache", files.size, device.address)
+            files.forEach { cache.removeResource(GalleryImage(it, Variant.PREVIEW).cacheKey) }
+        }
+    }
+
+    /**
      * Releases the cache of the device.
      */
     fun release(address: String) {
