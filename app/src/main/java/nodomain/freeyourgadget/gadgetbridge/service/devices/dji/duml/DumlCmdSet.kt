@@ -5,4 +5,5 @@ object DumlCmdSet {
     const val SPECIAL = 0x01
     const val CAMERA = 0x02
     const val WIFI = 0x07
+    const val BATTERY = 0x0d
 }

@@ -7,9 +7,16 @@ import android.content.Context
 import android.os.Bundle
 import io.kaitai.struct.KaitaiStruct
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventBatteryInfo
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventUpdateDeviceState
+import nodomain.freeyourgadget.gadgetbridge.devices.BatteryCurrentSampleProvider
+import nodomain.freeyourgadget.gadgetbridge.devices.BatteryTemperatureSampleProvider
+import nodomain.freeyourgadget.gadgetbridge.entities.BatteryCurrentSample
+import nodomain.freeyourgadget.gadgetbridge.entities.BatteryTemperatureSample
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.kaitai.DumlBattery
 import nodomain.freeyourgadget.gadgetbridge.kaitai.DumlWifi
+import nodomain.freeyourgadget.gadgetbridge.model.BatteryState
 import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLESingleDeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder
 import nodomain.freeyourgadget.gadgetbridge.service.devices.dji.DjiPrefs
@@ -33,6 +40,9 @@ import java.util.UUID
 class DjiBleSupport : AbstractBTLESingleDeviceSupport(LOG) {
     private val reassembler = DumlFrameReassembler()
     private var nextSeq: Int = 0
+    private var lastBatteryLevel: Int = -1
+    private var lastBatteryState: BatteryState = BatteryState.UNKNOWN
+    private var lastBatteryPersistMillis: Long = 0
     private var wifiSession: DjiWifiSession? = null
     private var gallerySource: DjiGallerySource? = null
 
@@ -80,6 +90,9 @@ class DjiBleSupport : AbstractBTLESingleDeviceSupport(LOG) {
 
     override fun initializeDevice(builder: TransactionBuilder): TransactionBuilder {
         reassembler.reset()
+        lastBatteryLevel = -1
+        lastBatteryState = BatteryState.UNKNOWN
+        lastBatteryPersistMillis = 0
 
         builder.setDeviceState(GBDevice.State.INITIALIZING)
         builder.requestMtu(247)
@@ -155,7 +168,62 @@ class DjiBleSupport : AbstractBTLESingleDeviceSupport(LOG) {
 
             is DumlWifi.ApPassphraseGetResponse -> wifiSession?.onApPassphraseGetResponse(payload)
 
+            is DumlBattery.DynamicData -> handleBatteryDynamicData(payload)
+
             else -> LOG.warn("Unhandled DUML command {}", cmd)
+        }
+    }
+
+    private fun handleBatteryDynamicData(data: DumlBattery.DynamicData) {
+        val level = data.stateOfCharge()
+        LOG.debug(
+            "Battery level={}% voltage={}mV current={}mA temperature={}",
+            level,
+            data.voltage(),
+            data.current(),
+            data.temperature() / 10f
+        )
+        val state = if (data.current() > 0) BatteryState.BATTERY_CHARGING else BatteryState.BATTERY_NORMAL
+        // The device pushes these ~ once per second, so we don't store every single sample
+        val now = System.currentTimeMillis()
+        if (level == lastBatteryLevel && state == lastBatteryState &&
+            now - lastBatteryPersistMillis < BATTERY_PERSIST_INTERVAL_MILLIS
+        ) {
+            return
+        }
+        lastBatteryLevel = level
+        lastBatteryState = state
+        lastBatteryPersistMillis = now
+        evaluateGBDeviceEvent(GBDeviceEventBatteryInfo().apply {
+            this.level = level
+            this.state = state
+            voltage = data.voltage() / 1000f
+        })
+        persistBatteryCurrentAndTemperature(now, data.current() / 1000f, data.temperature() / 10f)
+    }
+
+    private fun persistBatteryCurrentAndTemperature(timestamp: Long, current: Float, temperature: Float) {
+        try {
+            GBApplication.acquireDB().use { db ->
+                BatteryCurrentSampleProvider(gbDevice, db.daoSession).persistSamples(
+                    BatteryCurrentSample().apply {
+                        this.timestamp = timestamp
+                        batteryIndex = 0
+                        this.current = current
+                    },
+                    context
+                )
+                BatteryTemperatureSampleProvider(gbDevice, db.daoSession).persistSamples(
+                    BatteryTemperatureSample().apply {
+                        this.timestamp = timestamp
+                        batteryIndex = 0
+                        this.temperature = temperature
+                    },
+                    context
+                )
+            }
+        } catch (e: Exception) {
+            LOG.error("Failed to persist battery current and temperature", e)
         }
     }
 
@@ -249,6 +317,8 @@ class DjiBleSupport : AbstractBTLESingleDeviceSupport(LOG) {
 
     companion object {
         private val LOG = LoggerFactory.getLogger(DjiBleSupport::class.java)
+
+        private const val BATTERY_PERSIST_INTERVAL_MILLIS = 60_000L
 
         private val UUID_SERVICE_DJI: UUID = UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")
         private val UUID_CHARACTERISTIC_DJI_FFF4: UUID = UUID.fromString("0000fff4-0000-1000-8000-00805f9b34fb")

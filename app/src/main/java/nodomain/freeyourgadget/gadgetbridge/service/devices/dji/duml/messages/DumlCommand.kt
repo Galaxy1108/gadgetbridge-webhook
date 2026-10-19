@@ -35,6 +35,7 @@ class DumlCommand(
             DumlCmdSet.GENERAL to GENERAL_DECODERS,
             DumlCmdSet.CAMERA to CAMERA_DECODERS,
             DumlCmdSet.WIFI to WIFI_DECODERS,
+            DumlCmdSet.BATTERY to BATTERY_DECODERS,
         )
 
         fun decode(cmdSet: Int, cmd: Int, packetType: DumlPacketType, payload: ByteArray): DumlCommand =
