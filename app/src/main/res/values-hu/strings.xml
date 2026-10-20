@@ -4658,4 +4658,10 @@
     <string name="ak102_pref_audio_pair_summary">Párosítsa az óra Klasszikus Bluetooth oldalát és csatlakoztassa a hang profilokat</string>
     <string name="ak102_pref_audio_unpair_title">Hívás hang párosítás feloldása</string>
     <string name="ak102_pref_audio_unpair_summary">Az órával való Bluetooth párosítás feloldása</string>
+    <string name="ak102_audio_pairing_started">Hívás hang párosítása, fogadja el a párosítási kérelmet telefonján és óráján</string>
+    <string name="ak102_audio_connected">Sikeres hívás hang párosítás</string>
+    <string name="ak102_audio_unpaired">Hívási hang párosítás feloldva</string>
+    <string name="ak102_pref_display_items_title">Elemek megjelenítése</string>
+    <string name="ak102_pref_display_items_summary">Órán megjelenő képernyők</string>
+    <string name="stratos4pro_pref_audio_on_call_title">Csak hívásoknál kapcsolódjon a hívás hanghoz</string>
 </resources>
