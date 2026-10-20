@@ -23,6 +23,7 @@ import "garmin/gdi_explore_sync.proto";
 import "garmin/gdi_event_sharing.proto";
 import "garmin/gdi_launch_monitor_service.proto";
 import "garmin/gdi_incident_detection.proto";
+import "garmin/gdi_audio_prompts.proto";
 
 message Smart {
     optional GDI.Proto.Calendar.CalendarService calendar_events_service = 1;
@@ -32,7 +33,7 @@ message Smart {
     optional DataTransferService data_transfer_service = 7;
     optional DeviceStatusService device_status_service = 8;
     optional GDI.Proto.IncidentDetection.IncidentDetectionService incident_detection_service = 9;
-    optional Service10 audio_prompts_service = 10;
+    optional GDI.Proto.AudioPrompts.AudioPromptsService audio_prompts_service = 10;
     optional Service11 wifi_setup_service = 11;
     optional FindMyWatchService find_my_watch_service = 12;
     optional CoreService core_service = 13;
@@ -64,27 +65,6 @@ message UUID {
     required fixed64 upper = 1;
     required fixed64 lower = 2;
 }
-
-message Service10 {
-    message AudioLocale {
-        message Locale {
-            optional string language = 1;
-            optional string region = 2;
-        }
-        optional Locale locale = 1;
-    }
-    message Message14 {
-        message Message3 {
-            optional string announcement = 1; // e.g. FITNESS/FITNESS_LAP_TIME
-            optional string json_params = 2; // e.g. {"lap":1, "time":618}
-        }
-        optional uint32 unk1 = 1;
-        optional Message3 unk3 = 3;
-    }
-    optional AudioLocale from_device12 = 12;
-    optional Message14 from_device14 = 14;
-}
-
 
 message Service11 {
     message Message9 {
