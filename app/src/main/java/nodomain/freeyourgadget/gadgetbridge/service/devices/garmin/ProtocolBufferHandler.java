@@ -429,7 +429,7 @@ public class ProtocolBufferHandler implements MessageHandler {
     @Nullable
     private Smart processProtobufCoreRequest(@NonNull GdiCore.CoreService coreService) {
         if (coreService.hasSyncResponse()) {
-            final GdiCore.CoreService.SyncResponse syncResponse = coreService.getSyncResponse();
+            final GdiCore.SyncResponse syncResponse = coreService.getSyncResponse();
             LOG.info("Received sync status: {}", syncResponse.getStatus());
             return null;
         }
@@ -438,49 +438,49 @@ public class ProtocolBufferHandler implements MessageHandler {
             LOG.info("Got location request");
             final CurrentPosition currentPosition = new CurrentPosition();
             final Location location = currentPosition.getLastKnownLocation();
-            final GdiCore.CoreService.GetLocationResponse.Builder response = GdiCore.CoreService.GetLocationResponse.newBuilder();
+            final GdiCore.GetLocationResponse.Builder response = GdiCore.GetLocationResponse.newBuilder();
             if (location.getLatitude() == 0 && location.getLongitude() == 0) {
-                response.setStatus(GdiCore.CoreService.GetLocationResponse.Status.NO_VALID_LOCATION);
+                response.setStatus(GdiCore.GetLocationResponse.Status.NO_VALID_LOCATION);
             } else if (currentPosition.isFromPreferences() &&
                     GBApplication.getPrefs().getBoolean("use_updated_location_if_available", false)) {
                 LOG.warn("No fresh location available, replying with NO_VALID_LOCATION");
-                response.setStatus(GdiCore.CoreService.GetLocationResponse.Status.NO_VALID_LOCATION);
+                response.setStatus(GdiCore.GetLocationResponse.Status.NO_VALID_LOCATION);
             } else {
-                response.setStatus(GdiCore.CoreService.GetLocationResponse.Status.OK)
-                        .setLocationData(GarminUtils.toLocationData(location, GdiCore.CoreService.DataType.GENERAL_LOCATION));
+                response.setStatus(GdiCore.GetLocationResponse.Status.OK)
+                        .setLocationData(GarminUtils.toLocationData(location, GdiCore.LocationData.DataType.GENERAL_LOCATION));
             }
             return Smart.newBuilder().setCoreService(
                     GdiCore.CoreService.newBuilder().setGetLocationResponse(response)).build();
         }
 
         if (coreService.hasLocationUpdatedSetEnabledRequest()) {
-            final GdiCore.CoreService.LocationUpdatedSetEnabledRequest locationUpdatedSetEnabledRequest = coreService.getLocationUpdatedSetEnabledRequest();
+            final GdiCore.LocationUpdatedSetEnabledRequest locationUpdatedSetEnabledRequest = coreService.getLocationUpdatedSetEnabledRequest();
 
             LOG.info("Received locationUpdatedSetEnabledRequest status: {}", locationUpdatedSetEnabledRequest.getEnabled());
 
-            GdiCore.CoreService.LocationUpdatedSetEnabledResponse.Builder response = GdiCore.CoreService.LocationUpdatedSetEnabledResponse.newBuilder()
-                    .setStatus(GdiCore.CoreService.LocationUpdatedSetEnabledResponse.Status.OK);
+            GdiCore.LocationUpdatedSetEnabledResponse.Builder response = GdiCore.LocationUpdatedSetEnabledResponse.newBuilder()
+                    .setStatus(GdiCore.LocationUpdatedSetEnabledResponse.Status.OK);
 
             final boolean sendGpsPref = deviceSupport.getDevicePrefs().getBoolean(DeviceSettingsPreferenceConst.PREF_WORKOUT_SEND_GPS_TO_BAND, false);
 
-            GdiCore.CoreService.Request realtimeRequest = null;
+            GdiCore.LocationUpdatedSetEnabledRequest.Request realtimeRequest = null;
 
             if (locationUpdatedSetEnabledRequest.getEnabled()) {
-                for (final GdiCore.CoreService.Request request : locationUpdatedSetEnabledRequest.getRequestsList()) {
-                    final GdiCore.CoreService.LocationUpdatedSetEnabledResponse.Requested.RequestedStatus requestedStatus;
-                    if (GdiCore.CoreService.DataType.REALTIME_TRACKING.equals(request.getRequested())) {
+                for (final GdiCore.LocationUpdatedSetEnabledRequest.Request request : locationUpdatedSetEnabledRequest.getRequestsList()) {
+                    final GdiCore.LocationUpdatedSetEnabledResponse.RequestStatus.Status requestedStatus;
+                    if (GdiCore.LocationData.DataType.REALTIME_TRACKING.equals(request.getRequested())) {
                         realtimeRequest = request;
                         if (sendGpsPref) {
-                            requestedStatus = GdiCore.CoreService.LocationUpdatedSetEnabledResponse.Requested.RequestedStatus.OK;
+                            requestedStatus = GdiCore.LocationUpdatedSetEnabledResponse.RequestStatus.Status.OK;
                         } else {
-                            requestedStatus = GdiCore.CoreService.LocationUpdatedSetEnabledResponse.Requested.RequestedStatus.KO;
+                            requestedStatus = GdiCore.LocationUpdatedSetEnabledResponse.RequestStatus.Status.NOT_AVAILABLE;
                         }
                     } else {
-                        requestedStatus = GdiCore.CoreService.LocationUpdatedSetEnabledResponse.Requested.RequestedStatus.KO;
+                        requestedStatus = GdiCore.LocationUpdatedSetEnabledResponse.RequestStatus.Status.NOT_AVAILABLE;
                     }
 
                     response.addRequests(
-                            GdiCore.CoreService.LocationUpdatedSetEnabledResponse.Requested.newBuilder()
+                            GdiCore.LocationUpdatedSetEnabledResponse.RequestStatus.newBuilder()
                                     .setRequested(request.getRequested())
                                     .setStatus(requestedStatus)
                     );
@@ -509,7 +509,7 @@ public class ProtocolBufferHandler implements MessageHandler {
             // ping-pong to notify the gadget that the connection is live and working
             return Smart.newBuilder().setCoreService(
                     GdiCore.CoreService.newBuilder().setConnectionReadyNotification(
-                            GdiCore.CoreService.ConnectionReadyNotification.newBuilder().build()
+                            GdiCore.ConnectionReadyNotification.newBuilder().build()
                     )).build();
         }
 

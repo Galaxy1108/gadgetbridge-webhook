@@ -124,21 +124,21 @@ enum MeasurementUnit {
 }
 
 message ScPoint {
-    optional sint32 lat = 1;
-    optional sint32 lon = 2;
+    required sint32 lat = 1;
+    required sint32 lon = 2;
 }
 
 message UUID {
-    optional fixed64 most_significant = 1;
-    optional fixed64 least_significant = 2;
+    required fixed64 most_significant = 1;
+    required fixed64 least_significant = 2;
 }
 
 message Locale {
-    optional string language_code = 1;
+    required string language_code = 1;
     optional string country_code = 2;
 }
 
 message DataTransferItem {
-    optional uint32 id = 1;
-    optional uint32 size = 2;
+    required uint32 id = 1;
+    required uint32 size = 2;
 }

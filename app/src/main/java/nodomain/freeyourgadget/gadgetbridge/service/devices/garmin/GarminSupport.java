@@ -1697,9 +1697,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
     @Override
     public void onSetGpsLocation(final Location location) {
-        final GdiCore.CoreService.LocationUpdatedNotification.Builder locationUpdatedNotification = GdiCore.CoreService.LocationUpdatedNotification.newBuilder()
+        final GdiCore.LocationUpdatedNotification.Builder locationUpdatedNotification = GdiCore.LocationUpdatedNotification.newBuilder()
                 .addLocationData(
-                        GarminUtils.toLocationData(location, GdiCore.CoreService.DataType.REALTIME_TRACKING)
+                        GarminUtils.toLocationData(location, GdiCore.LocationData.DataType.REALTIME_TRACKING)
                 );
 
         sendProtobufRequest("set gps location",

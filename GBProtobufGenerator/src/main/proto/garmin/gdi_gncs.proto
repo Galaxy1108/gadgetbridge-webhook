@@ -48,3 +48,19 @@ enum MediaType {
     JPEG = 1;
 }
 
+enum NotificationDisabledReason {
+    LOW_RAM_MOBILE_DEVICE = 1;
+    PERMISSION_NOT_GRANTED = 2;
+    SERVICE_NOT_BOUND = 3;
+}
+
+message CapabilitiesRequest {
+    optional uint32 np_version = 1;
+    optional NotificationDisabledReason notification_disabled_reason = 2;
+    optional string default_messaging_app_id = 3;
+    optional string default_dialer_app_id = 4;
+}
+
+message CapabilitiesResponse {
+    optional uint32 nc_version = 1;
+}
