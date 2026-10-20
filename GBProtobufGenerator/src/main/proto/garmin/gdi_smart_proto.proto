@@ -30,7 +30,7 @@ message Smart {
     optional GDI.Proto.ConnectIQHTTP.ConnectIQHTTPService connect_iq_http_service = 2;
     optional AppConfigService connect_iq_app_settings_service = 4;
     optional InstalledAppsService connect_iq_installed_apps_service = 3;
-    optional DataTransferService data_transfer_service = 7;
+    optional GDI.Proto.DataTransfer.DataTransferService data_transfer_service = 7;
     optional DeviceStatusService device_status_service = 8;
     optional GDI.Proto.IncidentDetection.IncidentDetectionService incident_detection_service = 9;
     optional GDI.Proto.AudioPrompts.AudioPromptsService audio_prompts_service = 10;

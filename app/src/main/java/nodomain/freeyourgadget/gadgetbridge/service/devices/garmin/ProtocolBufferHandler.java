@@ -42,7 +42,8 @@ import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiAuthenticationService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCalendarService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.DataTransferService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.GdiDataTransferService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
@@ -146,7 +147,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 // Response will be async
             }
             if (smart.hasDataTransferService()) {
-                final GdiDataTransferService.DataTransferService response = dataTransferHandler.handle(smart.getDataTransferService(), message.getRequestId());
+                final DataTransferService response = dataTransferHandler.handle(smart.getDataTransferService(), message.getRequestId());
                 if (response == null) {
                     return null;
                 }
