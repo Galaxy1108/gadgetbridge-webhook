@@ -11,7 +11,7 @@ import "garmin/gdi_file_access.proto";
 import "garmin/gdi_find_my_watch.proto";
 import "garmin/gdi_core.proto";
 import "garmin/gdi_http_service.proto";
-import "garmin/gdi_app_config_service.proto";
+import "garmin/gdi_app_settings.proto";
 import "garmin/gdi_installed_apps.proto";
 import "garmin/gdi_data_transfer_service.proto";
 import "garmin/gdi_sms_notification.proto";
@@ -35,7 +35,7 @@ import "garmin/gdi_generic_item_transfer.proto";
 message Smart {
     optional GDI.Proto.Calendar.CalendarService calendar_events_service = 1;
     optional GDI.Proto.ConnectIQHTTP.ConnectIQHTTPService connect_iq_http_service = 2;
-    optional AppConfigService connect_iq_app_settings_service = 4;
+    optional GDI.Proto.ConnectIQAppSettings.ConnectIQAppSettingsService connect_iq_app_settings_service = 4;
     optional GDI.Proto.ConnectIQInstalledApps.ConnectIQInstalledAppsService connect_iq_installed_apps_service = 3;
     optional GDI.Proto.DataTransfer.DataTransferService data_transfer_service = 7;
     optional GDI.Proto.DeviceStatus.DeviceStatusService device_status_service = 8;
