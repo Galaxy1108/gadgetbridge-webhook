@@ -4442,7 +4442,7 @@
     <string name="ak102_pref_audio_auto_connect_summary">Reconnecter la montre en tant que casque à chaque fois qu\'elle se connecte. Ce lien est nécessaire pour les appels, les contacts et la liste des appels.</string>
     <string name="ak102_pref_audio_unpair_title">Désappairage du son des appels</string>
     <string name="ak102_pref_audio_unpair_summary">Supprimer l\'appairage Bluetooth avec la montre</string>
-    <string name="ak102_audio_pairing_started">Appairage du son des appels, acceptez la demande d\'appairage sur le téléphone et vérifiez le statut</string>
+    <string name="ak102_audio_pairing_started">Appairage du son des appels, si une demande d\'appairage apparaît sur le téléphone et la montre, acceptez-la</string>
     <string name="ak102_pref_audio_pair_title">Appairage pour le son des appels</string>
     <string name="ak102_prefs_audio_header">Bluetooth pour le son des appels</string>
     <string name="ak102_pref_audio_auto_connect_title">Auto-connecter le son des appels</string>
