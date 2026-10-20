@@ -5,7 +5,6 @@ import android.graphics.PointF
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import nodomain.freeyourgadget.gadgetbridge.R
-import nodomain.freeyourgadget.gadgetbridge.activities.charts.SleepAnalysis
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.widgets.Band
 import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
@@ -51,13 +50,14 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
         val samples = mutableListOf<RateSample>()
         try {
             for (dev in scope.devices) {
-                val sleep = if (dev.deviceCoordinator.supportsDayRespiratoryRate(dev)) {
-                    SleepAnalysis().calculateSleepSessions(scope.allSamples(dev))
-                        .map { it.sleepStart.time..it.sleepEnd.time }
-                } else {
-                    null
-                }
                 scope.db { db ->
+                    val sleep = if (dev.deviceCoordinator.supportsDayRespiratoryRate(dev)) {
+                        dev.deviceCoordinator.getSleepSessionProvider(dev, db.daoSession)
+                            .getSleepSessions(scope.query.timeFrom, scope.query.timeTo)
+                            .map { it.startTime..it.endTime }
+                    } else {
+                        null
+                    }
                     dev.deviceCoordinator.getRespiratoryRateSampleProvider(dev, db.daoSession)
                         ?.getAllSamples(scope.query.timeFrom * 1000L, scope.query.timeTo * 1000L)
                         .orEmpty()
