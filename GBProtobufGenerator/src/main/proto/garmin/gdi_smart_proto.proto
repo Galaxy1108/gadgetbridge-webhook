@@ -24,7 +24,7 @@ import "garmin/gdi_event_sharing.proto";
 import "garmin/gdi_launch_monitor_service.proto";
 
 message Smart {
-    optional CalendarService calendar_events_service = 1;
+    optional GDI.Proto.Calendar.CalendarService calendar_events_service = 1;
     optional HttpService connect_iq_http_service = 2;
     optional AppConfigService connect_iq_app_settings_service = 4;
     optional InstalledAppsService connect_iq_installed_apps_service = 3;

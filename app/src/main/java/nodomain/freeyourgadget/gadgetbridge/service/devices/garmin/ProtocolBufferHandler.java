@@ -319,8 +319,8 @@ public class ProtocolBufferHandler implements MessageHandler {
     }
 
     private Smart processProtobufCalendarRequest(GdiCalendarService.CalendarService calendarService) {
-        if (calendarService.hasCalendarRequest()) {
-            GdiCalendarService.CalendarService.CalendarServiceRequest calendarServiceRequest = calendarService.getCalendarRequest();
+        if (calendarService.hasCalendarEventsRequest()) {
+            GdiCalendarService.CalendarEventsRequest calendarServiceRequest = calendarService.getCalendarEventsRequest();
 
             final boolean syncEnabled = GBApplication.getDeviceSpecificSharedPrefs(deviceSupport.getDevice().getAddress())
                     .getBoolean(PREF_SYNC_CALENDAR, false);
@@ -328,21 +328,21 @@ public class ProtocolBufferHandler implements MessageHandler {
             if (!syncEnabled) {
                 LOG.warn("Got calendar request, but calendar sync is disabled");
                 return Smart.newBuilder().setCalendarEventsService(
-                        GdiCalendarService.CalendarService.newBuilder().setCalendarResponse(
-                                GdiCalendarService.CalendarService.CalendarServiceResponse.newBuilder()
-                                        .addAllCalendarEvent(Collections.emptyList())
-                                        .setStatus(GdiCalendarService.CalendarService.CalendarServiceResponse.ResponseStatus.OK)
+                        GdiCalendarService.CalendarService.newBuilder().setCalendarEventsResponse(
+                                GdiCalendarService.CalendarEventsResponse.newBuilder()
+                                        .addAllEvents(Collections.emptyList())
+                                        .setStatus(GdiCalendarService.CalendarEventsResponse.ResponseStatus.OK)
                         )
                 ).build();
             }
 
             CalendarManager upcomingEvents = new CalendarManager(deviceSupport.getContext(), deviceSupport.getDevice().getAddress());
             List<CalendarEvent> mEvents = upcomingEvents.getCalendarEventList();
-            List<GdiCalendarService.CalendarService.CalendarEvent> watchEvents = new ArrayList<>();
+            List<GdiCalendarService.CalendarEvent> watchEvents = new ArrayList<>();
 
             for (CalendarEvent mEvt : mEvents) {
-                if (mEvt.getEndSeconds() < calendarServiceRequest.getBegin() ||
-                        mEvt.getBeginSeconds() > calendarServiceRequest.getEnd()) {
+                if (mEvt.getEndSeconds() < calendarServiceRequest.getStartDate() ||
+                        mEvt.getBeginSeconds() > calendarServiceRequest.getEndDate()) {
                     LOG.debug("CalendarService Skipping event {} that is out of requested time range", mEvt.getTitle());
                     continue;
                 }
@@ -370,7 +370,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                     endDateSeconds = mEvt.getEndSeconds();
                 }
 
-                final GdiCalendarService.CalendarService.CalendarEvent.Builder event = GdiCalendarService.CalendarService.CalendarEvent.newBuilder()
+                final GdiCalendarService.CalendarEvent.Builder event = GdiCalendarService.CalendarEvent.newBuilder()
                         .setTitle(mEvt.getTitle().substring(0, Math.min(mEvt.getTitle().length(), calendarServiceRequest.getMaxTitleLength())))
                         .setAllDay(mEvt.isAllDay())
                         .setStartDate(startDateSeconds)
@@ -391,18 +391,18 @@ public class ProtocolBufferHandler implements MessageHandler {
 
             LOG.debug("CalendarService Sending {} events to watch", watchEvents.size());
             return Smart.newBuilder().setCalendarEventsService(
-                    GdiCalendarService.CalendarService.newBuilder().setCalendarResponse(
-                            GdiCalendarService.CalendarService.CalendarServiceResponse.newBuilder()
-                                    .addAllCalendarEvent(watchEvents)
-                                    .setStatus(GdiCalendarService.CalendarService.CalendarServiceResponse.ResponseStatus.OK)
+                    GdiCalendarService.CalendarService.newBuilder().setCalendarEventsResponse(
+                            GdiCalendarService.CalendarEventsResponse.newBuilder()
+                                    .addAllEvents(watchEvents)
+                                    .setStatus(GdiCalendarService.CalendarEventsResponse.ResponseStatus.OK)
                     )
             ).build();
         }
         LOG.warn("Unknown CalendarService request: {}", calendarService);
         return Smart.newBuilder().setCalendarEventsService(
-                GdiCalendarService.CalendarService.newBuilder().setCalendarResponse(
-                        GdiCalendarService.CalendarService.CalendarServiceResponse.newBuilder()
-                                .setStatus(GdiCalendarService.CalendarService.CalendarServiceResponse.ResponseStatus.UNKNOWN_RESPONSE_STATUS)
+                GdiCalendarService.CalendarService.newBuilder().setCalendarEventsResponse(
+                        GdiCalendarService.CalendarEventsResponse.newBuilder()
+                                .setStatus(GdiCalendarService.CalendarEventsResponse.ResponseStatus.UNKNOWN_RESPONSE_STATUS)
                 )
         ).build();
     }
