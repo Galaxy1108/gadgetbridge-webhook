@@ -410,7 +410,7 @@ public class ProtocolBufferHandler implements MessageHandler {
 
     private void processProtobufDeviceStatusResponse(GdiDeviceStatus.DeviceStatusService deviceStatusService) {
         if (deviceStatusService.hasRemoteDeviceBatteryStatusResponse()) {
-            final GdiDeviceStatus.DeviceStatusService.RemoteDeviceBatteryStatusResponse batteryStatusResponse = deviceStatusService.getRemoteDeviceBatteryStatusResponse();
+            final GdiDeviceStatus.RemoteDeviceBatteryStatusResponse batteryStatusResponse = deviceStatusService.getRemoteDeviceBatteryStatusResponse();
             final int batteryLevel = batteryStatusResponse.getCurrentBatteryLevel();
             LOG.info("Received remote battery status {}: level={}", batteryStatusResponse.getStatus(), batteryLevel);
             final GBDeviceEventBatteryInfo batteryEvent = new GBDeviceEventBatteryInfo();
@@ -419,8 +419,8 @@ public class ProtocolBufferHandler implements MessageHandler {
             return;
         }
         if (deviceStatusService.hasActivityStatusResponse()) {
-            final GdiDeviceStatus.DeviceStatusService.ActivityStatusResponse activityStatusResponse = deviceStatusService.getActivityStatusResponse();
-            LOG.info("Received activity status: {}", activityStatusResponse.getStatus());
+            final GdiDeviceStatus.GetCurrentActivityStatusResponse activityStatusResponse = deviceStatusService.getActivityStatusResponse();
+            LOG.info("Received activity status: {}", activityStatusResponse.getActivityStatus());
             return;
         }
         LOG.warn("Unknown DeviceStatusService response: {}", deviceStatusService);

@@ -1307,7 +1307,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 .setDeviceStatusService(
                         GdiDeviceStatus.DeviceStatusService.newBuilder()
                                 .setRemoteDeviceBatteryStatusRequest(
-                                        GdiDeviceStatus.DeviceStatusService.RemoteDeviceBatteryStatusRequest.newBuilder()
+                                        GdiDeviceStatus.RemoteDeviceBatteryStatusRequest.newBuilder()
                                 )
                 )
                 .build());
