@@ -4721,4 +4721,10 @@
     <string name="hydration_unit_cup_symbol">pohár</string>
     <string name="hydration_unit_ounce_symbol">fl oz</string>
     <string name="pref_header_hydration">Hidratálás</string>
+    <string name="pref_hydration_container_i">Vizes palack %1$d</string>
+    <string name="pref_hydration_container_volume">Méret</string>
+    <string name="hydration_total">Összesen</string>
+    <string name="hydration_goal">Napi cél</string>
+    <string name="hydration_daily_average">Napi átlag</string>
+    <string name="hydration_add">Hozzáadás</string>
 </resources>
