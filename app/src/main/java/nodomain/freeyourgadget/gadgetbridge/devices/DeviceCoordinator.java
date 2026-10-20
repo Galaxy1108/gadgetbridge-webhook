@@ -178,6 +178,7 @@ public interface DeviceCoordinator {
         VACUUM,
         GAMEPAD,
         GYM_EQUIPMENT,
+        PULSE_OXIMETER,
     }
 
     /**

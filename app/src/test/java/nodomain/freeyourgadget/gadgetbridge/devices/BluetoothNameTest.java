@@ -80,6 +80,7 @@ public class BluetoothNameTest extends TestBase {
             put("ZL02D", DeviceType.ZL02D);
             put("R11C_B200", DeviceType.YAWELL_R11);
             put("R11_B200", DeviceType.YAWELL_R11);
+            put("iP900BPB", DeviceType.INNOVO_IP900BP_B); // #7134
             put("WF-C710N", DeviceType.SONY_WF_C710N);
             put("John's WF-C710N", DeviceType.SONY_WF_C710N);
             put("LE_WF-C710N", null);
