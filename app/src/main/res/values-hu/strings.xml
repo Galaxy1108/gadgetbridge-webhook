@@ -4667,4 +4667,7 @@
     <string name="stratos4pro_pref_audio_on_call_summary">Az óra Klasszikus Bluetooth kapcsolatát hagyja kikapcsolva egészen a hívásig, hogy akkor fel tudja venni az órán. Kevesebb akkumulátort használ fel, mintha mindig kapcsolódva lenne. Szükséges hozzá a hívás értesítés.</string>
     <string name="stratos4pro_incoming_call">Bejövő hívás</string>
     <string name="stratos4pro_pref_audio_auto_connect_title">Minden hang kapcsolódás meghagyása</string>
+    <string name="stratos4pro_pref_audio_auto_connect_summary">Az óra szétkapcsolja a Klasszikus Bluetooth kapcsolatot ha pár percig nem használja, ami miatt nem érik el a hívások. Kapcsolja vissza, amikor ilyen történik.</string>
+    <string name="pref_summary_notifications_ignore_other_users">Ne küldjön értesítéseket az órára más felhasználói profilból</string>
+    <string name="stratos4pro_pref_audio_schedule_title">Csak egy bizonyos időablakban</string>
 </resources>
