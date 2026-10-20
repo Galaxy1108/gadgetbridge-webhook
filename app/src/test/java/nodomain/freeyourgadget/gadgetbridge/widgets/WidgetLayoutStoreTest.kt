@@ -8,7 +8,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StressWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxWidget
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -30,13 +30,13 @@ class WidgetLayoutStoreTest : TestBase() {
     }
 
     private fun columns(columns: Int): Map<String, Int> =
-        WidgetLayoutStore.layout(columns).associate { it.instanceId to it.x }
+        WidgetLayoutStore.layout(columns).associate { it.instance.instanceId to it.x }
 
-    private fun order(columns: Int): List<String> = WidgetLayoutStore.layout(columns).map { it.instanceId }
+    private fun order(columns: Int): List<String> = WidgetLayoutStore.layout(columns).map { it.instance.instanceId }
 
     @Test
     fun migratesLegacyLayoutIntoBaseLayout() {
-        val placements = WidgetLayoutStore.layout(WidgetGrid.BASE_COLUMNS).associateBy { it.instanceId }
+        val placements = WidgetLayoutStore.layout(WidgetGrid.BASE_COLUMNS).associateBy { it.instance.instanceId }
 
         assertEquals(WidgetVariant.SMALL.id, placements["today"]?.variantId)
         assertEquals(StressWidget.SIMPLE.id, placements["c"]?.variantId)
@@ -60,23 +60,35 @@ class WidgetLayoutStoreTest : TestBase() {
     }
 
     @Test
-    fun deleteRemovesInstanceFromAllLayouts() {
-        WidgetLayoutStore.saveLayout(12, WidgetLayoutStore.layout(12))
-        WidgetLayoutStore.delete("a")
+    fun firstEditOfDerivedLayoutCopiesInstances() {
+        WidgetLayoutStore.delete(12, "a")
 
-        assertFalse(columns(WidgetGrid.BASE_COLUMNS).containsKey("a"))
-        assertFalse(columns(12).containsKey("a"))
-        assertNull(WidgetLayoutStore.instances().find { it.instanceId == "a" })
+        val copies = WidgetLayoutStore.layout(12)
+        assertEquals(4, copies.size)
+        assertTrue(copies.none { it.instance.instanceId in setOf("today", "b", "c", "d") })
+        assertEquals(listOf("today", "a", "b", "c", "d"), order(WidgetGrid.BASE_COLUMNS))
+
+        val vo2MaxCopy = copies.single { it.instance.typeId == Vo2MaxWidget.id }.instance
+        val vo2MaxPrefs = Prefs(GBApplication.getWidgetSharedPrefs(vo2MaxCopy.instanceId))
+        assertEquals(Vo2MaxWidget.SPORT_RUNNING, vo2MaxPrefs.getString(Vo2MaxWidget.KEY_SPORT, ""))
     }
 
     @Test
-    fun addPlacesInstanceInAllStoredLayouts() {
-        WidgetLayoutStore.saveLayout(12, WidgetLayoutStore.layout(12))
-        val instance = WidgetLayoutStore.add("sleep")
+    fun deleteKeepsOtherStoredLayouts() {
+        WidgetLayoutStore.instanceForEdit(12, "a")
+        WidgetLayoutStore.delete(WidgetGrid.BASE_COLUMNS, "a")
+
+        assertFalse(columns(WidgetGrid.BASE_COLUMNS).containsKey("a"))
+        assertEquals(5, WidgetLayoutStore.layout(12).size)
+    }
+
+    @Test
+    fun addPlacesInstanceOnlyInEditedLayout() {
+        WidgetLayoutStore.instanceForEdit(12, "a")
+        val instance = WidgetLayoutStore.add(WidgetGrid.BASE_COLUMNS, "sleep")
 
         assertEquals(instance.instanceId, order(WidgetGrid.BASE_COLUMNS).last())
         assertEquals(0, columns(WidgetGrid.BASE_COLUMNS)[instance.instanceId])
-        assertEquals(instance.instanceId, order(12).last())
-        assertEquals(0, columns(12)[instance.instanceId])
+        assertFalse(columns(12).containsKey(instance.instanceId))
     }
 }

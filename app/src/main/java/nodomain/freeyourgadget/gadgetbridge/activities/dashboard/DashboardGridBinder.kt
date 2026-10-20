@@ -116,7 +116,7 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
         cell.card.contentDescription = view.contentDescription
         cell.card.setOnClickListener { item.widget.onClick(view, item.variant, config, timestamp) }
         cell.card.setOnLongClickListener {
-            WidgetInstanceSettingsActivity.startForWidget(view.context, item.instance)
+            WidgetInstanceSettingsActivity.startForWidget(view.context, grid.columns, item.instance.instanceId)
             true
         }
     }

@@ -35,7 +35,7 @@ import java.text.Collator
 import java.util.Collections
 
 /**
- * Lists the widget instances in the layout for the current column count, in reading order: drag to
+ * Lists the widget instances in the layout for the current column count, in their order: drag to
  * reorder, and per-row Configure/Duplicate/Remove. A FAB adds a new instance of any widget
  * kind supported by a currently paired device.
  */
@@ -79,6 +79,8 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
                 WidgetLayoutStore.reorder(columns, instances.map { it.instanceId })
+                // Derived layouts get new instance ids on their first edit
+                recyclerView.post { reload() }
             }
         })
         touchHelper.attachToRecyclerView(recyclerView)
@@ -110,10 +112,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
     }
 
     private fun reload() {
-        val byId = WidgetLayoutStore.instances().associateBy { it.instanceId }
-        instances = WidgetLayoutStore.layout(columns)
-            .mapNotNull { byId[it.instanceId] }
-            .toMutableList()
+        instances = WidgetLayoutStore.layout(columns).map { it.instance }.toMutableList()
         adapter.submit(instances)
     }
 
@@ -134,23 +133,23 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.widgets_add_widget)
             .setAdapter(IconListAdapter(this, entries)) { _, which ->
-                WidgetLayoutStore.add(available[which].id)
+                WidgetLayoutStore.add(columns, available[which].id)
                 reload()
             }
             .show()
     }
 
     private fun configure(instance: WidgetInstance) {
-        WidgetInstanceSettingsActivity.startForWidget(this, instance)
+        WidgetInstanceSettingsActivity.startForWidget(this, columns, instance.instanceId)
     }
 
     private fun duplicate(instance: WidgetInstance) {
-        WidgetLayoutStore.duplicate(instance.instanceId)
+        WidgetLayoutStore.duplicate(columns, instance.instanceId)
         reload()
     }
 
     private fun delete(instance: WidgetInstance) {
-        WidgetLayoutStore.delete(instance.instanceId)
+        WidgetLayoutStore.delete(columns, instance.instanceId)
         reload()
     }
 

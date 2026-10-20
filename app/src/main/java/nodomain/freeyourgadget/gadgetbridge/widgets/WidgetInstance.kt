@@ -22,7 +22,7 @@ data class WidgetInstance(
  */
 @GsonSerialized
 data class WidgetPlacement(
-    val instanceId: String,
+    val instance: WidgetInstance,
     val variantId: String,
     val x: Int,
 )

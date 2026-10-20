@@ -15,13 +15,10 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 /**
- * The widget instances and the stored layouts, by column count.
+ * The stored layouts, by column count.
  */
 @GsonSerialized
-private data class Dashboard(
-    val instances: List<WidgetInstance>,
-    val layouts: Map<Int, List<WidgetPlacement>>,
-)
+private data class Dashboard(val layouts: Map<Int, List<WidgetPlacement>>)
 
 /**
  * One widget in the legacy layout format, before the cell grid.
@@ -30,16 +27,26 @@ private data class Dashboard(
 private data class LegacyLayoutEntry(val id: String, val type: String, val cols: Int)
 
 /**
- * Persists the widget instances and their layouts as JSON in one preference, and the settings of
- * each instance in its own SharedPreferences file (see [GBApplication.getWidgetSharedPrefs]).
+ * The stored layout for a column count, and the ids of the instances that were copied to store it.
+ */
+private class OwnLayout(val placements: List<WidgetPlacement>, private val copies: Map<String, String>) {
+    /**
+     * The id in this layout of [instanceId], also if it is the id of an instance before the copy.
+     */
+    fun idOf(instanceId: String): String = copies[instanceId] ?: instanceId
+}
+
+/**
+ * Persists the layouts as JSON in one preference, and the settings of each widget instance in its own
+ * SharedPreferences file (see [GBApplication.getWidgetSharedPrefs]).
  * <p>
- * The layout of [WidgetGrid.BASE_COLUMNS] is always stored. A layout for a different column count
- * is stored only after the user edits it. Until then, it is derived from the base layout.
+ * The layout of [WidgetGrid.BASE_COLUMNS] is always stored. A layout for a different column count is derived from the
+ * base layout, and shows its instances, until the first edit. The first edit stores it with a copy of each instance.
  */
 object WidgetLayoutStore {
     private val LOG: Logger = LoggerFactory.getLogger(WidgetLayoutStore::class.java)
 
-    private const val PREF_DASHBOARD = "pref_dashboard_grid"
+    private const val PREF_DASHBOARD = "pref_dashboard_layouts"
     private const val PREF_LEGACY_LAYOUT = "pref_dashboard_layout"
     private const val PREF_LEGACY_ORDER = "pref_dashboard_widgets_order"
 
@@ -66,7 +73,10 @@ object WidgetLayoutStore {
     private val dashboardType = object : TypeToken<Dashboard>() {}.type
     private val legacyListType = object : TypeToken<List<LegacyLayoutEntry>>() {}.type
 
-    fun instances(): List<WidgetInstance> = load().instances
+    /**
+     * The widget instances of all stored layouts.
+     */
+    fun instances(): List<WidgetInstance> = load().layouts.values.flatten().map { it.instance }
 
     /**
      * The placements for [columns]: the stored layout, or a layout derived from the base layout if there is none.
@@ -77,22 +87,18 @@ object WidgetLayoutStore {
      * The widgets that the grid displays for [columns], in their order. Placements of widgets that are not available
      * now are left out.
      */
-    fun placedWidgets(columns: Int): List<PlacedWidget> {
-        val dashboard = load()
-        val instances = dashboard.instances.associateBy { it.instanceId }
-        return layoutOf(dashboard, columns).mapNotNull { placement ->
-            val instance = instances[placement.instanceId] ?: return@mapNotNull null
-            val widget = WidgetRegistry.byId(instance.typeId) ?: return@mapNotNull null
-            PlacedWidget(instance, widget, widget.variant(placement.variantId), placement.x)
-        }
+    fun placedWidgets(columns: Int): List<PlacedWidget> = layout(columns).mapNotNull { placement ->
+        val widget = WidgetRegistry.byId(placement.instance.typeId) ?: return@mapNotNull null
+        PlacedWidget(placement.instance, widget, widget.variant(placement.variantId), placement.x)
     }
 
     /**
-     * Stores [placements] as the layout for [columns].
+     * Stores the layout for [columns] if it is derived. Returns the instance in it that [instanceId] is, or was copied
+     * to.
      */
-    fun saveLayout(columns: Int, placements: List<WidgetPlacement>) {
-        val dashboard = load()
-        save(dashboard.copy(layouts = dashboard.layouts + (columns to placements)))
+    fun instanceForEdit(columns: Int, instanceId: String): WidgetInstance? {
+        val layout = ownLayout(columns)
+        return layout.placements.find { it.instance.instanceId == layout.idOf(instanceId) }?.instance
     }
 
     /**
@@ -100,73 +106,74 @@ object WidgetLayoutStore {
      * column.
      */
     fun reorder(columns: Int, instanceIds: List<String>) {
-        val dashboard = load()
-        val byId = layoutOf(dashboard, columns).associateBy { it.instanceId }
-        val ordered = instanceIds.mapNotNull { byId[it] }
+        val layout = ownLayout(columns)
+        val byId = layout.placements.associateBy { it.instance.instanceId }
         val repacked = mutableListOf<WidgetPlacement>()
-        for (placement in ordered) {
-            repacked += placeAtFirstFree(dashboard, columns, repacked, placement)
+        for (instanceId in instanceIds) {
+            val placement = byId[layout.idOf(instanceId)] ?: continue
+            repacked += placeAtFirstFree(columns, repacked, placement)
         }
         saveLayout(columns, repacked)
     }
 
     /**
-     * Adds a new instance of [typeId] to all layouts, with the default variant, and returns it.
+     * Adds a new instance of [typeId] to the layout for [columns], with the default variant, and returns it.
      */
-    fun add(typeId: String): WidgetInstance {
+    fun add(columns: Int, typeId: String): WidgetInstance {
         val instance = WidgetInstance(newInstanceId(), typeId)
         val variantId = WidgetRegistry.byId(typeId)?.variants?.first()?.id ?: ""
-        addToLayouts(load(), instance) { variantId }
+        val placements = ownLayout(columns).placements
+        saveLayout(columns, placements + placeAtFirstFree(columns, placements, WidgetPlacement(instance, variantId, 0)))
         return instance
     }
 
     /**
-     * Duplicates [instanceId] (settings included) into each layout that has it, with the same variant. Returns the copy, if the
-     * original was found.
+     * Duplicates [instanceId] (settings included) in the layout for [columns], with the same variant. Returns the copy,
+     * if the original was found.
      */
-    fun duplicate(instanceId: String): WidgetInstance? {
-        val dashboard = load()
-        val original = dashboard.instances.find { it.instanceId == instanceId } ?: return null
-        val copy = original.copy(instanceId = newInstanceId())
-
-        val source = GBApplication.getWidgetSharedPrefs(instanceId)
-        val dest = GBApplication.getWidgetSharedPrefs(copy.instanceId)
-        if (source != null && dest != null) {
-            copyAllPrefs(source, dest) { it }
-        }
-
-        addToLayouts(dashboard, copy) { placements -> placements.find { it.instanceId == instanceId }?.variantId }
+    fun duplicate(columns: Int, instanceId: String): WidgetInstance? {
+        val layout = ownLayout(columns)
+        val original = layout.placements.find { it.instance.instanceId == layout.idOf(instanceId) } ?: return null
+        val copy = copyInstance(original.instance)
+        saveLayout(
+            columns,
+            layout.placements + placeAtFirstFree(columns, layout.placements, original.copy(instance = copy))
+        )
         return copy
     }
 
     /**
-     * Removes [instanceId] from all layouts, and deletes its settings.
+     * Removes [instanceId] from the layout for [columns], and deletes its settings.
      */
-    fun delete(instanceId: String) {
-        val dashboard = load()
-        save(
-            Dashboard(
-                instances = dashboard.instances.filterNot { it.instanceId == instanceId },
-                layouts = dashboard.layouts.mapValues { (_, placements) -> placements.filterNot { it.instanceId == instanceId } },
-            )
-        )
-        GBApplication.deleteWidgetSharedPrefs(instanceId)
+    fun delete(columns: Int, instanceId: String) {
+        val layout = ownLayout(columns)
+        val id = layout.idOf(instanceId)
+        saveLayout(columns, layout.placements.filterNot { it.instance.instanceId == id })
+        GBApplication.deleteWidgetSharedPrefs(id)
     }
 
     /**
-     * Adds a new instance for each variant of each widget to all stored layouts.
+     * Adds a new instance for each variant of each widget to the base layout and to each stored layout, also for the
+     * widgets that no device supports.
      */
     fun addAllVariants() {
-        for (widget in WidgetRegistry.all()) {
-            for (variant in widget.variants) {
-                LOG.info("Adding widget {}, variant {}", widget.id, variant.id)
-                addToLayouts(load(), WidgetInstance(newInstanceId(), widget.id)) { variant.id }
+        for (columns in load().layouts.keys) {
+            for (widget in WidgetRegistry.all()) {
+                for (variant in widget.variants) {
+                    LOG.info("Adding widget {} with variant {} to {} columns", widget.id, variant.id, columns)
+                    val placements = layout(columns)
+                    val instance = WidgetInstance(newInstanceId(), widget.id)
+                    saveLayout(
+                        columns,
+                        placements + placeAtFirstFree(columns, placements, WidgetPlacement(instance, variant.id, 0))
+                    )
+                }
             }
         }
     }
 
     /**
-     * Clears the dashboard preference. The next load migrates the legacy config again.
+     * Removes the dashboard. The next load migrates the legacy config again.
      */
     fun reset() {
         LOG.info("Resetting the dashboard")
@@ -178,10 +185,13 @@ object WidgetLayoutStore {
     /**
      * Changes the variant of [instanceId] in the layout for [columns].
      */
-    fun setVariant(instanceId: String, columns: Int, variantId: String) {
+    fun setVariant(columns: Int, instanceId: String, variantId: String) {
+        val layout = ownLayout(columns)
+        val id = layout.idOf(instanceId)
         saveLayout(
             columns,
-            layout(columns).map { if (it.instanceId == instanceId) it.copy(variantId = variantId) else it })
+            layout.placements.map { if (it.instance.instanceId == id) it.copy(variantId = variantId) else it }
+        )
     }
 
     private fun load(): Dashboard {
@@ -196,19 +206,20 @@ object WidgetLayoutStore {
             gson.fromJson(json, dashboardType)
         } catch (e: Exception) {
             LOG.error("Failed to parse the dashboard, treating it as empty", e)
-            Dashboard(emptyList(), mapOf(WidgetGrid.BASE_COLUMNS to emptyList()))
+            Dashboard(mapOf(WidgetGrid.BASE_COLUMNS to emptyList()))
         }
     }
 
     private fun save(dashboard: Dashboard) {
-        LOG.debug(
-            "Saving dashboard with {} widget instances and layouts {}",
-            dashboard.instances.size,
-            dashboard.layouts.keys
-        )
+        LOG.debug("Saving dashboard with layouts {}", dashboard.layouts.mapValues { it.value.size })
         sharedPreferences().edit {
             putString(PREF_DASHBOARD, gson.toJson(dashboard))
         }
+    }
+
+    private fun saveLayout(columns: Int, placements: List<WidgetPlacement>) {
+        val dashboard = load()
+        save(dashboard.copy(layouts = dashboard.layouts + (columns to placements)))
     }
 
     private fun layoutOf(dashboard: Dashboard, columns: Int): List<WidgetPlacement> {
@@ -216,51 +227,57 @@ object WidgetLayoutStore {
 
         val derived = mutableListOf<WidgetPlacement>()
         for (placement in dashboard.layouts[WidgetGrid.BASE_COLUMNS].orEmpty()) {
-            derived += placeAtFirstFree(dashboard, columns, derived, placement)
+            derived += placeAtFirstFree(columns, derived, placement)
         }
         return derived
     }
 
     /**
-     * Adds [instance] to the instances, and to each stored layout for which [variantFor] returns a variant.
+     * The layout for [columns]. If it is derived, it is stored first, with a copy of each instance.
      */
-    private fun addToLayouts(
-        dashboard: Dashboard,
-        instance: WidgetInstance,
-        variantFor: (List<WidgetPlacement>) -> String?
-    ) {
-        val instances = dashboard.instances + instance
-        val withInstance = dashboard.copy(instances = instances)
-        val layouts = dashboard.layouts.mapValues { (columns, placements) ->
-            val variantId = variantFor(placements) ?: return@mapValues placements
-            placements + placeAtFirstFree(
-                withInstance,
-                columns,
-                placements,
-                WidgetPlacement(instance.instanceId, variantId, 0)
-            )
+    private fun ownLayout(columns: Int): OwnLayout {
+        val dashboard = load()
+        dashboard.layouts[columns]?.let { return OwnLayout(it, emptyMap()) }
+
+        LOG.info("Storing the derived layout for {} columns", columns)
+        val copies = mutableMapOf<String, String>()
+        val placements = layoutOf(dashboard, columns).map { placement ->
+            val copy = copyInstance(placement.instance)
+            copies[placement.instance.instanceId] = copy.instanceId
+            placement.copy(instance = copy)
         }
-        save(Dashboard(instances, layouts))
+        saveLayout(columns, placements)
+        return OwnLayout(placements, copies)
+    }
+
+    /**
+     * A new instance of the same widget as [instance], with a copy of its settings.
+     */
+    private fun copyInstance(instance: WidgetInstance): WidgetInstance {
+        val copy = instance.copy(instanceId = newInstanceId())
+        val source = GBApplication.getWidgetSharedPrefs(instance.instanceId)
+        val dest = GBApplication.getWidgetSharedPrefs(copy.instanceId)
+        if (source != null && dest != null) {
+            copyAllPrefs(source, dest) { it }
+        }
+        return copy
     }
 
     private fun placeAtFirstFree(
-        dashboard: Dashboard,
         columns: Int,
         occupied: List<WidgetPlacement>,
         placement: WidgetPlacement,
     ): WidgetPlacement {
-        val size = sizeOf(dashboard, placement) ?: WidgetVariant.GAUGE
-        val stacked = WidgetGrid.stack(columns, occupied.mapNotNull { rectOf(dashboard, it) })
-        return placement.copy(x = WidgetGrid.firstFreeColumn(columns, stacked, size.width))
+        val width = (sizeOf(placement) ?: WidgetVariant.GAUGE).width
+        val stacked = WidgetGrid.stack(columns, occupied.mapNotNull { rectOf(it) })
+        return placement.copy(x = WidgetGrid.firstFreeColumn(columns, stacked, width))
     }
 
-    private fun sizeOf(dashboard: Dashboard, placement: WidgetPlacement): WidgetVariant? {
-        val typeId = dashboard.instances.find { it.instanceId == placement.instanceId }?.typeId ?: return null
-        return WidgetRegistry.byId(typeId)?.variant(placement.variantId)
-    }
+    private fun sizeOf(placement: WidgetPlacement): WidgetVariant? =
+        WidgetRegistry.byId(placement.instance.typeId)?.variant(placement.variantId)
 
-    private fun rectOf(dashboard: Dashboard, placement: WidgetPlacement): GridRect? {
-        val size = sizeOf(dashboard, placement) ?: return null
+    private fun rectOf(placement: WidgetPlacement): GridRect? {
+        val size = sizeOf(placement) ?: return null
         return GridRect(placement.x, 0, size.width, size.heightDp)
     }
 
@@ -300,7 +317,6 @@ object WidgetLayoutStore {
         val entries = loadLegacyLayout() ?: migrateLegacyOrder()
         LOG.info("Migrating {} dashboard widgets to the cell grid", entries.size)
 
-        val instances = mutableListOf<WidgetInstance>()
         val placements = mutableListOf<WidgetPlacement>()
         for (entry in entries) {
             val (typeId, variantId) = when (entry.type) {
@@ -322,18 +338,14 @@ object WidgetLayoutStore {
 
                 else -> entry.type to (WidgetRegistry.byId(entry.type)?.variants?.first()?.id ?: "")
             }
-            val instance = WidgetInstance(entry.id, typeId)
-            instances += instance
-            val dashboard = Dashboard(instances, emptyMap())
             placements += placeAtFirstFree(
-                dashboard,
                 WidgetGrid.BASE_COLUMNS,
                 placements,
-                WidgetPlacement(entry.id, variantId, 0)
+                WidgetPlacement(WidgetInstance(entry.id, typeId), variantId, 0)
             )
         }
 
-        return Dashboard(instances, mapOf(WidgetGrid.BASE_COLUMNS to placements))
+        return Dashboard(mapOf(WidgetGrid.BASE_COLUMNS to placements))
     }
 
     private fun setVo2MaxSport(instanceId: String, sport: String) {

@@ -50,15 +50,14 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
 
         refreshHandle = DeviceSettingRenderer.render(items, screen, prefs, this)
 
-        setupVariantPreference(instanceId)
+        setupVariantPreference(instanceId, requireArguments().getInt(ARG_COLUMNS, WidgetGrid.BASE_COLUMNS))
     }
 
-    private fun setupVariantPreference(instanceId: String) {
+    private fun setupVariantPreference(instanceId: String, columns: Int) {
         val variantPref = findPreference<ListPreference>(KEY_VARIANT) ?: return
         variantPref.isPersistent = false
 
-        val columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
-        val placement = WidgetLayoutStore.layout(columns).find { it.instanceId == instanceId }
+        val placement = WidgetLayoutStore.layout(columns).find { it.instance.instanceId == instanceId }
         if (placement == null) {
             variantPref.isVisible = false
             return
@@ -69,7 +68,7 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
         variantPref.setOnPreferenceChangeListener { preference, newValue ->
             val accepted = rendererListener?.onPreferenceChange(preference, newValue) ?: true
             if (accepted) {
-                WidgetLayoutStore.setVariant(instanceId, columns, newValue as String)
+                WidgetLayoutStore.setVariant(columns, instanceId, newValue as String)
             }
             accepted
         }
@@ -171,13 +170,15 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
     companion object {
         const val ARG_INSTANCE_ID = "widget_instance_id"
         const val ARG_TYPE_ID = "widget_type_id"
+        const val ARG_COLUMNS = "widget_columns"
         private const val KEY_VARIANT = "widget_variant"
 
-        fun newInstance(instanceId: String, typeId: String): WidgetInstanceSettingsFragment {
+        fun newInstance(instanceId: String, typeId: String, columns: Int): WidgetInstanceSettingsFragment {
             val fragment = WidgetInstanceSettingsFragment()
             val args = Bundle()
             args.putString(ARG_INSTANCE_ID, instanceId)
             args.putString(ARG_TYPE_ID, typeId)
+            args.putInt(ARG_COLUMNS, columns)
             fragment.arguments = args
             return fragment
         }
