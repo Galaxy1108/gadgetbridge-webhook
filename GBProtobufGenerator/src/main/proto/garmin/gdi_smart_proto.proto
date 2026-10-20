@@ -25,6 +25,7 @@ import "garmin/gdi_launch_monitor_service.proto";
 import "garmin/gdi_incident_detection.proto";
 import "garmin/gdi_audio_prompts.proto";
 import "garmin/gdi_wifi_setup.proto";
+import "garmin/gdi_group_live_track.proto";
 
 message Smart {
     optional GDI.Proto.Calendar.CalendarService calendar_events_service = 1;
@@ -38,7 +39,7 @@ message Smart {
     optional GDI.Proto.WifiSetup.WifiSetupService wifi_setup_service = 11;
     optional GDI.Proto.FindMyWatch.FindMyWatchService find_my_watch_service = 12;
     optional CoreService core_service = 13;
-    optional Service14 group_live_track_service = 14;
+    optional GDI.Proto.GroupLiveTrack.GroupLiveTrackService group_live_track_service = 14;
     optional SmsNotificationService sms_notification_service = 16;
     optional Service18 instant_input_service = 18;
     optional Service21 live_track_service = 21;
@@ -65,19 +66,6 @@ message Smart {
 message UUID {
     required fixed64 upper = 1;
     required fixed64 lower = 2;
-}
-
-message Service14 {
-    message Message1 {
-        message Message1X {
-            optional sint32 unk1 = 1;
-            optional sint32 unk2 = 2;
-        }
-        optional Message1X unk1 = 1;
-        optional uint32 unk2 = 2;
-        repeated uint32 unk3 = 3;
-    }
-    optional Message1 unk1 = 1;
 }
 
 message Service18 {
