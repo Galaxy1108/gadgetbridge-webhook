@@ -39,7 +39,7 @@ import nodomain.freeyourgadget.gadgetbridge.externalevents.gps.GBLocationProvide
 import nodomain.freeyourgadget.gadgetbridge.externalevents.gps.GBLocationService;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiAuthenticationService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCredentials;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCalendarService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.DataTransferService;
@@ -165,24 +165,24 @@ public class ProtocolBufferHandler implements MessageHandler {
                 processed = true;
                 processProtobufSettingsService(smart.getRealtimeSettingsService());
             }
-            if (smart.hasCredentialsService() && smart.getCredentialsService().hasOauthRequest()) {
+            if (smart.hasCredentialsService() && smart.getCredentialsService().hasGcOauthRequest()) {
                 LOG.debug("Got OAuth request");
                 final GarminPrefs devicePrefs = deviceSupport.getDevicePrefs();
                 if (!devicePrefs.fakeOauthEnabled()) {
                     LOG.warn("Got OAuth request, but fake OAuth is disabled");
                 } else {
-                    final GdiAuthenticationService.OAuthResponse oauthResponse = GdiAuthenticationService.OAuthResponse.newBuilder()
-                            .setKeys(GdiAuthenticationService.OAuthKeys.newBuilder()
+                    final GdiCredentials.GCOAuthCredentialsResponse oauthResponse = GdiCredentials.GCOAuthCredentialsResponse.newBuilder()
+                            .setOauthCredentials(GdiCredentials.OAuthCredentials.newBuilder()
                                     .setConsumerKey(UUID.randomUUID().toString())
                                     .setConsumerSecret(RandomStringUtils.insecure().next(35, true, true))
                                     .setOauthToken(UUID.randomUUID().toString())
                                     .setOauthSecret(RandomStringUtils.insecure().next(35, true, true))
                                     .build()
-                            ).setRegion(0).build();
+                            ).setGcsLocation(GdiCredentials.GCSLocation.PRODUCTION).build();
 
                     return prepareProtobufResponse(Smart.newBuilder().setCredentialsService(
-                            GdiAuthenticationService.AuthenticationService.newBuilder()
-                                    .setOauthResponse(oauthResponse)
+                            GdiCredentials.CredentialsService.newBuilder()
+                                    .setGcOauthResponse(oauthResponse)
                     ).build(), message.getRequestId());
                 }
             }

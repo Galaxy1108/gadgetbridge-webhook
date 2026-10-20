@@ -5,7 +5,7 @@ package garmin_vivomovehr;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto";
 option java_multiple_files = true;
 
-import "garmin/gdi_authentication_service.proto";
+import "garmin/gdi_credentials.proto";
 import "garmin/gdi_device_status.proto";
 import "garmin/gdi_file_access.proto";
 import "garmin/gdi_find_my_watch.proto";
@@ -30,6 +30,7 @@ import "garmin/gdi_instant_input_service.proto";
 import "garmin/gdi_live_track.proto";
 import "garmin/gdi_waypoint_transfer.proto";
 import "garmin/gdi_device_messages.proto";
+import "garmin/gdi_generic_item_transfer.proto";
 
 message Smart {
     optional GDI.Proto.Calendar.CalendarService calendar_events_service = 1;
@@ -49,12 +50,12 @@ message Smart {
     optional GDI.Proto.LiveTrack.LiveTrackService live_track_service = 21;
     optional GDI.Proto.WaypointTransfer.WaypointTransferService way_point_transfer_service = 23;
     optional GDI.Proto.DeviceMessages.DeviceMessageService device_message_service = 24;
-    optional AuthenticationService credentials_service = 27;
+    optional GDI.Proto.Credentials.CredentialsService credentials_service = 27;
     optional ExploreSyncService explore_sync_service = 22;
     optional Service28 inreach_tracking_service = 28;
     optional Service29 inreach_messaging_service = 29;
     optional GDI.Proto.EventSharing.EventSharing event_sharing = 30;
-    optional Service31 generic_item_transfer_service = 31;
+    optional GDI.Proto.GenericItemTransfer.GenericItemTransferService generic_item_transfer_service = 31;
     optional Service32 inreach_contact_sync_service = 32;
     optional GDI.Proto.LaunchMonitor.LaunchMonitorService launch_monitor_service = 38;
     optional EcgService samd_service = 39;
@@ -162,21 +163,6 @@ message Service29 {
     optional Message41 unk41 = 41;
     optional Message43 unk43 = 43;
     optional Message45 unk45 = 45;
-}
-
-message Service31 {
-    message Message2 {
-        optional uint32 unk1 = 1;
-    }
-    message Message4 {
-        optional uint32 unk4 = 1;
-    }
-    message Message6 {
-        optional uint32 unk6 = 1;
-    }
-    optional Message2 unk2 = 2;
-    optional Message4 unk4 = 4;
-    optional Message6 unk6 = 6;
 }
 
 message Service32 {
