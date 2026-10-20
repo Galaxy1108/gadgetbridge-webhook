@@ -157,6 +157,28 @@ object WidgetLayoutStore {
     }
 
     /**
+     * Adds a new instance for each variant of each widget to all stored layouts.
+     */
+    fun addAllVariants() {
+        for (widget in WidgetRegistry.all()) {
+            for (variant in widget.variants) {
+                LOG.info("Adding widget {}, variant {}", widget.id, variant.id)
+                addToLayouts(load(), WidgetInstance(newInstanceId(), widget.id)) { variant.id }
+            }
+        }
+    }
+
+    /**
+     * Clears the dashboard preference. The next load migrates the legacy config again.
+     */
+    fun reset() {
+        LOG.info("Resetting the dashboard")
+        sharedPreferences().edit {
+            remove(PREF_DASHBOARD)
+        }
+    }
+
+    /**
      * Changes the variant of [instanceId] in the layout for [columns].
      */
     fun setVariant(instanceId: String, columns: Int, variantId: String) {
