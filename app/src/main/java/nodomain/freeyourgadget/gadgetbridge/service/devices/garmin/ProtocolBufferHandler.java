@@ -39,16 +39,16 @@ import nodomain.freeyourgadget.gadgetbridge.externalevents.gps.GBLocationProvide
 import nodomain.freeyourgadget.gadgetbridge.externalevents.gps.GBLocationService;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.DataTransferItem;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCredentials;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCalendarService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.DataTransferService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.GdiDataTransferService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiGncs;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttpService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiNotificationsService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledAppsService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmsNotification;
@@ -517,31 +517,31 @@ public class ProtocolBufferHandler implements MessageHandler {
         return null;
     }
 
-    private Smart processProtobufNotificationsServiceMessage(final GdiNotificationsService.NotificationsService notificationsService) {
-        if (notificationsService.hasPictureRequest()) {
-            final GdiNotificationsService.PictureRequest pictureRequest = notificationsService.getPictureRequest();
-            final int notificationId = pictureRequest.getNotificationId();
+    private Smart processProtobufNotificationsServiceMessage(final GdiGncs.GncsService notificationsService) {
+        if (notificationsService.hasMediaRequest()) {
+            final GdiGncs.MediaRequest pictureRequest = notificationsService.getMediaRequest();
+            final int notificationId = pictureRequest.getNotificationUid();
             final Bitmap bmp = deviceSupport.getNotificationAttachmentBitmap(notificationId);
             if (bmp == null) {
                 return null;
             }
 
-            final GdiNotificationsService.PictureParameters parameters = pictureRequest.getParameters();
-            final int targetHeight = (int) Math.round(bmp.getHeight() * ((double) parameters.getWidth() / bmp.getWidth()));
+            final GdiGncs.DisplayAttributes parameters = pictureRequest.getParameters();
+            final int targetHeight = (int) Math.round(bmp.getHeight() * ((double) parameters.getWidthPx() / bmp.getWidth()));
 
-            final Bitmap scaledBmp = Bitmap.createScaledBitmap(bmp, parameters.getWidth(), targetHeight, true);
+            final Bitmap scaledBmp = Bitmap.createScaledBitmap(bmp, parameters.getWidthPx(), targetHeight, true);
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             scaledBmp.compress(Bitmap.CompressFormat.JPEG, parameters.getQuality(), baos);
             final byte[] imageBytes = baos.toByteArray();
 
             final int transferId = DataTransferHandler.registerData(imageBytes);
 
-            final GdiNotificationsService.PictureResponse.Builder response = GdiNotificationsService.PictureResponse.newBuilder()
-                    .setStatus(1)
-                    .setNotificationId(notificationId)
-                    .setPictureType(GdiNotificationsService.PictureType.JPEG)
-                    .setDataTransferItem(
-                            GdiNotificationsService.DataTransferItem.newBuilder()
+            final GdiGncs.MediaResponse.Builder response = GdiGncs.MediaResponse.newBuilder()
+                    .setStatus(GdiGncs.MediaResponse.Status.SUCCESS)
+                    .setNotificationUid(notificationId)
+                    .setMediaType(GdiGncs.MediaType.JPEG)
+                    .setTransferInfo(
+                            DataTransferItem.newBuilder()
                                     .setId(transferId)
                                     .setSize(imageBytes.length)
                                     .build()
@@ -552,7 +552,7 @@ public class ProtocolBufferHandler implements MessageHandler {
             }
 
             return Smart.newBuilder().setGncsService(
-                    GdiNotificationsService.NotificationsService.newBuilder().setPictureResponse(response.build())
+                    GdiGncs.GncsService.newBuilder().setMediaResponse(response.build())
             ).build();
         }
 

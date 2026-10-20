@@ -1,0 +1,50 @@
+syntax = "proto2";
+
+package GDI.Proto.GNCS;
+
+option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+import "garmin/gdi_datatypes.proto";
+
+message GncsService {
+    optional MediaRequest media_request = 1;
+    optional MediaResponse media_response = 2;
+}
+
+message MediaRequest {
+    optional uint32 notification_uid = 1;
+    optional uint32 index = 2; // 0
+    optional DisplayAttributes parameters = 3;
+    repeated MediaType media_type = 4;
+}
+
+message DisplayAttributes {
+    optional uint32 width_px = 1;
+    optional uint32 height_px = 2;
+    optional uint32 max_byte_size = 3;
+    optional uint32 quality = 4; // 80
+}
+
+message MediaResponse {
+    enum Status {
+        UNKNOWN = 0;
+        SUCCESS = 1;
+        INVALID_UID = 2;
+        INVALID_INDEX = 3;
+    }
+    optional Status status = 1;
+    optional uint32 notification_uid = 2;
+    optional uint32 index = 3; // 0
+    optional MediaType media_type = 4;
+    optional GDI.Proto.DataTypes.DataTransferItem transfer_info = 5;
+}
+
+message DataTransferItem {
+    optional uint32 id = 1;
+    optional uint32 size = 2;
+}
+
+enum MediaType {
+    PNG = 0;
+    JPEG = 1;
+}
+

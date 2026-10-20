@@ -17,7 +17,7 @@ import "garmin/gdi_data_transfer_service.proto";
 import "garmin/gdi_sms_notification.proto";
 import "garmin/gdi_calendar_service.proto";
 import "garmin/gdi_settings_service.proto";
-import "garmin/gdi_notifications_service.proto";
+import "garmin/gdi_gncs.proto";
 import "garmin/gdi_ecg_service.proto";
 import "garmin/gdi_explore_sync.proto";
 import "garmin/gdi_event_sharing.proto";
@@ -64,7 +64,7 @@ message Smart {
     optional Service44 service44 = 44;
     optional Service46 deeplinking_service = 46;
     optional Service47 garmin_connect_service = 47;
-    optional NotificationsService gncs_service = 49;
+    optional GDI.Proto.GNCS.GncsService gncs_service = 49;
     optional Service56 live_session_service = 56;
 }
 
