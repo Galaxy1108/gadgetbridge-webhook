@@ -112,7 +112,6 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
     private fun reload() {
         val byId = WidgetLayoutStore.instances().associateBy { it.instanceId }
         instances = WidgetLayoutStore.layout(columns)
-            .sortedWith(compareBy({ it.y }, { it.x }))
             .mapNotNull { byId[it.instanceId] }
             .toMutableList()
         adapter.submit(instances)

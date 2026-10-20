@@ -17,25 +17,24 @@ data class WidgetInstance(
 )
 
 /**
- * A widget instance in one layout, at the cell of its top-left corner.
+ * A widget instance in one layout, at the column of its left edge. The order of the placements in the layout is the
+ * order in which they are stacked.
  */
 @GsonSerialized
 data class WidgetPlacement(
     val instanceId: String,
     val variantId: String,
     val x: Int,
-    val y: Int,
 )
 
 /**
- * A widget instance as the dashboard grid displays it, after compaction.
+ * A widget instance as the dashboard grid displays it.
  */
 data class PlacedWidget(
     val instance: WidgetInstance,
     val widget: GBWidget<*>,
     val variant: WidgetVariant,
     val x: Int,
-    val y: Int,
 )
 
 /**

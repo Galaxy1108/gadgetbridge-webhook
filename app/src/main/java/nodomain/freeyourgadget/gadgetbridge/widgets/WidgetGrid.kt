@@ -1,18 +1,13 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets
 
 /**
- * A rectangle in the dashboard grid, in cells.
+ * A rectangle in the dashboard grid: the first column and the width in columns, and the top and the height in a unit
+ * of length.
  */
-data class GridRect(val x: Int, val y: Int, val width: Int, val height: Int) {
-    fun overlaps(other: GridRect): Boolean =
-        x < other.x + other.width &&
-            other.x < x + width &&
-            y < other.y + other.height &&
-            other.y < y + height
-}
+data class GridRect(val x: Int, val y: Int, val width: Int, val height: Int)
 
 /**
- * The square-cell grid of the dashboard.
+ * The cell grid of the dashboard.
  */
 object WidgetGrid {
     /**
@@ -28,40 +23,33 @@ object WidgetGrid {
     }
 
     /**
-     * Moves each rectangle up to the highest free row, in reading order. A rectangle that overlaps
-     * one before it moves down. Returns the new rectangles, in the order of [rects].
+     * Stacks the rectangles in their order. Each rectangle goes directly under the lowest rectangle in its columns.
+     * Returns the new rectangles, in the order of [rects].
      */
-    fun compact(columns: Int, rects: List<GridRect>): List<GridRect> {
-        val result = arrayOfNulls<GridRect>(rects.size)
-        val placed = mutableListOf<GridRect>()
-        val order = rects.indices.sortedWith(compareBy({ rects[it].y }, { rects[it].x }))
-        for (index in order) {
-            val rect = rects[index]
+    fun stack(columns: Int, rects: List<GridRect>): List<GridRect> {
+        val bottoms = IntArray(columns)
+        return rects.map { rect ->
             val width = rect.width.coerceAtMost(columns)
-            var candidate = GridRect(rect.x.coerceIn(0, columns - width), 0, width, rect.height)
-            while (placed.any { it.overlaps(candidate) }) {
-                candidate = candidate.copy(y = candidate.y + 1)
+            val x = rect.x.coerceIn(0, columns - width)
+            val y = (x until x + width).maxOf { bottoms[it] }
+            for (column in x until x + width) {
+                bottoms[column] = y + rect.height
             }
-            placed += candidate
-            result[index] = candidate
+            GridRect(x, y, width, rect.height)
         }
-        return result.map { it!! }
     }
 
     /**
-     * The first position, in reading order, where a rectangle of [width] x [height] does not overlap [occupied].
+     * The first column at which a rectangle of [width] goes highest, under the stacked rectangles in [stacked].
      */
-    fun firstFree(columns: Int, occupied: List<GridRect>, width: Int, height: Int): GridRect {
-        val clampedWidth = width.coerceAtMost(columns)
-        var y = 0
-        while (true) {
-            for (x in 0..columns - clampedWidth) {
-                val candidate = GridRect(x, y, clampedWidth, height)
-                if (occupied.none { it.overlaps(candidate) }) {
-                    return candidate
-                }
+    fun firstFreeColumn(columns: Int, stacked: List<GridRect>, width: Int): Int {
+        val bottoms = IntArray(columns)
+        for (rect in stacked) {
+            for (column in rect.x until rect.x + rect.width) {
+                bottoms[column] = maxOf(bottoms[column], rect.y + rect.height)
             }
-            y++
         }
+        val clampedWidth = width.coerceAtMost(columns)
+        return (0..columns - clampedWidth).minBy { x -> (x until x + clampedWidth).maxOf { bottoms[it] } }
     }
 }

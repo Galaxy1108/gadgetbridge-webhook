@@ -15,9 +15,9 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
  * segmented gauge with the day's samples.
  */
 object StressWidget : MetricWidget<StressData?>() {
-    val SEGMENTED = WidgetVariant("segmented", R.string.menuitem_stress_segmented, 3, 2)
-    val SIMPLE = WidgetVariant("simple", R.string.menuitem_stress_simple, 3, 2)
-    val BREAKDOWN = WidgetVariant("breakdown", R.string.menuitem_stress_breakdown, 3, 2)
+    val SEGMENTED = WidgetVariant("segmented", R.string.menuitem_stress_segmented, 3, WidgetVariant.GAUGE_HEIGHT_DP)
+    val SIMPLE = WidgetVariant("simple", R.string.menuitem_stress_simple, 3, WidgetVariant.GAUGE_HEIGHT_DP)
+    val BREAKDOWN = WidgetVariant("breakdown", R.string.menuitem_stress_breakdown, 3, WidgetVariant.GAUGE_HEIGHT_DP)
 
     override val id = "stress"
     override val label = R.string.menuitem_stress

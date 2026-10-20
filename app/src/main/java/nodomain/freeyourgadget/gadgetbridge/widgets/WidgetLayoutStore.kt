@@ -74,33 +74,30 @@ object WidgetLayoutStore {
     fun layout(columns: Int): List<WidgetPlacement> = layoutOf(load(), columns)
 
     /**
-     * The widgets that the grid displays for [columns], after compaction, in reading order.
-     * Placements of widgets that are not available now are left out.
+     * The widgets that the grid displays for [columns], in their order. Placements of widgets that are not available
+     * now are left out.
      */
     fun placedWidgets(columns: Int): List<PlacedWidget> {
         val dashboard = load()
         val instances = dashboard.instances.associateBy { it.instanceId }
-        val resolved = layoutOf(dashboard, columns).mapNotNull { placement ->
+        return layoutOf(dashboard, columns).mapNotNull { placement ->
             val instance = instances[placement.instanceId] ?: return@mapNotNull null
             val widget = WidgetRegistry.byId(instance.typeId) ?: return@mapNotNull null
-            PlacedWidget(instance, widget, widget.variant(placement.variantId), placement.x, placement.y)
+            PlacedWidget(instance, widget, widget.variant(placement.variantId), placement.x)
         }
-        val rects =
-            WidgetGrid.compact(columns, resolved.map { GridRect(it.x, it.y, it.variant.width, it.variant.height) })
-        return resolved.zip(rects) { placed, rect -> placed.copy(x = rect.x, y = rect.y) }
-            .sortedWith(compareBy({ it.y }, { it.x }))
     }
 
     /**
-     * Stores [placements] as the layout for [columns], after compaction.
+     * Stores [placements] as the layout for [columns].
      */
     fun saveLayout(columns: Int, placements: List<WidgetPlacement>) {
         val dashboard = load()
-        save(dashboard.copy(layouts = dashboard.layouts + (columns to compact(dashboard, columns, placements))))
+        save(dashboard.copy(layouts = dashboard.layouts + (columns to placements)))
     }
 
     /**
-     * Places the instances in [instanceIds] again in the layout for [columns], in that order, each at the first free position.
+     * Places the instances in [instanceIds] again in the layout for [columns], in that order, each at the first free
+     * column.
      */
     fun reorder(columns: Int, instanceIds: List<String>) {
         val dashboard = load()
@@ -217,9 +214,8 @@ object WidgetLayoutStore {
     private fun layoutOf(dashboard: Dashboard, columns: Int): List<WidgetPlacement> {
         dashboard.layouts[columns]?.let { return it }
 
-        val base = dashboard.layouts[WidgetGrid.BASE_COLUMNS].orEmpty().sortedWith(compareBy({ it.y }, { it.x }))
         val derived = mutableListOf<WidgetPlacement>()
-        for (placement in base) {
+        for (placement in dashboard.layouts[WidgetGrid.BASE_COLUMNS].orEmpty()) {
             derived += placeAtFirstFree(dashboard, columns, derived, placement)
         }
         return derived
@@ -241,7 +237,7 @@ object WidgetLayoutStore {
                 withInstance,
                 columns,
                 placements,
-                WidgetPlacement(instance.instanceId, variantId, 0, 0)
+                WidgetPlacement(instance.instanceId, variantId, 0)
             )
         }
         save(Dashboard(instances, layouts))
@@ -254,19 +250,8 @@ object WidgetLayoutStore {
         placement: WidgetPlacement,
     ): WidgetPlacement {
         val size = sizeOf(dashboard, placement) ?: WidgetVariant.GAUGE
-        val rect = WidgetGrid.firstFree(columns, occupied.mapNotNull { rectOf(dashboard, it) }, size.width, size.height)
-        return placement.copy(x = rect.x, y = rect.y)
-    }
-
-    /**
-     * Compacts the placements of the widgets that are available now. The others keep their position.
-     */
-    private fun compact(dashboard: Dashboard, columns: Int, placements: List<WidgetPlacement>): List<WidgetPlacement> {
-        val known = placements.filter { sizeOf(dashboard, it) != null }
-        val rects = WidgetGrid.compact(columns, known.map { rectOf(dashboard, it)!! })
-        val compacted = known.zip(rects)
-            .associate { (placement, rect) -> placement.instanceId to placement.copy(x = rect.x, y = rect.y) }
-        return placements.map { compacted[it.instanceId] ?: it }
+        val stacked = WidgetGrid.stack(columns, occupied.mapNotNull { rectOf(dashboard, it) })
+        return placement.copy(x = WidgetGrid.firstFreeColumn(columns, stacked, size.width))
     }
 
     private fun sizeOf(dashboard: Dashboard, placement: WidgetPlacement): WidgetVariant? {
@@ -276,7 +261,7 @@ object WidgetLayoutStore {
 
     private fun rectOf(dashboard: Dashboard, placement: WidgetPlacement): GridRect? {
         val size = sizeOf(dashboard, placement) ?: return null
-        return GridRect(placement.x, placement.y, size.width, size.height)
+        return GridRect(placement.x, 0, size.width, size.heightDp)
     }
 
     private fun newInstanceId(): String = UUID.randomUUID().toString().replace("-", "").take(12)
@@ -344,7 +329,7 @@ object WidgetLayoutStore {
                 dashboard,
                 WidgetGrid.BASE_COLUMNS,
                 placements,
-                WidgetPlacement(entry.id, variantId, 0, 0)
+                WidgetPlacement(entry.id, variantId, 0)
             )
         }
 

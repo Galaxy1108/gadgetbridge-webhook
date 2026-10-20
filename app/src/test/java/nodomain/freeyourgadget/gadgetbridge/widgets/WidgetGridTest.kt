@@ -5,39 +5,33 @@ import org.junit.Test
 
 class WidgetGridTest {
     @Test
-    fun compactMovesUp() {
-        val rects = WidgetGrid.compact(4, listOf(GridRect(0, 3, 2, 1)))
-        assertEquals(listOf(GridRect(0, 0, 2, 1)), rects)
+    fun stackPutsRectUnderLowestRectInItsColumns() {
+        val rects = WidgetGrid.stack(6, listOf(GridRect(0, 0, 3, 100), GridRect(3, 0, 3, 50), GridRect(0, 0, 6, 10)))
+        assertEquals(listOf(GridRect(0, 0, 3, 100), GridRect(3, 0, 3, 50), GridRect(0, 100, 6, 10)), rects)
     }
 
     @Test
-    fun compactMovesOverlapDown() {
-        val rects = WidgetGrid.compact(4, listOf(GridRect(0, 0, 4, 4), GridRect(2, 0, 2, 1)))
-        assertEquals(listOf(GridRect(0, 0, 4, 4), GridRect(2, 4, 2, 1)), rects)
+    fun stackKeepsStackNextToTallRect() {
+        val rects = WidgetGrid.stack(6, listOf(GridRect(0, 0, 3, 300), GridRect(3, 0, 3, 127), GridRect(3, 0, 3, 127)))
+        assertEquals(listOf(GridRect(0, 0, 3, 300), GridRect(3, 0, 3, 127), GridRect(3, 127, 3, 127)), rects)
     }
 
     @Test
-    fun compactKeepsStackNextToTallRect() {
-        val input = listOf(GridRect(0, 0, 2, 2), GridRect(2, 0, 2, 1), GridRect(2, 1, 2, 1))
-        assertEquals(input, WidgetGrid.compact(4, input))
-    }
-
-    @Test
-    fun compactClampsToColumns() {
-        val rects = WidgetGrid.compact(4, listOf(GridRect(3, 0, 2, 1)))
+    fun stackClampsToColumns() {
+        val rects = WidgetGrid.stack(4, listOf(GridRect(3, 0, 2, 1)))
         assertEquals(listOf(GridRect(2, 0, 2, 1)), rects)
     }
 
     @Test
-    fun firstFreeFillsGapNextToTallRect() {
-        val occupied = listOf(GridRect(0, 0, 2, 2), GridRect(2, 0, 2, 1))
-        assertEquals(GridRect(2, 1, 2, 1), WidgetGrid.firstFree(4, occupied, 2, 1))
+    fun firstFreeColumnGoesHighest() {
+        val stacked = listOf(GridRect(0, 0, 3, 300), GridRect(3, 0, 3, 127))
+        assertEquals(3, WidgetGrid.firstFreeColumn(6, stacked, 3))
     }
 
     @Test
-    fun firstFreeGoesBelowWhenRowIsFull() {
-        val occupied = listOf(GridRect(0, 0, 2, 2), GridRect(2, 0, 2, 1))
-        assertEquals(GridRect(0, 2, 4, 4), WidgetGrid.firstFree(4, occupied, 4, 4))
+    fun firstFreeColumnTakesLeftmostOnTie() {
+        val stacked = listOf(GridRect(0, 0, 3, 100), GridRect(3, 0, 3, 100))
+        assertEquals(0, WidgetGrid.firstFreeColumn(6, stacked, 3))
     }
 
     @Test

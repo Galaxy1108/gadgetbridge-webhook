@@ -2,16 +2,17 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
+import nodomain.freeyourgadget.gadgetbridge.widgets.GridRect
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
-import kotlin.math.max
 import kotlin.math.roundToInt
 import androidx.core.view.isGone
 
 /**
- * Places each child in a grid of cells, at the cells in its [LayoutParams]. A cell is the width divided by [columns]
- * wide and [ROW_HEIGHT_DP] high. The height is the number of rows that the children use.
+ * Places each child in the columns of its [LayoutParams], stacked in the order of the children. A column is the width
+ * divided by [columns] wide. Each child goes directly under the lowest child in its columns.
  */
 class WidgetGridLayout @JvmOverloads constructor(
     context: Context,
@@ -26,40 +27,49 @@ class WidgetGridLayout @JvmOverloads constructor(
 
     class LayoutParams(
         var cellX: Int,
-        var cellY: Int,
         var cellWidth: Int,
-        var cellHeight: Int,
+        /**
+         * The height of the child in pixels, without the margins.
+         */
+        var childHeight: Int,
     ) : MarginLayoutParams(MATCH_PARENT, MATCH_PARENT)
 
     private var cellSize = 0f
-    private val rowHeight = ROW_HEIGHT_DP * resources.displayMetrics.density
+
+    /**
+     * The visible children and their rectangles in pixels, margins included, from the last measure.
+     */
+    private var stacked: List<Pair<View, GridRect>> = emptyList()
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
         cellSize = (width - paddingLeft - paddingRight).toFloat() / columns
 
-        var rows = 0
-        for (child in children) {
-            if (child.isGone) continue
+        val visible = children.filterNot { it.isGone }.toList()
+        val rects = WidgetGrid.stack(columns, visible.map { child ->
             val lp = child.layoutParams as LayoutParams
-            rows = max(rows, lp.cellY + lp.cellHeight)
-            val childWidth = edge(lp.cellX + lp.cellWidth) - edge(lp.cellX) - lp.leftMargin - lp.rightMargin
-            val childHeight = rowEdge(lp.cellY + lp.cellHeight) - rowEdge(lp.cellY) - lp.topMargin - lp.bottomMargin
+            GridRect(lp.cellX, 0, lp.cellWidth, lp.childHeight + lp.topMargin + lp.bottomMargin)
+        })
+        stacked = visible.zip(rects)
+
+        for ((child, rect) in stacked) {
+            val lp = child.layoutParams as LayoutParams
+            val childWidth = edge(rect.x + rect.width) - edge(rect.x) - lp.leftMargin - lp.rightMargin
             child.measure(
                 MeasureSpec.makeMeasureSpec(childWidth.coerceAtLeast(0), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(childHeight.coerceAtLeast(0), MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(lp.childHeight.coerceAtLeast(0), MeasureSpec.EXACTLY),
             )
         }
 
-        setMeasuredDimension(width, rowEdge(rows) + paddingTop + paddingBottom)
+        val height = rects.maxOfOrNull { it.y + it.height } ?: 0
+        setMeasuredDimension(width, height + paddingTop + paddingBottom)
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        for (child in children) {
-            if (child.isGone) continue
+        for ((child, rect) in stacked) {
             val lp = child.layoutParams as LayoutParams
-            val left = paddingLeft + edge(lp.cellX) + lp.leftMargin
-            val top = paddingTop + rowEdge(lp.cellY) + lp.topMargin
+            val left = paddingLeft + edge(rect.x) + lp.leftMargin
+            val top = paddingTop + rect.y + lp.topMargin
             child.layout(left, top, left + child.measuredWidth, top + child.measuredHeight)
         }
     }
@@ -69,14 +79,12 @@ class WidgetGridLayout @JvmOverloads constructor(
      */
     private fun edge(cells: Int): Int = (cells * cellSize).roundToInt()
 
-    private fun rowEdge(rows: Int): Int = (rows * rowHeight).roundToInt()
-
     override fun checkLayoutParams(p: ViewGroup.LayoutParams?): Boolean = p is LayoutParams
 
-    override fun generateDefaultLayoutParams(): LayoutParams = LayoutParams(0, 0, 1, 1)
+    override fun generateDefaultLayoutParams(): LayoutParams = LayoutParams(0, 1, 0)
 
     override fun generateLayoutParams(p: ViewGroup.LayoutParams?): LayoutParams {
-        val lp = LayoutParams(0, 0, 1, 1)
+        val lp = LayoutParams(0, 1, 0)
         if (p is MarginLayoutParams) {
             lp.setMargins(p.leftMargin, p.topMargin, p.rightMargin, p.bottomMargin)
         }
@@ -84,16 +92,11 @@ class WidgetGridLayout @JvmOverloads constructor(
     }
 
     override fun generateLayoutParams(attrs: AttributeSet?): LayoutParams {
-        val lp = LayoutParams(0, 0, 1, 1)
+        val lp = LayoutParams(0, 1, 0)
         val margins = MarginLayoutParams(context, attrs)
         lp.setMargins(margins.leftMargin, margins.topMargin, margins.rightMargin, margins.bottomMargin)
         return lp
     }
 
     override fun shouldDelayChildPressedState(): Boolean = false
-
-    private companion object {
-        // A half-step of 64dp plus the 12dp gap between tiles
-        const val ROW_HEIGHT_DP = 77f
-    }
 }

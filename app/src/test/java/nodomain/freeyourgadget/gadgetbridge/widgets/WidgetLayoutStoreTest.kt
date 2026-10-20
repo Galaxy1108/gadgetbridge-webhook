@@ -29,8 +29,10 @@ class WidgetLayoutStoreTest : TestBase() {
         }
     }
 
-    private fun positions(columns: Int): Map<String, Pair<Int, Int>> =
-        WidgetLayoutStore.layout(columns).associate { it.instanceId to (it.x to it.y) }
+    private fun columns(columns: Int): Map<String, Int> =
+        WidgetLayoutStore.layout(columns).associate { it.instanceId to it.x }
+
+    private fun order(columns: Int): List<String> = WidgetLayoutStore.layout(columns).map { it.instanceId }
 
     @Test
     fun migratesLegacyLayoutIntoBaseLayout() {
@@ -38,9 +40,10 @@ class WidgetLayoutStoreTest : TestBase() {
 
         assertEquals(WidgetVariant.SMALL.id, placements["today"]?.variantId)
         assertEquals(StressWidget.SIMPLE.id, placements["c"]?.variantId)
+        assertEquals(listOf("today", "a", "b", "c", "d"), order(WidgetGrid.BASE_COLUMNS))
         assertEquals(
-            mapOf("today" to (0 to 0), "a" to (0 to 2), "b" to (3 to 2), "c" to (0 to 4), "d" to (3 to 4)),
-            positions(WidgetGrid.BASE_COLUMNS),
+            mapOf("today" to 0, "a" to 0, "b" to 3, "c" to 0, "d" to 3),
+            columns(WidgetGrid.BASE_COLUMNS),
         )
 
         val types = WidgetLayoutStore.instances().associate { it.instanceId to it.typeId }
@@ -52,10 +55,8 @@ class WidgetLayoutStoreTest : TestBase() {
 
     @Test
     fun derivesWiderLayoutFromBaseLayout() {
-        assertEquals(
-            mapOf("today" to (0 to 0), "a" to (6 to 0), "b" to (9 to 0), "c" to (0 to 2), "d" to (3 to 2)),
-            positions(12),
-        )
+        assertEquals(listOf("today", "a", "b", "c", "d"), order(12))
+        assertEquals(mapOf("today" to 0, "a" to 6, "b" to 9, "c" to 6, "d" to 9), columns(12))
     }
 
     @Test
@@ -63,8 +64,8 @@ class WidgetLayoutStoreTest : TestBase() {
         WidgetLayoutStore.saveLayout(12, WidgetLayoutStore.layout(12))
         WidgetLayoutStore.delete("a")
 
-        assertFalse(positions(WidgetGrid.BASE_COLUMNS).containsKey("a"))
-        assertFalse(positions(12).containsKey("a"))
+        assertFalse(columns(WidgetGrid.BASE_COLUMNS).containsKey("a"))
+        assertFalse(columns(12).containsKey("a"))
         assertNull(WidgetLayoutStore.instances().find { it.instanceId == "a" })
     }
 
@@ -73,17 +74,9 @@ class WidgetLayoutStoreTest : TestBase() {
         WidgetLayoutStore.saveLayout(12, WidgetLayoutStore.layout(12))
         val instance = WidgetLayoutStore.add("sleep")
 
-        assertEquals(0 to 6, positions(WidgetGrid.BASE_COLUMNS)[instance.instanceId])
-        assertEquals(6 to 2, positions(12)[instance.instanceId])
-    }
-
-    @Test
-    fun largerVariantPushesNeighboursDown() {
-        WidgetLayoutStore.setVariant("today", WidgetGrid.BASE_COLUMNS, WidgetVariant.LARGE.id)
-
-        assertEquals(
-            mapOf("today" to (0 to 0), "a" to (0 to 5), "b" to (3 to 5), "c" to (0 to 7), "d" to (3 to 7)),
-            positions(WidgetGrid.BASE_COLUMNS),
-        )
+        assertEquals(instance.instanceId, order(WidgetGrid.BASE_COLUMNS).last())
+        assertEquals(0, columns(WidgetGrid.BASE_COLUMNS)[instance.instanceId])
+        assertEquals(instance.instanceId, order(12).last())
+        assertEquals(0, columns(12)[instance.instanceId])
     }
 }

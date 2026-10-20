@@ -21,7 +21,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
  * Total calories for the day, split into active and resting.
  */
 object CaloriesWidget : MetricWidget<CaloriesWidget.Data>() {
-    val SEGMENTED = WidgetVariant("segmented", R.string.menuitem_calories_segmented, 3, 2)
+    val SEGMENTED = WidgetVariant("segmented", R.string.menuitem_calories_segmented, 3, WidgetVariant.GAUGE_HEIGHT_DP)
 
     override val id = "calories"
     override val label = R.string.calories

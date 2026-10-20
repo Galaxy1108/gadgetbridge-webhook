@@ -69,9 +69,8 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
 
             val lp = cell.card.layoutParams as WidgetGridLayout.LayoutParams
             lp.cellX = item.x
-            lp.cellY = item.y
             lp.cellWidth = item.variant.width
-            lp.cellHeight = item.variant.height
+            lp.childHeight = (item.variant.heightDp * grid.resources.displayMetrics.density).roundToInt()
             grid.addView(cell.card)
 
             bind(cell)
