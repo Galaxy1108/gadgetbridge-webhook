@@ -47,11 +47,6 @@ class InnovoPulseOximeterCoordinator : AbstractBLEDeviceCoordinator() {
         return false
     }
 
-    override fun isExperimental(): Boolean {
-        // Untested
-        return true
-    }
-
     override fun getDeviceKind(device: GBDevice): DeviceCoordinator.DeviceKind {
         return DeviceCoordinator.DeviceKind.PULSE_OXIMETER
     }
