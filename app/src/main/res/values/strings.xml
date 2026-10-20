@@ -59,6 +59,7 @@
     <string name="controlcenter_navigation_drawer_close">Close navigation drawer</string>
     <string name="controlcenter_snackbar_need_longpress">Long press the card to disconnect</string>
     <string name="controlcenter_snackbar_disconnecting">Disconnecting</string>
+    <string name="controlcenter_snackbar_discovering_services">Discovering services…</string>
     <string name="controlcenter_snackbar_connecting">Connecting…</string>
     <string name="controlcenter_snackbar_requested_screenshot">Taking a screenshot of the device</string>
     <string name="controlcenter_calibrate_device">Calibrate Device</string>
@@ -2122,6 +2123,9 @@
     <string name="devicetype_unknown">Unknown Device</string>
     <string name="devicetype_test" translatable="false">Test Device</string>
     <string name="add_test_device">Add test device</string>
+    <string name="discovery_show_details">Show details</string>
+    <string name="title_activity_device_candidate_details">Device details</string>
+    <string name="device_candidate_details_read_gatt">Read GATT characteristics</string>
     <string name="set_device_type">Set device type</string>
     <string name="devicetype_pebble" translatable="false">Pebble</string>
     <string name="devicetype_miband" translatable="false">Mi Band</string>
