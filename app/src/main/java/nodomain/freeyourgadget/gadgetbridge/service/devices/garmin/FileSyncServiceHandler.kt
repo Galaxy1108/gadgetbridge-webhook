@@ -18,6 +18,8 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin
 
 import com.google.common.collect.Lists
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.GdiDatatypes
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.UUID
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess.TransportProtocol
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart
@@ -92,21 +94,21 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
     private fun handlePullItemResponse(fileResponse: GdiFileAccess.PullItemDataResponse): GdiFileAccess.FileSyncService? {
         LOG.debug("Got file response: {}", fileResponse)
 
-        if (fileResponse.status != 0) {
-            LOG.warn("File download failed with status={} - {}", fileResponse.status, fileResponse)
+        if (fileResponse.result != GdiFileAccess.ItemAccessResult.SUCCESS) {
+            LOG.warn("File download failed with status={} - {}", fileResponse.result, fileResponse)
             // Signal to the support class that the download failed so it can also continue to the next one
             val fileDownloadedDeviceEvent = FileDownloadedDeviceEvent()
             fileDownloadedDeviceEvent.success = false
             deviceSupport.evaluateGBDeviceEvent(fileDownloadedDeviceEvent)
         } else {
-            deviceSupport.downloadFileFromServiceV2(fileResponse.handle)
+            deviceSupport.downloadFileFromServiceV2(fileResponse.transferHandle)
         }
 
         return null
     }
 
     private fun handleItemListResponse(fileListResponse: GdiFileAccess.ItemListResponse): GdiFileAccess.FileSyncService? {
-        if (!fileListResponse.hasStatus() || fileListResponse.status != 0) {
+        if (!fileListResponse.hasStatus() || fileListResponse.status != GdiFileAccess.ItemListResponse.Status.SUCCESS) {
             LOG.warn(
                 "Handling file list response with failed status={} - {}",
                 if (fileListResponse.hasStatus()) fileListResponse.status else null,
@@ -116,15 +118,15 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
             LOG.debug(
                 "Handling file list response with status={}, files={}, cursorId={}, nextPageId={}",
                 if (fileListResponse.hasStatus()) fileListResponse.status else null,
-                fileListResponse.fileList.size,
-                if (fileListResponse.hasCursorId()) fileListResponse.cursorId else null,
-                if (fileListResponse.hasNextPageId()) fileListResponse.nextPageId else null,
+                fileListResponse.itemsList.size,
+                if (fileListResponse.hasSessionId()) fileListResponse.sessionId else null,
+                if (fileListResponse.hasNextTransactionId()) fileListResponse.nextTransactionId else null,
             )
         }
 
         // Only the first entry for a type seems to contain the type name, so keep track of them
         val nameMap: MutableMap<Int?, String?> = HashMap()
-        for (file in fileListResponse.fileList) {
+        for (file in fileListResponse.itemsList) {
             if (!file.hasDataType()) {
                 LOG.warn("Ignoring listed file without type information: {}", file)
                 continue
@@ -148,13 +150,13 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         // #5461 - some watches to not send the next page ID
         // however, from previous logs, it always seems to match the max seen across all sent items, so attempt
         // to fall back to that as a workaround so we can fetch the subsequent files
-        nextPageId = fileListResponse.nextPageId
+        nextPageId = fileListResponse.nextTransactionId
 
         // The device sets cursor_id when there are more items pending for *this same* listing
         // request. Keep pulling pages within this cursor immediately instead of stopping after
         // one page - otherwise anything past the first ~100 items (which can easily be all SPORTS
         // backlog) is never seen.
-        cursorId = if (fileListResponse.hasCursorId()) fileListResponse.cursorId else null
+        cursorId = if (fileListResponse.hasSessionId()) fileListResponse.sessionId else null
         if (cursorId != null) {
             deviceSupport.sendProtobufRequest(
                 "continue file list",
@@ -170,15 +172,15 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
 
         val fileListRequestBuilder = GdiFileAccess.ItemListRequest.newBuilder().apply {
             // Exclusion flags? If we omit this, it sends back already synced files going back months.
-            addFlags1(GdiFileAccess.FileId.newBuilder().setId1(FLAGS_SYNCED).setId2(FLAGS_SYNCED).build())
-            addFlags2(GdiFileAccess.FileId.newBuilder().setId1(FLAGS_SYNCED).setId2(FLAGS_SYNCED).build())
+            addExcludeAllFlags(UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
+            addGetFlags(UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
         }
 
         val currentcursorId = cursorId
         if (currentcursorId != null) {
-            fileListRequestBuilder.cursorId = currentcursorId
+            fileListRequestBuilder.sessionId = currentcursorId
         } else {
-            nextPageId?.let { fileListRequestBuilder.startPageId = it }
+            nextPageId?.let { fileListRequestBuilder.transactionId = it }
         }
 
         return GdiFileAccess.FileSyncService.newBuilder().buildWith {
@@ -197,7 +199,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
             pullItemRequest = GdiFileAccess.PullItemDataRequest.newBuilder().buildWith {
                 item = fileToRequest
                 priority = 24
-                supportedTransport = TransportProtocol.MULTILINK_TRANSPORT_PIPE
+                addSupportedTransport(TransportProtocol.MULTILINK_TRANSPORT_PIPE)
                 offset = 0
                 requestedCompressionWindow = 15
             }
@@ -228,7 +230,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         return GdiFileAccess.FileSyncService.newBuilder().buildWith {
             modifyFlagsRequest = GdiFileAccess.ModifyFlagsRequest.newBuilder().buildWith {
                 uid = syncFile.uid
-                setFlags = GdiFileAccess.FileId.newBuilder().setId1(FLAGS_SYNCED).setId2(FLAGS_SYNCED).build()
+                addSetFlags(UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
             }
         }
     }

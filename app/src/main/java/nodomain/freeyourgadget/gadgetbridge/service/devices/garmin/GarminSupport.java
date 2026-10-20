@@ -2248,7 +2248,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         }
         pendingItemPush = null;
 
-        final int token = response.getToken();
+        final int token = response.getTransferHandle();
         LOG.info("Got push item response token {} for {}", token, pending.taskName());
 
         pending.communicatorV2().startTransfer(new CommunicatorV2.ServiceCallback() {
