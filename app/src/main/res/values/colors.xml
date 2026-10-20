@@ -187,6 +187,7 @@
     <attr name="row_separator" format="color" />
     <attr name="stat_tile_bg" format="color" />
     <attr name="stat_tile_border" format="color" />
+    <attr name="chart_marker_bg" format="color" />
     <attr name="activity_icon_bg" format="color" />
     <attr name="table_header_rule" format="color" />
 
