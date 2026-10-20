@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -30,8 +31,6 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
-import nodomain.freeyourgadget.gadgetbridge.util.dialogs.IconListAdapter
-import java.text.Collator
 import java.util.Collections
 
 /**
@@ -41,8 +40,19 @@ import java.util.Collections
  */
 class DashboardWidgetsActivity : AbstractGBActivity() {
     private lateinit var adapter: InstanceAdapter
+    private lateinit var recyclerView: RecyclerView
     private var instances: MutableList<WidgetInstance> = mutableListOf()
     private var columns = WidgetGrid.BASE_COLUMNS
+
+    private val pickWidget = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode != RESULT_OK || data == null) return@registerForActivityResult
+        val typeId = data.getStringExtra(WidgetPickerActivity.EXTRA_TYPE_ID) ?: return@registerForActivityResult
+        val variantId = data.getStringExtra(WidgetPickerActivity.EXTRA_VARIANT_ID) ?: return@registerForActivityResult
+        val instance = WidgetLayoutStore.add(columns, typeId, variantId)
+        reload()
+        recyclerView.scrollToPosition(instances.indexOfFirst { it.instanceId == instance.instanceId })
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +60,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
         columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
 
         adapter = InstanceAdapter()
-        val recyclerView = findViewById<RecyclerView>(R.id.dashboard_widgets_list)
+        recyclerView = findViewById(R.id.dashboard_widgets_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
         recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
@@ -87,7 +97,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
         adapter.touchHelper = touchHelper
 
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener {
-            showAddWidgetDialog()
+            addWidget()
         }
 
         reload()
@@ -116,12 +126,8 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
         adapter.submit(instances)
     }
 
-    private fun showAddWidgetDialog() {
-        val collator = Collator.getInstance()
-        val available = WidgetRegistry.available().sortedWith { a, b ->
-            collator.compare(a.displayName(this), b.displayName(this))
-        }
-        if (available.isEmpty()) {
+    private fun addWidget() {
+        if (WidgetRegistry.available().isEmpty()) {
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.widgets_add_widget)
                 .setMessage(R.string.no_supported_devices_found)
@@ -129,14 +135,7 @@ class DashboardWidgetsActivity : AbstractGBActivity() {
                 .show()
             return
         }
-        val entries = available.map { IconListAdapter.Entry(it.icon, it.displayName(this)) }
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.widgets_add_widget)
-            .setAdapter(IconListAdapter(this, entries)) { _, which ->
-                WidgetLayoutStore.add(columns, available[which].id)
-                reload()
-            }
-            .show()
+        pickWidget.launch(Intent(this, WidgetPickerActivity::class.java))
     }
 
     private fun configure(instance: WidgetInstance) {

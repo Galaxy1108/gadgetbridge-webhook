@@ -45,7 +45,7 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
         set(value) {
             if (field == value) return
             field = value
-            cells.values.forEach { applyCardStyle(it.card) }
+            cells.values.forEach { applyCardStyle(it.card, cardsEnabled) }
         }
 
     fun submitItems(newItems: List<PlacedWidget>) {
@@ -94,7 +94,7 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
     private fun createCell(): Cell {
         val card =
             LayoutInflater.from(grid.context).inflate(R.layout.dashboard_widget_card, grid, false) as MaterialCardView
-        applyCardStyle(card)
+        applyCardStyle(card, cardsEnabled)
         return Cell(card, card.findViewById(R.id.dashboard_widget_content))
     }
 
@@ -120,25 +120,27 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
             true
         }
     }
+}
 
-    private fun applyCardStyle(card: MaterialCardView) {
-        val density = card.resources.displayMetrics.density
-        card.cardElevation = 0f
-        if (cardsEnabled) {
-            // Same fill as the stat tiles, so it follows the theme.
-            card.setCardBackgroundColor(MaterialColors.getColor(card, R.attr.stat_tile_bg))
-            card.strokeColor = MaterialColors.getColor(card, R.attr.stat_tile_border)
-            card.strokeWidth = (TILE_STROKE_DP * density).roundToInt()
-            card.radius = TILE_RADIUS_DP * density
-        } else {
-            card.setCardBackgroundColor(Color.TRANSPARENT)
-            card.strokeWidth = 0
-            card.radius = 0f
-        }
-    }
+private const val TILE_STROKE_DP = 1.5f
+private const val TILE_RADIUS_DP = 12f
 
-    private companion object {
-        const val TILE_STROKE_DP = 1.5f
-        const val TILE_RADIUS_DP = 12f
+/**
+ * Draws [card] as a tile, or without a fill and a border if [cardsEnabled] is false.
+ */
+fun applyCardStyle(card: MaterialCardView, cardsEnabled: Boolean) {
+    val density = card.resources.displayMetrics.density
+    card.cardElevation = 0f
+    if (cardsEnabled) {
+        // Same fill as the stat tiles, so it follows the theme.
+        card.setCardBackgroundColor(MaterialColors.getColor(card, R.attr.stat_tile_bg))
+        card.strokeColor = MaterialColors.getColor(card, R.attr.stat_tile_border)
+        card.strokeWidth = (TILE_STROKE_DP * density).roundToInt()
+        card.radius = TILE_RADIUS_DP * density
+    } else {
+        card.setCardBackgroundColor(Color.TRANSPARENT)
+        card.strokeWidth = 0
+        card.radius = 0f
     }
 }
+

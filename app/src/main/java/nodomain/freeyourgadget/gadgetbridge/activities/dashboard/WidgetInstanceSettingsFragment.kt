@@ -1,12 +1,14 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.InputType
 import android.widget.EditText
 import androidx.preference.EditTextPreference
-import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceScreen
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractPreferenceFragment
@@ -23,6 +25,8 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
+import nodomain.freeyourgadget.gadgetbridge.widgets.variant
 
 /**
  * Renders one placed widget instance's settings: the common ones (device selection, variant, title override),
@@ -50,28 +54,46 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
 
         refreshHandle = DeviceSettingRenderer.render(items, screen, prefs, this)
 
-        setupVariantPreference(instanceId, requireArguments().getInt(ARG_COLUMNS, WidgetGrid.BASE_COLUMNS))
+        setupVariantPreference(widget, instanceId, requireArguments().getInt(ARG_COLUMNS, WidgetGrid.BASE_COLUMNS))
     }
 
-    private fun setupVariantPreference(instanceId: String, columns: Int) {
-        val variantPref = findPreference<ListPreference>(KEY_VARIANT) ?: return
-        variantPref.isPersistent = false
+    private fun setupVariantPreference(widget: GBWidget<*>, instanceId: String, columns: Int) {
+        val variantPref = findPreference<Preference>(KEY_VARIANT) ?: return
 
         val placement = WidgetLayoutStore.layout(columns).find { it.instance.instanceId == instanceId }
         if (placement == null) {
             variantPref.isVisible = false
             return
         }
-        variantPref.value = placement.variantId
-
-        val rendererListener = variantPref.onPreferenceChangeListener
-        variantPref.setOnPreferenceChangeListener { preference, newValue ->
-            val accepted = rendererListener?.onPreferenceChange(preference, newValue) ?: true
-            if (accepted) {
-                WidgetLayoutStore.setVariant(columns, instanceId, newValue as String)
+        var variantId = placement.variantId
+        variantPref.summary = getString(widget.variant(variantId).name)
+        variantPref.setOnPreferenceClickListener {
+            showVariantSheet(widget, variantId) { variant ->
+                variantId = variant.id
+                WidgetLayoutStore.setVariant(columns, instanceId, variant.id)
+                variantPref.summary = getString(variant.name)
             }
-            accepted
+            true
         }
+    }
+
+    /**
+     * Shows a preview of each variant of [widget] in a bottom sheet, as wide as the screen so that the previews size
+     * match the dashboard.
+     */
+    @SuppressLint("InflateParams")  // The bottom sheet sets the layout params of its content view
+    private fun showVariantSheet(widget: GBWidget<*>, selectedVariantId: String, onSelect: (WidgetVariant) -> Unit) {
+        val sheet = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.dashboard_widget_previews, null)
+        showVariantPreviews(view.findViewById(R.id.dashboard_widget_previews), widget, selectedVariantId) { variant ->
+            onSelect(variant)
+            sheet.dismiss()
+        }
+        sheet.setContentView(view)
+        sheet.behavior.maxWidth = resources.displayMetrics.widthPixels
+        sheet.behavior.skipCollapsed = true
+        sheet.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        sheet.show()
     }
 
     override fun onDestroyView() {
@@ -114,12 +136,11 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
             },
         )
         if (widget.variants.size > 1) {
-            list(
+            action(
                 key = KEY_VARIANT,
                 title = R.string.pref_widget_variant_title,
                 icon = R.drawable.ic_font_size,
-                entries = widget.variants.map { ListEntry.Res(it.id, it.name) },
-                defaultValue = widget.variants.first().id,
+                connectedOnly = false,
             )
         }
         text(

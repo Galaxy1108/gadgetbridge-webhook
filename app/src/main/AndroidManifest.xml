@@ -1206,6 +1206,11 @@
             android:parentActivityName=".activities.devicesettings.DeviceSettingsActivity" />
 
         <activity
+            android:name=".activities.dashboard.WidgetPickerActivity"
+            android:label="@string/widgets_add_widget"
+            android:parentActivityName=".activities.dashboard.DashboardWidgetsActivity" />
+
+        <activity
             android:name=".activities.dashboard.WidgetInstanceSettingsActivity"
             android:label="@string/pref_dashboard_widget_settings"
             android:parentActivityName=".activities.dashboard.DashboardWidgetsActivity" />

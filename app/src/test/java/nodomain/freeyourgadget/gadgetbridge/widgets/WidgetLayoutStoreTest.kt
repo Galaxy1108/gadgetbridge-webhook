@@ -85,7 +85,7 @@ class WidgetLayoutStoreTest : TestBase() {
     @Test
     fun addPlacesInstanceOnlyInEditedLayout() {
         WidgetLayoutStore.instanceForEdit(12, "a")
-        val instance = WidgetLayoutStore.add(WidgetGrid.BASE_COLUMNS, "sleep")
+        val instance = WidgetLayoutStore.add(WidgetGrid.BASE_COLUMNS, "sleep", WidgetVariant.GAUGE.id)
 
         assertEquals(instance.instanceId, order(WidgetGrid.BASE_COLUMNS).last())
         assertEquals(0, columns(WidgetGrid.BASE_COLUMNS)[instance.instanceId])

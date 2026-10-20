@@ -117,11 +117,10 @@ object WidgetLayoutStore {
     }
 
     /**
-     * Adds a new instance of [typeId] to the layout for [columns], with the default variant, and returns it.
+     * Adds a new instance of [typeId] with [variantId] to the layout for [columns], and returns it.
      */
-    fun add(columns: Int, typeId: String): WidgetInstance {
+    fun add(columns: Int, typeId: String, variantId: String): WidgetInstance {
         val instance = WidgetInstance(newInstanceId(), typeId)
-        val variantId = WidgetRegistry.byId(typeId)?.variants?.first()?.id ?: ""
         val placements = ownLayout(columns).placements
         saveLayout(columns, placements + placeAtFirstFree(columns, placements, WidgetPlacement(instance, variantId, 0)))
         return instance
