@@ -1336,12 +1336,12 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         final GdiFindMyWatch.FindMyWatchService.Builder a = GdiFindMyWatch.FindMyWatchService.newBuilder();
         if (start) {
             a.setFindRequest(
-                    GdiFindMyWatch.FindMyWatchService.FindMyWatchRequest.newBuilder()
+                    GdiFindMyWatch.FindMyWatchRequest.newBuilder()
                             .setTimeout(60)
             );
         } else {
             a.setCancelRequest(
-                    GdiFindMyWatch.FindMyWatchService.FindMyWatchCancelRequest.newBuilder()
+                    GdiFindMyWatch.FindMyWatchCancelRequest.newBuilder()
             );
         }
         sendProtobufRequest("find device",

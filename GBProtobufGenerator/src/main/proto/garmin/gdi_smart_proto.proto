@@ -35,7 +35,7 @@ message Smart {
     optional GDI.Proto.IncidentDetection.IncidentDetectionService incident_detection_service = 9;
     optional GDI.Proto.AudioPrompts.AudioPromptsService audio_prompts_service = 10;
     optional Service11 wifi_setup_service = 11;
-    optional FindMyWatchService find_my_watch_service = 12;
+    optional GDI.Proto.FindMyWatch.FindMyWatchService find_my_watch_service = 12;
     optional CoreService core_service = 13;
     optional Service14 group_live_track_service = 14;
     optional SmsNotificationService sms_notification_service = 16;
