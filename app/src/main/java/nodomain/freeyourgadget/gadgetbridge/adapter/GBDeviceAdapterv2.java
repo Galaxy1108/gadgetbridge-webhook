@@ -150,7 +150,7 @@ public class GBDeviceAdapterv2 extends ListAdapter<GBDevice, GBDeviceAdapterv2.V
     @SuppressLint("NotifyDataSetChanged")
     public final void refreshSingleDevice(final GBDevice device) {
         final int i = devicesListWithFolders.indexOf(device);
-        if (i > 0) {
+        if (i >= 0) {
             notifyItemChanged(i);
         } else {
             // Somehow the device was not on the list - rebuild everything
