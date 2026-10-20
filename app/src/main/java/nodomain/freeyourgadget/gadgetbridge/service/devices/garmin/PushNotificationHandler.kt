@@ -90,7 +90,7 @@ class PushNotificationHandler(private val deviceSupport: GarminSupport) {
         LOG.debug("Sending push notification {} for {}: {}", id, appId, payload)
 
         return Smart.newBuilder().buildWith {
-            pushNotificationService = PushNotificationService.newBuilder().buildWith {
+            deviceMessageService = PushNotificationService.newBuilder().buildWith {
                 pushNotification = PushNotificationService.PushNotification.newBuilder().buildWith {
                     this.id = id
                     this.appId = appId

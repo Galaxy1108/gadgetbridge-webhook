@@ -156,7 +156,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         if (cursorId != null) {
             deviceSupport.sendProtobufRequest(
                 "continue file list",
-                Smart.newBuilder().setFileSyncService(requestFileList()).build()
+                Smart.newBuilder().setFileAccessService(requestFileList()).build()
             )
         }
 

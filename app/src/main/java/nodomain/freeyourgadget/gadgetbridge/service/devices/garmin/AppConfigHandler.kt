@@ -122,7 +122,7 @@ class AppConfigHandler(private val deviceSupport: GarminSupport) {
     fun onAppConfigRequest(uuid: UUID): Smart {
         LOG.debug("Encoding app config request for {}", uuid)
         return Smart.newBuilder().buildWith {
-            appConfigService = GdiAppConfigService.AppConfigService.newBuilder().buildWith {
+            connectIqAppSettingsService = GdiAppConfigService.AppConfigService.newBuilder().buildWith {
                 appConfigGet = AppConfig.newBuilder().buildWith {
                     appId = ByteString.copyFrom(UuidUtil.toBytes(uuid))
                 }
@@ -153,7 +153,7 @@ class AppConfigHandler(private val deviceSupport: GarminSupport) {
         }
 
         return Smart.newBuilder().buildWith {
-            appConfigService = GdiAppConfigService.AppConfigService.newBuilder().buildWith {
+            connectIqAppSettingsService = GdiAppConfigService.AppConfigService.newBuilder().buildWith {
                 appConfigSet = AppConfig.newBuilder().buildWith {
                     appId = ByteString.copyFrom(UuidUtil.toBytes(uuid))
                     appConfig = ByteString.copyFrom(configsBytes)

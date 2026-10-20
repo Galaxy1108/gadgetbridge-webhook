@@ -161,7 +161,7 @@ public class FirewallInterceptor implements HttpInterceptor {
 
     private void sendHttpServiceRequest(@NonNull final GarminHttpRequest request,
                                         @NonNull final GdiHttpService.HttpService httpService) {
-        final Smart smart = Smart.newBuilder().setHttpService(httpService).build();
+        final Smart smart = Smart.newBuilder().setConnectIqHttpService(httpService).build();
         deviceSupport.evaluateGBDeviceEvent(new ProtobufResponseEvent(
                 smart, request.getMessageRequestId()
         ));

@@ -131,16 +131,16 @@ public class ProtocolBufferHandler implements MessageHandler {
             if (smart.hasCoreService()) { //TODO: unify request and response???
                 return prepareProtobufResponse(processProtobufCoreRequest(smart.getCoreService()), message.getRequestId());
             }
-            if (smart.hasCalendarService()) {
-                return prepareProtobufResponse(processProtobufCalendarRequest(smart.getCalendarService()), message.getRequestId());
+            if (smart.hasCalendarEventsService()) {
+                return prepareProtobufResponse(processProtobufCalendarRequest(smart.getCalendarEventsService()), message.getRequestId());
             }
             if (smart.hasSmsNotificationService()) {
                 return prepareProtobufResponse(processProtobufSmsNotificationMessage(smart.getSmsNotificationService()), message.getRequestId());
             }
-            if (smart.hasHttpService()) {
-                final GdiHttpService.HttpService response = httpHandler.handle(smart.getHttpService(), message.getRequestId());
+            if (smart.hasConnectIqHttpService()) {
+                final GdiHttpService.HttpService response = httpHandler.handle(smart.getConnectIqHttpService(), message.getRequestId());
                 if (response != null) {
-                    return prepareProtobufResponse(Smart.newBuilder().setHttpService(response).build(), message.getRequestId());
+                    return prepareProtobufResponse(Smart.newBuilder().setConnectIqHttpService(response).build(), message.getRequestId());
                 }
                 processed = true;
                 // Response will be async
@@ -160,11 +160,11 @@ public class ProtocolBufferHandler implements MessageHandler {
                 processed = true;
                 processProtobufFindMyWatchResponse(smart.getFindMyWatchService());
             }
-            if (smart.hasSettingsService()) {
+            if (smart.hasRealtimeSettingsService()) {
                 processed = true;
-                processProtobufSettingsService(smart.getSettingsService());
+                processProtobufSettingsService(smart.getRealtimeSettingsService());
             }
-            if (smart.hasAuthenticationService() && smart.getAuthenticationService().hasOauthRequest()) {
+            if (smart.hasCredentialsService() && smart.getCredentialsService().hasOauthRequest()) {
                 LOG.debug("Got OAuth request");
                 final GarminPrefs devicePrefs = deviceSupport.getDevicePrefs();
                 if (!devicePrefs.fakeOauthEnabled()) {
@@ -179,17 +179,17 @@ public class ProtocolBufferHandler implements MessageHandler {
                                     .build()
                             ).setRegion(0).build();
 
-                    return prepareProtobufResponse(Smart.newBuilder().setAuthenticationService(
+                    return prepareProtobufResponse(Smart.newBuilder().setCredentialsService(
                             GdiAuthenticationService.AuthenticationService.newBuilder()
                                     .setOauthResponse(oauthResponse)
                     ).build(), message.getRequestId());
                 }
             }
-            if (smart.hasNotificationsService()) {
-                return prepareProtobufResponse(processProtobufNotificationsServiceMessage(smart.getNotificationsService()), message.getRequestId());
+            if (smart.hasGncsService()) {
+                return prepareProtobufResponse(processProtobufNotificationsServiceMessage(smart.getGncsService()), message.getRequestId());
             }
-            if (smart.hasInstalledAppsService()) {
-                final GdiInstalledAppsService.InstalledAppsService installedAppsService = smart.getInstalledAppsService();
+            if (smart.hasConnectIqInstalledAppsService()) {
+                final GdiInstalledAppsService.InstalledAppsService installedAppsService = smart.getConnectIqInstalledAppsService();
 
                 if (installedAppsService.hasGetInstalledAppsResponse()) {
                     processed = true;
@@ -214,38 +214,38 @@ public class ProtocolBufferHandler implements MessageHandler {
                     }
                 }
             }
-            if (smart.hasFileSyncService()) {
-                if (smart.getFileSyncService().hasPushItemResponse()) {
+            if (smart.hasFileAccessService()) {
+                if (smart.getFileAccessService().hasPushItemResponse()) {
                     // Handled outside of new_sync_protocol, since this only applies to file uploads
                     processed = true;
-                    deviceSupport.onPushItemResponse(smart.getFileSyncService().getPushItemResponse());
+                    deviceSupport.onPushItemResponse(smart.getFileAccessService().getPushItemResponse());
                 }
                 if (deviceSupport.newSyncProtocol()) {
                     processed = true;
-                    final GdiFileSyncService.FileSyncService response = fileSyncServiceHandler.handle(smart.getFileSyncService());
+                    final GdiFileSyncService.FileSyncService response = fileSyncServiceHandler.handle(smart.getFileAccessService());
                     if (response != null) {
-                        return prepareProtobufResponse(Smart.newBuilder().setFileSyncService(response).build(), message.getRequestId());
+                        return prepareProtobufResponse(Smart.newBuilder().setFileAccessService(response).build(), message.getRequestId());
                     }
                 } else {
                     LOG.warn("Ignoring file sync service - new sync protocol is disabled");
                 }
             }
-            if (smart.hasEcgService()) {
+            if (smart.hasSamdService()) {
                 if (deviceSupport.newSyncProtocol()) {
                     processed = true;
-                    final GdiEcgService.EcgService response = ecgServiceHandler.handle(smart.getEcgService());
+                    final GdiEcgService.EcgService response = ecgServiceHandler.handle(smart.getSamdService());
                     if (response != null) {
-                        return prepareProtobufResponse(Smart.newBuilder().setEcgService(response).build(), message.getRequestId());
+                        return prepareProtobufResponse(Smart.newBuilder().setSamdService(response).build(), message.getRequestId());
                     }
                 } else {
                     LOG.warn("Ignoring zip transfer service - new sync protocol is disabled");
                 }
             }
-            if (smart.hasAppConfigService()) {
-                processed = appConfigHandler.process(smart.getAppConfigService());
+            if (smart.hasConnectIqAppSettingsService()) {
+                processed = appConfigHandler.process(smart.getConnectIqAppSettingsService());
             }
-            if (smart.hasPushNotificationService()) {
-                processed = pushNotificationHandler.handle(smart.getPushNotificationService());
+            if (smart.hasDeviceMessageService()) {
+                processed = pushNotificationHandler.handle(smart.getDeviceMessageService());
             }
             if (smart.hasExploreSyncService()) {
                 if (deviceSupport.getDevicePrefs().getBoolean("garmin_exploresync", false)) {
@@ -327,7 +327,7 @@ public class ProtocolBufferHandler implements MessageHandler {
 
             if (!syncEnabled) {
                 LOG.warn("Got calendar request, but calendar sync is disabled");
-                return Smart.newBuilder().setCalendarService(
+                return Smart.newBuilder().setCalendarEventsService(
                         GdiCalendarService.CalendarService.newBuilder().setCalendarResponse(
                                 GdiCalendarService.CalendarService.CalendarServiceResponse.newBuilder()
                                         .addAllCalendarEvent(Collections.emptyList())
@@ -390,7 +390,7 @@ public class ProtocolBufferHandler implements MessageHandler {
             }
 
             LOG.debug("CalendarService Sending {} events to watch", watchEvents.size());
-            return Smart.newBuilder().setCalendarService(
+            return Smart.newBuilder().setCalendarEventsService(
                     GdiCalendarService.CalendarService.newBuilder().setCalendarResponse(
                             GdiCalendarService.CalendarService.CalendarServiceResponse.newBuilder()
                                     .addAllCalendarEvent(watchEvents)
@@ -399,7 +399,7 @@ public class ProtocolBufferHandler implements MessageHandler {
             ).build();
         }
         LOG.warn("Unknown CalendarService request: {}", calendarService);
-        return Smart.newBuilder().setCalendarService(
+        return Smart.newBuilder().setCalendarEventsService(
                 GdiCalendarService.CalendarService.newBuilder().setCalendarResponse(
                         GdiCalendarService.CalendarService.CalendarServiceResponse.newBuilder()
                                 .setStatus(GdiCalendarService.CalendarService.CalendarServiceResponse.ResponseStatus.UNKNOWN_RESPONSE_STATUS)
@@ -550,7 +550,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 response.setIndex(pictureRequest.getIndex());
             }
 
-            return Smart.newBuilder().setNotificationsService(
+            return Smart.newBuilder().setGncsService(
                     GdiNotificationsService.NotificationsService.newBuilder().setPictureResponse(response.build())
             ).build();
         }

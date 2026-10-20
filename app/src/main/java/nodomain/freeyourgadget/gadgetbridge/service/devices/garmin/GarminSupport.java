@@ -316,7 +316,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             if (directoryEntry.getFiletype() == FileType.FILETYPE.DIRECTORY) {
                 LOG.debug("Got directory entry, syncing with new protocol");
                 sendProtobufRequest("request file list",
-                        Smart.newBuilder().setFileSyncService(
+                        Smart.newBuilder().setFileAccessService(
                                 protocolBufferHandler.getFileSyncServiceHandler().requestFileList()
                         ).build());
                 return;
@@ -557,7 +557,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 final String country = Locale.getDefault().getCountry();
                 final String localeString = language + "_" + country.toUpperCase();
                 sendProtobufRequest("init realtime settings", Smart.newBuilder()
-                        .setSettingsService(
+                        .setRealtimeSettingsService(
                                 SettingsService.newBuilder()
                                         .setInitRequest(
                                                 InitRequest.newBuilder()
@@ -680,7 +680,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             // #6700 - Some firmwares will freeze on the legacy sync request
             LOG.warn("Legacy sync flush is disabled - requesting file list directly");
             sendProtobufRequest("directly request file list",
-                Smart.newBuilder().setFileSyncService(
+                Smart.newBuilder().setFileAccessService(
                     protocolBufferHandler.getFileSyncServiceHandler().requestFileList()
                 ).build());
             return;
@@ -737,7 +737,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
     private void onAppInfoReq(final GdiInstalledAppsService.InstalledAppsService.AppType appType) {
         sendProtobufRequest("request apps of type " + appType,
-            Smart.newBuilder().setInstalledAppsService(
+            Smart.newBuilder().setConnectIqInstalledAppsService(
                 GdiInstalledAppsService.InstalledAppsService.newBuilder().setGetInstalledAppsRequest(
                     GdiInstalledAppsService.InstalledAppsService.GetInstalledAppsRequest.newBuilder()
                         .setAppType(appType)
@@ -797,7 +797,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         }
 
         sendProtobufRequest("delete app",
-                Smart.newBuilder().setInstalledAppsService(
+                Smart.newBuilder().setConnectIqInstalledAppsService(
                         GdiInstalledAppsService.InstalledAppsService.newBuilder().setDeleteAppRequest(
                                 GdiInstalledAppsService.InstalledAppsService.DeleteAppRequest.newBuilder()
                                         .setStoreAppId(app.getStoreAppId())
@@ -1217,7 +1217,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                     LOG.debug("Will download file: {}/{}", currentlyDownloading.getSyncFile().getId().getId1(), currentlyDownloading.getSyncFile().getId().getId2());
 
                     sendProtobufRequest("request file",
-                            Smart.newBuilder().setFileSyncService(
+                            Smart.newBuilder().setFileAccessService(
                                     protocolBufferHandler.getFileSyncServiceHandler().requestFile(currentlyDownloading.getSyncFile())
                             ).build());
                 } else {
@@ -1761,7 +1761,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             sendProtobufRequest("get settings screen " + screenId,
                     Smart.newBuilder()
-                            .setSettingsService(SettingsService.newBuilder()
+                            .setRealtimeSettingsService(SettingsService.newBuilder()
                                     .setDefinitionRequest(
                                             ScreenDefinitionRequest.newBuilder()
                                                     .setScreenId(screenId)
@@ -1772,7 +1772,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             sendProtobufRequest("get settings state " + screenId,
                     Smart.newBuilder()
-                            .setSettingsService(SettingsService.newBuilder()
+                            .setRealtimeSettingsService(SettingsService.newBuilder()
                                     .setStateRequest(
                                             ScreenStateRequest.newBuilder()
                                                     .setScreenId(screenId)
@@ -2131,7 +2131,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                             .markSynced(gdiFile);
                     if (syncedCommand != null) {
                         sendProtobufRequest("mark file as synced",
-                                Smart.newBuilder().setFileSyncService(syncedCommand).build());
+                                Smart.newBuilder().setFileAccessService(syncedCommand).build());
                     }
                 }
 
@@ -2227,7 +2227,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 .build();
 
         sendProtobufRequest("reserve app install slot for " + taskName,
-                Smart.newBuilder().setFileSyncService(
+                Smart.newBuilder().setFileAccessService(
                         GdiFileSyncService.FileSyncService.newBuilder().setPushItemRequest(
                                 GdiFileSyncService.PushItemRequest.newBuilder()
                                         .setFile(file)
