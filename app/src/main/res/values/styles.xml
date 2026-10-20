@@ -912,6 +912,13 @@
         <item name="bar_shade">@drawable/bar_shade_amoled</item>
     </style>
 
+    <style name="ThemeOverlay.App.MaterialAlertDialog.WindowBackground" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.App.WindowBackground</item>
+    </style>
+    <style name="MaterialAlertDialog.App.WindowBackground" parent="MaterialAlertDialog.Material3">
+        <item name="backgroundTint">?android:attr/colorBackground</item>
+    </style>
+
     <style name="GalleryViewerTheme" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowBackground">@android:color/black</item>
