@@ -28,6 +28,7 @@ import "garmin/gdi_wifi_setup.proto";
 import "garmin/gdi_group_live_track.proto";
 import "garmin/gdi_instant_input_service.proto";
 import "garmin/gdi_live_track.proto";
+import "garmin/gdi_waypoint_transfer.proto";
 
 message Smart {
     optional GDI.Proto.Calendar.CalendarService calendar_events_service = 1;
@@ -45,7 +46,7 @@ message Smart {
     optional SmsNotificationService sms_notification_service = 16;
     optional GDI.Proto.InstantInput.InstantInputService instant_input_service = 18;
     optional GDI.Proto.LiveTrack.LiveTrackService live_track_service = 21;
-    optional Service23 way_point_transfer_service = 23;
+    optional GDI.Proto.WaypointTransfer.WaypointTransferService way_point_transfer_service = 23;
     optional PushNotificationService device_message_service = 24;
     optional AuthenticationService credentials_service = 27;
     optional ExploreSyncService explore_sync_service = 22;
@@ -68,9 +69,6 @@ message Smart {
 message UUID {
     required fixed64 upper = 1;
     required fixed64 lower = 2;
-}
-
-message Service23 {
 }
 
 message PushNotificationService {
