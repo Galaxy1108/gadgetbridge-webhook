@@ -199,7 +199,7 @@
     <string name="miband_pairing_using_dummy_userdata">没有提供有效的用户数据, 现在使用虚拟用户数据。</string>
     <string name="miband_pairing_tap_hint">当您的小米手环振动并闪烁时，请连续点击几下。</string>
     <string name="appinstaller_install">安装</string>
-    <string name="discovery_connected_devices_hint">使您的设备可被发现。 当前连接的设备可能不会被发现。 请激活定位（如 GPS ）。 若禁用权限， Gadgetbridge 可能会崩溃并重新启动。 如果几分钟后没有找到设备，请重新启动您的移动设备后再试。</string>
+    <string name="discovery_connected_devices_hint">使您的设备可被发现。 当前连接的设备可能不会被发现。 请激活定位（如 GPS ）。</string>
     <string name="discovery_note">注意:</string>
     <string name="candidate_item_device_image">设备图像</string>
     <string name="miband_prefs_alias">名称/别名</string>
@@ -5594,4 +5594,51 @@
     <string name="garmin_connect_iq_error_report">连接 IQ 错误报告</string>
     <string name="garmin_prg_transfer_mlr_title">用 MLR 安装 PRG 文件</string>
     <string name="garmin_prg_transfer_mlr_summary">文件传输速度更快，但可能不稳定。</string>
+    <string name="duration_short_three_months">3 个月</string>
+    <string name="device_rssi_dbm">%1$s dBm</string>
+    <string name="activity_list_row_meta">%1$s - %2$s · %3$s</string>
+    <string name="activity_list_row_stats_pair">%1$s · %2$s</string>
+    <string name="activity_list_intensity_value">强度 %s</string>
+    <plurals name="activity_list_steps_count">
+        <item quantity="other">%d 步</item>
+    </plurals>
+    <string name="dji_wifi_state_opening_control_channel">正在连接到相机…</string>
+    <string name="dji_wifi_error_credentials">相机未发送其 Wi-Fi 的名称和密码</string>
+    <string name="dji_wifi_error_control_channel">相机未通过 Wi-Fi 进行回应</string>
+    <string name="photo_gallery">图库</string>
+    <string name="gallery_filter_all">所有</string>
+    <string name="gallery_filter_photos">照片</string>
+    <string name="gallery_filter_videos">视频</string>
+    <string name="gallery_filter_favorites">收藏</string>
+    <string name="gallery_empty">无照片或视频</string>
+    <string name="gallery_clear_cache">清除缓存</string>
+    <string name="gallery_download_progress">正在下载 %2$d 项中的第 %1$d 项</string>
+    <string name="gallery_download_summary">已下载 %1$d 项，跳过了 %2$d 项，%3$d 项失败</string>
+    <string name="gallery_download_failed">下载失败</string>
+    <string name="gallery_download_error_storage_permission">未授予存储权限</string>
+    <string name="gallery_favorite">收藏</string>
+    <string name="gallery_unfavorite">取消收藏</string>
+    <plurals name="gallery_delete_confirm">
+        <item quantity="other">从相机中删除 %d 个文件？</item>
+    </plurals>
+    <string name="gallery_deleting">删除中…</string>
+    <string name="gallery_updating_favorites">正在更新收藏…</string>
+    <string name="gallery_delete_error">删除失败：%1$s</string>
+    <string name="gallery_favorite_error">收藏更改失败：%1$s</string>
+    <string name="gallery_download_queued">已加入队列</string>
+    <string name="gallery_downloaded">已下载</string>
+    <plurals name="gallery_download_added">
+        <item quantity="other">添加了 %d 个文件到下载</item>
+    </plurals>
+    <plurals name="gallery_download_already_downloaded">
+        <item quantity="other">已下载 %d 个文件</item>
+    </plurals>
+    <string name="pref_service_status_title">%1$s 状态</string>
+    <string name="pref_service_log_in_title">登录到 %1$s</string>
+    <string name="pref_service_log_in_summary">轻按此处输入 %1$s 服务器并登录</string>
+    <string name="pref_service_api_token_title">输入 %1$s API 令牌</string>
+    <string name="pref_service_api_token_summary">轻按此处输入 %1$s 服务器和 API 令牌</string>
+    <string name="pref_service_log_out_title">退出 %1$s 登录</string>
+    <string name="pref_service_auto_upload_title">自动上传到 %1$s</string>
+    <string name="pref_service_auto_upload_summary">自动上传新同步的锻炼到 %1$s</string>
 </resources>
