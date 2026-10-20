@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.ActiveCaloriesWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.ActiveTimeWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BloodPressureWidget
@@ -91,4 +92,10 @@ object WidgetRegistry {
         val devices = GBApplication.app().deviceManager.devices
         return all().filter { widget -> devices.any { widget.isSupportedBy(it) } }
     }
+
+    /**
+     * Whether at least one widget supports the device.
+     */
+    @JvmStatic
+    fun supportsAnyWidget(device: GBDevice): Boolean = all().any { it.isSupportedBy(device) }
 }

@@ -26,13 +26,16 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardWidgetsActivity;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry;
 
 public class DashboardPreferencesActivity extends AbstractSettingsActivityV2 {
     @Override
@@ -68,10 +71,15 @@ public class DashboardPreferencesActivity extends AbstractSettingsActivityV2 {
 
             final MultiSelectListPreference dashboardDevices = findPreference("dashboard_devices_multiselect");
             if (dashboardDevices != null) {
-                final List<GBDevice> devices = GBApplication.app().getDeviceManager().getDevices();
+                final Set<String> selected = dashboardDevices.getValues();
+                final List<GBDevice> devices = new ArrayList<>(GBApplication.app().getDeviceManager().getDevices());
+                devices.removeIf(dev -> !WidgetRegistry.supportsAnyWidget(dev));
+                devices.sort(Comparator
+                    .comparing((GBDevice dev) -> !selected.contains(dev.getAddress()))
+                    .thenComparing(GBDevice::getAliasOrName, String.CASE_INSENSITIVE_ORDER));
                 final List<String> deviceMACs = new ArrayList<>();
                 final List<String> deviceNames = new ArrayList<>();
-                for (GBDevice dev : devices) {
+                for (final GBDevice dev : devices) {
                     deviceMACs.add(dev.getAddress());
                     deviceNames.add(dev.getAliasOrName());
                 }

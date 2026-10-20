@@ -16,6 +16,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.Device
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsRefreshHandle
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.ListEntry
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
@@ -96,10 +97,14 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
             key = WidgetConfig.KEY_DEVICES,
             title = R.string.pref_dashboard_select_devices_title,
             icon = R.drawable.ic_devices_other,
-            entriesProvider = {
+            entriesProvider = { prefs ->
+                val selected = prefs.getStringSet(WidgetConfig.KEY_DEVICES, emptySet())
                 GBApplication.app().deviceManager.devices
                     .filter { widget.isSupportedBy(it) }
-                    .sortedBy { it.aliasOrName }
+                    .sortedWith(
+                        compareBy<GBDevice> { it.address !in selected }
+                            .thenBy(String.CASE_INSENSITIVE_ORDER) { it.aliasOrName }
+                    )
                     .map { ListEntry.Text(it.address, it.aliasOrName) }
             },
             visibleWhen = {
