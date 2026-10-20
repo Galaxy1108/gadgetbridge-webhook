@@ -81,7 +81,7 @@ public class ProtocolBufferHandler implements MessageHandler {
     private final ExploreSyncHandler exploreSyncHandler;
     private final PushNotificationHandler pushNotificationHandler;
 
-    private final Map<GdiSmsNotification.SmsNotificationService.CannedListType, String[]> cannedListTypeMap = new HashMap<>();
+    private final Map<GdiSmsNotification.CannedListType, String[]> cannedListTypeMap = new HashMap<>();
 
     public ProtocolBufferHandler(GarminSupport deviceSupport) {
         this.deviceSupport = deviceSupport;
@@ -567,18 +567,18 @@ public class ProtocolBufferHandler implements MessageHandler {
             // Mark canned messages as supported
             deviceSupport.evaluateGBDeviceEvent(new GBDeviceEventUpdatePreferences(GarminPreferences.PREF_FEAT_CANNED_MESSAGES, true));
 
-            List<GdiSmsNotification.SmsNotificationService.CannedListType> requestedTypes = smsNotificationService.getSmsCannedListRequest().getRequestedTypesList();
+            List<GdiSmsNotification.CannedListType> requestedTypes = smsNotificationService.getSmsCannedListRequest().getRequestedTypesList();
 
             populateCannedListTypeMap(requestedTypes);
 
-            GdiSmsNotification.SmsNotificationService.SmsCannedListResponse.Builder builder = GdiSmsNotification.SmsNotificationService.SmsCannedListResponse.newBuilder()
-                    .setStatus(GdiSmsNotification.SmsNotificationService.ResponseStatus.SUCCESS);
+            GdiSmsNotification.SmsCannedListResponse.Builder builder = GdiSmsNotification.SmsCannedListResponse.newBuilder()
+                    .setStatus(GdiSmsNotification.SmsCannedListResponse.ResponseStatus.SUCCESS);
             boolean found = false;
-            for (GdiSmsNotification.SmsNotificationService.CannedListType requestedType : requestedTypes) {
+            for (GdiSmsNotification.CannedListType requestedType : requestedTypes) {
                 if (this.cannedListTypeMap.containsKey(requestedType)) {
                     found = true;
-                    builder.addLists(GdiSmsNotification.SmsNotificationService.SmsCannedList.newBuilder()
-                            .addAllResponse(Arrays.asList(Objects.requireNonNull(this.cannedListTypeMap.get(requestedType))))
+                    builder.addLists(GdiSmsNotification.SmsCannedList.newBuilder()
+                            .addAllResponses(Arrays.asList(Objects.requireNonNull(this.cannedListTypeMap.get(requestedType))))
                             .setType(requestedType)
                     );
                 } else {
@@ -586,7 +586,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 }
             }
             if (!found)
-                builder.setStatus(GdiSmsNotification.SmsNotificationService.ResponseStatus.GENERIC_ERROR);
+                builder.setStatus(GdiSmsNotification.SmsCannedListResponse.ResponseStatus.GENERIC_ERROR);
 
             return Smart.newBuilder().setSmsNotificationService(GdiSmsNotification.SmsNotificationService.newBuilder().setSmsCannedListResponse(builder)).build();
         } else {
@@ -595,14 +595,14 @@ public class ProtocolBufferHandler implements MessageHandler {
         }
     }
 
-    private void populateCannedListTypeMap(List<GdiSmsNotification.SmsNotificationService.CannedListType> requestedTypes) {
+    private void populateCannedListTypeMap(List<GdiSmsNotification.CannedListType> requestedTypes) {
         if (this.cannedListTypeMap.isEmpty()) {
-            for (GdiSmsNotification.SmsNotificationService.CannedListType type :
+            for (GdiSmsNotification.CannedListType type :
                     requestedTypes) {
                 String preferencesPrefix = "";
-                if (GdiSmsNotification.SmsNotificationService.CannedListType.SMS_MESSAGE_RESPONSE.equals(type))
+                if (GdiSmsNotification.CannedListType.SMS_MESSAGE_RESPONSE.equals(type))
                     preferencesPrefix = "canned_reply_";
-                else if (GdiSmsNotification.SmsNotificationService.CannedListType.PHONE_CALL_RESPONSE.equals(type))
+                else if (GdiSmsNotification.CannedListType.PHONE_CALL_RESPONSE.equals(type))
                     preferencesPrefix = "canned_message_dismisscall_";
                 else
                     continue;
@@ -687,14 +687,14 @@ public class ProtocolBufferHandler implements MessageHandler {
     }
 
     public ProtobufMessage setCannedMessages(CannedMessagesSpec cannedMessagesSpec) {
-        final GdiSmsNotification.SmsNotificationService.CannedListType cannedListType;
+        final GdiSmsNotification.CannedListType cannedListType;
         switch (cannedMessagesSpec.getType()) {
             case CannedMessagesSpec.TYPE_REJECTEDCALLS:
-                cannedListType = GdiSmsNotification.SmsNotificationService.CannedListType.PHONE_CALL_RESPONSE;
+                cannedListType = GdiSmsNotification.CannedListType.PHONE_CALL_RESPONSE;
                 break;
             case CannedMessagesSpec.TYPE_GENERIC:
             case CannedMessagesSpec.TYPE_NEWSMS:
-                cannedListType = GdiSmsNotification.SmsNotificationService.CannedListType.SMS_MESSAGE_RESPONSE;
+                cannedListType = GdiSmsNotification.CannedListType.SMS_MESSAGE_RESPONSE;
                 break;
             default:
                 LOG.warn("Unknown canned messages type, ignoring.");
@@ -706,7 +706,7 @@ public class ProtocolBufferHandler implements MessageHandler {
         Smart smart = Smart.newBuilder()
                 .setSmsNotificationService(GdiSmsNotification.SmsNotificationService.newBuilder()
                         .setSmsCannedListChangedNotification(
-                                GdiSmsNotification.SmsNotificationService.SmsCannedListChangedNotification.newBuilder().addChangedType(cannedListType)
+                                GdiSmsNotification.SmsCannedListChangedNotification.newBuilder().addChangedTypes(cannedListType)
                         )
                 ).build();
 
