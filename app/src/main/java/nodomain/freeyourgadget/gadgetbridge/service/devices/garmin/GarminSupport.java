@@ -117,7 +117,7 @@ import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledAppsService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledApps;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.InitRequest;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenDefinitionRequest;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenStateRequest;
@@ -219,7 +219,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
     private GBProgressNotification transferNotification;
 
-    final Map<UUID, GdiInstalledAppsService.InstalledAppsService.InstalledApp> installedApps = new HashMap<>();
+    final Map<UUID, GdiInstalledApps.GetInstalledAppsResponse.InstalledApp> installedApps = new HashMap<>();
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -734,14 +734,14 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
     @Override
     public void onAppInfoReq() {
-        onAppInfoReq(GdiInstalledAppsService.InstalledAppsService.AppType.ALL);
+        onAppInfoReq(GdiInstalledApps.AppType.ALL);
     }
 
-    private void onAppInfoReq(final GdiInstalledAppsService.InstalledAppsService.AppType appType) {
+    private void onAppInfoReq(final GdiInstalledApps.AppType appType) {
         sendProtobufRequest("request apps of type " + appType,
             Smart.newBuilder().setConnectIqInstalledAppsService(
-                GdiInstalledAppsService.InstalledAppsService.newBuilder().setGetInstalledAppsRequest(
-                    GdiInstalledAppsService.InstalledAppsService.GetInstalledAppsRequest.newBuilder()
+                GdiInstalledApps.ConnectIQInstalledAppsService.newBuilder().setGetInstalledAppsRequest(
+                    GdiInstalledApps.GetInstalledAppsRequest.newBuilder()
                         .setAppType(appType)
                 )
             ).build());
@@ -791,7 +791,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
             return;
         }
 
-        final GdiInstalledAppsService.InstalledAppsService.InstalledApp app = installedApps.get(uuid);
+        final GdiInstalledApps.GetInstalledAppsResponse.InstalledApp app = installedApps.get(uuid);
 
         if (app == null) {
             LOG.warn("Unknown app {}", uuid);
@@ -800,10 +800,10 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         sendProtobufRequest("delete app",
                 Smart.newBuilder().setConnectIqInstalledAppsService(
-                        GdiInstalledAppsService.InstalledAppsService.newBuilder().setDeleteAppRequest(
-                                GdiInstalledAppsService.InstalledAppsService.DeleteAppRequest.newBuilder()
+                        GdiInstalledApps.ConnectIQInstalledAppsService.newBuilder().setDeleteAppRequest(
+                                GdiInstalledApps.DeleteAppRequest.newBuilder()
                                         .setStoreAppId(app.getStoreAppId())
-                                        .setAppType(app.getType())
+                                        .setAppType(app.getAppType())
                         )
                 ).build());
     }
@@ -820,14 +820,14 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 protocolBufferHandler.getAppConfigHandler().onAppConfigSet(uuid, configs));
     }
 
-    public void onAppListReceived(final List<GdiInstalledAppsService.InstalledAppsService.InstalledApp> apps) {
+    public void onAppListReceived(final List<GdiInstalledApps.GetInstalledAppsResponse.InstalledApp> apps) {
         installedApps.clear();
 
         final List<GBDeviceApp> gbApps = new ArrayList<>(apps.size());
 
-        for (final GdiInstalledAppsService.InstalledAppsService.InstalledApp installedApp : apps) {
-            final boolean isSystemApp = !installedApp.hasFileName();
-            final GBDeviceApp.Type type = switch (installedApp.getType()) {
+        for (final GdiInstalledApps.GetInstalledAppsResponse.InstalledApp installedApp : apps) {
+            final boolean isSystemApp = !installedApp.hasFilename();
+            final GBDeviceApp.Type type = switch (installedApp.getAppType()) {
                 case WATCH_FACE -> isSystemApp ? GBDeviceApp.Type.WATCHFACE_SYSTEM : GBDeviceApp.Type.WATCHFACE;
                 case DATA_FIELD, ACTIVITY -> isSystemApp ? GBDeviceApp.Type.UNKNOWN /* otherwise too many appear */ : GBDeviceApp.Type.APP_ACTIVITYTRACKER;
                 case AUDIO_CONTENT_PROVIDER -> isSystemApp ? GBDeviceApp.Type.APP_SYSTEM : GBDeviceApp.Type.APP_GENERIC;
@@ -1072,7 +1072,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         sendOutgoingMessage("set sync ready", new SystemEventMessage(SystemEventMessage.GarminSystemEventType.SYNC_READY, 0));
 
         requestBatteryUpdate();
-        onAppInfoReq(GdiInstalledAppsService.InstalledAppsService.AppType.WATCH_APP);
+        onAppInfoReq(GdiInstalledApps.AppType.WATCH_APP);
 
 
         gbDevice.setUpdateState(GBDevice.State.INITIALIZED, getContext());
@@ -1878,7 +1878,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
     private void installItem(final InstallSession session, final List<InstallItem> items, final int index) {
         if (index >= items.size()) {
             // Refresh app list
-            onAppInfoReq(GdiInstalledAppsService.InstalledAppsService.AppType.WATCH_APP);
+            onAppInfoReq(GdiInstalledApps.AppType.WATCH_APP);
             if (getDevice().isBusy()) {
                 getDevice().unsetBusyTask();
                 getDevice().sendDeviceUpdateIntent(getContext());
