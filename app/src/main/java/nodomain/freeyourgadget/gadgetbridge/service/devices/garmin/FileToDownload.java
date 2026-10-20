@@ -2,18 +2,18 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin;
 
 import androidx.annotation.Nullable;
 
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess;
 
 public class FileToDownload {
     private final FileTransferHandler.DirectoryEntry directoryEntry;
-    private final GdiFileSyncService.File syncFile;
+    private final GdiFileAccess.ItemReference syncFile;
 
     public FileToDownload(final FileTransferHandler.DirectoryEntry directoryEntry) {
         this.directoryEntry = directoryEntry;
         this.syncFile = null;
     }
 
-    public FileToDownload(final GdiFileSyncService.File syncFile) {
+    public FileToDownload(final GdiFileAccess.ItemReference syncFile) {
         this.directoryEntry = null;
         this.syncFile = syncFile;
     }
@@ -24,7 +24,7 @@ public class FileToDownload {
     }
 
     @Nullable
-    public GdiFileSyncService.File getSyncFile() {
+    public GdiFileAccess.ItemReference getSyncFile() {
         return syncFile;
     }
 

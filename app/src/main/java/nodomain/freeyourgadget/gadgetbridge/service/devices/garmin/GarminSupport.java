@@ -112,9 +112,10 @@ import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.model.weather.Weather;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutTemplate;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.GdiDatatypes;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledAppsService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.InitRequest;
@@ -184,6 +185,7 @@ import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.Dev
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_SEND_APP_NOTIFICATIONS;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_TIME_SYNC;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivityUser.PREF_USER_GOAL_HYDRATION_ML;
+import static nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess.TransportProtocol.MULTILINK_TRANSPORT_PIPE;
 
 
 public class GarminSupport extends AbstractBTLESingleDeviceSupport implements ICommunicator.Callback {
@@ -332,7 +334,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         }
     }
 
-    public void addFileToDownloadList(GdiFileSyncService.File file) {
+    public void addFileToDownloadList(GdiFileAccess.ItemReference file) {
         filesToDownload.add(new FileToDownload(file));
         if (isBusyFetching && file.hasSize()) {
             transferNotification.incrementTotalSize(file.getSize());
@@ -1214,7 +1216,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                     }
                     sendOutgoingMessage("download file " + directoryEntry.getFileIndex(), downloadRequestMessage);
                 } else if (currentlyDownloading.getSyncFile() != null) {
-                    LOG.debug("Will download file: {}/{}", currentlyDownloading.getSyncFile().getId().getId1(), currentlyDownloading.getSyncFile().getId().getId2());
+                    LOG.debug("Will download file: {}/{}", currentlyDownloading.getSyncFile().getUid().getMostSignificant(), currentlyDownloading.getSyncFile().getUid().getLeastSignificant());
 
                     sendProtobufRequest("request file",
                             Smart.newBuilder().setFileAccessService(
@@ -2023,11 +2025,11 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
                 LOG.debug("Inflated {} bytes", inflated.length);
 
-                final GdiFileSyncService.File gdiFile = (currentlyDownloading != null) ? currentlyDownloading.getSyncFile() : null;
+                final GdiFileAccess.ItemReference gdiFile = (currentlyDownloading != null) ? currentlyDownloading.getSyncFile() : null;
                 String typeName;
                 FileType.FILETYPE filetype;
-                if(gdiFile != null && gdiFile.hasType() && gdiFile.getType().hasName()) {
-                    typeName = gdiFile.getType().getName();
+                if(gdiFile != null && gdiFile.hasDataType() && gdiFile.getDataType().hasGdxmlString()) {
+                    typeName = gdiFile.getDataType().getGdxmlString();
                     filetype = FileType.FILETYPE.findByTypeName(typeName);
                 } else {
                     typeName = null;
@@ -2091,16 +2093,16 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                                 fileDate = new Date(GarminTimeUtils.garminTimestampToJavaMillis(ts));
                             }
                         }
-                        if (fileDate == null && gdiFile != null && gdiFile.hasId()) {
+                        if (fileDate == null && gdiFile != null && gdiFile.hasUid()) {
                             // The upper 32 bits of id1 are the creation time of the file
-                            final int idTimestamp = (int) (gdiFile.getId().getId1() >>> 32);
+                            final int idTimestamp = (int) (gdiFile.getUid().getMostSignificant() >>> 32);
                             if (idTimestamp != 0 && idTimestamp != -1) {
                                 fileDate = new Date(GarminTimeUtils.garminTimestampToJavaMillis(idTimestamp));
                             }
                         }
                         String suffix = "";
-                        if(gdiFile != null && gdiFile.hasId()) {
-                            suffix = new UUID(gdiFile.getId().getId1(), gdiFile.getId().getId2()).toString();
+                        if(gdiFile != null && gdiFile.hasUid()) {
+                            suffix = new UUID(gdiFile.getUid().getMostSignificant(), gdiFile.getUid().getLeastSignificant()).toString();
                         }
                         String fileName =  GarminUtils.buildExportPath(typeName, fileDate, suffix, fileExtension);
                         File deviceDir = getWritableExportDirectory();
@@ -2127,7 +2129,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 }
 
                 if (gdiFile != null && !getKeepActivityDataOnDevice()) { // delete file from watch upon successful download
-                    final GdiFileSyncService.FileSyncService syncedCommand = protocolBufferHandler.getFileSyncServiceHandler()
+                    final GdiFileAccess.FileSyncService syncedCommand = protocolBufferHandler.getFileSyncServiceHandler()
                             .markSynced(gdiFile);
                     if (syncedCommand != null) {
                         sendProtobufRequest("mark file as synced",
@@ -2212,33 +2214,33 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         pendingItemPush = new PendingItemPush(communicatorV2, compressed, taskName, listener);
 
-        final GdiFileSyncService.FileId fileId = GdiFileSyncService.FileId.newBuilder()
-                .setId1(-1L)
-                .setId2(new Random().nextLong())
+        final nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.UUID fileId = nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.UUID.newBuilder()
+                .setMostSignificant(-1L)
+                .setLeastSignificant(new Random().nextLong())
                 .build();
-        final GdiFileSyncService.FileType fileType = GdiFileSyncService.FileType.newBuilder()
-                .setCode(0)
-                .setName(prgFileType.typeName)
+        final GdiFileAccess.DataType fileType = GdiFileAccess.DataType.newBuilder()
+                .setFormat(GdiFileAccess.DataType.Format.GDXML_DATA_TYPE)
+                .setGdxmlString(prgFileType.typeName)
                 .build();
-        final GdiFileSyncService.File file = GdiFileSyncService.File.newBuilder()
-                .setId(fileId)
-                .setType(fileType)
+        final GdiFileAccess.ItemReference file = GdiFileAccess.ItemReference.newBuilder()
+                .setUid(fileId)
+                .setDataType(fileType)
                 .setSize(rawPrgBytes.length)
                 .build();
 
         sendProtobufRequest("reserve app install slot for " + taskName,
                 Smart.newBuilder().setFileAccessService(
-                        GdiFileSyncService.FileSyncService.newBuilder().setPushItemRequest(
-                                GdiFileSyncService.PushItemRequest.newBuilder()
-                                        .setFile(file)
-                                        .setUnk2(37)
-                                        .setUnk3(0)
+                        GdiFileAccess.FileSyncService.newBuilder().setPushItemRequest(
+                                GdiFileAccess.PushItemDataRequest.newBuilder()
+                                        .setItem(file)
+                                        .setPriority(37)
+                                        .addSupportedTransports(MULTILINK_TRANSPORT_PIPE)
                                         .setRequestedCompressionWindow(15)
                         )
                 ).build());
     }
 
-    public void onPushItemResponse(final GdiFileSyncService.PushItemResponse response) {
+    public void onPushItemResponse(final GdiFileAccess.PushItemDataResponse response) {
         final PendingItemPush pending = pendingItemPush;
         if (pending == null) {
             LOG.warn("Got push item response, but no push is pending: {}", response);

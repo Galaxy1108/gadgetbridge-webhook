@@ -3,6 +3,7 @@ syntax = "proto2";
 package garmin_vivomovehr;
 
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+import "garmin/gdi_file_access.proto";
 
 message CoreService {
     optional SyncRequest sync_request = 1;
@@ -137,6 +138,7 @@ message CoreService {
         optional string display_name = 3;
 
         optional GNCSCapabilitiesRequest gncs_capabilities_request = 12;
+        optional GDI.Proto.FileAccess.Capabilities request_file_access_capabilities = 16;
     }
 
     message FeatureCapabilitiesResponse {
@@ -153,6 +155,7 @@ message CoreService {
             optional bool support_blocked_apps = 2;
         }
         optional GNCSCapabilitiesResponse gncs_capabilities_response = 12;
+        optional GDI.Proto.FileAccess.Capabilities response_file_access_capabilities = 16;
     }
 
     message Message11 {
