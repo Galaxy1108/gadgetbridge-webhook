@@ -4664,4 +4664,7 @@
     <string name="ak102_pref_display_items_title">Elemek megjelenítése</string>
     <string name="ak102_pref_display_items_summary">Órán megjelenő képernyők</string>
     <string name="stratos4pro_pref_audio_on_call_title">Csak hívásoknál kapcsolódjon a hívás hanghoz</string>
+    <string name="stratos4pro_pref_audio_on_call_summary">Az óra Klasszikus Bluetooth kapcsolatát hagyja kikapcsolva egészen a hívásig, hogy akkor fel tudja venni az órán. Kevesebb akkumulátort használ fel, mintha mindig kapcsolódva lenne. Szükséges hozzá a hívás értesítés.</string>
+    <string name="stratos4pro_incoming_call">Bejövő hívás</string>
+    <string name="stratos4pro_pref_audio_auto_connect_title">Minden hang kapcsolódás meghagyása</string>
 </resources>
