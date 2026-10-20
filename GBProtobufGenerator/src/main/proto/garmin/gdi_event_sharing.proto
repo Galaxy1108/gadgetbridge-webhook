@@ -1,16 +1,16 @@
 syntax = "proto2";
 
-package garmin_vivomovehr;
+package GDI.Proto.EventSharing;
 
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiEventSharing";
 option java_multiple_files = true;
 
 import "garmin/gdi_launch_monitor_service.proto";
 
-message EventSharingService {
+message EventSharing {
     optional SubscribeRequest subscribe_request = 1;
-    optional SubscribeResponse subscribe_respose = 2;
-    optional AlertNotification notification = 3;
+    optional SubscribeResponse subscribe_response = 2;
+    optional AlertNotification alert_notification = 3;
     optional AlertSupportRequest support_request = 4;
     optional AlertSupportResponse support_response = 5;
 }
@@ -34,15 +34,15 @@ enum AlertType {
     XERO_CHRONOGRAPH = 15;
     GOLF_CLUB_STATUS_CHANGE = 16;
     DIVE_READINESS_CHANGE = 17;
-    UNK_18 = 18;
+    RADAR_SETTINGS_CHANGE = 18;
     LIVE_SESSION = 19;
     HEART_RATE_MEASUREMENT = 20;
     RUNNING_MEASUREMENT = 21;
     ACCESSORY_UTILITIES_ACTIVITY_STATE = 22;
     RUNNING_ALGORITHM_INPUT = 23;
-    UNK_24 = 24;
-    UNK_25 = 25;
-    UNK_26 = 26;
+    BIKE_POWER_MEASUREMENT = 24;
+    DEVELOPMENT_TESTING = 25;
+    PSA_SAMPLE = 26;
     UNK_27 = 27;
     BUTTON_CHANGE = 28;
     UNK_29 = 29;
@@ -91,11 +91,29 @@ message AlertSupportResponse {
     repeated uint32 version_number = 2;
 }
 
-message AlertDetails {
+message Sport {
+    optional uint32 sport_fit_type = 1;
+    optional uint32 sport_fit_sub_type = 2;
+}
+
+message ActivityAlertDetails {
+    optional uint32 total_distance = 1;
+    optional uint32 total_time = 2;
+    optional uint32 lap_time = 3;
+    optional uint32 average_pace = 4;
+    optional Sport sport_type = 5;
+    optional uint32 est_finish_time = 6;
+    optional uint32 lap_number = 7;
+    optional uint32 session_dist = 8;
+    optional uint32 session_time = 9;
+    optional uint32 local_time = 10;
+    optional Sport last_sport_type = 11;
+    optional uint32 interval_dist = 12;
+    optional uint32 interval_time = 13;
 }
 
 message AlertNotification {
     optional AlertType type = 1;
-    optional AlertDetails details = 2;
-    optional LaunchAlertDetails launch_alert_details = 1001;
+    optional ActivityAlertDetails activity_details = 2;
+    optional GDI.Proto.LaunchMonitor.LaunchAlertDetails launch_alert_details = 1001;
 }

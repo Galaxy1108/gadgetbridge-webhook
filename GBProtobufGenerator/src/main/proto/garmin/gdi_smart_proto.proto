@@ -20,7 +20,7 @@ import "garmin/gdi_settings_service.proto";
 import "garmin/gdi_notifications_service.proto";
 import "garmin/gdi_ecg_service.proto";
 import "garmin/gdi_explore_sync.proto";
-import "garmin/gdi_event_sharing_service.proto";
+import "garmin/gdi_event_sharing.proto";
 import "garmin/gdi_launch_monitor_service.proto";
 
 message Smart {
@@ -45,10 +45,10 @@ message Smart {
     optional ExploreSyncService explore_sync_service = 22;
     optional Service28 inreach_tracking_service = 28;
     optional Service29 inreach_messaging_service = 29;
-    optional EventSharingService event_sharing = 30;
+    optional GDI.Proto.EventSharing.EventSharing event_sharing = 30;
     optional Service31 generic_item_transfer_service = 31;
     optional Service32 inreach_contact_sync_service = 32;
-    optional LaunchMonitorService launch_monitor_service = 38;
+    optional GDI.Proto.LaunchMonitor.LaunchMonitorService launch_monitor_service = 38;
     optional EcgService samd_service = 39;
     optional SettingsService realtime_settings_service = 42;
     optional FileSyncService file_access_service = 43;
