@@ -138,7 +138,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 return prepareProtobufResponse(processProtobufSmsNotificationMessage(smart.getSmsNotificationService()), message.getRequestId());
             }
             if (smart.hasConnectIqHttpService()) {
-                final GdiHttpService.HttpService response = httpHandler.handle(smart.getConnectIqHttpService(), message.getRequestId());
+                final GdiHttpService.ConnectIQHTTPService response = httpHandler.handle(smart.getConnectIqHttpService(), message.getRequestId());
                 if (response != null) {
                     return prepareProtobufResponse(Smart.newBuilder().setConnectIqHttpService(response).build(), message.getRequestId());
                 }

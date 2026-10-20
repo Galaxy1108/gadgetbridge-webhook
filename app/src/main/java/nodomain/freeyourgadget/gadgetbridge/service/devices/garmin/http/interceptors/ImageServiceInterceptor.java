@@ -68,7 +68,7 @@ public class ImageServiceInterceptor implements HttpInterceptor {
     @Override
     @Nullable
     public GarminHttpResponse handle(@NonNull final GarminHttpRequest request) {
-        if (request.getRawRequest().getMethod() != GdiHttpService.HttpService.Method.GET) {
+        if (request.getRawRequest().getMethod() != GdiHttpService.RawResourceRequest.HTTPMethod.GET) {
             LOG.warn("Known image service requests should be GET");
             return null;
         }

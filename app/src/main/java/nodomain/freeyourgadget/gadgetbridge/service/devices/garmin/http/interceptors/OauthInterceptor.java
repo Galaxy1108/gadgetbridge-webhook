@@ -56,7 +56,7 @@ public class OauthInterceptor implements HttpInterceptor {
     @Override
     @Nullable
     public GarminHttpResponse handle(@NonNull final GarminHttpRequest request) {
-        if (request.getRawRequest().getMethod() != GdiHttpService.HttpService.Method.POST) {
+        if (request.getRawRequest().getMethod() != GdiHttpService.RawResourceRequest.HTTPMethod.POST) {
             LOG.warn("Known OAuth requests should be POST");
             return null;
         }

@@ -145,22 +145,22 @@ public class FirewallInterceptor implements HttpInterceptor {
             return;
         }
 
-        final GdiHttpService.HttpService successResponse = HttpHandler.createSuccessResponse(request, garminHttpResponse);
+        final GdiHttpService.ConnectIQHTTPService successResponse = HttpHandler.createSuccessResponse(request, garminHttpResponse);
         if (successResponse != null) {
             sendHttpServiceRequest(request, successResponse);
         } else {
-            final GdiHttpService.HttpService errorResponse = HttpHandler.createErrorResponse(request);
+            final GdiHttpService.ConnectIQHTTPService errorResponse = HttpHandler.createErrorResponse(request);
             sendHttpServiceRequest(request, errorResponse);
         }
     }
 
     private void handleHttpException(@NonNull final GarminHttpRequest request) {
-        final GdiHttpService.HttpService errorResponse = HttpHandler.createErrorResponse(request);
+        final GdiHttpService.ConnectIQHTTPService errorResponse = HttpHandler.createErrorResponse(request);
         sendHttpServiceRequest(request, errorResponse);
     }
 
     private void sendHttpServiceRequest(@NonNull final GarminHttpRequest request,
-                                        @NonNull final GdiHttpService.HttpService httpService) {
+                                        @NonNull final GdiHttpService.ConnectIQHTTPService httpService) {
         final Smart smart = Smart.newBuilder().setConnectIqHttpService(httpService).build();
         deviceSupport.evaluateGBDeviceEvent(new ProtobufResponseEvent(
                 smart, request.getMessageRequestId()
