@@ -4909,6 +4909,9 @@
     <string name="widgets_remove">Remove</string>
     <string name="widgets_drag_to_reorder">Drag to reorder</string>
     <string name="widgets_more_options">More options</string>
+    <string name="dashboard_edit">Edit dashboard</string>
+    <string name="widgets_deleted">Widget deleted</string>
+    <string name="undo">Undo</string>
     <plurals name="widgets_variant_count">
         <item quantity="one">%d variant</item>
         <item quantity="other">%d variants</item>

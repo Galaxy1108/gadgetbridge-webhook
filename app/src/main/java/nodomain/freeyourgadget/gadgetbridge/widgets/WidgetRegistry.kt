@@ -86,10 +86,14 @@ object WidgetRegistry {
     fun byId(id: String): GBWidget<*>? = all().find { it.id == id }
 
     /**
-     * Widget kinds supported by at least one currently paired device.
+     * Widget kinds supported by at least one device that is enabled for the dashboard.
      */
     fun available(): List<GBWidget<*>> {
+        val prefs = GBApplication.getPrefs()
+        val showAllDevices = prefs.getBoolean("dashboard_devices_all", true)
+        val selectedDevices = prefs.getStringSet("dashboard_devices_multiselect", emptySet())
         val devices = GBApplication.app().deviceManager.devices
+            .filter { showAllDevices || it.address in selectedDevices }
         return all().filter { widget -> devices.any { widget.isSupportedBy(it) } }
     }
 

@@ -2,6 +2,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
@@ -34,7 +35,23 @@ class WidgetGridLayout @JvmOverloads constructor(
         var childHeight: Int,
     ) : MarginLayoutParams(MATCH_PARENT, MATCH_PARENT)
 
+    /**
+     * Whether this layout intercepts all touch events from its children (e.g. during a drag).
+     */
+    var interceptTouches: Boolean = false
+
+    /**
+     * The position of the last touch down, in the coordinates of this layout.
+     */
+    var lastDownX = 0f
+        private set
+    var lastDownY = 0f
+        private set
+
     private var cellSize = 0f
+
+    val columnWidth: Float get() = cellSize
+
 
     /**
      * The visible children and their rectangles in pixels, margins included, from the last measure.
@@ -72,6 +89,14 @@ class WidgetGridLayout @JvmOverloads constructor(
             val top = paddingTop + rect.y + lp.topMargin
             child.layout(left, top, left + child.measuredWidth, top + child.measuredHeight)
         }
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) {
+            lastDownX = ev.x
+            lastDownY = ev.y
+        }
+        return interceptTouches
     }
 
     /**

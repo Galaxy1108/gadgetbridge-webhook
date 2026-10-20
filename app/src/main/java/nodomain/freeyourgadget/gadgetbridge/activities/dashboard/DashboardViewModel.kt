@@ -48,6 +48,9 @@ class DashboardViewModel : ViewModel() {
     val state: StateFlow<Map<String, WidgetState>> = _state.asStateFlow()
 
     private var refreshJob: Job? = null
+    private var query: DashboardQuery? = null
+    private var dashboardShowAllDevices = true
+    private var dashboardDeviceList: Set<String> = emptySet()
 
     /**
      * Re-reads the layout for [columns] from [WidgetLayoutStore] and reloads every instance for [day].
@@ -64,6 +67,9 @@ class DashboardViewModel : ViewModel() {
         val timeTo = (day.timeInMillis / 1000L).toInt()
         val timeFrom = DateTimeUtils.shiftDays(timeTo, -1)
         val query = DashboardQuery(timeFrom, timeTo)
+        this.query = query
+        this.dashboardShowAllDevices = dashboardShowAllDevices
+        this.dashboardDeviceList = dashboardDeviceList
 
         refreshJob = viewModelScope.launch(Dispatchers.IO) {
             val jobs = layout.map { placed ->
@@ -73,6 +79,32 @@ class DashboardViewModel : ViewModel() {
             }
             jobs.awaitAll()
             LOG.debug("Reloading finished")
+        }
+    }
+
+    /**
+     * Re-reads the layout for [columns] from [WidgetLayoutStore]. Loads only the instances that are new, that have a
+     * different variant, or that are in [reload], for the day of the last [refresh].
+     */
+    fun updateLayout(columns: Int, reload: Set<String> = emptySet()) {
+        val query = query ?: return
+        val previous = _items.value.associate { it.instance.instanceId to it.variant }
+        val layout = WidgetLayoutStore.placedWidgets(columns)
+        val changed = layout.filter { previous[it.instance.instanceId] != it.variant || it.instance.instanceId in reload }
+        LOG.debug("Updating the layout in {} columns, reloading {} widgets", columns, changed.size)
+
+        val ids = layout.map { it.instance.instanceId }.toSet()
+        _items.value = layout
+        _state.update { states ->
+            states.filterKeys { it in ids } + changed.associate { it.instance.instanceId to WidgetState.Loading }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            changed.map { placed ->
+                async {
+                    loadInstance(placed, query, dashboardShowAllDevices, dashboardDeviceList)
+                }
+            }.awaitAll()
         }
     }
 

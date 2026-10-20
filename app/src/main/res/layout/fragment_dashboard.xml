@@ -50,8 +50,10 @@
         android:layout_height="match_parent">
 
         <androidx.core.widget.NestedScrollView
+            android:id="@+id/dashboard_scroll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:clipToPadding="false">
 
             <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridLayout
                 android:id="@+id/dashboard_grid"
@@ -59,6 +61,16 @@
                 android:layout_height="wrap_content"
                 android:padding="10dp" />
         </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/dashboard_add_widget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/widgets_add_widget"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_add" />
 
         <View
             android:id="@+id/dashboard_date_row_shade"

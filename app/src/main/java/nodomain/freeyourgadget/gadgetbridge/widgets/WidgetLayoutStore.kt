@@ -37,6 +37,16 @@ private class OwnLayout(val placements: List<WidgetPlacement>, private val copie
 }
 
 /**
+ * A widget instance that [WidgetLayoutStore.delete] removed: its layout, its position in the order, and its settings.
+ */
+class DeletedWidget(
+    val columns: Int,
+    val index: Int,
+    val placement: WidgetPlacement,
+    val settings: Map<String, *>,
+)
+
+/**
  * Persists the layouts as JSON in one preference, and the settings of each widget instance in its own
  * SharedPreferences file (see [GBApplication.getWidgetSharedPrefs]).
  * <p>
@@ -102,18 +112,27 @@ object WidgetLayoutStore {
     }
 
     /**
-     * Places the instances in [instanceIds] again in the layout for [columns], in that order, each at the first free
-     * column.
+     * Stores the layout for [columns] in the order of [arrangement], each instance at its column. Instances that are
+     * not in [arrangement] go to the end.
      */
-    fun reorder(columns: Int, instanceIds: List<String>) {
+    fun arrange(columns: Int, arrangement: List<Pair<String, Int>>) {
         val layout = ownLayout(columns)
         val byId = layout.placements.associateBy { it.instance.instanceId }
-        val repacked = mutableListOf<WidgetPlacement>()
-        for (instanceId in instanceIds) {
-            val placement = byId[layout.idOf(instanceId)] ?: continue
-            repacked += placeAtFirstFree(columns, repacked, placement)
-        }
-        saveLayout(columns, repacked)
+        val arranged = arrangement.mapNotNull { (instanceId, x) -> byId[layout.idOf(instanceId)]?.copy(x = x) }
+        val arrangedIds = arranged.map { it.instance.instanceId }.toSet()
+        saveLayout(columns, arranged + layout.placements.filterNot { it.instance.instanceId in arrangedIds })
+    }
+
+    /**
+     * Moves [instanceId] in the layout for [columns] to [index] in the order, at column [x].
+     */
+    fun move(columns: Int, instanceId: String, index: Int, x: Int) {
+        val layout = ownLayout(columns)
+        val id = layout.idOf(instanceId)
+        val placement = layout.placements.find { it.instance.instanceId == id } ?: return
+        val placements = layout.placements.filterNot { it.instance.instanceId == id }.toMutableList()
+        placements.add(index.coerceIn(0, placements.size), placement.copy(x = x))
+        saveLayout(columns, placements)
     }
 
     /**
@@ -142,13 +161,30 @@ object WidgetLayoutStore {
     }
 
     /**
-     * Removes [instanceId] from the layout for [columns], and deletes its settings.
+     * Removes [instanceId] from the layout for [columns], and deletes its settings. Returns the [DeletedWidget] if it
+     * was found, so that the change can be undone.
      */
-    fun delete(columns: Int, instanceId: String) {
+    fun delete(columns: Int, instanceId: String): DeletedWidget? {
         val layout = ownLayout(columns)
         val id = layout.idOf(instanceId)
-        saveLayout(columns, layout.placements.filterNot { it.instance.instanceId == id })
+        val index = layout.placements.indexOfFirst { it.instance.instanceId == id }
+        if (index < 0) return null
+        val settings = GBApplication.getWidgetSharedPrefs(id)?.all.orEmpty()
+        saveLayout(columns, layout.placements.filterIndexed { i, _ -> i != index })
         GBApplication.deleteWidgetSharedPrefs(id)
+        return DeletedWidget(columns, index, layout.placements[index], settings)
+    }
+
+    /**
+     * Restores a widget instance that [delete] removed back into its layout, with its settings.
+     */
+    fun restore(deleted: DeletedWidget) {
+        val placements = ownLayout(deleted.columns).placements.toMutableList()
+        placements.add(deleted.index.coerceAtMost(placements.size), deleted.placement)
+        GBApplication.getWidgetSharedPrefs(deleted.placement.instance.instanceId)?.let { dest ->
+            copyAllPrefs(deleted.settings, dest) { it }
+        }
+        saveLayout(deleted.columns, placements)
     }
 
     /**
@@ -257,7 +293,7 @@ object WidgetLayoutStore {
         val source = GBApplication.getWidgetSharedPrefs(instance.instanceId)
         val dest = GBApplication.getWidgetSharedPrefs(copy.instanceId)
         if (source != null && dest != null) {
-            copyAllPrefs(source, dest) { it }
+            copyAllPrefs(source.all, dest) { it }
         }
         return copy
     }
@@ -289,9 +325,9 @@ object WidgetLayoutStore {
      * skipping entries the transform rejects (returns null for). Preserves each value's runtime
      * type (String/boolean/int/long/float/String set), the same types SharedPreferences supports.
      */
-    private fun copyAllPrefs(source: SharedPreferences, dest: SharedPreferences, keyTransform: (String) -> String?) {
+    private fun copyAllPrefs(source: Map<String, *>, dest: SharedPreferences, keyTransform: (String) -> String?) {
         dest.edit {
-            for ((key, value) in source.all) {
+            for ((key, value) in source) {
                 val destKey = keyTransform(key) ?: continue
                 when (value) {
                     is Boolean -> putBoolean(destKey, value)
@@ -391,14 +427,14 @@ object WidgetLayoutStore {
         val defaultPrefs = sharedPreferences()
         if (order.contains("today")) {
             GBApplication.getWidgetSharedPrefs("today")?.let { dest ->
-                copyAllPrefs(defaultPrefs, dest) { key ->
+                copyAllPrefs(defaultPrefs.all, dest) { key ->
                     key.removePrefix("dashboard_widget_today_").takeIf { it != key }
                 }
             }
         }
         if (order.contains("goals")) {
             GBApplication.getWidgetSharedPrefs("goals")?.let { dest ->
-                copyAllPrefs(defaultPrefs, dest) { key ->
+                copyAllPrefs(defaultPrefs.all, dest) { key ->
                     key.removePrefix("dashboard_widget_goals_").takeIf { it != key }
                 }
             }

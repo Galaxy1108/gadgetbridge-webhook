@@ -33,7 +33,6 @@ import java.util.Set;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
-import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardWidgetsActivity;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry;
 
@@ -90,7 +89,9 @@ public class DashboardPreferencesActivity extends AbstractSettingsActivityV2 {
             final Preference manageWidgets = findPreference("pref_dashboard_manage_widgets");
             if (manageWidgets != null) {
                 manageWidgets.setOnPreferenceClickListener(preference -> {
-                    startActivity(new Intent(requireContext(), DashboardWidgetsActivity.class));
+                    LocalBroadcastManager.getInstance(requireContext())
+                            .sendBroadcast(new Intent(DashboardFragment.ACTION_START_EDITING));
+                    requireActivity().finish();
                     return true;
                 });
             }

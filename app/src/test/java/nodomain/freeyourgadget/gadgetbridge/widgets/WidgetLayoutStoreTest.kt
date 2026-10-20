@@ -91,4 +91,30 @@ class WidgetLayoutStoreTest : TestBase() {
         assertEquals(0, columns(WidgetGrid.BASE_COLUMNS)[instance.instanceId])
         assertFalse(columns(12).containsKey(instance.instanceId))
     }
+
+    @Test
+    fun moveChangesOrderAndColumn() {
+        WidgetLayoutStore.move(WidgetGrid.BASE_COLUMNS, "d", 0, 3)
+
+        assertEquals(listOf("d", "today", "a", "b", "c"), order(WidgetGrid.BASE_COLUMNS))
+        assertEquals(3, columns(WidgetGrid.BASE_COLUMNS)["d"])
+    }
+
+    @Test
+    fun restorePutsDeletedInstanceBackWithSettings() {
+        val deleted = WidgetLayoutStore.delete(WidgetGrid.BASE_COLUMNS, "d")!!
+        WidgetLayoutStore.restore(deleted)
+
+        assertEquals(listOf("today", "a", "b", "c", "d"), order(WidgetGrid.BASE_COLUMNS))
+        val vo2MaxPrefs = Prefs(GBApplication.getWidgetSharedPrefs("d"))
+        assertEquals(Vo2MaxWidget.SPORT_RUNNING, vo2MaxPrefs.getString(Vo2MaxWidget.KEY_SPORT, ""))
+    }
+
+    @Test
+    fun arrangeStoresOrderAndColumnsAndKeepsMissingInstances() {
+        WidgetLayoutStore.arrange(WidgetGrid.BASE_COLUMNS, listOf("b" to 0, "a" to 3, "today" to 0))
+
+        assertEquals(listOf("b", "a", "today", "c", "d"), order(WidgetGrid.BASE_COLUMNS))
+        assertEquals(mapOf("b" to 0, "a" to 3, "today" to 0, "c" to 0, "d" to 3), columns(WidgetGrid.BASE_COLUMNS))
+    }
 }
