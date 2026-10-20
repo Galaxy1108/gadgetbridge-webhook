@@ -3092,4 +3092,10 @@
     <string name="workout_template_copy_name">%1$s (עותק)</string>
     <string name="workout_template_add">הוספת תבנית אימון</string>
     <string name="pref_workout_templates_title">תבנית אימון</string>
+    <string name="pref_title_navigation_update_rate">קצב עדכון למצב רציף (במילישניות)</string>
+    <string name="navigation_destination_reached">הגעת ליעד</string>
+    <string name="navigation_eta">זמן משוער: %1$s</string>
+    <string name="navigation_distance_left">נותרו %1$s</string>
+    <string name="map_theme_indigo">אינדיגו</string>
+    <string name="map_theme_dark_low_contrast">כהה (ניגודיות נמוכה)</string>
 </resources>
