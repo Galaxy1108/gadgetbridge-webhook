@@ -46,6 +46,13 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
         SleepWidget.StageSupport.of(scope.devices),
     )
 
+    override fun previewData(): Data = Data(
+        value = 84,
+        nights = floatArrayOf(72f, 81f, 68f, 77f, 88f, 79f, 84f),
+        stages = longArrayOf(248, 94, 110, 18),
+        asleepMinutes = 452,
+    )
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val history = data.nights?.let {
             MiniChart.Bars(it, intArrayOf(WidgetColors.lightSleep), HISTORY_MIN, HISTORY_MAX, highlightLast = true)

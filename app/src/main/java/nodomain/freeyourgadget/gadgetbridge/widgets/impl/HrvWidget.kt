@@ -83,6 +83,16 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
         return null
     }
 
+    override fun previewData(): Data = Data(
+        weeklyAverage = 48,
+        baselineLowUpper = 34,
+        baselineBalancedLower = 41,
+        baselineBalancedUpper = 56,
+        status = HrvSummarySample.Status.BALANCED,
+        nights = floatArrayOf(44f, 51f, 39f, 47f, 53f, 46f, 49f),
+        lastNight = 49,
+    )
+
     override fun model(context: Context, config: WidgetConfig, data: Data?): TileModel {
         if (data == null || data.weeklyAverage <= 0) {
             return emptyModel(context, GaugeSpec.Zones(colors(context), SEGMENTS))

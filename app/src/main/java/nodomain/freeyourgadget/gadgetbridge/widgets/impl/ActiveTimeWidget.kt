@@ -37,6 +37,16 @@ object ActiveTimeWidget : MetricWidget<ActiveTimeWidget.Data>() {
         )
     }
 
+    override fun previewData(): Data {
+        val hourly = floatArrayOf(
+            0f, 0f, 0f, 0f, 0f, 0f, 1f, 6f, 14f, 2f, 1f, 3f,
+            8f, 2f, 1f, 4f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f,
+        )
+        val total = hourly.sum().toLong()
+        val goal = ActivityUser.defaultUserActiveTimeGoalMinutes.toLong()
+        return Data(total, total / goal.toFloat(), goal, hourly, 16, 6400, 4800f)
+    }
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel = goalTile(
         context, config, clock(data.total), WidgetColors.activeTime, data.goalFactor, clock(data.goalMinutes),
         data.hourly, data.hoursStarted,

@@ -198,6 +198,35 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         )
     }
 
+    override fun previewData(): Data {
+        fun at(hour: Int, minute: Int) = hour * DayClockView.HOUR + minute * 60
+        return Data(
+            segments = listOf(
+                DayClockView.Segment(at(0, 0), at(0, 40), Kind.LIGHT_SLEEP),
+                DayClockView.Segment(at(0, 40), at(1, 50), Kind.DEEP_SLEEP),
+                DayClockView.Segment(at(1, 50), at(2, 30), Kind.LIGHT_SLEEP),
+                DayClockView.Segment(at(2, 30), at(3, 0), Kind.REM_SLEEP),
+                DayClockView.Segment(at(3, 0), at(4, 10), Kind.LIGHT_SLEEP),
+                DayClockView.Segment(at(4, 10), at(4, 50), Kind.DEEP_SLEEP),
+                DayClockView.Segment(at(4, 50), at(5, 40), Kind.LIGHT_SLEEP),
+                DayClockView.Segment(at(5, 40), at(6, 20), Kind.REM_SLEEP),
+                DayClockView.Segment(at(6, 20), at(6, 50), Kind.LIGHT_SLEEP),
+                DayClockView.Segment(at(6, 50), at(7, 30), Kind.WORN),
+                DayClockView.Segment(at(7, 30), at(7, 55), Kind.NOT_WORN),
+                DayClockView.Segment(at(7, 55), at(8, 20), Kind.WORN),
+                DayClockView.Segment(at(8, 20), at(8, 45), Kind.ACTIVITY),
+                DayClockView.Segment(at(8, 45), at(12, 15), Kind.WORN),
+                DayClockView.Segment(at(12, 15), at(13, 0), Kind.EXERCISE),
+                DayClockView.Segment(at(13, 0), at(14, 10), Kind.WORN),
+                DayClockView.Segment(at(14, 10), at(14, 25), Kind.ACTIVITY),
+                DayClockView.Segment(at(14, 25), at(15, 30), Kind.WORN),
+            ),
+            now = at(15, 30),
+            remSupported = true,
+            singleStage = false,
+        )
+    }
+
     private fun kindOf(kind: ActivityKind): Kind = when (kind) {
         ActivityKind.EXERCISE -> Kind.EXERCISE
         ActivityKind.ACTIVITY -> Kind.ACTIVITY

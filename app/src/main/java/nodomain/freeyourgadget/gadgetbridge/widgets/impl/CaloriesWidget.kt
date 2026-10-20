@@ -48,6 +48,14 @@ object CaloriesWidget : MetricWidget<CaloriesWidget.Data>() {
         scope.hoursStarted,
     )
 
+    override fun previewData(): Data {
+        val hourly = floatArrayOf(
+            0f, 0f, 0f, 0f, 0f, 0f, 4f, 28f, 62f, 18f, 14f, 20f,
+            34f, 16f, 12f, 32f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f,
+        )
+        return Data(hourly.sum().toInt(), 1130, hourly, 16)
+    }
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val totalCalories = data.activeCalories + data.restingCalories
         val colors = intArrayOf(

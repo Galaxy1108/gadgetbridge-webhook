@@ -78,6 +78,23 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
         )
     }
 
+    override fun previewData() = Data(
+        report = TrainingReadinessReport(
+            score = 78,
+            timestamp = LocalDate.now().atTime(7, 12).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            hrvStatus = HrvSummarySample.Status.BALANCED,
+            hrvWeeklyAverage = 52,
+            acuteLoad = 420,
+            chronicLoad = 382,
+            sleepScore = 84,
+            recoveryMinutes = 300,
+            sleepHistoryAvg = 81,
+            stressHistoryAvg = 28,
+            stressRanges = intArrayOf(0, 40, 60, 80),
+        ),
+        history = floatArrayOf(64f, 71f, 58f, 82f, 76f, 69f, 78f),
+    )
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val zoneColors = TrainingReadinessReport.ZONE_COLOR_RES.map { ContextCompat.getColor(context, it) }.toIntArray()
         val report = data.report

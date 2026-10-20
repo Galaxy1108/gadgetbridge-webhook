@@ -48,6 +48,11 @@ abstract class BodyCompositionWidget : MetricWidget<BodyCompositionWidget.Data>(
         return Data(composition, ActivityUser().gender)
     }
 
+    override fun previewData(): Data {
+        val gender = ActivityUser().gender
+        return Data(BodyCompositionCalculator.compute(gender, 35, 178, 76f, 500f), gender)
+    }
+
     final override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val value = data.composition?.let { valueOf(it) }
             ?: return emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f))

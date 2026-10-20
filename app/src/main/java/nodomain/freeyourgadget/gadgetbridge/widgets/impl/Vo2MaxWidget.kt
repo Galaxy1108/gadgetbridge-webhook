@@ -127,6 +127,13 @@ object Vo2MaxWidget : MetricWidget<Vo2MaxWidget.Data>() {
         )
     }
 
+    override fun previewData() = Data(
+        value = 46.2f,
+        age = 35,
+        gender = ActivityUser().gender,
+        weeks = floatArrayOf(44.8f, 44.8f, 45.1f, 45.0f, 45.3f, 45.3f, 45.6f, 45.5f, 45.8f, 46.0f, 46.0f, 46.2f),
+    )
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val colors = colors(context)
         if (data.value == -1f) {

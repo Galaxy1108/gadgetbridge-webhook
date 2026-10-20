@@ -37,6 +37,16 @@ object DistanceWidget : MetricWidget<DistanceWidget.Data>() {
         )
     }
 
+    override fun previewData(): Data {
+        val hourly = floatArrayOf(
+            0f, 0f, 0f, 0f, 0f, 0f, 80f, 520f, 1350f, 180f, 150f, 310f,
+            720f, 190f, 120f, 1180f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f,
+        )
+        val total = hourly.sum()
+        val goal = ActivityUser.defaultUserDistanceGoalMeters
+        return Data(total, total / goal, goal, hourly, 16, 6400, 42L)
+    }
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel = goalTile(
         context, config, FormatUtils.getFormattedDistanceLabel(data.total.toDouble()), WidgetColors.distance,
         data.goalFactor, FormatUtils.getFormattedDistanceLabel(data.goalMeters.toDouble()), data.hourly, data.hoursStarted,

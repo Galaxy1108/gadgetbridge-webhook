@@ -35,6 +35,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.abs
 
@@ -65,6 +66,25 @@ object WeightWidget : MetricWidget<WeightWidget.Data>() {
             if (config.needsHistory) history(scope) else null,
             scope.dayStart,
         )
+    }
+
+    override fun previewData(): Data {
+        val dayStart = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
+        val weights = listOf(
+            29 to 78.4f,
+            26 to 78.1f,
+            23 to 78.3f,
+            20 to 77.8f,
+            17 to 77.6f,
+            14 to 77.7f,
+            11 to 77.3f,
+            8 to 77.2f,
+            5 to 76.9f,
+            2 to 77.0f,
+            0 to 76.8f,
+        )
+        val history = weights.map { (daysAgo, kg) -> TimedValue(dayStart - daysAgo * SECONDS_PER_DAY + 7 * 3600L, kg) }
+        return Data(weightKg = history.last().value.toDouble(), heightCm = 178, history = history, dayStart = dayStart)
     }
 
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {

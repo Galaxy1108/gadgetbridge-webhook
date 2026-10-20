@@ -58,6 +58,19 @@ object StepsWidget : MetricWidget<StepsWidget.Data>() {
         )
     }
 
+    override fun previewData() = Data(
+        total = 6400,
+        goalFactor = 6400f / ActivityUser.defaultUserStepsGoal,
+        goal = ActivityUser.defaultUserStepsGoal,
+        hourly = floatArrayOf(
+            0f, 0f, 0f, 0f, 0f, 0f, 0f, 520f, 1340f, 310f, 240f, 420f,
+            1610f, 830f, 360f, 770f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f,
+        ),
+        hoursStarted = 16,
+        distanceMeters = 4800f,
+        activeMinutes = 42,
+    )
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         return goalTile(
             context, config, data.total.toString(), WidgetColors.activity, data.goalFactor,

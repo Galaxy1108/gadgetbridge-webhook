@@ -114,6 +114,24 @@ object PaiWidget : MetricWidget<PaiWidget.Data>() {
         return data
     }
 
+    override fun previewData(): Data = Data(
+        total = 86,
+        today = 12,
+        target = 100,
+        low = 3,
+        moderate = 6,
+        high = 3,
+        minutesLow = 38,
+        minutesModerate = 22,
+        minutesHigh = 6,
+        hasTime = true,
+        hasLow = true,
+        days = floatArrayOf(64f, 70f, 69f, 75f, 72f, 74f, 86f),
+        dayIncreases = floatArrayOf(8f, 6f, 2f, 9f, 0f, 2f, 12f),
+        // Sunday, so that the bars of the whole week have data
+        day = LocalDate.of(2026, 10, 18),
+    )
+
     /**
      * The weekly total and the day's increase at the end of each day of the selected day's week, Monday to Sunday.
      */

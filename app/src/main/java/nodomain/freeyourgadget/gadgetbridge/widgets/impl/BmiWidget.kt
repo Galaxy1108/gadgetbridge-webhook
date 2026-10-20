@@ -47,6 +47,8 @@ object BmiWidget : MetricWidget<WeightWidget.Data>() {
         return WeightWidget.Data(latest?.weightKg?.toDouble() ?: 0.0, ActivityUser().heightCm)
     }
 
+    override fun previewData() = WeightWidget.Data(76.0, 178)
+
     override fun model(context: Context, config: WidgetConfig, data: WeightWidget.Data): TileModel {
         val bmi = Bmi.of(data.weightKg, data.heightCm)
             ?: return emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f), MiniChart.ZoneBar(Bmi.COLORS, Bmi.SEGMENTS, -1f))

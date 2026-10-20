@@ -89,6 +89,23 @@ object TrainingLoadWidget : MetricWidget<TrainingLoadWidget.Data>() {
         )
     }
 
+    override fun previewData(): Data {
+        val acuteDays = floatArrayOf(
+            340f, 352f, 371f, 365f, 348f, 362f, 390f, 402f, 385f, 370f, 356f, 381f, 410f, 428f,
+            415f, 398f, 380f, 362f, 389f, 405f, 431f, 446f, 437f, 418f, 401f, 395f, 412f, 420f,
+        )
+        val chronicDays = FloatArray(DAYS) { 350f + it * 1.2f }
+        val acute = acuteDays.last().roundToInt()
+        val chronic = chronicDays.last().roundToInt()
+        return Data(
+            acute = acute,
+            chronic = chronic,
+            status = statusFor(acute, chronic),
+            acuteDays = acuteDays,
+            chronicDays = chronicDays,
+        )
+    }
+
     /**
      * The day's acute or chronic load samples, from the metric samples like the Load chart when experimental
      * metrics are on.

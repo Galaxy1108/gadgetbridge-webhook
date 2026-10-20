@@ -24,6 +24,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -104,6 +105,22 @@ object BodyEnergyWidget : MetricWidget<BodyEnergyWidget.Data>() {
         }
 
         return data
+    }
+
+    override fun previewData(): Data {
+        val dayStart = LocalDate.of(2026, 1, 1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
+        val levels = intArrayOf(32, 40, 49, 58, 66, 73, 79, 84, 81, 76, 72, 69, 65, 63, 58, 54)
+        return Data(
+            value = levels.last(),
+            gained = 52,
+            lost = 30,
+            isToday = true,
+            lastOfDay = levels.last(),
+            samples = levels.mapIndexed { hour, level ->
+                TimedValue(dayStart + hour * SECONDS_PER_HOUR.toLong(), level.toFloat())
+            },
+            dayStart = dayStart,
+        )
     }
 
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {

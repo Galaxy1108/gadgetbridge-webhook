@@ -42,6 +42,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
  * Most recent heart rate measurement of the day, taken from the activity samples so that
@@ -137,6 +138,22 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
             average = if (hasStats) accumulator.average.roundToInt() else 0,
             latestSeconds = latestTimestamp.toLong(),
             isToday = scope.isToday,
+        )
+    }
+
+    override fun previewData(): Data {
+        val hourly = intArrayOf(58, 55, 53, 52, 52, 54, 61, 78, 86, 74, 71, 76, 104, 83, 75, 72)
+        val line = FloatArray(BUCKETS) { bucket ->
+            hourly.getOrNull(bucket / 4)?.let { it + 3 * sin(bucket * 1.7f) } ?: Float.NaN
+        }
+        return Data(
+            heartRate = 72,
+            maxHeartRate = 190,
+            line = line,
+            resting = 56,
+            minimum = 49,
+            maximum = 118,
+            average = 68,
         )
     }
 

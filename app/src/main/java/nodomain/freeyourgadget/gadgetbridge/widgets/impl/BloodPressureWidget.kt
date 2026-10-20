@@ -73,6 +73,8 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
         return Data(latestSystolic, latestDiastolic)
     }
 
+    override fun previewData() = Data(118, 76)
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         if (data.systolic <= 0 || data.diastolic <= 0) {
             return emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f), MiniChart.ZoneBar(COLORS, SEGMENTS, -1f))

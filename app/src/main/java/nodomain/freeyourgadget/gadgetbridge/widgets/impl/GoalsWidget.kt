@@ -80,6 +80,15 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
         return Data(goals)
     }
 
+    override fun previewData(): Data = Data(
+        listOf(
+            Progress(Goal.STEPS, 6400.0, ActivityUser.defaultUserStepsGoal.toDouble()),
+            Progress(Goal.DISTANCE, 4800.0, ActivityUser.defaultUserDistanceGoalMeters.toDouble()),
+            Progress(Goal.ACTIVE_TIME, 42.0, ActivityUser.defaultUserActiveTimeGoalMinutes.toDouble()),
+            Progress(Goal.SLEEP, 452.0, ActivityUser.defaultUserSleepDurationGoal.toDouble()),
+        )
+    )
+
     override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View = when (variant) {
         WidgetVariant.SMALL -> inflater.inflate(R.layout.dashboard_widget_goals_wide, parent, false)
         WidgetVariant.OVERVIEW_TALL -> inflater.inflate(R.layout.dashboard_widget_goal_rings_tall, parent, false).also {

@@ -39,6 +39,25 @@ object StressWidget : MetricWidget<StressData?>() {
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): StressData? =
         computeStress(scope, config.needsHistory, config.isFullWidth || config.isTall)
 
+    override fun previewData(): StressData {
+        val hourly = floatArrayOf(
+            18f, 15f, 14f, 16f, 15f, 19f, 22f, 38f, 45f, 52f, 41f, 36f,
+            30f, 48f, 63f, 44f, Float.NaN, Float.NaN, Float.NaN, Float.NaN,
+            Float.NaN, Float.NaN, Float.NaN, Float.NaN,
+        )
+        val offsets = floatArrayOf(-4f, 3f, -1f, 2f)
+        return StressData(
+            value = 30,
+            ranges = intArrayOf(0, 40, 60, 80),
+            totalTime = intArrayOf(35400, 15600, 4800, 1200),
+            hourly = hourly,
+            hoursStarted = 16,
+            quarters = FloatArray(hourly.size * offsets.size) {
+                hourly[it / offsets.size] + offsets[it % offsets.size]
+            },
+        )
+    }
+
     override fun model(context: Context, config: WidgetConfig, data: StressData?): TileModel = when (config.variant.id) {
         SIMPLE.id -> simple(context, data)
         BREAKDOWN.id -> breakdown(context, data)

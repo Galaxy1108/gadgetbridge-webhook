@@ -40,6 +40,8 @@ object HydrationWidget : MetricWidget<HydrationWidget.Data>() {
         return Data(totalMl, ActivityUser().hydrationGoalMl, unit)
     }
 
+    override fun previewData(): Data = Data(1450.0, 2000, HydrationUnit.MILLILITER)
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val color = ContextCompat.getColor(context, R.color.hydration_color)
         val factor = (data.totalMl / data.goalMl).toFloat().coerceIn(0f, 1f)

@@ -19,6 +19,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
  * Latest breathing rate of the day, with the awake and sleep averages.
@@ -78,6 +79,16 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
                 null
             },
         )
+    }
+
+    override fun previewData(): Data {
+        val hourly = floatArrayOf(
+            13f, 12.5f, 12f, 12f, 12.5f, 13f, 13.5f, 15f, 16f, 15.5f, 16f, 15.5f, 17f, 16f, 15.5f, 16f,
+        )
+        val line = FloatArray(BUCKETS) { bucket ->
+            hourly.getOrNull(bucket / 4)?.let { it + 0.6f * sin(bucket * 1.7f) } ?: Float.NaN
+        }
+        return Data(current = 16, awakeAvg = 16, sleepAvg = 13, lowest = 11, highest = 18, line = line)
     }
 
     /**

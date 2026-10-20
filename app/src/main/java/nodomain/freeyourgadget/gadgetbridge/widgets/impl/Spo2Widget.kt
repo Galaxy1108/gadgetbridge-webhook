@@ -93,6 +93,17 @@ object Spo2Widget : MetricWidget<Spo2Widget.Data>() {
         )
     }
 
+    override fun previewData() = Data(
+        spo2 = 97,
+        lowest = 92,
+        hourly = floatArrayOf(
+            95f, 94f, 95f, 94f, 95f, 96f, 96f, 97f, 97f, 98f, 97f, 97f,
+            98f, 97f, 96f, 97f, Float.NaN, Float.NaN, Float.NaN, Float.NaN,
+            Float.NaN, Float.NaN, Float.NaN, Float.NaN,
+        ),
+        hoursStarted = 16,
+    )
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val bars = data.hourly?.let { hourly ->
             MiniChart.Bars(

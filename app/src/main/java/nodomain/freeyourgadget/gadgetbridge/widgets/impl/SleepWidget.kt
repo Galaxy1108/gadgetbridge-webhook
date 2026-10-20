@@ -3,6 +3,7 @@ package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 import android.content.Context
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
 import nodomain.freeyourgadget.gadgetbridge.widgets.HypnogramSegment
 import nodomain.freeyourgadget.gadgetbridge.widgets.LegendRow
@@ -13,6 +14,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
 
@@ -60,6 +62,40 @@ object SleepWidget : MetricWidget<SleepWidget.Data>() {
             if (scope.devices.any { it.deviceCoordinator.supportsSleepScore(it) }) SleepScoreWidget.latestScore(scope) else -1,
             if (config.isFullWidth || config.isTall) scope.sleepStretches() else null,
             StageSupport.of(scope.devices),
+        )
+    }
+
+    override fun previewData(): Data {
+        val stages = listOf(
+            LANE_LIGHT to 20,
+            LANE_DEEP to 45,
+            LANE_LIGHT to 25,
+            LANE_REM to 15,
+            LANE_AWAKE to 4,
+            LANE_LIGHT to 30,
+            LANE_DEEP to 35,
+            LANE_LIGHT to 30,
+            LANE_REM to 25,
+            LANE_LIGHT to 35,
+            LANE_DEEP to 14,
+            LANE_LIGHT to 30,
+            LANE_AWAKE to 6,
+            LANE_REM to 30,
+            LANE_LIGHT to 40,
+            LANE_REM to 40,
+            LANE_AWAKE to 8,
+            LANE_LIGHT to 38,
+        )
+        var start = LocalDate.now().minusDays(1).atTime(23, 10).atZone(ZoneId.systemDefault()).toEpochSecond()
+        val night = stages.map { (lane, minutes) ->
+            HypnogramSegment(start, start + minutes * 60L, lane).also { start = it.end }
+        }
+        return Data(
+            total = 452,
+            goalFactor = 452f / ActivityUser.defaultUserSleepDurationGoal,
+            stages = longArrayOf(248, 94, 110, 18),
+            score = 84,
+            night = night,
         )
     }
 

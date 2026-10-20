@@ -123,6 +123,21 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
         )
     }
 
+    override fun previewData(): Data = Data(
+        Workout(
+            id = 0,
+            deviceAddress = "00:11:22:33:44:55",
+            name = null,
+            kind = ActivityKind.RUNNING,
+            startMillis = LocalDate.now().minusDays(1).atTime(18, 30).atZone(ZoneId.systemDefault()).toInstant()
+                .toEpochMilli(),
+            durationSec = 1665,
+            distanceMeters = 5000f,
+            calories = 342,
+            avgHr = 152,
+        )
+    )
+
     /**
      * The first positive value of [keys], or null.
      */

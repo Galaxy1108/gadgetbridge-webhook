@@ -40,6 +40,19 @@ object ActiveCaloriesWidget : MetricWidget<ActiveCaloriesWidget.Data>() {
         )
     }
 
+    override fun previewData(): Data {
+        val calories = CaloriesWidget.previewData()
+        val goal = ActivityUser.defaultUserCaloriesBurntGoal
+        return Data(
+            calories.activeCalories,
+            calories.activeCalories / goal.toFloat(),
+            goal,
+            calories.hourlyActive,
+            calories.hoursStarted,
+            calories.restingCalories,
+        )
+    }
+
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val kcal = { value: Int -> context.getString(R.string.widget_value_kcal, value.toString()) }
         return goalTile(

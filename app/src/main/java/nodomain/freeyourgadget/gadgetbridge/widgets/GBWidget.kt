@@ -72,6 +72,11 @@ interface GBWidget<D> {
     suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): D
 
     /**
+     * Generates fake data with reasonable values, to display a preview of each widget.
+     */
+    fun previewData(): D
+
+    /**
      * Inflates an empty view for [variant]. The view must fill the size of the variant that it gets from its parent.
      */
     fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View
