@@ -26,6 +26,7 @@ import "garmin/gdi_incident_detection.proto";
 import "garmin/gdi_audio_prompts.proto";
 import "garmin/gdi_wifi_setup.proto";
 import "garmin/gdi_group_live_track.proto";
+import "garmin/gdi_instant_input_service.proto";
 
 message Smart {
     optional GDI.Proto.Calendar.CalendarService calendar_events_service = 1;
@@ -41,7 +42,7 @@ message Smart {
     optional CoreService core_service = 13;
     optional GDI.Proto.GroupLiveTrack.GroupLiveTrackService group_live_track_service = 14;
     optional SmsNotificationService sms_notification_service = 16;
-    optional Service18 instant_input_service = 18;
+    optional GDI.Proto.InstantInput.InstantInputService instant_input_service = 18;
     optional Service21 live_track_service = 21;
     optional Service23 way_point_transfer_service = 23;
     optional PushNotificationService device_message_service = 24;
@@ -66,38 +67,6 @@ message Smart {
 message UUID {
     required fixed64 upper = 1;
     required fixed64 lower = 2;
-}
-
-message Service18 {
-    message CurrentInput {
-        optional string content = 1;
-        optional uint32 content_length = 2;
-    }
-
-    message StartInput {
-        optional uint32 codeset = 1;
-        optional uint32 max_length = 2;
-        optional string content = 3;
-        optional uint32 content_length = 4;
-        optional uint32 unk5 = 5;
-    }
-
-    message EndInput {
-        enum State {
-            ABORT = 1;
-            COMMIT = 2;
-        }
-        optional State state = 1;
-    }
-
-    message Message5 {
-        optional uint32 unk1 = 1;
-    }
-
-    optional CurrentInput current_input = 1;
-    optional StartInput start_input = 2;
-    optional EndInput end_input = 4;
-    optional Message5 unk5 = 5;
 }
 
 message Service21 {
