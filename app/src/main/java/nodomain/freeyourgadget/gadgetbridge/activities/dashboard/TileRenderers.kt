@@ -1,5 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.text.SpannableStringBuilder
@@ -22,6 +23,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.text.toSpannable
 import androidx.core.view.doOnLayout
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
@@ -482,6 +484,55 @@ internal fun renderFlowLegend(container: ViewGroup, items: List<Pair<Int, CharSe
     }
 }
 
+/**
+ * Shows the info button when the tile hides its legend, opening [items] in a dialog titled [title]. The button sits
+ * in the bottom corner, or in the header on tiles without a free corner.
+ */
+internal fun renderLegendButton(view: View, title: String, items: List<Pair<Int, CharSequence>>) {
+    val button = view.findViewById<View?>(R.id.tile_info_corner) ?: view.findViewById(R.id.tile_info)
+    if (items.isEmpty()) {
+        button.visibility = View.GONE
+        button.setOnClickListener(null)
+        return
+    }
+    button.visibility = View.VISIBLE
+    button.setOnClickListener { showLegendDialog(it.context, title, items) }
+}
+
+private fun showLegendDialog(context: Context, title: String, items: List<Pair<Int, CharSequence>>) {
+    val density = context.resources.displayMetrics.density
+    val list = LinearLayout(context)
+    list.orientation = LinearLayout.VERTICAL
+    val padding = (DIALOG_PADDING_DP * density).roundToInt()
+    list.setPadding(padding, (DIALOG_ROW_GAP_DP * density).roundToInt(), padding, 0)
+    renderFlowLegend(list, items, DIALOG_ROW_GAP_DP)
+    for (i in 0 until list.childCount) {
+        val item = list.getChildAt(i)
+        item.minimumHeight = (DIALOG_ROW_HEIGHT_DP * density).roundToInt()
+        val swatch = item.findViewById<View>(R.id.swatch)
+        swatch.layoutParams.width = (DIALOG_SWATCH_DP * density).roundToInt()
+        swatch.layoutParams.height = (DIALOG_SWATCH_DP * density).roundToInt()
+        (swatch.layoutParams as ViewGroup.MarginLayoutParams).marginEnd = (DIALOG_SWATCH_GAP_DP * density).roundToInt()
+        (swatch.background as? GradientDrawable)?.cornerRadius = DIALOG_SWATCH_RADIUS_DP * density
+        val label = item.findViewById<TextView>(R.id.swatch_label)
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, DIALOG_LABEL_SP)
+        label.setTextColor(MaterialColors.getColor(label, com.google.android.material.R.attr.colorOnSurface))
+    }
+    MaterialAlertDialogBuilder(context)
+        .setTitle(title)
+        .setView(list)
+        .setPositiveButton(android.R.string.ok, null)
+        .show()
+}
+
+private const val DIALOG_PADDING_DP = 24f
+private const val DIALOG_ROW_GAP_DP = 2f
+private const val DIALOG_ROW_HEIGHT_DP = 32f
+private const val DIALOG_SWATCH_DP = 12f
+private const val DIALOG_SWATCH_RADIUS_DP = 3f
+private const val DIALOG_SWATCH_GAP_DP = 12f
+private const val DIALOG_LABEL_SP = 14f
+
 private const val SWATCH_RADIUS_DP = 2f
 private const val LEGEND_ITEM_GAP_DP = 12f
 
@@ -492,9 +543,6 @@ private val UNIT_REGEX = Regex("[\\p{L}%]+(?:(?:\\s+|/)[\\p{L}%]+)*")
 private const val UNIT_SIZE = 0.5f
 private const val NOTE_SIZE_SP = 12
 
-/**
- * Draws the unit part of a value, like "kcal" or "%", smaller and in the secondary colour.
- */
 /**
  * [note] after the value, in the note size and colour.
  */
@@ -511,6 +559,9 @@ private fun appendNote(value: TextView, note: CharSequence) {
     value.text = text
 }
 
+/**
+ * Draws the unit part of a value, like "kcal" or "%", smaller and in the secondary colour.
+ */
 private fun shrinkUnits(value: TextView) {
     val text = value.text
     if (text is Spanned || text.none { it.isDigit() }) {

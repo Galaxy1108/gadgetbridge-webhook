@@ -18,6 +18,7 @@ import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.GoalRingsView
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderFlowLegend
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderHeader
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderLegendButton
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
@@ -125,6 +126,11 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
                 legendGap(config),
             )
         }
+        renderLegendButton(
+            view,
+            config.title(context, label),
+            if (isSmall(config) || showLegend(config)) emptyList() else data.goals.map { it.goal.color to context.getString(it.goal.label) },
+        )
         view.contentDescription = describe(context, config, data)
     }
 
@@ -141,6 +147,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
                 legendGap(config),
             )
         }
+        renderLegendButton(view, "", emptyList())
     }
 
     override fun onClick(view: View, variant: WidgetVariant, config: WidgetConfig, timestamp: Int) {

@@ -14,6 +14,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DayTimelineView
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderAxis
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderFlowLegend
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderHeader
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderLegendButton
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary
@@ -37,8 +38,14 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     private val LOG = LoggerFactory.getLogger(TodayWidget::class.java)
     private const val LEGEND_ROW_GAP_DP = 4f
     private const val COMPACT_LEGEND_ROW_GAP_DP = 5f
+    private const val LARGE_CLOCK_DP = 264f
+    private const val LARGE_CLOCK_NO_LEGEND_DP = 304f
+    private const val LARGE_LABEL_SP = 11f
     private const val TALL_CLOCK_DP = 108f
+    private const val TALL_CLOCK_NO_LEGEND_DP = 130f
     private const val TALL_LABEL_SP = 9f
+    private const val TIMELINE_NO_LEGEND_ROW_DP = 42f
+    private const val TIMELINE_NO_LEGEND_BASE_DP = 16f
     private val AXIS = listOf("00", "06", "12", "18", "24")
 
     override val id = "today"
@@ -325,11 +332,6 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         when (variant) {
             WidgetVariant.SMALL -> inflater.inflate(R.layout.dashboard_widget_day_timeline, parent, false)
             WidgetVariant.OVERVIEW_TALL -> inflater.inflate(R.layout.dashboard_widget_day_clock_tall, parent, false)
-                .also {
-                    val clock = it.findViewById<DayClockView>(R.id.tile_day_clock)
-                    clock.maxSizeDp = TALL_CLOCK_DP
-                    clock.labelSp = TALL_LABEL_SP
-                }
 
             else -> inflater.inflate(R.layout.dashboard_widget_day_clock, parent, false)
         }
@@ -339,6 +341,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         renderHeader(view, config.title(context, label), icon)
         val dimYesterday = config.prefs.getBoolean("dim_yesterday", true)
         val timeIndicator = config.prefs.getBoolean("time_indicator", true)
+        applySize(view, config)
         if (isSmall(config)) {
             view.findViewById<DayTimelineView>(R.id.tile_day_timeline)
                 .setDay(data.segments, data.now, data.yesterday, dimYesterday, timeIndicator)
@@ -353,11 +356,13 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
             if (showLegend(config)) legend(context, data) else emptyList(),
             legendGap(config),
         )
+        renderLegendButton(view, config.title(context, label), if (showLegend(config)) emptyList() else legend(context, data))
         view.contentDescription = describe(context, config, data)
     }
 
     override fun bindLoading(view: View, variant: WidgetVariant, config: WidgetConfig) {
         renderHeader(view, config.title(view.context, label), icon)
+        applySize(view, config)
         if (isSmall(config)) {
             view.findViewById<DayTimelineView>(R.id.tile_day_timeline).setLoading()
             renderAxis(view.findViewById(R.id.tile_axis), AXIS, true)
@@ -367,6 +372,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
             clock.setLoading()
         }
         renderFlowLegend(view.findViewById(R.id.tile_flow_legend), emptyList(), legendGap(config))
+        renderLegendButton(view, "", emptyList())
     }
 
     private fun isSmall(config: WidgetConfig) = config.variant == WidgetVariant.SMALL
@@ -377,6 +383,32 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     }
 
     private fun showLegend(config: WidgetConfig) = config.prefs.getBoolean("legend", true)
+
+    /**
+     * Grows the clock or the timeline into the space the legend leaves when it is hidden.
+     */
+    private fun applySize(view: View, config: WidgetConfig) {
+        val legend = showLegend(config)
+        if (isSmall(config)) {
+            view.findViewById<DayTimelineView>(R.id.tile_day_timeline).setBands(
+                if (legend) DayTimelineView.ROW_DP else TIMELINE_NO_LEGEND_ROW_DP,
+                if (legend) DayTimelineView.BASE_DP else TIMELINE_NO_LEGEND_BASE_DP,
+            )
+            return
+        }
+        val tall = config.variant == WidgetVariant.OVERVIEW_TALL
+        val base = if (tall) TALL_CLOCK_DP else LARGE_CLOCK_DP
+        val size = when {
+            legend -> base
+            tall -> TALL_CLOCK_NO_LEGEND_DP
+            else -> LARGE_CLOCK_NO_LEGEND_DP
+        }
+        val clock = view.findViewById<DayClockView>(R.id.tile_day_clock)
+        if (clock.maxSizeDp != size) {
+            clock.maxSizeDp = size
+            clock.labelSp = (if (tall) TALL_LABEL_SP else LARGE_LABEL_SP) * size / base
+        }
+    }
 
     private fun legendGap(config: WidgetConfig) =
         if (config.variant == WidgetVariant.LARGE) LEGEND_ROW_GAP_DP else COMPACT_LEGEND_ROW_GAP_DP

@@ -8,6 +8,7 @@ import android.view.View
 import com.google.android.material.color.MaterialColors
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DayClockView.Kind
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 /**
  * A day as one band from midnight on the left to midnight on the right, with the same stretches as
@@ -23,6 +24,8 @@ class DayTimelineView @JvmOverloads constructor(
     private var now: Int? = null
     private var dimYesterday = true
     private var showMarker = true
+    private var rowDp = ROW_DP
+    private var baseDp = BASE_DP
 
     private val density = resources.displayMetrics.density
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
@@ -53,6 +56,18 @@ class DayTimelineView @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * The height of the sleep and activity band and of the worn band within it. The view grows to fit them.
+     */
+    fun setBands(rowDp: Float, baseDp: Float) {
+        if (this.rowDp == rowDp && this.baseDp == baseDp) return
+        this.rowDp = rowDp
+        this.baseDp = baseDp
+        layoutParams?.let { it.height = ((MARKER_OVERHANG_DP + rowDp + TICK_BOTTOM_GAP_DP) * density).roundToInt() }
+        requestLayout()
+        invalidate()
+    }
+
     fun setLoading() {
         segments = emptyList()
         yesterday = emptyList()
@@ -63,9 +78,9 @@ class DayTimelineView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         if (width <= 0) return
         val top = MARKER_OVERHANG_DP * density
-        val rowHeight = ROW_DP * density
-        val baseTop = top + (rowHeight - BASE_DP * density) / 2
-        val baseBottom = baseTop + BASE_DP * density
+        val rowHeight = rowDp * density
+        val baseTop = top + (rowHeight - baseDp * density) / 2
+        val baseBottom = baseTop + baseDp * density
         val end = now ?: DayClockView.DAY
 
         fun x(seconds: Int) = seconds.toFloat() / DayClockView.DAY * width
@@ -95,7 +110,7 @@ class DayTimelineView @JvmOverloads constructor(
         linePaint.strokeWidth = TICK_DP * density
         for (hour in intArrayOf(6, 12, 18)) {
             val tickX = x(hour * DayClockView.HOUR)
-            canvas.drawLine(tickX, top + TICK_TOP_DP * density, tickX, top + TICK_BOTTOM_DP * density, linePaint)
+            canvas.drawLine(tickX, top + rowHeight + TICK_TOP_GAP_DP * density, tickX, top + rowHeight + TICK_BOTTOM_GAP_DP * density, linePaint)
         }
 
         val current = now
@@ -103,20 +118,20 @@ class DayTimelineView @JvmOverloads constructor(
             linePaint.color = markerColor
             linePaint.strokeWidth = MARKER_DP * density
             val markerX = x(current)
-            canvas.drawLine(markerX, top - MARKER_OVERHANG_DP * density, markerX, top + MARKER_BOTTOM_DP * density, linePaint)
+            canvas.drawLine(markerX, top - MARKER_OVERHANG_DP * density, markerX, top + rowHeight + MARKER_BOTTOM_GAP_DP * density, linePaint)
         }
     }
 
     companion object {
-        private const val ROW_DP = 20f
-        private const val BASE_DP = 8f
+        const val ROW_DP = 20f
+        const val BASE_DP = 8f
         private const val MIN_SEGMENT_DP = 1.5f
         private const val TICK_DP = 1f
-        private const val TICK_TOP_DP = 22f
-        private const val TICK_BOTTOM_DP = 25f
+        private const val TICK_TOP_GAP_DP = 2f
+        private const val TICK_BOTTOM_GAP_DP = 5f
         private const val MARKER_DP = 2f
         private const val MARKER_OVERHANG_DP = 3f
-        private const val MARKER_BOTTOM_DP = 23f
+        private const val MARKER_BOTTOM_GAP_DP = 3f
 
         private val THICK_ORDER = listOf(
             setOf(Kind.LIGHT_SLEEP, Kind.DEEP_SLEEP, Kind.REM_SLEEP),

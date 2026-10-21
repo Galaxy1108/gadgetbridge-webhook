@@ -26,6 +26,17 @@
         android:textSize="13sp" />
 
     <ImageView
+        android:id="@+id/tile_info"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginEnd="6dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/pref_dashboard_widget_show_legend_title"
+        android:src="@drawable/ic_info"
+        android:visibility="gone"
+        app:tint="?attr/colorOnSurfaceVariant" />
+
+    <ImageView
         android:layout_width="18dp"
         android:layout_height="18dp"
         android:importantForAccessibility="no"
