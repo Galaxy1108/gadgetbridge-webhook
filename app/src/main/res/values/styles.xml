@@ -669,6 +669,21 @@
         <item name="iconTint">@color/period_step_icon</item>
     </style>
 
+    <!-- Bottom bar actions with an icon above the label -->
+    <style name="Widget.App.EditBarItem" parent="Widget.Material3.Button.TextButton.Icon">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:maxLines">2</item>
+        <item name="cornerRadius">0dp</item>
+        <item name="iconGravity">top</item>
+        <item name="iconPadding">4dp</item>
+        <item name="iconSize">24dp</item>
+        <item name="iconTint">@color/period_step_icon</item>
+        <item name="android:textColor">@color/period_step_icon</item>
+        <item name="android:textAppearance">?attr/textAppearanceLabelMedium</item>
+    </style>
+
     <!-- Date-step pill buttons (charts date bar, dashboard day arrows) -->
     <style name="TextAppearance.App.DateLabel" parent="TextAppearance.Material3.TitleSmall">
         <item name="android:textSize">13sp</item>

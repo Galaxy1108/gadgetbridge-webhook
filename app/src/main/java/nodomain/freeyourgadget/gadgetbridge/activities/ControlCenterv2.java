@@ -105,6 +105,10 @@ public class ControlCenterv2 extends AppCompatActivity
     private AlertDialog clDialog;
     private BarShade.ScrollListener barShades;
     private View toolbarShade;
+    private View mainContent;
+    private BottomNavigationView navigationView;
+    private boolean bottomNavigationEnabled;
+    private boolean pageBottomBarShown;
 
     enum NavTab {
         DASHBOARD("dashboard", R.id.bottom_nav_dashboard, R.string.bottom_nav_dashboard, R.drawable.ic_dashboard),
@@ -305,12 +309,9 @@ public class ControlCenterv2 extends AppCompatActivity
 
         // Initialize bottom navigation
         rebuildBottomNav();
-        BottomNavigationView navigationView = findViewById(R.id.bottom_nav_bar);
-        if (visibleTabs.size() > 1 && prefs.getBoolean("display_bottom_navigation_bar", true)) {
-            navigationView.setVisibility(View.VISIBLE);
-        } else {
-            navigationView.setVisibility(View.GONE);
-        }
+        navigationView = findViewById(R.id.bottom_nav_bar);
+        bottomNavigationEnabled = visibleTabs.size() > 1 && prefs.getBoolean("display_bottom_navigation_bar", true);
+        navigationView.setVisibility(bottomNavigationEnabled ? View.VISIBLE : View.GONE);
         navigationView.setOnItemSelectedListener(menuItem -> {
             NavTab tab = NavTab.fromItemId(menuItem.getItemId());
             int index = visibleTabs.indexOf(tab);
@@ -326,7 +327,7 @@ public class ControlCenterv2 extends AppCompatActivity
         // targetSdk 35 forces edge-to-edge. We intercept the insets on the ConstraintLayout
         // itself (main_content) and apply them directly to the toolbar. The drawer header is
         // padded here too.
-        final View mainContent = findViewById(R.id.main_content);
+        mainContent = findViewById(R.id.main_content);
         final int toolbarPaddingLeft = toolbar.getPaddingLeft();
         final int toolbarPaddingRight = toolbar.getPaddingRight();
         final int toolbarPaddingBottom = toolbar.getPaddingBottom();
@@ -339,7 +340,8 @@ public class ControlCenterv2 extends AppCompatActivity
             toolbar.setPadding(toolbarPaddingLeft, insets.top, toolbarPaddingRight, toolbarPaddingBottom);
             navigationView.setPadding(bottomNavPaddingLeft, bottomNavPaddingTop, bottomNavPaddingRight, insets.bottom);
             // #6894 - when the bottom nav is not visible, the FAB would show up behind the system navbar
-            final int contentPaddingBottom = navigationView.getVisibility() == View.VISIBLE ? 0 : insets.bottom;
+            // A bottom bar of the page applies the system navbar inset itself
+            final int contentPaddingBottom = navigationView.getVisibility() == View.VISIBLE || pageBottomBarShown ? 0 : insets.bottom;
             swipeLayout.setPadding(swipeLayout.getPaddingLeft(), swipeLayout.getPaddingTop(), swipeLayout.getPaddingRight(), contentPaddingBottom);
             navigationHeaderView.setPadding(headerPaddingLeft, insets.top, headerPaddingRight, headerPaddingBottom);
             return windowInsets;
@@ -358,7 +360,7 @@ public class ControlCenterv2 extends AppCompatActivity
         navigationView.setBackgroundColor(MaterialColors.getColor(navigationView, R.attr.main_bar_bg));
         toolbarShade = findViewById(R.id.toolbar_shade);
         barShades = new BarShade.ScrollListener(findViewById(R.id.main_content));
-        if (navigationView.getVisibility() == View.VISIBLE) {
+        if (bottomNavigationEnabled) {
             barShades.setBottomShade(findViewById(R.id.bottom_nav_shade));
         }
 
@@ -492,6 +494,19 @@ public class ControlCenterv2 extends AppCompatActivity
         final View headerShade = fragment instanceof HeaderShadePage
                 ? ((HeaderShadePage) fragment).getHeaderShade() : null;
         barShades.setTopShade(headerShade != null ? headerShade : toolbarShade);
+    }
+
+    /**
+     * Shows or hides the bottom bar of the current page. The bottom navigation is hidden while the bar shows.
+     */
+    public void setPageBottomBarShown(final boolean shown) {
+        if (shown == pageBottomBarShown) {
+            return;
+        }
+        pageBottomBarShown = shown;
+        navigationView.setVisibility(bottomNavigationEnabled && !shown ? View.VISIBLE : View.GONE);
+        barShades.setBottomShade(bottomNavigationEnabled || shown ? findViewById(R.id.bottom_nav_shade) : null);
+        ViewCompat.requestApplyInsets(mainContent);
     }
 
     @Override

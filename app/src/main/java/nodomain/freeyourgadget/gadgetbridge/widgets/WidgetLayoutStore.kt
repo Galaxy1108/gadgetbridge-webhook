@@ -49,7 +49,7 @@ class DeletedWidget(
 /**
  * The stored layouts and the settings of their instances, at one point in time.
  */
-class DashboardSnapshot(
+data class DashboardSnapshot(
     internal val layouts: Map<Int, List<WidgetPlacement>>,
     internal val settings: Map<String, Map<String, *>>,
 )

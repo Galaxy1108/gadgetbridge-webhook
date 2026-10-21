@@ -35,6 +35,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.updatePadding
@@ -48,7 +50,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
@@ -71,7 +74,6 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
 import java.util.Calendar
 import java.util.GregorianCalendar
-import kotlin.math.roundToInt
 
 /**
  * Hosts the widget grid: date header, calendar/settings menu, and the [WidgetGridLayout] the
@@ -84,8 +86,8 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private lateinit var arrowLeft: TextView
     private lateinit var arrowRight: TextView
     private lateinit var scrollView: NestedScrollView
-    private lateinit var addButton: FloatingActionButton
-    private lateinit var saveButton: FloatingActionButton
+    private lateinit var editBar: View
+    private lateinit var discardButton: MaterialButton
     private lateinit var grid: WidgetGridLayout
     private lateinit var binder: DashboardGridBinder
     private lateinit var dragController: GridDragController
@@ -120,20 +122,16 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private val editCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.setTitle(R.string.dashboard_edit)
-            mode.menuInflater.inflate(R.menu.dashboard_edit_menu, menu)
             return true
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
 
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            if (item.itemId != R.id.dashboard_edit_undo) return false
-            resetEdits()
-            return true
-        }
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = false
 
         override fun onDestroyActionMode(mode: ActionMode) {
             actionMode = null
+            deleteSnackbar?.dismiss()
             viewModel.editSnapshot = null
             binder.editing = false
             setEditControls(false)
@@ -172,10 +170,16 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
         textViewDate = view.findViewById(R.id.dashboard_date)
         scrollView = view.findViewById(R.id.dashboard_scroll)
-        addButton = view.findViewById(R.id.dashboard_add_widget)
-        addButton.setOnClickListener { addWidget() }
-        saveButton = view.findViewById(R.id.dashboard_save)
-        saveButton.setOnClickListener { actionMode?.finish() }
+        editBar = view.findViewById(R.id.dashboard_edit_bar)
+        editBar.setBackgroundColor(MaterialColors.getColor(editBar, R.attr.main_bar_bg))
+        ViewCompat.setOnApplyWindowInsetsListener(editBar) { bar, insets ->
+            bar.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom)
+            insets
+        }
+        discardButton = view.findViewById(R.id.dashboard_discard)
+        discardButton.setOnClickListener { confirmDiscard() }
+        view.findViewById<View>(R.id.dashboard_add_widget).setOnClickListener { addWidget() }
+        view.findViewById<View>(R.id.dashboard_done).setOnClickListener { actionMode?.finish() }
         grid = view.findViewById(R.id.dashboard_grid)
         arrowLeft = view.findViewById(R.id.arrow_left)
         arrowRight = view.findViewById(R.id.arrow_right)
@@ -232,6 +236,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             }
         }
         settingsInstanceId = null
+        updateDiscardButton()
         if (startEditingOnResume) {
             startEditingOnResume = false
             startEditing()
@@ -284,6 +289,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.items.collect { items ->
                 binder.submitItems(items)
+                updateDiscardButton()
                 newInstanceId?.let { instanceId ->
                     newInstanceId = null
                     binder.cardOf(instanceId)?.doOnLayout { scrollView.smoothScrollTo(0, it.top) }
@@ -337,35 +343,43 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         }
         binder.editing = true
         setEditControls(true)
+        updateDiscardButton()
+    }
+
+    private fun updateDiscardButton() {
+        val snapshot = viewModel.editSnapshot
+        discardButton.isEnabled = snapshot != null && snapshot != WidgetLayoutStore.snapshot()
+    }
+
+    private fun confirmDiscard() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.workout_template_discard_title)
+            .setPositiveButton(R.string.workout_template_discard) { _, _ -> discardEdits() }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     /**
-     * Restores the dashboard to its state at the start of the edit mode.
+     * Restores the dashboard to its state at the start of the edit mode, and ends the edit mode.
      */
-    private fun resetEdits() {
+    private fun discardEdits() {
         val snapshot = viewModel.editSnapshot ?: return
         deleteSnackbar?.dismiss()
         WidgetLayoutStore.restore(snapshot)
+        actionMode?.finish()
         fullRefresh()
     }
 
     /**
-     * Shows the add and save FABs, and hides the date arrows and disables the page swipe in the edit mode.
+     * Shows the edit bar in place of the bottom navigation, and hides the date arrows and disables the page swipe in
+     * the edit mode.
      */
     private fun setEditControls(editing: Boolean) {
         arrowLeft.isInvisible = editing
         arrowRight.isInvisible = editing
-        if (editing) {
-            addButton.show()
-            saveButton.show()
-        } else {
-            addButton.hide()
-            saveButton.hide()
-        }
+        editBar.isVisible = editing
+        (activity as? ControlCenterv2)?.setPageBottomBarShown(editing)
         activity?.findViewById<ViewPager2>(R.id.dashboard_viewpager)?.isUserInputEnabled = !editing
-        // Reserve space for the two buttons and their margins
-        val bottom = if (editing) (160f * resources.displayMetrics.density).roundToInt() else 0
-        scrollView.updatePadding(bottom = bottom)
     }
 
     private fun addWidget() {
@@ -434,6 +448,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             sheet.dismiss()
             if (deleted != null) {
                 deleteSnackbar = Snackbar.make(requireView(), R.string.widgets_deleted, Snackbar.LENGTH_LONG)
+                    .setAnchorView(editBar)
                     .setAction(R.string.undo) {
                         WidgetLayoutStore.restore(deleted)
                         viewModel.updateLayout(columns)
