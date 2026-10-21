@@ -728,11 +728,6 @@
     <string name="pref_sleep_mode_sleep_screen_summary">Show the Sleep Screen when waking the screen during sleep mode, to reduce distractions</string>
     <string name="pref_sleep_mode_smart_enable_title">Smart Enable</string>
     <string name="pref_sleep_mode_smart_enable_summary">Enable the sleep mode automatically when wearing the band during sleep</string>
-    <string name="pref_title_itag_alert_force_mild">Force Mild Alert</string>
-    <string name="pref_summary_itag_alert_force_mild">If find my device doesn\'t work, try turning this on.</string>
-    <string name="pref_summary_itag_button_events">What should happen when the tags button is pressed?</string>
-    <string name="pref_title_itag_alert_link_loss">Trigger Alert on Link Loss</string>
-    <string name="pref_summary_itag_alert_link_loss">Makes the tag beep if it becomes disconnected.</string>
     <!-- Auto export preferences -->
     <string name="pref_header_auto_export">Auto export</string>
     <string name="pref_header_auto_export_db">Auto export database</string>
@@ -6288,4 +6283,10 @@
     <string name="service_setup_title">%1$s setup</string>
     <string name="service_setup_server_hostname">Server hostname</string>
     <string name="service_setup_api_token">API token</string>
+
+    <string name="pref_itag_alert_level">Find-device alert level</string>
+    <string name="pref_itag_alert_level_high">High (0x02)</string>
+    <string name="pref_itag_alert_level_mild">Mild (0x01)</string>
+    <string name="pref_itag_beep_on_disconnect">Beep on disconnect</string>
+    <string name="pref_itag_button_press">Action on button press</string>
 </resources>
