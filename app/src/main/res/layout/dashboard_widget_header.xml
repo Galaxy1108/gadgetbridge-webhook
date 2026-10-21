@@ -18,10 +18,18 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
         android:layout_weight="1"
         android:importantForAccessibility="no"
         android:maxLines="1"
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="13sp" />
+
+    <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_1_right"
+        app:tint="?attr/colorOnSurfaceVariant" />
 
 </LinearLayout>
