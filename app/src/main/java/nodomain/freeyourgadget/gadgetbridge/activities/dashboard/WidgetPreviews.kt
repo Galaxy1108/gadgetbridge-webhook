@@ -18,11 +18,12 @@ import kotlin.math.roundToInt
 
 private const val PREVIEW_INSTANCE_ID = "preview"
 private const val SELECTED_STROKE_DP = 3f
+private const val MAX_REORDERED_VARIANTS = 6
 
 /**
  * Populates [grid] with a card for each variant of [widget], with its preview data and its default settings.
- * The widcets will be stacked, as if they were on the dashboard. The card of [selectedVariantId] has a border
- * in the primary color. A tap on a card calls [onClick] with the variant that was clicked.
+ * The widgets are stacked as on the dashboard, in the order that takes the least height. The card of
+ * [selectedVariantId] has a border in the primary color. A tap on a card calls [onClick] with the variant that was clicked.
  */
 fun showVariantPreviews(
     grid: WidgetGridLayout,
@@ -38,11 +39,8 @@ fun showVariantPreviews(
 
     val data = widget.previewData()
     val instance = WidgetInstance(PREVIEW_INSTANCE_ID, widget.id)
-    val rects = mutableListOf<GridRect>()
-    for (variant in widget.variants) {
-        val x = WidgetGrid.firstFreeColumn(grid.columns, WidgetGrid.stack(grid.columns, rects), variant.width)
-        rects += GridRect(x, 0, variant.width, variant.heightDp)
-
+    val variants = compactOrder(grid.columns, widget.variants)
+    for ((variant, rect) in variants.zip(place(grid.columns, variants))) {
         val card = inflater.inflate(R.layout.dashboard_widget_card, grid, false) as MaterialCardView
         applyCardStyle(card, true)
         val slot = card.findViewById<FrameLayout>(R.id.dashboard_widget_content)
@@ -60,9 +58,46 @@ fun showVariantPreviews(
         card.setOnClickListener { onClick(variant) }
 
         val lp = card.layoutParams as WidgetGridLayout.LayoutParams
-        lp.cellX = x
+        lp.cellX = rect.x
         lp.cellWidth = variant.width
         lp.childHeight = (variant.heightDp * density).roundToInt()
         grid.addView(card)
+    }
+}
+
+/**
+ * The order of [variants] that stacks them to the least height. Of the orders with the same height, the first one in
+ * [permutations].
+ */
+private fun compactOrder(columns: Int, variants: List<WidgetVariant>): List<WidgetVariant> {
+    if (variants.size > MAX_REORDERED_VARIANTS) return variants
+    return permutations(variants).minBy { order -> place(columns, order).maxOfOrNull { it.y + it.height } ?: 0 }
+}
+
+/**
+ * Stacks each variant in the first column where it goes highest. Returns the rectangles in the order of [variants].
+ */
+private fun place(columns: Int, variants: List<WidgetVariant>): List<GridRect> {
+    val rects = mutableListOf<GridRect>()
+    for (variant in variants) {
+        val x = WidgetGrid.firstFreeColumn(columns, WidgetGrid.stack(columns, rects), variant.width)
+        rects += GridRect(x, 0, variant.width, variant.heightDp)
+    }
+    return WidgetGrid.stack(columns, rects)
+}
+
+/**
+ * All the orders of [items], starting with the given order.
+ */
+private fun <T> permutations(items: List<T>): Sequence<List<T>> = sequence {
+    if (items.size <= 1) {
+        yield(items)
+        return@sequence
+    }
+    for (i in items.indices) {
+        val rest = items.filterIndexed { index, _ -> index != i }
+        for (order in permutations(rest)) {
+            yield(listOf(items[i]) + order)
+        }
     }
 }
