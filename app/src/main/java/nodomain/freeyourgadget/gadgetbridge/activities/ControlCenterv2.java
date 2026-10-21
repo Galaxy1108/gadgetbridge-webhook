@@ -42,7 +42,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.MenuProvider;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -384,8 +383,6 @@ public class ControlCenterv2 extends AppCompatActivity
 
         // Sync ViewPager changes with BottomNavigationView
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            private MenuProvider existingMenuProvider = null;
-
             @Override
             public void onPageSelected(int position) {
                 if (rebuildingNav || position >= visibleTabs.size()) return;
@@ -395,16 +392,6 @@ public class ControlCenterv2 extends AppCompatActivity
                 }
 
                 bindTopShade();
-
-                // Ensure the menu provider is set to the current fragment
-                if (existingMenuProvider != null) {
-                    ControlCenterv2.this.removeMenuProvider(existingMenuProvider);
-                }
-                final Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + position);
-                if (fragment instanceof MenuProvider) {
-                    existingMenuProvider = (MenuProvider) fragment;
-                    ControlCenterv2.this.addMenuProvider(existingMenuProvider);
-                }
             }
         });
         if (savedInstanceState == null) {

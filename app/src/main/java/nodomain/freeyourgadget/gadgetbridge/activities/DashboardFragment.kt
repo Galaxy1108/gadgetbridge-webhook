@@ -43,6 +43,7 @@ import androidx.core.view.updatePadding
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -212,6 +213,8 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             startEditingOnResume = it.getBoolean(KEY_EDITING)
         }
 
+        // The pager resumes only the visible page
+        requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         observeViewModel()
         refresh()
 
