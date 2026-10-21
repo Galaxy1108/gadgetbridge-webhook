@@ -37,10 +37,9 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
     private const val DAYS = 7
     private const val SECONDS_PER_DAY = 24 * 60 * 60L
     private const val STALE_MILLIS = 12 * 60 * 60 * 1000L
-    private const val SHORT_FACTORS = 4
 
     override val id = "trainingreadiness"
-    override val label = R.string.menuitem_readiness
+    override val label = R.string.metric_garmin_training_readiness
     override val icon = R.drawable.ic_widget_training_readiness
     override val chartTab = "trainingreadiness"
 
@@ -112,7 +111,7 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
         if (report == null || score == null) {
             val empty = emptyModel(context, GaugeSpec.Zones(zoneColors, TrainingReadinessReport.ZONE_SEGMENTS))
             return when {
-                config.isTall -> empty.copy(largeChart = bars, axis = axis)
+                config.isTall || config.isWide -> empty.copy(largeChart = bars, axis = axis)
                 config.variant.id == WidgetVariant.NUMBER.id -> empty.copy(chart = bars)
                 else -> empty
             }
@@ -125,6 +124,8 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
             gauge = GaugeSpec.Zones(zoneColors, TrainingReadinessReport.ZONE_SEGMENTS, score / 100f, markerColor = zoneColors[zone]),
             status = StatusLine.Chip(zoneColors[zone], context.getString(TrainingReadinessReport.ZONE_NAME_RES[zone])),
             contentDescription = describe(context, config, score, zone, advice, factors),
+            valueNote = report.timestamp?.takeIf { config.variant.id == WidgetVariant.NUMBER.id || config.isWide }
+                ?.let { context.getString(R.string.widget_status_at, measuredAt(it, data.day)) },
         )
         return when {
             config.isTall -> model.copy(largeChart = bars, axis = axis)
@@ -133,7 +134,7 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
                 notes = listOfNotNull(advice, if (data.isToday) report.timestamp?.let { updatedText(context, it, System.currentTimeMillis()) } else null),
                 legend = factors,
             )
-            config.isWide -> model.copy(notes = listOf(advice), legend = factors.take(SHORT_FACTORS))
+            config.isWide -> model.copy(largeChart = bars, axis = axis)
             else -> model.copy(chart = bars)
         }
     }
@@ -191,6 +192,19 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
                 )
             },
         )
+    }
+
+    /**
+     * The time of [millis], with the date when it is not on [day].
+     */
+    private fun measuredAt(millis: Long, day: LocalDate, zone: ZoneId = ZoneId.systemDefault()): String {
+        val time = Instant.ofEpochMilli(millis).atZone(zone)
+        val style = if (time.toLocalDate() == day) {
+            DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+        } else {
+            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+        }
+        return time.format(style)
     }
 
     /**
