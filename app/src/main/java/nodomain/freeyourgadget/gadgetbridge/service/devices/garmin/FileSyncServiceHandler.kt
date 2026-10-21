@@ -18,11 +18,11 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin
 
 import com.google.common.collect.Lists
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.GdiDatatypes
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.UUID
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess.TransportProtocol
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.UUID
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.FileType.FILETYPE
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.deviceevents.FileDownloadedDeviceEvent
 import nodomain.freeyourgadget.gadgetbridge.util.protobuf.buildWith
@@ -172,8 +172,8 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
 
         val fileListRequestBuilder = GdiFileAccess.ItemListRequest.newBuilder().apply {
             // Exclusion flags? If we omit this, it sends back already synced files going back months.
-            addExcludeAllFlags(UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
-            addGetFlags(UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
+            addExcludeAllFlags(GdiDataTypes.UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
+            addGetFlags(GdiDataTypes.UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
         }
 
         val currentcursorId = cursorId
@@ -230,7 +230,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         return GdiFileAccess.FileSyncService.newBuilder().buildWith {
             modifyFlagsRequest = GdiFileAccess.ModifyFlagsRequest.newBuilder().buildWith {
                 uid = syncFile.uid
-                addSetFlags(UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
+                addSetFlags(GdiDataTypes.UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())
             }
         }
     }

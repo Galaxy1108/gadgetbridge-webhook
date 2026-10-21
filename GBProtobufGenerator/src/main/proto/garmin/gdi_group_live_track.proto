@@ -1,10 +1,10 @@
 syntax = "proto2";
 
 package GDI.Proto.GroupLiveTrack;
-
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto";
+option java_outer_classname = "GdiGroupLiveTrack";
 
-import "garmin/gdi_datatypes.proto";
+import "garmin/gdi_data_types.proto";
 
 message GroupLiveTrackService {
     optional GetLiveTrackConnectionsRequest get_live_track_connections_request = 1;

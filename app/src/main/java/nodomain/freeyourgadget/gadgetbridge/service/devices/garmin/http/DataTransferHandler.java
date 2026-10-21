@@ -16,9 +16,9 @@ import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.DataDownloadRequest;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.DataDownloadResponse;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.DataTransferService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransfer.DataDownloadRequest;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransfer.DataDownloadResponse;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransfer.DataTransferService;
 
 public class DataTransferHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DataTransferHandler.class);

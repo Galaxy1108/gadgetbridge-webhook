@@ -1,7 +1,8 @@
 syntax = "proto2";
 
 package GDI.Proto.LiveTrack;
-option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto";
+option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiLiveTrack";
 
 message LiveTrackService {
     optional ShareMetaConfigurationNotification share_meta_config_notification = 1;

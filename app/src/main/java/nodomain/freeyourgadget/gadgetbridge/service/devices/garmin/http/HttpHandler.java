@@ -39,8 +39,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttpService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.DataTransferItem;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.interceptors.AgpsInterceptor;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.interceptors.ContactsInterceptor;
@@ -175,7 +175,7 @@ public class HttpHandler {
                     .setHttpStatusCode(response.getStatus())
                     .addAllHeaders(responseHeaders)
                     .setXferData(
-                        DataTransferItem.newBuilder()
+                        GdiDataTypes.DataTransferItem.newBuilder()
                                     .setId(id)
                                     .setSize(response.getBody().length)
                                     .build()
@@ -183,7 +183,7 @@ public class HttpHandler {
                     .build();
         }
 
-        nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.DataTransferItem x;
+        GdiDataTypes.DataTransferItem x;
 
         final byte[] responseBody;
         if ("gzip".equals(request.getHeaders().get("accept-encoding"))) {

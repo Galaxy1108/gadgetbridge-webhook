@@ -2,7 +2,9 @@ syntax = "proto2";
 
 package GDI.Proto.WaypointTransfer;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
-import "garmin/gdi_datatypes.proto";
+option java_outer_classname = "GdiWaypointTransfer";
+
+import "garmin/gdi_data_types.proto";
 
 message WaypointTransferService {
     optional WaypointRequest waypoint_request = 1;

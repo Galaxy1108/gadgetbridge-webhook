@@ -1,8 +1,8 @@
 syntax = "proto2";
 
 package GDI.Proto.SmsNotification;
-
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiSmsNotification";
 
 message SmsNotificationService {
     optional SmsSendMessageRequest sms_send_message_request = 1;

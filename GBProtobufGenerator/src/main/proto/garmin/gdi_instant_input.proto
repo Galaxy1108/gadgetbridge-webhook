@@ -2,6 +2,7 @@ syntax = "proto2";
 
 package GDI.Proto.InstantInput;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiInstantInput";
 
 message InstantInputService {
     optional InstantInputMessage input_content = 1;

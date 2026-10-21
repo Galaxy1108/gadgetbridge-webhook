@@ -1,10 +1,10 @@
 syntax = "proto2";
 
 package GDI.Proto.FileAccess;
-
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiFileAccess";
 
-import "garmin/gdi_datatypes.proto";
+import "garmin/gdi_data_types.proto";
 
 message FileSyncService {
     optional PullItemDataRequest pull_item_request = 1;

@@ -1,8 +1,8 @@
 syntax = "proto2";
 
 package GDI.Proto.DeviceStatus;
-
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiDeviceStatus";
 
 message DeviceStatusService {
     optional RemoteDeviceBatteryStatusChangedNotification remote_device_battery_status_changed_notification = 1;

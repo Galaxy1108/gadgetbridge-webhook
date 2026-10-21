@@ -112,16 +112,13 @@ import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.model.weather.Weather;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.workouts.WorkoutTemplate;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.GdiDatatypes;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledApps;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.InitRequest;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenDefinitionRequest;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.ScreenStateRequest;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.SettingsService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiRealtimeSettings;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
 import nodomain.freeyourgadget.gadgetbridge.service.SleepAsAndroidSender;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLESingleDeviceSupport;
@@ -560,9 +557,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 final String localeString = language + "_" + country.toUpperCase();
                 sendProtobufRequest("init realtime settings", Smart.newBuilder()
                         .setRealtimeSettingsService(
-                                SettingsService.newBuilder()
+                            GdiRealtimeSettings.SettingsService.newBuilder()
                                         .setInitRequest(
-                                                InitRequest.newBuilder()
+                                            GdiRealtimeSettings.InitRequest.newBuilder()
                                                         .setLanguage(localeString.length() == 5 ? localeString : "en_US")
                                                         .setRegion("us") // FIXME choose region
                                         )
@@ -1763,9 +1760,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             sendProtobufRequest("get settings screen " + screenId,
                     Smart.newBuilder()
-                            .setRealtimeSettingsService(SettingsService.newBuilder()
+                            .setRealtimeSettingsService(GdiRealtimeSettings.SettingsService.newBuilder()
                                     .setDefinitionRequest(
-                                            ScreenDefinitionRequest.newBuilder()
+                                        GdiRealtimeSettings.ScreenDefinitionRequest.newBuilder()
                                                     .setScreenId(screenId)
                                                     .setUnk2(0)
                                                     .setLocale(localeString.length() == 5 ? localeString : "en_US")
@@ -1774,9 +1771,9 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             sendProtobufRequest("get settings state " + screenId,
                     Smart.newBuilder()
-                            .setRealtimeSettingsService(SettingsService.newBuilder()
+                            .setRealtimeSettingsService(GdiRealtimeSettings.SettingsService.newBuilder()
                                     .setStateRequest(
-                                            ScreenStateRequest.newBuilder()
+                                        GdiRealtimeSettings.ScreenStateRequest.newBuilder()
                                                     .setScreenId(screenId)
                                     )
                             ).build());
@@ -2214,7 +2211,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
         pendingItemPush = new PendingItemPush(communicatorV2, compressed, taskName, listener);
 
-        final nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.UUID fileId = nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.UUID.newBuilder()
+        final GdiDataTypes.UUID fileId = GdiDataTypes.UUID.newBuilder()
                 .setMostSignificant(-1L)
                 .setLeastSignificant(new Random().nextLong())
                 .build();

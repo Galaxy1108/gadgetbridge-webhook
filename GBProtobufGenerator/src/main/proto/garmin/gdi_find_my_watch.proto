@@ -1,8 +1,8 @@
 syntax = "proto2";
 
 package GDI.Proto.FindMyWatch;
-
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiFindMyWatch";
 
 message FindMyWatchService {
     optional FindMyWatchRequest find_request = 1;

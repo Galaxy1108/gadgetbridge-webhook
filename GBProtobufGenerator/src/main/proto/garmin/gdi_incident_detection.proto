@@ -1,10 +1,10 @@
 syntax = "proto2";
 
 package GDI.Proto.IncidentDetection;
-option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiIncidentDetection";
-option java_multiple_files = true;
+option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiIncidentDetection";
 
-import "garmin/gdi_datatypes.proto";
+import "garmin/gdi_data_types.proto";
 
 message IncidentDetectionService {
     optional UpdateDeviceOwnerRequest update_device_owner_request = 1;

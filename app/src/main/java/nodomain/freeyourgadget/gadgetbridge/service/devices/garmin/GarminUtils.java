@@ -11,8 +11,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.ScPoint;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes;
 
 public final class GarminUtils {
     private GarminUtils() {
@@ -77,7 +77,7 @@ public final class GarminUtils {
     }
 
     public static GdiCore.LocationData toLocationData(final Location location, final GdiCore.LocationData.DataType dataType) {
-        final ScPoint positionForWatch = ScPoint.newBuilder()
+        final GdiDataTypes.ScPoint positionForWatch = GdiDataTypes.ScPoint.newBuilder()
                 .setLat(degreesToSemicircles(location.getLatitude()))
                 .setLon(degreesToSemicircles(location.getLongitude()))
                 .build();

@@ -2,6 +2,7 @@ syntax = "proto2";
 
 package GDI.Proto.WifiSetup;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiWifiSetup";
 
 import "garmin/gdi_core.proto";
 

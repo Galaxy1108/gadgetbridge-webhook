@@ -2,8 +2,9 @@ syntax = "proto2";
 
 package GDI.Proto.GenericItemTransfer;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiGenericItemTransfer";
 
-import "garmin/gdi_datatypes.proto";
+import "garmin/gdi_data_types.proto";
 
 message GenericItemTransferService {
     optional ArbitraryItemRequest arbitrary_item_request = 1;

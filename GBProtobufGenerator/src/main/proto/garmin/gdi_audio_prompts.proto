@@ -1,9 +1,8 @@
 syntax = "proto2";
 
 package GDI.Proto.AudioPrompts;
-
-option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiAudioPrompts";
-option java_multiple_files = true;
+option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiAudioPrompts";
 
 enum SpeechType {
     UNKNOWN = 0;

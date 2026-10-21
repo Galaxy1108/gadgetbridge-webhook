@@ -39,22 +39,22 @@ import nodomain.freeyourgadget.gadgetbridge.externalevents.gps.GBLocationProvide
 import nodomain.freeyourgadget.gadgetbridge.externalevents.gps.GBLocationService;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.DataTypes.DataTransferItem;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCredentials;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCalendarService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCalendar;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransferService.DataTransferService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransfer.DataTransferService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiGncs;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttpService;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledApps;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiRealtimeSettings;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmsNotification;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiEcgService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiExploreSyncService;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService.SettingsService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiExploreSync;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.DataTransferHandler;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.HttpHandler;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.messages.GFDIMessage;
@@ -251,7 +251,7 @@ public class ProtocolBufferHandler implements MessageHandler {
             if (smart.hasExploreSyncService()) {
                 if (deviceSupport.getDevicePrefs().getBoolean("garmin_exploresync", false)) {
                     processed = true;
-                    final GdiExploreSyncService.ExploreSyncService response = exploreSyncHandler.handle(smart.getExploreSyncService());
+                    final GdiExploreSync.ExploreSyncService response = exploreSyncHandler.handle(smart.getExploreSyncService());
                     if (response != null) {
                         return prepareProtobufResponse(Smart.newBuilder().setExploreSyncService(response).build(), message.getRequestId());
                     }
@@ -319,9 +319,9 @@ public class ProtocolBufferHandler implements MessageHandler {
         return chunkedFragmentsMap.get(message.getRequestId());
     }
 
-    private Smart processProtobufCalendarRequest(GdiCalendarService.CalendarService calendarService) {
+    private Smart processProtobufCalendarRequest(GdiCalendar.CalendarService calendarService) {
         if (calendarService.hasCalendarEventsRequest()) {
-            GdiCalendarService.CalendarEventsRequest calendarServiceRequest = calendarService.getCalendarEventsRequest();
+            GdiCalendar.CalendarEventsRequest calendarServiceRequest = calendarService.getCalendarEventsRequest();
 
             final boolean syncEnabled = GBApplication.getDeviceSpecificSharedPrefs(deviceSupport.getDevice().getAddress())
                     .getBoolean(PREF_SYNC_CALENDAR, false);
@@ -329,17 +329,17 @@ public class ProtocolBufferHandler implements MessageHandler {
             if (!syncEnabled) {
                 LOG.warn("Got calendar request, but calendar sync is disabled");
                 return Smart.newBuilder().setCalendarEventsService(
-                        GdiCalendarService.CalendarService.newBuilder().setCalendarEventsResponse(
-                                GdiCalendarService.CalendarEventsResponse.newBuilder()
+                        GdiCalendar.CalendarService.newBuilder().setCalendarEventsResponse(
+                                GdiCalendar.CalendarEventsResponse.newBuilder()
                                         .addAllEvents(Collections.emptyList())
-                                        .setStatus(GdiCalendarService.CalendarEventsResponse.ResponseStatus.OK)
+                                        .setStatus(GdiCalendar.CalendarEventsResponse.ResponseStatus.OK)
                         )
                 ).build();
             }
 
             CalendarManager upcomingEvents = new CalendarManager(deviceSupport.getContext(), deviceSupport.getDevice().getAddress());
             List<CalendarEvent> mEvents = upcomingEvents.getCalendarEventList();
-            List<GdiCalendarService.CalendarEvent> watchEvents = new ArrayList<>();
+            List<GdiCalendar.CalendarEvent> watchEvents = new ArrayList<>();
 
             for (CalendarEvent mEvt : mEvents) {
                 if (mEvt.getEndSeconds() < calendarServiceRequest.getStartDate() ||
@@ -371,7 +371,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                     endDateSeconds = mEvt.getEndSeconds();
                 }
 
-                final GdiCalendarService.CalendarEvent.Builder event = GdiCalendarService.CalendarEvent.newBuilder()
+                final GdiCalendar.CalendarEvent.Builder event = GdiCalendar.CalendarEvent.newBuilder()
                         .setTitle(mEvt.getTitle().substring(0, Math.min(mEvt.getTitle().length(), calendarServiceRequest.getMaxTitleLength())))
                         .setAllDay(mEvt.isAllDay())
                         .setStartDate(startDateSeconds)
@@ -392,18 +392,18 @@ public class ProtocolBufferHandler implements MessageHandler {
 
             LOG.debug("CalendarService Sending {} events to watch", watchEvents.size());
             return Smart.newBuilder().setCalendarEventsService(
-                    GdiCalendarService.CalendarService.newBuilder().setCalendarEventsResponse(
-                            GdiCalendarService.CalendarEventsResponse.newBuilder()
+                    GdiCalendar.CalendarService.newBuilder().setCalendarEventsResponse(
+                            GdiCalendar.CalendarEventsResponse.newBuilder()
                                     .addAllEvents(watchEvents)
-                                    .setStatus(GdiCalendarService.CalendarEventsResponse.ResponseStatus.OK)
+                                    .setStatus(GdiCalendar.CalendarEventsResponse.ResponseStatus.OK)
                     )
             ).build();
         }
         LOG.warn("Unknown CalendarService request: {}", calendarService);
         return Smart.newBuilder().setCalendarEventsService(
-                GdiCalendarService.CalendarService.newBuilder().setCalendarEventsResponse(
-                        GdiCalendarService.CalendarEventsResponse.newBuilder()
-                                .setStatus(GdiCalendarService.CalendarEventsResponse.ResponseStatus.UNKNOWN_RESPONSE_STATUS)
+                GdiCalendar.CalendarService.newBuilder().setCalendarEventsResponse(
+                        GdiCalendar.CalendarEventsResponse.newBuilder()
+                                .setStatus(GdiCalendar.CalendarEventsResponse.ResponseStatus.UNKNOWN_RESPONSE_STATUS)
                 )
         ).build();
     }
@@ -541,7 +541,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                     .setNotificationUid(notificationId)
                     .setMediaType(GdiGncs.MediaType.JPEG)
                     .setTransferInfo(
-                            DataTransferItem.newBuilder()
+                        GdiDataTypes.DataTransferItem.newBuilder()
                                     .setId(transferId)
                                     .setSize(imageBytes.length)
                                     .build()
@@ -629,7 +629,7 @@ public class ProtocolBufferHandler implements MessageHandler {
         LOG.warn("Unknown FindMyWatchService response: {}", findMyWatchService);
     }
 
-    private boolean processProtobufSettingsService(final SettingsService settingsService) {
+    private boolean processProtobufSettingsService(final GdiRealtimeSettings.SettingsService settingsService) {
         boolean processed = false;
 
         if (settingsService.hasDefinitionResponse()) {

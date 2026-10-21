@@ -1,8 +1,8 @@
 syntax = "proto2";
 
 package GDI.Proto.Calendar;
-
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiCalendar";
 
 message CalendarService {
     optional CalendarEventsRequest calendar_events_request = 1;

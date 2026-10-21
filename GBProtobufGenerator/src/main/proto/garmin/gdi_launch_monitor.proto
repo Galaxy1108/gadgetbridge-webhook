@@ -1,9 +1,8 @@
 syntax = "proto2";
 
 package GDI.Proto.LaunchMonitor;
-
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiLaunchMonitorService";
-option java_multiple_files = true;
+option java_outer_classname = "GdiLaunchMonitor";
 
 message LaunchMonitorService {
     optional StatusRequest status_request = 1;

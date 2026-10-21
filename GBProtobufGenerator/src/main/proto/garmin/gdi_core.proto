@@ -1,9 +1,10 @@
 syntax = "proto2";
 
 package GDI.Proto.Core;
-
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
-import "garmin/gdi_datatypes.proto";
+option java_outer_classname = "GdiCore";
+
+import "garmin/gdi_data_types.proto";
 import "garmin/gdi_file_access.proto";
 import "garmin/gdi_gncs.proto";
 
