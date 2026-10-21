@@ -24,6 +24,9 @@ import java.text.Collator
  * Lists all widgets. The widgets that no dashboard device supports are still included at the end.
  * - A tap on a widget expands section with previews for all its variants.
  * - A tap on a preview returns the widget and the variant.
+ *
+ * With [EXTRA_LAUNCHER], the list has only the widgets that support the launcher, and the previews start with the
+ * automatic variant. A tap on it returns the widget without a variant.
  */
 class WidgetPickerActivity : AbstractGBActivity() {
     private lateinit var widgets: List<GBWidget<*>>
@@ -31,14 +34,17 @@ class WidgetPickerActivity : AbstractGBActivity() {
     private var firstUnsupported = 0
     private lateinit var layoutManager: LinearLayoutManager
     private var expanded = RecyclerView.NO_POSITION
+    private var forLauncher = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_widget_picker)
 
+        forLauncher = intent.getBooleanExtra(EXTRA_LAUNCHER, false)
         val collator = Collator.getInstance()
         val devices = WidgetRegistry.dashboardDevices()
         val (supported, unsupported) = WidgetRegistry.all()
+            .filter { !forLauncher || it.supportsLauncher }
             .map { widget -> widget to devices.count { widget.isSupportedBy(it) } }
             .sortedWith { a, b -> collator.compare(a.first.displayName(this), b.first.displayName(this)) }
             .partition { it.second > 0 }
@@ -62,10 +68,10 @@ class WidgetPickerActivity : AbstractGBActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun select(widget: GBWidget<*>, variant: WidgetVariant) {
+    private fun select(widget: GBWidget<*>, variant: WidgetVariant?) {
         val result = Intent()
         result.putExtra(EXTRA_TYPE_ID, widget.id)
-        result.putExtra(EXTRA_VARIANT_ID, variant.id)
+        result.putExtra(EXTRA_VARIANT_ID, variant?.id)
         setResult(RESULT_OK, result)
         finish()
     }
@@ -107,7 +113,17 @@ class WidgetPickerActivity : AbstractGBActivity() {
             val isExpanded = position == expanded
             holder.previews.isVisible = isExpanded
             if (isExpanded) {
-                showVariantPreviews(holder.previews, widget, null) { select(widget, it) }
+                showVariantPreviews(
+                    holder.previews,
+                    widget,
+                    null,
+                    onClick = { select(widget, it) },
+                    onAutomatic = if (forLauncher) {
+                        { select(widget, null) }
+                    } else {
+                        null
+                    },
+                )
             } else {
                 holder.previews.removeAllViews()
             }
@@ -128,5 +144,6 @@ class WidgetPickerActivity : AbstractGBActivity() {
     companion object {
         const val EXTRA_TYPE_ID = "widget_type_id"
         const val EXTRA_VARIANT_ID = "widget_variant_id"
+        const val EXTRA_LAUNCHER = "widget_launcher"
     }
 }

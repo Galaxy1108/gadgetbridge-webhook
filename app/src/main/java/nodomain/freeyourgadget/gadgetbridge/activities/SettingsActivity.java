@@ -139,7 +139,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
     public static class SettingsFragment extends AbstractPreferenceFragment {
         private static final Logger LOG = LoggerFactory.getLogger(SettingsActivity.class);
 
-        /** Must stay in sync with GBApplication#getAccentColorOverlay() and the ThemeOverlay.App.Accent.* styles. */
+        /** Must stay in sync with GBApplication#getAccentColorOverlay(boolean) and the ThemeOverlay.App.Accent.* styles. */
         private static final String[] ACCENT_COLOR_KEYS = {
                 "red", "coral", "orange", "amber", "lime", "green",
                 "teal", "cyan", "blue", "indigo", "violet", "pink", "white",
@@ -561,7 +561,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
 
             if (contrastingSurfaces != null) {
                 contrastingSurfaces.setEnabled(!GBApplication.areDynamicColorsEnabled());
-                contrastingSurfaces.setChecked(GBApplication.areContrastingSurfacesEnabled());
+                contrastingSurfaces.setChecked(GBApplication.areContrastingSurfacesEnabled(GBApplication.isDarkThemeEnabled()));
                 contrastingSurfaces.setOnPreferenceChangeListener((preference, newVal) -> {
                     GBApplication.getPrefs().getPreferences().edit()
                             .putBoolean(GBApplication.PREF_CONTRASTING_SURFACES, (Boolean) newVal)

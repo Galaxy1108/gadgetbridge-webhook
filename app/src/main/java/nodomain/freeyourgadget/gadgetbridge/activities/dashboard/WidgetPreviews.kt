@@ -19,16 +19,22 @@ import kotlin.math.roundToInt
 private const val PREVIEW_INSTANCE_ID = "preview"
 private const val SELECTED_STROKE_DP = 3f
 private const val MAX_REORDERED_VARIANTS = 6
+private const val AUTOMATIC_HEIGHT_DP = 84
 
 /**
  * Populates [grid] with a card for each variant of [widget], with its preview data and its default settings.
  * The widgets are stacked as on the dashboard, in the order that takes the least height. The card of
  * [selectedVariantId] has a border in the primary color. A tap on a card calls [onClick] with the variant that was clicked.
+ * <p>
+ * With [onAutomatic], a card for the automatic variant is above the variants. A tap on it calls [onAutomatic]. It
+ * has the border when [automaticSelected].
  */
 fun showVariantPreviews(
     grid: WidgetGridLayout,
     widget: GBWidget<*>,
     selectedVariantId: String?,
+    onAutomatic: (() -> Unit)? = null,
+    automaticSelected: Boolean = false,
     onClick: (WidgetVariant) -> Unit,
 ) {
     val context = grid.context
@@ -36,6 +42,24 @@ fun showVariantPreviews(
     val density = context.resources.displayMetrics.density
     grid.columns = WidgetGrid.columnsForWidth(context.resources.configuration.screenWidthDp)
     grid.removeAllViews()
+
+    if (onAutomatic != null) {
+        val card = inflater.inflate(R.layout.dashboard_widget_card, grid, false) as MaterialCardView
+        applyCardStyle(card, true)
+        val slot = card.findViewById<FrameLayout>(R.id.dashboard_widget_content)
+        slot.addView(inflater.inflate(R.layout.dashboard_widget_automatic, slot, false))
+        if (automaticSelected) {
+            markSelected(card)
+        }
+        card.contentDescription = context.getString(R.string.automatic)
+        card.setOnClickListener { onAutomatic() }
+
+        val lp = card.layoutParams as WidgetGridLayout.LayoutParams
+        lp.cellX = 0
+        lp.cellWidth = grid.columns
+        lp.childHeight = (AUTOMATIC_HEIGHT_DP * density).roundToInt()
+        grid.addView(card)
+    }
 
     val data = widget.previewData()
     val instance = WidgetInstance(PREVIEW_INSTANCE_ID, widget.id)
@@ -50,9 +74,7 @@ fun showVariantPreviews(
         widget.bindUnsafe(content, variant, config, data)
 
         if (variant.id == selectedVariantId) {
-            card.isSelected = true
-            card.strokeColor = MaterialColors.getColor(card, androidx.appcompat.R.attr.colorPrimary)
-            card.strokeWidth = (SELECTED_STROKE_DP * density).roundToInt()
+            markSelected(card)
         }
         card.contentDescription = context.getString(variant.name)
         card.setOnClickListener { onClick(variant) }
@@ -63,6 +85,12 @@ fun showVariantPreviews(
         lp.childHeight = (variant.heightDp * density).roundToInt()
         grid.addView(card)
     }
+}
+
+private fun markSelected(card: MaterialCardView) {
+    card.isSelected = true
+    card.strokeColor = MaterialColors.getColor(card, androidx.appcompat.R.attr.colorPrimary)
+    card.strokeWidth = (SELECTED_STROKE_DP * card.resources.displayMetrics.density).roundToInt()
 }
 
 /**

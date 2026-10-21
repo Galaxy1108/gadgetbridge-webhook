@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
 import android.annotation.SuppressLint
+import android.appwidget.AppWidgetManager
 import android.os.Bundle
 import android.text.InputType
 import android.widget.EditText
@@ -26,11 +27,13 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
+import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetRenderer
+import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.variant
 
 /**
- * Renders one placed widget instance's settings: the common ones (device selection, variant, title override),
- * followed by the widget's own [GBWidget.settings].
+ * Renders the settings of one widget instance, on the dashboard or on the launcher: the common ones (device
+ * selection, variant, title override), followed by the widget's own [GBWidget.settings].
  */
 class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRenderHost {
     private var refreshHandle: DeviceSettingsRefreshHandle? = null
@@ -46,30 +49,50 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
         val instanceId = requireArguments().getString(ARG_INSTANCE_ID) ?: return
         val typeId = requireArguments().getString(ARG_TYPE_ID) ?: return
         val columns = requireArguments().getInt(ARG_COLUMNS, WidgetGrid.BASE_COLUMNS)
+        val appWidgetId = requireArguments().getInt(ARG_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         val widget = WidgetRegistry.byId(typeId)!!
+        val launcherWidget = LauncherWidgetStore.get(appWidgetId)
         val placement = WidgetLayoutStore.layout(columns).find { it.instance.instanceId == instanceId }
+        val variant = if (launcherWidget != null) {
+            LauncherWidgetRenderer.variantFor(requireContext(), appWidgetId, widget, launcherWidget)
+        } else {
+            widget.variant(placement?.variantId)
+        }
 
         refreshHandle?.cleanup()
         preferenceScreen.removeAll()
 
         val prefs = Prefs(GBApplication.getWidgetSharedPrefs(instanceId))
         val items = mutableListOf<DeviceSetting>()
-        items += commonSettings(widget)
-        widget.settings(requireContext(), widget.variant(placement?.variantId))?.let {
+        items += commonSettings(widget, launcherWidget != null)
+        widget.settings(requireContext(), variant)?.let {
             items += it.items
         }
 
         refreshHandle = DeviceSettingRenderer.render(items, preferenceScreen, prefs, this)
 
         val variantPref = findPreference<Preference>(KEY_VARIANT) ?: return
+        if (launcherWidget != null) {
+            variantPref.summary = launcherWidget.variantId?.let { getString(widget.variant(it).name) }
+                ?: getString(R.string.automatic)
+            variantPref.setOnPreferenceClickListener {
+                showVariantSheet(widget, launcherWidget.variantId, true) { selected ->
+                    LauncherWidgetStore.setVariant(appWidgetId, selected?.id)
+                    renderSettings()
+                }
+                true
+            }
+            return
+        }
         if (placement == null) {
             variantPref.isVisible = false
             return
         }
         variantPref.summary = getString(widget.variant(placement.variantId).name)
         variantPref.setOnPreferenceClickListener {
-            showVariantSheet(widget, placement.variantId) { variant ->
-                WidgetLayoutStore.setVariant(columns, instanceId, variant.id)
+            showVariantSheet(widget, placement.variantId, false) { selected ->
+                selected ?: return@showVariantSheet
+                WidgetLayoutStore.setVariant(columns, instanceId, selected.id)
                 renderSettings()
             }
             true
@@ -78,16 +101,36 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
 
     /**
      * Shows a preview of each variant of [widget] in a bottom sheet, as wide as the screen so that the previews size
-     * match the dashboard.
+     * match the dashboard. With [showAutomatic], a card for the automatic variant is above the previews. It is selected
+     * when [selectedVariantId] is null, and a tap on it selects a null variant.
      */
     @SuppressLint("InflateParams")  // The bottom sheet sets the layout params of its content view
-    private fun showVariantSheet(widget: GBWidget<*>, selectedVariantId: String, onSelect: (WidgetVariant) -> Unit) {
+    private fun showVariantSheet(
+        widget: GBWidget<*>,
+        selectedVariantId: String?,
+        showAutomatic: Boolean,
+        onSelect: (WidgetVariant?) -> Unit,
+    ) {
         val sheet = BottomSheetDialog(requireContext())
         val view = layoutInflater.inflate(R.layout.dashboard_widget_previews, null)
-        showVariantPreviews(view.findViewById(R.id.dashboard_widget_previews), widget, selectedVariantId) { variant ->
-            onSelect(variant)
-            sheet.dismiss()
-        }
+        showVariantPreviews(
+            view.findViewById(R.id.dashboard_widget_previews),
+            widget,
+            selectedVariantId,
+            onClick = { variant ->
+                onSelect(variant)
+                sheet.dismiss()
+            },
+            onAutomatic = if (showAutomatic) {
+                {
+                    onSelect(null)
+                    sheet.dismiss()
+                }
+            } else {
+                null
+            },
+            automaticSelected = selectedVariantId == null,
+        )
         sheet.setContentView(view)
         sheet.behavior.maxWidth = resources.displayMetrics.widthPixels
         sheet.behavior.skipCollapsed = true
@@ -101,7 +144,7 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
         super.onDestroyView()
     }
 
-    private fun commonSettings(widget: GBWidget<*>): List<DeviceSetting> = deviceSettings {
+    private fun commonSettings(widget: GBWidget<*>, launcher: Boolean): List<DeviceSetting> = deviceSettings {
         list(
             key = WidgetConfig.KEY_DEVICES_MODE,
             title = R.string.bottom_nav_devices,
@@ -151,6 +194,28 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
             inputType = InputType.TYPE_CLASS_TEXT,
             connectedOnly = false,
         )
+        if (launcher) {
+            switchSetting(
+                key = LauncherWidgetRenderer.KEY_CARD,
+                title = R.string.pref_launcher_widget_card_title,
+                icon = R.drawable.ic_widgets,
+                defaultValue = true,
+                connectedOnly = false,
+            )
+            list(
+                key = LauncherWidgetRenderer.KEY_THEME,
+                title = R.string.pref_title_theme,
+                icon = R.drawable.ic_paint,
+                entries = listOf(
+                    ListEntry.Res(LauncherWidgetRenderer.THEME_APP, R.string.pref_default),
+                    ListEntry.Res(LauncherWidgetRenderer.THEME_SYSTEM, R.string.pref_theme_system),
+                    ListEntry.Res(LauncherWidgetRenderer.THEME_LIGHT, R.string.pref_theme_light),
+                    ListEntry.Res(LauncherWidgetRenderer.THEME_DARK, R.string.pref_theme_dark),
+                ),
+                defaultValue = LauncherWidgetRenderer.THEME_APP,
+                connectedOnly = false,
+            )
+        }
     }.items
 
     //
@@ -191,14 +256,21 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
         const val ARG_INSTANCE_ID = "widget_instance_id"
         const val ARG_TYPE_ID = "widget_type_id"
         const val ARG_COLUMNS = "widget_columns"
+        const val ARG_APP_WIDGET_ID = "widget_app_widget_id"
         private const val KEY_VARIANT = "widget_variant"
 
-        fun newInstance(instanceId: String, typeId: String, columns: Int): WidgetInstanceSettingsFragment {
+        fun newInstance(
+            instanceId: String,
+            typeId: String,
+            columns: Int,
+            appWidgetId: Int
+        ): WidgetInstanceSettingsFragment {
             val fragment = WidgetInstanceSettingsFragment()
             val args = Bundle()
             args.putString(ARG_INSTANCE_ID, instanceId)
             args.putString(ARG_TYPE_ID, typeId)
             args.putInt(ARG_COLUMNS, columns)
+            args.putInt(ARG_APP_WIDGET_ID, appWidgetId)
             fragment.arguments = args
             return fragment
         }

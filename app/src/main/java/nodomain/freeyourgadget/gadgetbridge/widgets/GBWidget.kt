@@ -51,6 +51,11 @@ interface GBWidget<D> {
     val variants: List<WidgetVariant>
 
     /**
+     * Whether this widget can be added to the launcher.
+     */
+    val supportsLauncher: Boolean get() = true
+
+    /**
      * Whether this widget is supported by the [device].
      */
     fun isSupportedBy(device: GBDevice): Boolean

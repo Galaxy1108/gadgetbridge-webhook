@@ -4932,6 +4932,9 @@
     <string name="widgets_picker_unsupported">No supported devices</string>
     <string name="pref_widget_devices_mode_inherit">Inherit from dashboard</string>
     <string name="pref_widget_variant_title">Variant</string>
+    <string name="launcher_widget_description">A widget from the dashboard</string>
+    <string name="pref_launcher_widget_card_title">Show on a card</string>
+    <string name="launcher_widget_automatic_summary">Automatically choose a layout that fits the widget size</string>
     <string name="widget_variant_gauge">Gauge</string>
     <string name="widget_variant_small">Small</string>
     <string name="widget_variant_large">Large</string>

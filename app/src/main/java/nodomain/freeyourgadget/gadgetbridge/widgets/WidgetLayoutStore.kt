@@ -366,7 +366,7 @@ object WidgetLayoutStore {
         return copy
     }
 
-    private fun newInstanceId(): String = UUID.randomUUID().toString().replace("-", "").take(12)
+    internal fun newInstanceId(): String = UUID.randomUUID().toString().replace("-", "").take(12)
 
     private fun sharedPreferences(): SharedPreferences = GBApplication.getPrefs().preferences
 
