@@ -58,6 +58,8 @@ message LocationData {
     optional GDI.Proto.DataTypes.GPSFixType gps_fix = 8;
     optional float course = 9;
     optional float speed = 10;
+
+    extensions 1000;
 }
 
 message GetLocationRequest {

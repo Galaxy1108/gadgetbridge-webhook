@@ -5,6 +5,7 @@ option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiGenericItemTransfer";
 
 import "garmin/gdi_data_types.proto";
+import "garmin/gdi_inreach_tracking.proto";
 
 message GenericItemTransferService {
     optional ArbitraryItemRequest arbitrary_item_request = 1;
@@ -30,6 +31,7 @@ enum SessionEndReason {
 }
 
 message DataTypeConfig {
+    optional GDI.Proto.InReachTracking.DataTypeConfigExt config_ext = 101;
 }
 
 message DataTypeStatus {
@@ -42,6 +44,7 @@ message GenericItem {
 
 message GenericItemReference {
     optional GDI.Proto.DataTypes.UUID uuid = 1;
+    optional GDI.Proto.InReachTracking.GenericItemReferenceExt reference_ext = 101;
 }
 
 message ArbitraryItemRequest {

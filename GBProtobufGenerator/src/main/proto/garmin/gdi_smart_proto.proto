@@ -25,6 +25,7 @@ import "garmin/gdi_gncs.proto";
 import "garmin/gdi_group_live_track.proto";
 import "garmin/gdi_http_service.proto";
 import "garmin/gdi_incident_detection.proto";
+import "garmin/gdi_inreach_tracking.proto";
 import "garmin/gdi_installed_apps.proto";
 import "garmin/gdi_instant_input.proto";
 import "garmin/gdi_launch_monitor.proto";
@@ -55,7 +56,7 @@ message Smart {
     optional GDI.Proto.DeviceMessages.DeviceMessageService device_message_service = 24;
     optional GDI.Proto.Credentials.CredentialsService credentials_service = 27;
     optional ExploreSyncService explore_sync_service = 22;
-    optional Service28 inreach_tracking_service = 28;
+    optional GDI.Proto.InReachTracking.InReachTrackingService inreach_tracking_service = 28;
     optional Service29 inreach_messaging_service = 29;
     optional GDI.Proto.EventSharing.EventSharing event_sharing = 30;
     optional GDI.Proto.GenericItemTransfer.GenericItemTransferService generic_item_transfer_service = 31;
@@ -74,36 +75,6 @@ message Smart {
 message UUID {
     required fixed64 upper = 1;
     required fixed64 lower = 2;
-}
-
-message Service28 {
-    message Message2 {
-        message Message3 {
-            message Message2x {
-                optional uint32 unk1 = 1;
-                optional uint32 unk2 = 2;
-                optional uint32 unk3 = 3;
-            }
-            optional uint32 unk1 = 1;
-            repeated Message2x unk2 = 2;
-        }
-        optional uint32 unk1 = 1;
-        optional uint32 unk2 = 2;
-        optional Message3 unk3 = 3;
-    }
-    message Message4 {
-        optional uint32 unk1 = 1;
-    }
-    message Message6 {
-        optional uint32 unk1 = 1;
-    }
-    message Message14 {
-        optional uint32 unk1 = 1;
-    }
-    optional Message2 unk2 = 2;
-    optional Message4 unk4 = 4;
-    optional Message6 unk6 = 6;
-    optional Message14 unk14 = 14;
 }
 
 message Service29 {
