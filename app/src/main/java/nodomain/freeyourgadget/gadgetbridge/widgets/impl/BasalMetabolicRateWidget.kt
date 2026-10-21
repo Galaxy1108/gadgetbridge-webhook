@@ -38,5 +38,5 @@ object BasalMetabolicRateWidget : BodyCompositionWidget() {
 
     override val showsScale = false
 
-    override val showsHistory = false
+    override val historyPadding = 10f
 }

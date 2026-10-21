@@ -46,7 +46,7 @@ abstract class BodyCompositionWidget : MetricWidget<BodyCompositionWidget.Data>(
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         val sample = WeightWidget.latestWeightSample(scope)
         val composition = sample?.let { s -> scope.db { db -> BodyCompositionEstimates.composition(db.daoSession, s) } }
-        val history = if (config.isLarge && showsHistory) {
+        val history = if (config.isLarge) {
             WeightWidget.history(scope) { session, s -> BodyCompositionEstimates.composition(session, s)?.let { valueOf(it) } }
         } else {
             null
@@ -72,13 +72,13 @@ abstract class BodyCompositionWidget : MetricWidget<BodyCompositionWidget.Data>(
             showsScale -> MiniChart.Progress(colorFor(value, data), scale(value))
             else -> null
         }
-        val line = data.history?.takeIf { showsHistory && config.isLarge && it.isNotEmpty() }
+        val line = data.history?.takeIf { config.isLarge && it.isNotEmpty() }
             ?.let { WeightWidget.historyLine(it, data.dayStart, colorFor(value, data), historyPadding) }
         return TileModel(
             value = format(context, value),
             gauge = GaugeSpec.Progress(colorFor(value, data), scale(value)),
             status = zones?.let { StatusLine.Chip(colorFor(value, data), context.getString(zones.labelFor(value))) },
-            chart = chart,
+            chart = if (config.isTall && line != null) null else chart,
             largeChart = line,
             axis = if (line != null) WeightWidget.historyAxis(data.dayStart) else emptyList(),
         )
@@ -88,8 +88,6 @@ abstract class BodyCompositionWidget : MetricWidget<BodyCompositionWidget.Data>(
      * Whether the number style shows where the value sits on the gauge's scale.
      */
     protected open val showsScale: Boolean = true
-
-    protected open val showsHistory: Boolean = true
 
     protected open val historyPadding: Float = 0.5f
 

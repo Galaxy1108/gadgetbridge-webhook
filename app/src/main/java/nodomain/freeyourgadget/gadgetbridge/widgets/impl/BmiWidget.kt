@@ -67,7 +67,7 @@ object BmiWidget : MetricWidget<WeightWidget.Data>() {
             value = String.format(Locale.getDefault(), "%.1f", bmi),
             gauge = GaugeSpec.Progress(Bmi.colorFor(bmi), Bmi.gaugeFraction(bmi)),
             status = StatusLine.Chip(Bmi.colorFor(bmi), context.getString(LABELS[Bmi.categoryOf(bmi)])),
-            chart = MiniChart.ZoneBar(Bmi.COLORS, Bmi.SEGMENTS, Bmi.scaleFraction(bmi)),
+            chart = if (config.isTall && line != null) null else MiniChart.ZoneBar(Bmi.COLORS, Bmi.SEGMENTS, Bmi.scaleFraction(bmi)),
             largeChart = line,
             axis = if (line != null) WeightWidget.historyAxis(data.dayStart) else emptyList(),
         )
