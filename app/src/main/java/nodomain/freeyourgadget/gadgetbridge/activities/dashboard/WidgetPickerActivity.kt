@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
@@ -21,7 +22,8 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import java.text.Collator
 
 /**
- * Lists all widgets. The widgets that no dashboard device supports are still included at the end.
+ * Lists all widgets in three groups: supported by a dashboard device, supported only by a device that is not
+ * enabled for the dashboard, and supported by no device.
  * - A tap on a widget expands section with previews for all its variants.
  * - A tap on a preview returns the widget and the variant.
  *
@@ -31,7 +33,7 @@ import java.text.Collator
 class WidgetPickerActivity : AbstractGBActivity() {
     private lateinit var widgets: List<GBWidget<*>>
     private lateinit var deviceCounts: List<Int>
-    private var firstUnsupported = 0
+    private lateinit var groups: List<SupportGroup>
     private lateinit var layoutManager: LinearLayoutManager
     private var expanded = RecyclerView.NO_POSITION
     private var forLauncher = false
@@ -42,15 +44,26 @@ class WidgetPickerActivity : AbstractGBActivity() {
 
         forLauncher = intent.getBooleanExtra(EXTRA_LAUNCHER, false)
         val collator = Collator.getInstance()
-        val devices = WidgetRegistry.dashboardDevices()
-        val (supported, unsupported) = WidgetRegistry.all()
+        val dashboardDevices = WidgetRegistry.dashboardDevices()
+        val allDevices = GBApplication.app().deviceManager.devices
+        val entries = WidgetRegistry.all()
             .filter { !forLauncher || it.supportsLauncher }
-            .map { widget -> widget to devices.count { widget.isSupportedBy(it) } }
-            .sortedWith { a, b -> collator.compare(a.first.displayName(this), b.first.displayName(this)) }
-            .partition { it.second > 0 }
-        widgets = (supported + unsupported).map { it.first }
-        deviceCounts = (supported + unsupported).map { it.second }
-        firstUnsupported = supported.size
+            .map { widget ->
+                val dashboardCount = dashboardDevices.count { widget.isSupportedBy(it) }
+                val allCount = allDevices.count { widget.isSupportedBy(it) }
+                when {
+                    dashboardCount > 0 -> Triple(widget, dashboardCount, SupportGroup.DASHBOARD)
+                    allCount > 0 -> Triple(widget, allCount, SupportGroup.OTHER_DEVICES)
+                    else -> Triple(widget, 0, SupportGroup.NONE)
+                }
+            }
+            .sortedWith(
+                compareBy<Triple<GBWidget<*>, Int, SupportGroup>> { it.third }
+                    .thenComparator { a, b -> collator.compare(a.first.displayName(this), b.first.displayName(this)) }
+            )
+        widgets = entries.map { it.first }
+        deviceCounts = entries.map { it.second }
+        groups = entries.map { it.third }
 
         val recyclerView = findViewById<RecyclerView>(R.id.widget_picker_list)
         layoutManager = LinearLayoutManager(this)
@@ -78,7 +91,7 @@ class WidgetPickerActivity : AbstractGBActivity() {
 
     private inner class WidgetAdapter : RecyclerView.Adapter<WidgetAdapter.ViewHolder>() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val section: View = view.findViewById(R.id.widget_picker_section)
+            val section: TextView = view.findViewById(R.id.widget_picker_section)
             val header: View = view.findViewById(R.id.widget_picker_header)
             val icon: ImageView = view.findViewById(R.id.widget_picker_icon)
             val name: TextView = view.findViewById(R.id.widget_picker_name)
@@ -97,7 +110,14 @@ class WidgetPickerActivity : AbstractGBActivity() {
             val widget = widgets[position]
             val context = holder.itemView.context
             val deviceCount = deviceCounts[position]
-            holder.section.isVisible = position == firstUnsupported
+            val group = groups[position]
+            val firstInGroup = position == 0 || groups[position - 1] != group
+            holder.section.isVisible = firstInGroup && group != SupportGroup.DASHBOARD
+            when (group) {
+                SupportGroup.OTHER_DEVICES -> holder.section.setText(R.string.widgets_picker_other_devices)
+                SupportGroup.NONE -> holder.section.setText(R.string.widgets_picker_unsupported)
+                SupportGroup.DASHBOARD -> {}
+            }
             holder.icon.setImageResource(widget.icon)
             holder.name.text = widget.displayName(context)
             holder.variants.text = context.getString(
@@ -139,6 +159,12 @@ class WidgetPickerActivity : AbstractGBActivity() {
                 layoutManager.scrollToPositionWithOffset(clicked, top)
             }
         }
+    }
+
+    private enum class SupportGroup {
+        DASHBOARD,
+        OTHER_DEVICES,
+        NONE,
     }
 
     companion object {

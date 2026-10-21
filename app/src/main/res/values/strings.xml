@@ -4929,6 +4929,7 @@
         <item quantity="other">%d devices</item>
     </plurals>
     <string name="widgets_picker_summary">%1$s • %2$s</string>
+    <string name="widgets_picker_other_devices">Devices not included in the dashboard</string>
     <string name="widgets_picker_unsupported">No supported devices</string>
     <string name="pref_widget_devices_mode_inherit">Inherit from dashboard</string>
     <string name="pref_widget_variant_title">Variant</string>
