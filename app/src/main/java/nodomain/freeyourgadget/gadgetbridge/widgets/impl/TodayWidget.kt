@@ -21,6 +21,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySession
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetActions
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
@@ -49,6 +50,56 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         device.deviceCoordinator.supportsActivityTracking(device)
 
     override fun settings(context: Context): DeviceSettingsSpec = deviceSettings {
+        switchSetting(
+            key = "24h",
+            title = R.string.pref_dashboard_widget_today_24h_title,
+            summary = R.string.pref_dashboard_widget_today_24h_summary,
+            icon = R.drawable.ic_access_time,
+            defaultValue = false,
+            connectedOnly = false,
+        )
+        switchSetting(
+            key = "24h_upside_down",
+            title = R.string.pref_dashboard_widget_today_upside_down_title,
+            summary = R.string.pref_dashboard_widget_today_upside_down_summary,
+            icon = R.drawable.ic_caret_down_solid,
+            defaultValue = false,
+            dependency = "24h",
+            connectedOnly = false,
+        )
+        switchSetting(
+            key = "show_yesterday",
+            title = R.string.pref_dashboard_widget_today_yesterday_data_title,
+            summary = R.string.pref_dashboard_widget_today_yesterday_data_summary,
+            icon = R.drawable.ic_calendar_from,
+            defaultValue = false,
+            connectedOnly = false,
+        )
+        switchSetting(
+            key = "dim_yesterday",
+            title = R.string.pref_dashboard_widget_today_dim_yesterday_data_title,
+            summary = R.string.pref_dashboard_widget_today_dim_yesterday_data_summary,
+            icon = R.drawable.ic_brightness_2,
+            defaultValue = true,
+            dependency = "show_yesterday",
+            connectedOnly = false,
+        )
+        switchSetting(
+            key = "time_indicator",
+            title = R.string.pref_dashboard_widget_today_time_indicator_title,
+            summary = R.string.pref_dashboard_widget_today_time_indicator_summary,
+            icon = R.drawable.ic_info,
+            defaultValue = true,
+            connectedOnly = false,
+        )
+        switchSetting(
+            key = "legend",
+            title = R.string.pref_dashboard_widget_show_legend_title,
+            summary = R.string.pref_dashboard_widget_show_legend_summary,
+            icon = R.drawable.ic_legend_toggle,
+            defaultValue = true,
+            connectedOnly = false,
+        )
         text(
             key = "hr_interval",
             title = R.string.pref_dashboard_widget_today_hr_interval_title,
@@ -67,6 +118,39 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
 
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         val hrIntervalSecs = (config.prefs.getString("hr_interval", "1").toIntOrNull() ?: 1) * 60
+        val (segments, kinds) = loadDay(scope, hrIntervalSecs)
+        val now = if (scope.isToday) ((System.currentTimeMillis() / 1000L) - scope.dayStart).toInt() else null
+
+        var yesterday = emptyList<DayClockView.Segment>()
+        var yesterdayKinds = emptySet<ActivityKind>()
+        if (now != null && config.prefs.getBoolean("show_yesterday", false)) {
+            val yesterdayScope = WidgetDataScope(
+                DashboardQuery(timeFrom = scope.query.timeFrom - 86400, timeTo = scope.query.timeTo - 86400),
+                scope.devices,
+            )
+            val (yesterdaySegments, loadedKinds) = loadDay(yesterdayScope, hrIntervalSecs)
+            yesterday = yesterdaySegments.filter { it.end > now }.map { it.copy(start = maxOf(it.start, now)) }
+            yesterdayKinds = loadedKinds
+        }
+
+        val allKinds = kinds + yesterdayKinds
+        return Data(
+            segments = segments,
+            yesterday = yesterday,
+            now = now,
+            remSupported = scope.devices.any { it.deviceCoordinator.supportsRemSleep(it) },
+            singleStage = ActivityKind.SLEEP_ANY in allKinds &&
+                allKinds.none { it == ActivityKind.LIGHT_SLEEP || it == ActivityKind.DEEP_SLEEP || it == ActivityKind.REM_SLEEP },
+        )
+    }
+
+    /**
+     * The stretches of the day of [scope], in seconds after its midnight, and the activity kinds in them.
+     */
+    private suspend fun loadDay(
+        scope: WidgetDataScope,
+        hrIntervalSecs: Int
+    ): Pair<List<DayClockView.Segment>, Set<ActivityKind>> {
         val activityTimestamps = HashMap<Long, ActivityKind>()
 
         fun addActivity(timeFrom: Long, timeTo: Long, kind: ActivityKind) {
@@ -80,14 +164,14 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
                     ActivityKind.DEEP_SLEEP -> kind == ActivityKind.EXERCISE || kind == ActivityKind.ACTIVITY
                     ActivityKind.LIGHT_SLEEP -> kind == ActivityKind.EXERCISE || kind == ActivityKind.ACTIVITY || kind == ActivityKind.DEEP_SLEEP
                     ActivityKind.REM_SLEEP -> kind == ActivityKind.EXERCISE || kind == ActivityKind.ACTIVITY ||
-                            kind == ActivityKind.DEEP_SLEEP || kind == ActivityKind.LIGHT_SLEEP
+                        kind == ActivityKind.DEEP_SLEEP || kind == ActivityKind.LIGHT_SLEEP
 
                     ActivityKind.AWAKE_SLEEP -> kind == ActivityKind.EXERCISE || kind == ActivityKind.ACTIVITY ||
-                            kind == ActivityKind.DEEP_SLEEP || kind == ActivityKind.LIGHT_SLEEP || kind == ActivityKind.REM_SLEEP
+                        kind == ActivityKind.DEEP_SLEEP || kind == ActivityKind.LIGHT_SLEEP || kind == ActivityKind.REM_SLEEP
 
                     ActivityKind.SLEEP_ANY, ActivityKind.NOT_MEASURED -> kind == ActivityKind.EXERCISE || kind == ActivityKind.ACTIVITY ||
-                            kind == ActivityKind.DEEP_SLEEP || kind == ActivityKind.LIGHT_SLEEP ||
-                            kind == ActivityKind.REM_SLEEP || kind == ActivityKind.AWAKE_SLEEP
+                        kind == ActivityKind.DEEP_SLEEP || kind == ActivityKind.LIGHT_SLEEP ||
+                        kind == ActivityKind.REM_SLEEP || kind == ActivityKind.AWAKE_SLEEP
 
                     else -> true
                 }
@@ -188,14 +272,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         }
         current?.let { segments += it }
 
-        val kinds = activityTimestamps.values.toSet()
-        return Data(
-            segments = segments.filter { it.end > it.start },
-            now = if (scope.isToday) ((System.currentTimeMillis() / 1000L) - dayStart).toInt() else null,
-            remSupported = scope.devices.any { it.deviceCoordinator.supportsRemSleep(it) },
-            singleStage = ActivityKind.SLEEP_ANY in kinds &&
-                kinds.none { it == ActivityKind.LIGHT_SLEEP || it == ActivityKind.DEEP_SLEEP || it == ActivityKind.REM_SLEEP },
-        )
+        return segments.filter { it.end > it.start } to activityTimestamps.values.toSet()
     }
 
     override fun previewData(): Data {
@@ -221,6 +298,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
                 DayClockView.Segment(at(14, 10), at(14, 25), Kind.ACTIVITY),
                 DayClockView.Segment(at(14, 25), at(15, 30), Kind.WORN),
             ),
+            yesterday = emptyList(),
             now = at(15, 30),
             remSupported = true,
             singleStage = false,
@@ -241,26 +319,38 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     // View (UI thread)
     //
 
-    override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View = when (variant) {
-        WidgetVariant.SMALL -> inflater.inflate(R.layout.dashboard_widget_day_timeline, parent, false)
-        WidgetVariant.OVERVIEW_TALL -> inflater.inflate(R.layout.dashboard_widget_day_clock_tall, parent, false).also {
-            val clock = it.findViewById<DayClockView>(R.id.tile_day_clock)
-            clock.maxSizeDp = TALL_CLOCK_DP
-            clock.labelSp = TALL_LABEL_SP
+    override fun createView(inflater: LayoutInflater, parent: ViewGroup, variant: WidgetVariant): View =
+        when (variant) {
+            WidgetVariant.SMALL -> inflater.inflate(R.layout.dashboard_widget_day_timeline, parent, false)
+            WidgetVariant.OVERVIEW_TALL -> inflater.inflate(R.layout.dashboard_widget_day_clock_tall, parent, false)
+                .also {
+                    val clock = it.findViewById<DayClockView>(R.id.tile_day_clock)
+                    clock.maxSizeDp = TALL_CLOCK_DP
+                    clock.labelSp = TALL_LABEL_SP
+                }
+
+            else -> inflater.inflate(R.layout.dashboard_widget_day_clock, parent, false)
         }
-        else -> inflater.inflate(R.layout.dashboard_widget_day_clock, parent, false)
-    }
 
     override fun bind(view: View, variant: WidgetVariant, config: WidgetConfig, data: Data) {
         val context = view.context
         renderHeader(view, config.title(context, label), icon)
+        val dimYesterday = config.prefs.getBoolean("dim_yesterday", true)
+        val timeIndicator = config.prefs.getBoolean("time_indicator", true)
         if (isSmall(config)) {
-            view.findViewById<DayTimelineView>(R.id.tile_day_timeline).setDay(data.segments, data.now)
+            view.findViewById<DayTimelineView>(R.id.tile_day_timeline)
+                .setDay(data.segments, data.now, data.yesterday, dimYesterday, timeIndicator)
             renderAxis(view.findViewById(R.id.tile_axis), AXIS, true)
         } else {
-            view.findViewById<DayClockView>(R.id.tile_day_clock).setDay(data.segments, data.now)
+            val clock = view.findViewById<DayClockView>(R.id.tile_day_clock)
+            applyClockMode(clock, config)
+            clock.setDay(data.segments, data.now, data.yesterday, dimYesterday, timeIndicator)
         }
-        renderFlowLegend(view.findViewById(R.id.tile_flow_legend), legend(context, data), legendGap(config))
+        renderFlowLegend(
+            view.findViewById(R.id.tile_flow_legend),
+            if (showLegend(config)) legend(context, data) else emptyList(),
+            legendGap(config),
+        )
         view.contentDescription = describe(context, config, data)
     }
 
@@ -270,12 +360,21 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
             view.findViewById<DayTimelineView>(R.id.tile_day_timeline).setLoading()
             renderAxis(view.findViewById(R.id.tile_axis), AXIS, true)
         } else {
-            view.findViewById<DayClockView>(R.id.tile_day_clock).setLoading()
+            val clock = view.findViewById<DayClockView>(R.id.tile_day_clock)
+            applyClockMode(clock, config)
+            clock.setLoading()
         }
         renderFlowLegend(view.findViewById(R.id.tile_flow_legend), emptyList(), legendGap(config))
     }
 
     private fun isSmall(config: WidgetConfig) = config.variant == WidgetVariant.SMALL
+
+    private fun applyClockMode(clock: DayClockView, config: WidgetConfig) {
+        clock.mode24h = config.prefs.getBoolean("24h", false)
+        clock.upsideDown = config.prefs.getBoolean("24h_upside_down", false)
+    }
+
+    private fun showLegend(config: WidgetConfig) = config.prefs.getBoolean("legend", true)
 
     private fun legendGap(config: WidgetConfig) =
         if (config.variant == WidgetVariant.LARGE) LEGEND_ROW_GAP_DP else COMPACT_LEGEND_ROW_GAP_DP
@@ -288,9 +387,17 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         legendItem(context, Kind.ACTIVITY, R.string.activity_type_activity),
         legendItem(context, Kind.EXERCISE, R.string.activity_type_exercise),
         legendItem(context, Kind.WORN, R.string.activity_type_worn),
-        legendItem(context, Kind.LIGHT_SLEEP, if (data.singleStage) R.string.menuitem_sleep else R.string.activity_type_light_sleep),
+        legendItem(
+            context,
+            Kind.LIGHT_SLEEP,
+            if (data.singleStage) R.string.menuitem_sleep else R.string.activity_type_light_sleep
+        ),
         if (data.singleStage) null else legendItem(context, Kind.DEEP_SLEEP, R.string.activity_type_deep_sleep),
-        if (data.remSupported && !data.singleStage) legendItem(context, Kind.REM_SLEEP, R.string.activity_type_rem_sleep) else null,
+        if (data.remSupported && !data.singleStage) legendItem(
+            context,
+            Kind.REM_SLEEP,
+            R.string.activity_type_rem_sleep
+        ) else null,
         legendItem(context, Kind.NOT_WORN, R.string.abstract_chart_fragment_kind_not_worn),
     )
 
@@ -322,11 +429,12 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     }
 
     /**
-     * The day's stretches, [now] in seconds after midnight (null for a past day), whether a device reports REM
-     * sleep, and whether the sleep has only one stage.
+     * The day's stretches, the stretches of yesterday after [now], [now] in seconds after midnight (null for a
+     * past day), whether a device reports REM sleep, and whether the sleep has only one stage.
      */
     class Data(
         val segments: List<DayClockView.Segment>,
+        val yesterday: List<DayClockView.Segment>,
         val now: Int?,
         val remSupported: Boolean,
         val singleStage: Boolean,

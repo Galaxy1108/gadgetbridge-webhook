@@ -19,7 +19,10 @@ class DayTimelineView @JvmOverloads constructor(
 ) : View(context, attrs) {
 
     private var segments: List<DayClockView.Segment> = emptyList()
+    private var yesterday: List<DayClockView.Segment> = emptyList()
     private var now: Int? = null
+    private var dimYesterday = true
+    private var showMarker = true
 
     private val density = resources.displayMetrics.density
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
@@ -33,15 +36,26 @@ class DayTimelineView @JvmOverloads constructor(
 
     /**
      * Shows [segments], with the time after [now] (seconds after midnight) as future; null for a past day.
+     * The [yesterday] stretches are drawn in the future, dimmed when [dimYesterday] is set.
      */
-    fun setDay(segments: List<DayClockView.Segment>, now: Int?) {
+    fun setDay(
+        segments: List<DayClockView.Segment>,
+        now: Int?,
+        yesterday: List<DayClockView.Segment>,
+        dimYesterday: Boolean,
+        showMarker: Boolean,
+    ) {
         this.segments = segments
         this.now = now
+        this.yesterday = yesterday
+        this.dimYesterday = dimYesterday
+        this.showMarker = showMarker
         invalidate()
     }
 
     fun setLoading() {
         segments = emptyList()
+        yesterday = emptyList()
         now = 0
         invalidate()
     }
@@ -63,15 +77,19 @@ class DayTimelineView @JvmOverloads constructor(
 
         band(0, end, DayClockView.colorOf(context, Kind.NOT_WORN), baseTop, baseBottom)
         band(end, DayClockView.DAY, futureColor, baseTop, baseBottom)
-        for (segment in segments.filter { !it.kind.thick }) {
-            band(segment.start, segment.end, DayClockView.colorOf(context, segment.kind), baseTop, baseBottom)
-        }
-        // Higher priority kinds draw last
-        for (kinds in THICK_ORDER) {
-            for (segment in segments.filter { it.kind in kinds }) {
-                band(segment.start, segment.end, DayClockView.colorOf(context, segment.kind), top, top + rowHeight, MIN_SEGMENT_DP * density)
+        fun bands(segments: List<DayClockView.Segment>, alpha: Int) {
+            for (segment in segments.filter { !it.kind.thick }) {
+                band(segment.start, segment.end, DayClockView.colorOf(context, segment.kind, alpha), baseTop, baseBottom)
+            }
+            // Higher priority kinds draw last
+            for (kinds in THICK_ORDER) {
+                for (segment in segments.filter { it.kind in kinds }) {
+                    band(segment.start, segment.end, DayClockView.colorOf(context, segment.kind, alpha), top, top + rowHeight, MIN_SEGMENT_DP * density)
+                }
             }
         }
+        bands(yesterday, if (dimYesterday) DayClockView.YESTERDAY_ALPHA else DayClockView.OPAQUE)
+        bands(segments, DayClockView.OPAQUE)
 
         linePaint.color = tickColor
         linePaint.strokeWidth = TICK_DP * density
@@ -81,7 +99,7 @@ class DayTimelineView @JvmOverloads constructor(
         }
 
         val current = now
-        if (current != null && current < DayClockView.DAY) {
+        if (showMarker && current != null && current < DayClockView.DAY) {
             linePaint.color = markerColor
             linePaint.strokeWidth = MARKER_DP * density
             val markerX = x(current)

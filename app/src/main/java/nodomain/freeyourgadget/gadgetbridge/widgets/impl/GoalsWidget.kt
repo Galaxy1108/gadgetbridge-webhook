@@ -18,6 +18,8 @@ import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.GoalRingsView
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderFlowLegend
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.renderHeader
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.DistanceUnit
@@ -64,6 +66,17 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsActivityTracking(device)
 
+    override fun settings(context: Context): DeviceSettingsSpec = deviceSettings {
+        switchSetting(
+            key = "legend",
+            title = R.string.pref_dashboard_widget_show_legend_title,
+            summary = R.string.pref_dashboard_widget_show_legend_summary,
+            icon = R.drawable.ic_legend_toggle,
+            defaultValue = true,
+            connectedOnly = false,
+        )
+    }
+
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         val user = ActivityUser()
         val steps = scope.devices.any { it.deviceCoordinator.supportsStepCounter(it) }
@@ -108,7 +121,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
             view.findViewById<View>(R.id.tile_empty).visibility = if (data.goals.isEmpty()) View.VISIBLE else View.GONE
             renderFlowLegend(
                 view.findViewById(R.id.tile_flow_legend),
-                data.goals.map { it.goal.color to context.getString(it.goal.label) },
+                if (showLegend(config)) data.goals.map { it.goal.color to context.getString(it.goal.label) } else emptyList(),
                 legendGap(config),
             )
         }
@@ -124,7 +137,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
         } else {
             renderFlowLegend(
                 view.findViewById(R.id.tile_flow_legend),
-                Goal.entries.map { it.color to context.getString(it.label) },
+                if (showLegend(config)) Goal.entries.map { it.color to context.getString(it.label) } else emptyList(),
                 legendGap(config),
             )
         }
@@ -135,6 +148,8 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     }
 
     private fun isSmall(config: WidgetConfig) = config.variant == WidgetVariant.SMALL
+
+    private fun showLegend(config: WidgetConfig) = config.prefs.getBoolean("legend", true)
 
     private fun legendGap(config: WidgetConfig) =
         if (config.variant == WidgetVariant.OVERVIEW_TALL) TALL_LEGEND_ROW_GAP_DP else LEGEND_ROW_GAP_DP
