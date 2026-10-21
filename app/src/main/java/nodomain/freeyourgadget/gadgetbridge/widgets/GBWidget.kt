@@ -56,13 +56,13 @@ interface GBWidget<D> {
     fun isSupportedBy(device: GBDevice): Boolean
 
     /**
-     * Per-instance settings, rendered with the same DSL used for device settings (see
+     * Per-instance settings that apply to [variant], rendered with the same DSL used for device settings (see
      * [nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings]).
      * Common settings (device selection, variant, title) are prepended by the settings
      * screen; this only needs to declare widget-specific options.
      * Returns null if the widget has none.
      */
-    fun settings(context: Context): DeviceSettingsSpec? = null
+    fun settings(context: Context, variant: WidgetVariant): DeviceSettingsSpec? = null
 
     /**
      * Loads the data this widget needs to render. Runs on a background dispatcher via

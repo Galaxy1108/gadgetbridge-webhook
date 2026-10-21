@@ -37,41 +37,40 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val instanceId = requireArguments().getString(ARG_INSTANCE_ID) ?: return
-        val typeId = requireArguments().getString(ARG_TYPE_ID) ?: return
-        val widget = WidgetRegistry.byId(typeId)!!
-
         preferenceManager.sharedPreferencesName = "widgetsettings_$instanceId"
+        preferenceScreen = preferenceManager.createPreferenceScreen(requireContext())
+        renderSettings()
+    }
 
-        val screen = preferenceManager.createPreferenceScreen(requireContext())
-        preferenceScreen = screen
+    private fun renderSettings() {
+        val instanceId = requireArguments().getString(ARG_INSTANCE_ID) ?: return
+        val typeId = requireArguments().getString(ARG_TYPE_ID) ?: return
+        val columns = requireArguments().getInt(ARG_COLUMNS, WidgetGrid.BASE_COLUMNS)
+        val widget = WidgetRegistry.byId(typeId)!!
+        val placement = WidgetLayoutStore.layout(columns).find { it.instance.instanceId == instanceId }
+
+        refreshHandle?.cleanup()
+        preferenceScreen.removeAll()
 
         val prefs = Prefs(GBApplication.getWidgetSharedPrefs(instanceId))
         val items = mutableListOf<DeviceSetting>()
         items += commonSettings(widget)
-        widget.settings(requireContext())?.let {
+        widget.settings(requireContext(), widget.variant(placement?.variantId))?.let {
             items += it.items
         }
 
-        refreshHandle = DeviceSettingRenderer.render(items, screen, prefs, this)
+        refreshHandle = DeviceSettingRenderer.render(items, preferenceScreen, prefs, this)
 
-        setupVariantPreference(widget, instanceId, requireArguments().getInt(ARG_COLUMNS, WidgetGrid.BASE_COLUMNS))
-    }
-
-    private fun setupVariantPreference(widget: GBWidget<*>, instanceId: String, columns: Int) {
         val variantPref = findPreference<Preference>(KEY_VARIANT) ?: return
-
-        val placement = WidgetLayoutStore.layout(columns).find { it.instance.instanceId == instanceId }
         if (placement == null) {
             variantPref.isVisible = false
             return
         }
-        var variantId = placement.variantId
-        variantPref.summary = getString(widget.variant(variantId).name)
+        variantPref.summary = getString(widget.variant(placement.variantId).name)
         variantPref.setOnPreferenceClickListener {
-            showVariantSheet(widget, variantId) { variant ->
-                variantId = variant.id
+            showVariantSheet(widget, placement.variantId) { variant ->
                 WidgetLayoutStore.setVariant(columns, instanceId, variant.id)
-                variantPref.summary = getString(variant.name)
+                renderSettings()
             }
             true
         }

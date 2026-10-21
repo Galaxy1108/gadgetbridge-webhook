@@ -66,7 +66,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsActivityTracking(device)
 
-    override fun settings(context: Context): DeviceSettingsSpec = deviceSettings {
+    override fun settings(context: Context, variant: WidgetVariant): DeviceSettingsSpec = deviceSettings {
         switchSetting(
             key = "legend",
             title = R.string.pref_dashboard_widget_show_legend_title,

@@ -66,7 +66,7 @@ object Vo2MaxWidget : MetricWidget<Vo2MaxWidget.Data>() {
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsVO2Max(device) || device.deviceCoordinator.supportsVO2MultiSport(device)
 
-    override fun settings(context: Context): DeviceSettingsSpec = deviceSettings {
+    override fun settings(context: Context, variant: WidgetVariant): DeviceSettingsSpec = deviceSettings {
         list(
             key = KEY_SPORT,
             title = R.string.xiaomi_scooter_ride_mode_sport,

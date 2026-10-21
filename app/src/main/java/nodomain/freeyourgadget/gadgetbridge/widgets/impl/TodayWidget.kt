@@ -49,24 +49,26 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     override fun isSupportedBy(device: GBDevice): Boolean =
         device.deviceCoordinator.supportsActivityTracking(device)
 
-    override fun settings(context: Context): DeviceSettingsSpec = deviceSettings {
-        switchSetting(
-            key = "24h",
-            title = R.string.pref_dashboard_widget_today_24h_title,
-            summary = R.string.pref_dashboard_widget_today_24h_summary,
-            icon = R.drawable.ic_access_time,
-            defaultValue = false,
-            connectedOnly = false,
-        )
-        switchSetting(
-            key = "24h_upside_down",
-            title = R.string.pref_dashboard_widget_today_upside_down_title,
-            summary = R.string.pref_dashboard_widget_today_upside_down_summary,
-            icon = R.drawable.ic_caret_down_solid,
-            defaultValue = false,
-            dependency = "24h",
-            connectedOnly = false,
-        )
+    override fun settings(context: Context, variant: WidgetVariant): DeviceSettingsSpec = deviceSettings {
+        if (variant != WidgetVariant.SMALL) {
+            switchSetting(
+                key = "24h",
+                title = R.string.pref_dashboard_widget_today_24h_title,
+                summary = R.string.pref_dashboard_widget_today_24h_summary,
+                icon = R.drawable.ic_access_time,
+                defaultValue = false,
+                connectedOnly = false,
+            )
+            switchSetting(
+                key = "24h_upside_down",
+                title = R.string.pref_dashboard_widget_today_upside_down_title,
+                summary = R.string.pref_dashboard_widget_today_upside_down_summary,
+                icon = R.drawable.ic_caret_down_solid,
+                defaultValue = false,
+                dependency = "24h",
+                connectedOnly = false,
+            )
+        }
         switchSetting(
             key = "show_yesterday",
             title = R.string.pref_dashboard_widget_today_yesterday_data_title,
