@@ -13,6 +13,7 @@ import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
+import androidx.core.view.isVisible
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
@@ -31,9 +32,9 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
         fun onLongPress(item: PlacedWidget, card: View)
 
         /**
-         * A tap on [item] in the edit mode.
+         * A tap on the edit button of [item].
          */
-        fun onEditClick(item: PlacedWidget)
+        fun onEditClick(item: PlacedWidget, button: View)
 
         /**
          * A request to move [item] by [offset] positions in the order.
@@ -41,7 +42,12 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
         fun onMove(item: PlacedWidget, offset: Int)
     }
 
-    private class Cell(val card: MaterialCardView, val slot: FrameLayout, val foreground: Drawable?) {
+    private class Cell(
+        val card: MaterialCardView,
+        val slot: FrameLayout,
+        val editButton: View,
+        val foreground: Drawable?,
+    ) {
         var placed: PlacedWidget? = null
         var content: View? = null
         var moveActions: List<Int> = emptyList()
@@ -75,7 +81,7 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
     var callbacks: Callbacks? = null
 
     /**
-     * Whether a tap edits the widget instead of opening its chart.
+     * Whether the cards show their edit button instead of opening the chart on a tap.
      */
     var editing: Boolean = false
         set(value) {
@@ -171,7 +177,12 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
     private fun createCell(): Cell {
         val card =
             LayoutInflater.from(grid.context).inflate(R.layout.dashboard_widget_card, grid, false) as MaterialCardView
-        val cell = Cell(card, card.findViewById(R.id.dashboard_widget_content), card.foreground)
+        val cell = Cell(
+            card,
+            card.findViewById(R.id.dashboard_widget_content),
+            card.findViewById(R.id.dashboard_widget_edit),
+            card.foreground,
+        )
         applyStyle(cell)
         return cell
     }
@@ -225,8 +236,10 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
             callbacks?.onLongPress(item, card)
             true
         }
+        cell.editButton.isVisible = editing
+        cell.editButton.setOnClickListener { callbacks?.onEditClick(item, it) }
         when {
-            editing -> card.setOnClickListener { callbacks?.onEditClick(item) }
+            editing -> card.setOnClickListener(null)
             states[item.instance.instanceId] is WidgetState.Ready -> card.setOnClickListener {
                 item.widget.onClick(view, item.variant, configOf(item), timestamp)
             }

@@ -669,6 +669,21 @@
         <item name="iconTint">@color/period_step_icon</item>
     </style>
 
+    <!-- A 32dp circle in a 48dp touch area -->
+    <style name="Widget.App.WidgetEditButton" parent="Widget.Material3.Button.IconButton.Filled.Tonal">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:insetLeft">8dp</item>
+        <item name="android:insetTop">8dp</item>
+        <item name="android:insetRight">8dp</item>
+        <item name="android:insetBottom">8dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconSize">18dp</item>
+        <item name="cornerRadius">16dp</item>
+    </style>
+
     <!-- Bottom bar actions with an icon above the label -->
     <style name="Widget.App.EditBarItem" parent="Widget.Material3.Button.TextButton.Icon">
         <item name="android:minWidth">0dp</item>

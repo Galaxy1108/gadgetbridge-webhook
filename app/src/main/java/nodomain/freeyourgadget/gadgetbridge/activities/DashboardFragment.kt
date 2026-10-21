@@ -34,6 +34,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -402,8 +403,29 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         dragController.start(card)
     }
 
-    override fun onEditClick(item: PlacedWidget) {
-        showEditSheet(item)
+    override fun onEditClick(item: PlacedWidget, button: View) {
+        val columns = grid.columns
+        val instanceId = item.instance.instanceId
+        val popup = PopupMenu(requireContext(), button)
+        popup.inflate(R.menu.dashboard_widget_edit_menu)
+        popup.menu.findItem(R.id.dashboard_widget_variant).isVisible = item.widget.variants.size > 1
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.dashboard_widget_variant -> showVariantSheet(item)
+                R.id.dashboard_widget_settings -> settingsInstanceId =
+                    WidgetInstanceSettingsActivity.startForWidget(requireContext(), columns, instanceId)?.instanceId
+
+                R.id.dashboard_widget_duplicate -> {
+                    newInstanceId = WidgetLayoutStore.duplicate(columns, instanceId)?.instanceId
+                    viewModel.updateLayout(columns)
+                }
+
+                R.id.dashboard_widget_delete -> deleteWidget(instanceId)
+                else -> return@setOnMenuItemClickListener false
+            }
+            true
+        }
+        popup.show()
     }
 
     override fun onMove(item: PlacedWidget, offset: Int) {
@@ -413,51 +435,34 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         viewModel.updateLayout(grid.columns)
     }
 
+    private fun deleteWidget(instanceId: String) {
+        val columns = grid.columns
+        val deleted = WidgetLayoutStore.delete(columns, instanceId) ?: return
+        viewModel.updateLayout(columns)
+        deleteSnackbar = Snackbar.make(requireView(), R.string.widgets_deleted, Snackbar.LENGTH_LONG)
+            .setAnchorView(editBar)
+            .setAction(R.string.undo) {
+                WidgetLayoutStore.restore(deleted)
+                viewModel.updateLayout(columns)
+            }
+            .apply { show() }
+    }
+
     /**
-     * Shows the variants of [item] and its Settings, Duplicate and Delete actions in a bottom sheet.
+     * Shows the variants of [item] in a bottom sheet.
      */
     @SuppressLint("InflateParams")  // The bottom sheet sets the layout params of its content view
-    private fun showEditSheet(item: PlacedWidget) {
-        val context = requireContext()
+    private fun showVariantSheet(item: PlacedWidget) {
         val columns = grid.columns
-        val instanceId = item.instance.instanceId
-        val sheet = BottomSheetDialog(context)
+        val sheet = BottomSheetDialog(requireContext())
         val view = layoutInflater.inflate(R.layout.dashboard_widget_edit_sheet, null)
 
-        view.findViewById<TextView>(R.id.dashboard_edit_title).text = item.widget.displayName(context)
+        view.findViewById<TextView>(R.id.dashboard_edit_title).text = item.widget.displayName(requireContext())
         val variants = view.findViewById<WidgetGridLayout>(R.id.dashboard_edit_variants)
-        if (item.widget.variants.size > 1) {
-            showVariantPreviews(variants, item.widget, item.variant.id) { variant ->
-                WidgetLayoutStore.setVariant(columns, instanceId, variant.id)
-                viewModel.updateLayout(columns)
-                sheet.dismiss()
-            }
-        } else {
-            variants.isVisible = false
-        }
-
-        view.findViewById<View>(R.id.dashboard_edit_settings).setOnClickListener {
-            settingsInstanceId = WidgetInstanceSettingsActivity.startForWidget(context, columns, instanceId)?.instanceId
-            sheet.dismiss()
-        }
-        view.findViewById<View>(R.id.dashboard_edit_duplicate).setOnClickListener {
-            newInstanceId = WidgetLayoutStore.duplicate(columns, instanceId)?.instanceId
+        showVariantPreviews(variants, item.widget, item.variant.id) { variant ->
+            WidgetLayoutStore.setVariant(columns, item.instance.instanceId, variant.id)
             viewModel.updateLayout(columns)
             sheet.dismiss()
-        }
-        view.findViewById<View>(R.id.dashboard_edit_delete).setOnClickListener {
-            val deleted = WidgetLayoutStore.delete(columns, instanceId)
-            viewModel.updateLayout(columns)
-            sheet.dismiss()
-            if (deleted != null) {
-                deleteSnackbar = Snackbar.make(requireView(), R.string.widgets_deleted, Snackbar.LENGTH_LONG)
-                    .setAnchorView(editBar)
-                    .setAction(R.string.undo) {
-                        WidgetLayoutStore.restore(deleted)
-                        viewModel.updateLayout(columns)
-                    }
-                    .apply { show() }
-            }
         }
 
         sheet.setContentView(view)
