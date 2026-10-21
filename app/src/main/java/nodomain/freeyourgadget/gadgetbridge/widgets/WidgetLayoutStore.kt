@@ -97,6 +97,11 @@ object WidgetLayoutStore {
     fun instances(): List<WidgetInstance> = load().layouts.values.flatten().map { it.instance }
 
     /**
+     * The stored layouts, by column count.
+     */
+    fun storedLayouts(): Map<Int, List<WidgetPlacement>> = load().layouts
+
+    /**
      * The placements for [columns]: the stored layout, or a layout derived from the base layout if there is none.
      */
     fun layout(columns: Int): List<WidgetPlacement> = layoutOf(load(), columns)
@@ -254,6 +259,22 @@ object WidgetLayoutStore {
         LOG.info("Resetting the dashboard")
         sharedPreferences().edit {
             remove(PREF_DASHBOARD)
+        }
+    }
+
+    /**
+     * Removes the stored layout for [columns] and deletes the settings of its instances.
+     */
+    fun resetLayout(columns: Int) {
+        LOG.info("Resetting the layout for {} columns", columns)
+        val dashboard = load()
+        for (placement in dashboard.layouts[columns].orEmpty()) {
+            GBApplication.deleteWidgetSharedPrefs(placement.instance.instanceId)
+        }
+        if (columns == WidgetGrid.BASE_COLUMNS) {
+            save(dashboard.copy(layouts = dashboard.layouts + (columns to migrate().layouts.getValue(columns))))
+        } else {
+            save(dashboard.copy(layouts = dashboard.layouts - columns))
         }
     }
 
