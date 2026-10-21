@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -223,15 +224,14 @@ public class ControlCenterv2 extends AppCompatActivity
         visibleTabs.clear();
 
         GBPrefs prefs = GBApplication.getPrefs();
-        String mainScreensPref = prefs.getString("main_screens", "dashboard,workouts,devices");
+        List<String> mainScreensPref = prefs.getList("main_screens", Arrays.asList("dashboard", "workouts", "devices"));
         Set<NavTab> seen = EnumSet.noneOf(NavTab.class);
         int order = 0;
-        for (String token : mainScreensPref.split(",")) {
+        for (String token : mainScreensPref) {
             NavTab tab = NavTab.fromKey(token.trim());
-            if (tab == null || !seen.add(tab)) {
-                if (tab == NavTab.DASHBOARD && !supportsActivityTracking) continue;
-                if (tab == NavTab.WORKOUTS && !supportsRecordedActivities) continue;
-            }
+            if (tab == null || !seen.add(tab)) continue;
+            if (tab == NavTab.DASHBOARD && !supportsActivityTracking) continue;
+            if (tab == NavTab.WORKOUTS && !supportsRecordedActivities) continue;
             menu.add(Menu.NONE, tab.itemId, order++, tab.titleRes).setIcon(tab.iconRes);
             visibleTabs.add(tab);
         }
@@ -270,6 +270,8 @@ public class ControlCenterv2 extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        GBPrefs prefs = GBApplication.getPrefs();
+
         if (savedInstanceState != null) {
             if (savedInstanceState.getBoolean("cl")) {
                 GBChangeLog cl = GBChangeLog.createChangeLog(this);
@@ -303,6 +305,11 @@ public class ControlCenterv2 extends AppCompatActivity
         // Initialize bottom navigation
         rebuildBottomNav();
         BottomNavigationView navigationView = findViewById(R.id.bottom_nav_bar);
+        if (visibleTabs.size() > 1 && prefs.getBoolean("display_bottom_navigation_bar", true)) {
+            navigationView.setVisibility(View.VISIBLE);
+        } else {
+            navigationView.setVisibility(View.GONE);
+        }
         navigationView.setOnItemSelectedListener(menuItem -> {
             NavTab tab = NavTab.fromItemId(menuItem.getItemId());
             int index = visibleTabs.indexOf(tab);
@@ -311,7 +318,6 @@ public class ControlCenterv2 extends AppCompatActivity
             }
             return true;
         });
-        GBPrefs prefs = GBApplication.getPrefs();
         prefs.getPreferences().registerOnSharedPreferenceChangeListener(prefListener);
 
         // Initialize actionbar

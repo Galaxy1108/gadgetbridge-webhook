@@ -252,26 +252,6 @@
             android:summary="@string/pref_refresh_on_swipe_summary"
             android:title="@string/pref_refresh_on_swipe_title" />
 
-        <com.mobeta.android.dslv.DragSortListPreference
-            android:defaultValue="@array/pref_main_screens_items_values"
-            android:dialogTitle="Main screens"
-            android:entries="@array/pref_main_screens_items"
-            android:entryValues="@array/pref_main_screens_items_values"
-            android:icon="@drawable/ic_always_on_display"
-            android:key="main_screens"
-            android:persistent="true"
-            android:title="@string/pref_main_screens_title"
-            android:summary="@string/pref_main_screens_summary" />
-
-        <ListPreference
-            android:defaultValue="dashboard"
-            android:entries="@array/pref_main_screens_items"
-            android:entryValues="@array/pref_main_screens_items_values"
-            android:key="default_main_screen"
-            android:title="@string/pref_default_main_screen_title"
-            android:icon="@drawable/ic_always_on_display"
-            app:useSimpleSummaryProvider="true" />
-
         <PreferenceCategory
             android:key="pref_screen_main"
             android:title="@string/pref_header_main_screen"
@@ -294,6 +274,26 @@
                 android:summaryOff="@string/pref_summary_bottom_navigation_bar_off"
                 android:summaryOn="@string/pref_summary_bottom_navigation_bar_on"
                 android:title="@string/pref_title_bottom_navigation_bar" />
+
+            <com.mobeta.android.dslv.DragSortListPreference
+                android:defaultValue="@array/pref_main_screens_items_values"
+                android:dialogTitle="@string/pref_main_screens_title"
+                android:entries="@array/pref_main_screens_items"
+                android:entryValues="@array/pref_main_screens_items_values"
+                android:icon="@drawable/ic_always_on_display"
+                android:key="main_screens"
+                android:persistent="true"
+                android:title="@string/pref_main_screens_title"
+                android:summary="@string/pref_main_screens_summary" />
+
+            <ListPreference
+                android:defaultValue="dashboard"
+                android:entries="@array/pref_main_screens_items"
+                android:entryValues="@array/pref_main_screens_items_values"
+                android:key="default_main_screen"
+                android:title="@string/pref_default_main_screen_title"
+                android:icon="@drawable/ic_always_on_display"
+                app:useSimpleSummaryProvider="true" />
         </PreferenceCategory>
 
         <PreferenceCategory

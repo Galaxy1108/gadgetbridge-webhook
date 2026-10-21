@@ -49,6 +49,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes
 import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
+import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper
 import nodomain.freeyourgadget.gadgetbridge.util.GB
 import nodomain.freeyourgadget.gadgetbridge.util.WorkoutFilterUtils
 import nodomain.freeyourgadget.gadgetbridge.util.healthconnect.HealthConnectWorkoutDeletion
@@ -154,7 +155,8 @@ class WorkoutListFragment : Fragment() {
                 R.id.activity_action_statistics -> {
                     val intent = Intent(requireContext(), WorkoutStatisticsActivity::class.java)
                     if (deviceFilter != ActivitySummariesFilter.ALL_DEVICES) {
-                        intent.putExtra(GBDevice.EXTRA_DEVICE, gbDevices.first())
+                        val device = DeviceHelper.getInstance().findDeviceByDatabaseId(deviceFilter)
+                        intent.putExtra(GBDevice.EXTRA_DEVICE, device)
                     }
                     startActivity(intent)
                     true
@@ -483,6 +485,16 @@ class WorkoutListFragment : Fragment() {
             )
             return
         }
+        val device = DeviceHelper.getInstance().findDeviceByDatabaseId(deviceFilter)
+        if (device == null) {
+            GB.toast(
+                requireContext(),
+                getString(R.string.reset_fetch_timestamp_select_device),
+                Toast.LENGTH_LONG,
+                GB.INFO
+            )
+            return
+        }
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
             .build()
@@ -492,7 +504,7 @@ class WorkoutListFragment : Fragment() {
                 set(selectedDate.year, selectedDate.monthValue - 1, selectedDate.dayOfMonth)
             }
             val timestamp = date.timeInMillis - 1000
-            GBApplication.getDeviceSpecificSharedPrefs(gbDevices.first().address).edit().apply {
+            GBApplication.getDeviceSpecificSharedPrefs(device.address).edit().apply {
                 remove("lastSportsActivityTimeMillis")
                 putLong("lastSportsActivityTimeMillis", timestamp)
                 apply()
