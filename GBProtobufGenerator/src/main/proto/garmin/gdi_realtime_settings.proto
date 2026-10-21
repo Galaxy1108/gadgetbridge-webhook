@@ -5,7 +5,7 @@ package garmin_vivomovehr;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiRealtimeSettings";
 
-message SettingsService {
+message RealtimeSettingsService {
     optional ScreenDefinitionRequest definitionRequest = 1;
     optional ScreenDefinitionResponse definitionResponse = 2;
 

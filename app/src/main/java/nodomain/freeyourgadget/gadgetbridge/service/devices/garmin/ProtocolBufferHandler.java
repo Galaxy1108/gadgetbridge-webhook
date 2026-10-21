@@ -629,7 +629,7 @@ public class ProtocolBufferHandler implements MessageHandler {
         LOG.warn("Unknown FindMyWatchService response: {}", findMyWatchService);
     }
 
-    private boolean processProtobufSettingsService(final GdiRealtimeSettings.SettingsService settingsService) {
+    private boolean processProtobufSettingsService(final GdiRealtimeSettings.RealtimeSettingsService settingsService) {
         boolean processed = false;
 
         if (settingsService.hasDefinitionResponse()) {

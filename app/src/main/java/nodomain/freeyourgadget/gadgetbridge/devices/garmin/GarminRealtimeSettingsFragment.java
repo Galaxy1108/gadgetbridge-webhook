@@ -1108,7 +1108,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
         screenDefinition = null;
         screenState = null;
         final Smart smart = Smart.newBuilder()
-                .setRealtimeSettingsService(GdiRealtimeSettings.SettingsService.newBuilder()
+                .setRealtimeSettingsService(GdiRealtimeSettings.RealtimeSettingsService.newBuilder()
                         .setChangeRequest(changeRequest)
                 ).build();
         GBApplication.deviceService(device).onSendConfiguration("protobuf:" + GB.hexdump(smart.toByteArray()));

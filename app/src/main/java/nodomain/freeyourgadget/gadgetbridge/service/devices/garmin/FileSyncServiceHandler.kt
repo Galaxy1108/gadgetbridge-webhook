@@ -20,9 +20,7 @@ import com.google.common.collect.Lists
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess.TransportProtocol
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.UUID
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.FileType.FILETYPE
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.deviceevents.FileDownloadedDeviceEvent
 import nodomain.freeyourgadget.gadgetbridge.util.protobuf.buildWith
@@ -199,7 +197,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
             pullItemRequest = GdiFileAccess.PullItemDataRequest.newBuilder().buildWith {
                 item = fileToRequest
                 priority = 24
-                addSupportedTransports(TransportProtocol.MULTILINK_TRANSPORT_PIPE)
+                addSupportedTransports(GdiFileAccess.TransportProtocol.MULTILINK_TRANSPORT_PIPE)
                 offset = 0
                 requestedCompressionWindow = 15
             }

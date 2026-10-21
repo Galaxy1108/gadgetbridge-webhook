@@ -557,7 +557,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 final String localeString = language + "_" + country.toUpperCase();
                 sendProtobufRequest("init realtime settings", Smart.newBuilder()
                         .setRealtimeSettingsService(
-                            GdiRealtimeSettings.SettingsService.newBuilder()
+                            GdiRealtimeSettings.RealtimeSettingsService.newBuilder()
                                         .setInitRequest(
                                             GdiRealtimeSettings.InitRequest.newBuilder()
                                                         .setLanguage(localeString.length() == 5 ? localeString : "en_US")
@@ -1760,7 +1760,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             sendProtobufRequest("get settings screen " + screenId,
                     Smart.newBuilder()
-                            .setRealtimeSettingsService(GdiRealtimeSettings.SettingsService.newBuilder()
+                            .setRealtimeSettingsService(GdiRealtimeSettings.RealtimeSettingsService.newBuilder()
                                     .setDefinitionRequest(
                                         GdiRealtimeSettings.ScreenDefinitionRequest.newBuilder()
                                                     .setScreenId(screenId)
@@ -1771,7 +1771,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
             sendProtobufRequest("get settings state " + screenId,
                     Smart.newBuilder()
-                            .setRealtimeSettingsService(GdiRealtimeSettings.SettingsService.newBuilder()
+                            .setRealtimeSettingsService(GdiRealtimeSettings.RealtimeSettingsService.newBuilder()
                                     .setStateRequest(
                                         GdiRealtimeSettings.ScreenStateRequest.newBuilder()
                                                     .setScreenId(screenId)

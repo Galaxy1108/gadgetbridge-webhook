@@ -53,18 +53,18 @@ message Smart {
     optional GDI.Proto.SmsNotification.SmsNotificationService sms_notification_service = 16;
     optional GDI.Proto.InstantInput.InstantInputService instant_input_service = 18;
     optional GDI.Proto.LiveTrack.LiveTrackService live_track_service = 21;
+    optional ExploreSyncService explore_sync_service = 22;
     optional GDI.Proto.WaypointTransfer.WaypointTransferService way_point_transfer_service = 23;
     optional GDI.Proto.DeviceMessages.DeviceMessageService device_message_service = 24;
     optional GDI.Proto.Credentials.CredentialsService credentials_service = 27;
-    optional ExploreSyncService explore_sync_service = 22;
     optional GDI.Proto.InReachTracking.InReachTrackingService inreach_tracking_service = 28;
-    optional Service29 inreach_messaging_service = 29;
+    optional InReachMessagingService inreach_messaging_service = 29;
     optional GDI.Proto.EventSharing.EventSharing event_sharing = 30;
     optional GDI.Proto.GenericItemTransfer.GenericItemTransferService generic_item_transfer_service = 31;
     optional GDI.Proto.InReachContactSync.InReachContactSyncService inreach_contact_sync_service = 32;
     optional GDI.Proto.LaunchMonitor.LaunchMonitorService launch_monitor_service = 38;
     optional EcgService samd_service = 39;
-    optional SettingsService realtime_settings_service = 42;
+    optional RealtimeSettingsService realtime_settings_service = 42;
     optional GDI.Proto.FileAccess.Service file_access_service = 43;
     optional Service44 service44 = 44;
     optional GDI.Proto.DeepLinking.DeepLinkingService deeplinking_service = 46;
@@ -78,7 +78,7 @@ message UUID {
     required fixed64 lower = 2;
 }
 
-message Service29 {
+message InReachMessagingService {
     message Message2 {
         message Message1 {
             message Message12 {
