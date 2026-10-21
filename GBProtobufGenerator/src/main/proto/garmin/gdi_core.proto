@@ -6,6 +6,7 @@ option java_outer_classname = "GdiCore";
 
 import "garmin/gdi_data_types.proto";
 import "garmin/gdi_file_access.proto";
+import "garmin/gdi_garmin_connect.proto";
 import "garmin/gdi_gncs.proto";
 
 message CoreService {
@@ -129,6 +130,7 @@ message FeatureCapabilitiesRequest {
     optional bytes garmin_guid = 1;
     optional uint32 client_version = 2;
 
+    optional GDI.Proto.GarminConnect.ClientFeatureCapabilities request_garmin_connect_capabilites = 11;
     optional GDI.Proto.GNCS.CapabilitiesRequest gncs_capabilities_request = 12;
     optional GDI.Proto.FileAccess.Capabilities request_file_access_capabilities = 16;
 }
@@ -142,6 +144,7 @@ message FeatureCapabilitiesResponse {
     optional GuidStatus guid_status = 1;
     optional uint32 version = 2;
 
+    optional GDI.Proto.GarminConnect.ServerFeatureCapabilities response_garmin_connect_capabilites = 11;
     optional GDI.Proto.GNCS.CapabilitiesResponse gncs_capabilities_response = 12;
     optional GDI.Proto.FileAccess.Capabilities response_file_access_capabilities = 16;
 }
