@@ -6,34 +6,6 @@ option java_outer_classname = "GdiFileAccess";
 
 import "garmin/gdi_data_types.proto";
 
-message FileSyncService {
-    optional PullItemDataRequest pull_item_request = 1;
-    optional PullItemDataResponse pull_item_response = 2;
-    optional PushItemDataRequest push_item_request = 3;
-    optional PushItemDataResponse push_item_response = 4;
-    optional TransferStatusRequest transfer_status_request = 5;
-    optional TransferStatusResponse transfer_status_response = 21;
-    optional PriorityUpdateRequest priority_update_request = 6;
-    optional PriorityUpdateResponse priority_update_response = 7;
-    optional ItemListRequest item_list_request = 9;
-    optional ItemListResponse item_list_response = 10;
-    optional ItemListCancelNotification item_list_cancel_notification = 11;
-    optional ItemAddedNotification item_added_notification = 12;
-    optional DeleteItemRequest delete_item_request = 13;
-    optional DeleteItemResponse delete_item_response = 14;
-    optional ModifyFlagsRequest modify_flags_request = 15;
-    optional ModifyFlagsResponse modify_flags_response = 16;
-    optional ItemUpdatedNotification item_updated_notification = 17;
-    optional CancelTransferRequest cancel_transfer_request = 18;
-    optional CancelTransferResponse cancel_transfer_response = 19;
-    optional ResourceUpdateNotification resource_update_notification = 20;
-    optional SyncButtonNotification sync_button_notification = 22;
-    optional SoftwareUpdatePartNumberRequest software_update_part_number_request = 23;
-    optional SoftwareUpdatePartNumberResponse software_update_part_number_response = 24;
-    optional GetItemChecksumRequest get_item_checksum_request = 25;
-    optional GetItemChecksumResponse get_item_checksum_response = 26;
-}
-
 enum ItemAccessResult {
     SUCCESS = 0;
     ITEM_TYPE_NOT_SUPPORTED = 1;
@@ -47,10 +19,6 @@ enum ItemAccessResult {
     NO_SPACE = 9;
     DATA_TYPE_ERROR = 10;
     CONFLICTING_PUSH_REQUEST = 11;
-}
-
-enum TransportProtocol {
-    MULTILINK_TRANSPORT_PIPE = 0;
 }
 
 enum TransferDirection {
@@ -71,17 +39,53 @@ enum TransferPriorityLevel {
     HIGHEST_END = 49;
 }
 
-message ItemListCancelNotification {
-    optional uint32 session_id = 1;
+enum TransportProtocol {
+    MULTILINK_TRANSPORT_PIPE = 0;
 }
 
-// Reserves a transfer slot for a PRG upload via MLR. The response contains the token for the control
-// message that the upload starts with.
-message PushItemDataRequest {
-  optional ItemReference item = 1;
-  optional uint32 priority = 2; // 24, 34 or 37, does not seem related to the app type
-  repeated TransportProtocol supported_transports = 3;
-  optional uint32 requested_compression_window = 4; // 15
+message CancelTransferRequest {
+    optional uint32 transfer_handle = 1;
+}
+
+message CancelTransferResponse {
+    enum Status {
+        SUCCESS = 0;
+        UNKNOWN_TRANSFER = 1;
+    }
+    optional Status status = 1;
+}
+
+message Capabilities {
+    enum ChecksumMethod {
+        NOT_SUPPORTED = 0;
+        TRUNCATED_MD5 = 1;
+    }
+    optional bool server_push_file_bundle_support = 1;
+    optional bool software_update_part_number_request_support = 2;
+    optional ChecksumMethod server_file_checksum_method = 3;
+    optional uint32 checksum_max_file_size_byte = 4;
+    optional bool custom_flag_support = 5;
+}
+
+message DataType {
+    enum Format {
+        GDXML_DATA_TYPE = 0;
+        SOFTWARE_UPDATE = 1;
+        SPECIAL_CASE = 2;
+        GDXML_FULL_FILE = 3;
+        DATA_XFER = 4;
+        GDXML_UPDATE_FILE = 5;
+    }
+    enum SpecialCase {
+        COUNTER_BYTE_TEST = 1;
+    }
+    optional Format format = 1;
+    optional string gdxml_string = 2;
+    optional uint32 gdxml_string_key = 3;
+    optional string gdxml_file_identifier = 4;
+    optional string software_update_path = 5;
+    optional SpecialCase special_case = 6;
+    optional string update_part_number = 7;
 }
 
 message DeleteItemRequest {
@@ -89,16 +93,19 @@ message DeleteItemRequest {
     optional TransferDirection direction = 2;
 }
 
-message CancelTransferRequest {
-    optional uint32 transfer_handle = 1;
-}
-
-message SoftwareUpdatePartNumberRequest {
-    enum Requestor {
-        DISPLAY = 0;
-        APP = 1;
+message DeleteItemResponse {
+    enum Result {
+        SUCCESS = 0;
+        ITEM_DOES_NOT_EXIST = 1;
+        ITEM_CANNOT_BE_DELETED = 2;
+        TRANSFER_IN_PROGRESS = 3;
+        DELETE_FAILED = 4;
+        INVALID_PARAMS = 5;
+        OPERATION_NOT_SUPPORTED = 6;
     }
-    optional Requestor requestor = 1;
+    optional Result result = 1;
+    optional uint32 error_code = 2;
+    optional uint32 error_source = 3;
 }
 
 message GetItemChecksumRequest {
@@ -119,17 +126,85 @@ message GetItemChecksumResponse {
     optional fixed64 checksum_truncated_md5 = 3;
 }
 
-message PushItemDataResponse {
-    optional ItemAccessResult result = 1;
-    optional uint64 offset = 2;
-    optional TransportProtocol transport = 3;
-    optional uint32 transfer_handle = 4;
-    optional string file_path = 5;
-    optional sint32 error_code = 6;
-    optional uint32 error_source = 7;
-    optional uint32 compression_window = 8; // 10
-    optional uint32 data_specific_error_source = 9;
-    optional sint32 data_specific_error_code = 10;
+message ItemAddedNotification {
+    repeated ItemReference items = 1;
+}
+
+message ItemListCancelNotification {
+    optional uint32 session_id = 1;
+}
+
+message ItemListRequest {
+    enum MetaDataType {
+        MODIFIED_TIME = 0;
+    }
+    optional uint32 session_id = 1;
+    optional uint32 transaction_id = 2;
+    optional uint32 max_item_count = 3;
+    repeated GDI.Proto.DataTypes.UUID exclude_all_flags = 4;
+    repeated GDI.Proto.DataTypes.UUID get_flags = 5;
+    repeated DataType included_data_types = 6;
+    repeated MetaDataType requested_metadata = 7;
+}
+
+message ItemListResponse {
+    enum Status {
+        SUCCESS = 0;
+        FAIL_UNKNOWN_SESSION_ID = 1;
+        FAIL_TOO_MANY_EXCLUDE_FLAGS = 2;
+        FAIL_TOO_MANY_GET_FLAGS = 3;
+        FAIL_OTHER = 4;
+        FAIL_TOO_MANY_INCLUDE_TYPES = 5;
+        FAIL_INVALID_DATA_TYPE = 6;
+    }
+    optional Status status = 1;
+    optional uint32 session_id = 2;
+    optional uint32 next_transaction_id = 3;
+    repeated ItemReference items = 4;
+    optional uint32 error_code = 5;
+    optional uint32 abandoned_session_id = 6;
+    optional DataType malformed_data_type = 7;
+}
+
+message ItemReference {
+    enum Urgency {
+        IMMEDIATE = 0;
+        NORMAL = 1;
+        SLOW = 2;
+    }
+    optional GDI.Proto.DataTypes.UUID uid = 1;
+    optional DataType data_type = 2;
+    optional uint64 data_size = 3;
+    optional uint32 requested_flags = 4;
+    optional uint32 transaction_id = 5;
+    optional Urgency urgency = 6;
+    optional uint32 modified_time = 7;
+}
+
+message ItemUpdatedNotification {
+    optional GDI.Proto.DataTypes.UUID uid = 1;
+    repeated GDI.Proto.DataTypes.UUID changed_flags_set = 2;
+    repeated GDI.Proto.DataTypes.UUID changed_flags_clear = 3;
+}
+
+message ModifyFlagsRequest {
+    optional GDI.Proto.DataTypes.UUID uid = 1;
+    repeated GDI.Proto.DataTypes.UUID set_flags = 2;
+    repeated GDI.Proto.DataTypes.UUID clear_flags = 3;
+}
+
+message ModifyFlagsResponse {
+    enum Status {
+        SUCCESS = 0;
+        FAIL_ITEM_NOT_PROVIDED = 1;
+        FAIL_ITEM_NOT_FOUND = 2;
+        FAIL_FLAGS_NOT_PROVIDED = 3;
+        FAIL_MAX_FLAGS_REACHED = 4;
+        FAIL_OTHER = 5;
+    }
+    optional Status status = 1;
+    optional uint32 error_source = 2;
+    optional uint32 error_code = 3;
 }
 
 message PriorityUpdateRequest {
@@ -146,31 +221,44 @@ message PriorityUpdateResponse {
     optional Status status = 1;
 }
 
-message DeleteItemResponse {
-    enum Result {
-        SUCCESS = 0;
-        ITEM_DOES_NOT_EXIST = 1;
-        ITEM_CANNOT_BE_DELETED = 2;
-        TRANSFER_IN_PROGRESS = 3;
-        DELETE_FAILED = 4;
-        INVALID_PARAMS = 5;
-        OPERATION_NOT_SUPPORTED = 6;
-    }
-    optional Result result = 1;
-    optional uint32 error_code = 2;
-    optional uint32 error_source = 3;
+message PullItemDataRequest {
+    optional ItemReference item = 1;
+    optional uint32 priority = 2;
+    repeated TransportProtocol supported_transports = 3;
+    optional uint64 offset = 4;
+    optional uint32 requested_compression_window = 5;
 }
 
-message CancelTransferResponse {
-    enum Status {
-        SUCCESS = 0;
-        UNKNOWN_TRANSFER = 1;
-    }
-    optional Status status = 1;
+message PullItemDataResponse {
+    optional ItemAccessResult result = 1;
+    optional TransportProtocol transport = 2;
+    optional uint32 transfer_handle = 3;
+    optional string file_path = 4;
+    optional sint32 error_code = 5;
+    optional uint32 error_source = 6;
+    optional uint32 compression_window = 7;
+    optional uint32 data_specific_error_source = 8;
+    optional sint32 data_specific_error_code = 9;
 }
 
-message SoftwareUpdatePartNumberResponse {
-    repeated string part_number = 1;
+message PushItemDataRequest {
+    optional ItemReference item = 1;
+    optional uint32 priority = 2;
+    repeated TransportProtocol supported_transports = 3;
+    optional uint32 requested_compression_window = 4;
+}
+
+message PushItemDataResponse {
+    optional ItemAccessResult result = 1;
+    optional uint64 offset = 2;
+    optional TransportProtocol transport = 3;
+    optional uint32 transfer_handle = 4;
+    optional string file_path = 5;
+    optional sint32 error_code = 6;
+    optional uint32 error_source = 7;
+    optional uint32 compression_window = 8;
+    optional uint32 data_specific_error_source = 9;
+    optional sint32 data_specific_error_code = 10;
 }
 
 message ResourceUpdateNotification {
@@ -182,18 +270,47 @@ message ResourceUpdateNotification {
     optional uint32 current_priority = 2;
 }
 
-message ModifyFlagsResponse {
-    enum Status {
-        SUCCESS = 0;
-        FAIL_ITEM_NOT_PROVIDED = 1;
-        FAIL_ITEM_NOT_FOUND = 2;
-        FAIL_FLAGS_NOT_PROVIDED = 3;
-        FAIL_MAX_FLAGS_REACHED = 4;
-        FAIL_OTHER = 5;
+message Service {
+    optional PullItemDataRequest pull_item_request = 1;
+    optional PullItemDataResponse pull_item_response = 2;
+    optional PushItemDataRequest push_item_request = 3;
+    optional PushItemDataResponse push_item_response = 4;
+    optional TransferStatusRequest transfer_status_request = 5;
+    optional PriorityUpdateRequest priority_update_request = 6;
+    optional PriorityUpdateResponse priority_update_response = 7;
+    optional ItemListRequest item_list_request = 9;
+    optional ItemListResponse item_list_response = 10;
+    optional ItemListCancelNotification item_list_cancel_notification = 11;
+    optional ItemAddedNotification item_added_notification = 12;
+    optional DeleteItemRequest delete_item_request = 13;
+    optional DeleteItemResponse delete_item_response = 14;
+    optional ModifyFlagsRequest modify_flags_request = 15;
+    optional ModifyFlagsResponse modify_flags_response = 16;
+    optional ItemUpdatedNotification item_updated_notification = 17;
+    optional CancelTransferRequest cancel_transfer_request = 18;
+    optional CancelTransferResponse cancel_transfer_response = 19;
+    optional ResourceUpdateNotification resource_update_notification = 20;
+    optional TransferStatusResponse transfer_status_response = 21;
+    optional SyncButtonNotification sync_button_notification = 22;
+    optional SoftwareUpdatePartNumberRequest software_update_part_number_request = 23;
+    optional SoftwareUpdatePartNumberResponse software_update_part_number_response = 24;
+    optional GetItemChecksumRequest get_item_checksum_request = 25;
+    optional GetItemChecksumResponse get_item_checksum_response = 26;
+}
+
+message SoftwareUpdatePartNumberRequest {
+    enum Requestor {
+        DISPLAY = 0;
+        APP = 1;
     }
-    optional Status status = 1;
-    optional uint32 error_source = 2;
-    optional uint32 error_code = 3;
+    optional Requestor requestor = 1;
+}
+
+message SoftwareUpdatePartNumberResponse {
+    repeated string part_number = 1;
+}
+
+message SyncButtonNotification {
 }
 
 message TransferStatusRequest {
@@ -216,127 +333,4 @@ message TransferStatusRequest {
 
 message TransferStatusResponse {
     optional uint32 next_transfer_priority = 1;
-}
-
-message SyncButtonNotification {
-  // user pressed button on device to start syncing files
-}
-
-message ItemAddedNotification {
-  repeated ItemReference items = 1;
-}
-
-message ModifyFlagsRequest {
-  optional GDI.Proto.DataTypes.UUID uid = 1;
-  repeated GDI.Proto.DataTypes.UUID set_flags = 2;
-  repeated GDI.Proto.DataTypes.UUID clear_flags = 3;
-}
-
-message ItemUpdatedNotification {
-    optional GDI.Proto.DataTypes.UUID uid = 1;
-    repeated GDI.Proto.DataTypes.UUID changed_flags_set = 2;
-    repeated GDI.Proto.DataTypes.UUID changed_flags_clear = 3;
-}
-
-message PullItemDataRequest {
-  optional ItemReference item = 1;
-  optional uint32 priority = 2; // 24
-  repeated TransportProtocol supported_transport = 3;
-  optional uint64 offset = 4;
-  optional uint32 requested_compression_window = 5; // 15
-}
-
-message PullItemDataResponse {
-  optional ItemAccessResult result = 1; // 0 success 3 failure
-  optional TransportProtocol transport = 2;
-  optional uint32 transfer_handle = 3; // varies
-  optional string file_path = 4;
-  optional sint32 error_code = 5;
-  optional uint32 error_source = 6;
-  optional uint32 compression_window = 7; // 11
-  optional uint32 data_specific_error_source = 8;
-  optional sint32 data_specific_error_code = 9;
-}
-
-message ItemListRequest {
-  // Set to FileListResponse.cursor_id to continue an in-progress listing.
-  // Mutually exclusive with start_page_id: only set one of the two.
-  optional uint32 session_id = 1;
-  optional uint32 transaction_id = 2; // 33737
-  optional uint32 max_item_count = 3; // maximum per FileListResponse, not total max
-  // Exclusion flags? If we omit this, it sends back already synced files going back months.
-  // 0x000000000000a5a5 / 42405 appears to be the "already synced" flag.
-  repeated GDI.Proto.DataTypes.UUID exclude_all_flags = 4;
-  repeated GDI.Proto.DataTypes.UUID get_flags = 5;
-  repeated DataType included_data_types = 6;
-  repeated uint32 include_metadata = 7; // 0: include File.timestamp
-}
-
-message ItemListResponse {
-    enum Status {
-        SUCCESS = 0;
-        FAIL_UNKNOWN_SESSION_ID = 1;
-        FAIL_TOO_MANY_EXCLUDE_FLAGS = 2;
-        FAIL_TOO_MANY_GET_FLAGS = 3;
-        FAIL_OTHER = 4;
-        FAIL_TOO_MANY_INCLUDE_TYPES = 5;
-        FAIL_INVALID_DATA_TYPE = 6;
-    }
-  optional Status status = 1;
-  // Present when more items are pending for *this* listing (> 100 items) - send it back
-  // on the next FileListRequest.cursor_id to get the remaining items.
-  // Mutually exclusive with next_page_id: only one of the two is set.
-  optional uint32 session_id = 2; // 2 on venu 4, 1 on venu 3
-  optional uint32 next_transaction_id = 3; // 33737, incrementing
-  repeated ItemReference items = 4;
-  optional uint32 error_code = 5;
-  optional uint32 abandoned_session_id = 6; // 1 on venu 4
-  optional DataType malformed_data_type = 7;
-}
-
-message ItemReference {
-    enum Urgency {
-        IMMEDIATE = 0;
-        NORMAL = 1;
-        SLOW = 2;
-    }
-  optional GDI.Proto.DataTypes.UUID uid = 1;
-  optional DataType data_type = 2;
-  optional uint64 size = 3;
-  optional uint32 requested_flags = 4; // 0 on venu 4
-  optional uint32 transaction_id = 5; // 33652, 33653, ... incrementing
-  optional uint32 urgency = 6; // 2 on venu 4
-  optional uint32 timestamp = 7;
-}
-
-message DataType {
-    enum Format {
-        GDXML_DATA_TYPE = 0;
-        SOFTWARE_UPDATE = 1;
-        SPECIAL_CASE = 2;
-        GDXML_FULL_FILE = 3;
-        DATA_XFER = 4;
-        GDXML_UPDATE_FILE = 5;
-    }
-    enum SpecialCase {
-        COUNTER_BYTE_TEST = 1;
-    }
-    optional Format format = 1;
-    optional string gdxml_string = 2;
-    optional uint32 gdxml_string_key = 3; // mapping is ephemeral
-    optional string gdxml_file_identifier = 4;
-    optional string software_update_path = 5;
-    optional SpecialCase special_case = 6;
-    optional string update_part_number = 7;
-}
-
-message Capabilities {
-    enum ChecksumMethod {
-        NOT_SUPPORTED = 0;
-        TRUNCATED_MD5 = 1;
-    }
-    optional bool server_push_file_bundle_support = 1;
-    optional bool software_update_part_number_request_support = 2;
-    optional ChecksumMethod server_file_checksum_method = 3;
-    optional uint32 checksum_max_file_size_byte = 4;
 }

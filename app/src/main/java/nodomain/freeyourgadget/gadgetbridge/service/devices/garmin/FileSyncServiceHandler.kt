@@ -32,7 +32,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
     private var nextPageId: Int? = null
     private var cursorId: Int? = null
 
-    fun handle(fileSyncService: GdiFileAccess.FileSyncService): GdiFileAccess.FileSyncService? {
+    fun handle(fileSyncService: GdiFileAccess.Service): GdiFileAccess.Service? {
         return when {
             fileSyncService.hasItemAddedNotification() -> handleItemAddedNotification(fileSyncService.itemAddedNotification)
             fileSyncService.hasItemListResponse() -> handleItemListResponse(fileSyncService.itemListResponse)
@@ -48,36 +48,36 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         }
     }
 
-    private fun handleSyncButtonNotification(startSyncNotification: GdiFileAccess.SyncButtonNotification): GdiFileAccess.FileSyncService? {
+    private fun handleSyncButtonNotification(startSyncNotification: GdiFileAccess.SyncButtonNotification): GdiFileAccess.Service? {
         LOG.debug("Got start sync notification: {}", startSyncNotification)
         deviceSupport.onFetchRecordedData(RecordedDataTypes.TYPE_ALL)
         return null
     }
 
 
-    private fun handleItemUpdatedNotification(fileUpdateNotification: GdiFileAccess.ItemUpdatedNotification): GdiFileAccess.FileSyncService? {
+    private fun handleItemUpdatedNotification(fileUpdateNotification: GdiFileAccess.ItemUpdatedNotification): GdiFileAccess.Service? {
         LOG.debug("Got file updated flags: {}", fileUpdateNotification)
         // no action required
         return null
     }
 
-    private fun handleModifyFlagsResponse(fileModifiedFlags: GdiFileAccess.ModifyFlagsResponse): GdiFileAccess.FileSyncService? {
+    private fun handleModifyFlagsResponse(fileModifiedFlags: GdiFileAccess.ModifyFlagsResponse): GdiFileAccess.Service? {
         LOG.debug("Got file modified flags: {}", fileModifiedFlags)
         // no action required
         return null
     }
 
-    private fun handleTransferStatusRequest(transferStatusRequest: GdiFileAccess.TransferStatusRequest): GdiFileAccess.FileSyncService? {
+    private fun handleTransferStatusRequest(transferStatusRequest: GdiFileAccess.TransferStatusRequest): GdiFileAccess.Service? {
         LOG.debug("Got transfer status request: {}", transferStatusRequest)
         val response = GdiFileAccess.TransferStatusResponse.newBuilder().buildWith {
             nextTransferPriority = 1
         }
-        return GdiFileAccess.FileSyncService.newBuilder().buildWith {
+        return GdiFileAccess.Service.newBuilder().buildWith {
             transferStatusResponse = response
         }
     }
 
-    private fun handleItemAddedNotification(newFileNotification: GdiFileAccess.ItemAddedNotification): GdiFileAccess.FileSyncService? {
+    private fun handleItemAddedNotification(newFileNotification: GdiFileAccess.ItemAddedNotification): GdiFileAccess.Service? {
         LOG.debug("Got new file notification: {}", newFileNotification)
 
         for (file in newFileNotification.itemsList) {
@@ -91,7 +91,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         return null
     }
 
-    private fun handlePullItemResponse(fileResponse: GdiFileAccess.PullItemDataResponse): GdiFileAccess.FileSyncService? {
+    private fun handlePullItemResponse(fileResponse: GdiFileAccess.PullItemDataResponse): GdiFileAccess.Service? {
         LOG.debug("Got file response: {}", fileResponse)
 
         if (fileResponse.result != GdiFileAccess.ItemAccessResult.SUCCESS) {
@@ -107,7 +107,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         return null
     }
 
-    private fun handleItemListResponse(fileListResponse: GdiFileAccess.ItemListResponse): GdiFileAccess.FileSyncService? {
+    private fun handleItemListResponse(fileListResponse: GdiFileAccess.ItemListResponse): GdiFileAccess.Service? {
         if (!fileListResponse.hasStatus() || fileListResponse.status != GdiFileAccess.ItemListResponse.Status.SUCCESS) {
             LOG.warn(
                 "Handling file list response with failed status={} - {}",
@@ -167,7 +167,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         return null
     }
 
-    fun requestFileList(): GdiFileAccess.FileSyncService {
+    fun requestFileList(): GdiFileAccess.Service {
         LOG.debug("Requesting file list starting at page {} (cursorId={})", nextPageId, cursorId)
 
         val fileListRequestBuilder = GdiFileAccess.ItemListRequest.newBuilder().apply {
@@ -183,30 +183,30 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
             nextPageId?.let { fileListRequestBuilder.transactionId = it }
         }
 
-        return GdiFileAccess.FileSyncService.newBuilder().buildWith {
+        return GdiFileAccess.Service.newBuilder().buildWith {
             itemListRequest = fileListRequestBuilder.build()
         }
     }
 
-    fun requestFile(fileToRequest: GdiFileAccess.ItemReference): GdiFileAccess.FileSyncService {
+    fun requestFile(fileToRequest: GdiFileAccess.ItemReference): GdiFileAccess.Service {
         LOG.debug(
             "Requesting file: {}/{} ({})",
             fileToRequest.uid.mostSignificant,
             fileToRequest.uid.leastSignificant,
             fileToRequest.dataType.gdxmlString
         )
-        return GdiFileAccess.FileSyncService.newBuilder().buildWith {
+        return GdiFileAccess.Service.newBuilder().buildWith {
             pullItemRequest = GdiFileAccess.PullItemDataRequest.newBuilder().buildWith {
                 item = fileToRequest
                 priority = 24
-                addSupportedTransport(TransportProtocol.MULTILINK_TRANSPORT_PIPE)
+                addSupportedTransports(TransportProtocol.MULTILINK_TRANSPORT_PIPE)
                 offset = 0
                 requestedCompressionWindow = 15
             }
         }
     }
 
-    fun markSynced(syncFile: GdiFileAccess.ItemReference): GdiFileAccess.FileSyncService? {
+    fun markSynced(syncFile: GdiFileAccess.ItemReference): GdiFileAccess.Service? {
         val fetchUnknownFiles = deviceSupport.devicePrefs.fetchUnknownFiles
         if (fetchUnknownFiles) {
             // Since some of the unknown files are not really supposed to be marked as synced (eg. settings, courses, locations)
@@ -227,7 +227,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
             }
         }
 
-        return GdiFileAccess.FileSyncService.newBuilder().buildWith {
+        return GdiFileAccess.Service.newBuilder().buildWith {
             modifyFlagsRequest = GdiFileAccess.ModifyFlagsRequest.newBuilder().buildWith {
                 uid = syncFile.uid
                 addSetFlags(GdiDataTypes.UUID.newBuilder().setMostSignificant(FLAGS_SYNCED).setLeastSignificant(FLAGS_SYNCED).build())

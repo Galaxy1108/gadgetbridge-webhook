@@ -7,18 +7,6 @@ option java_outer_classname = "GdiDataTransfer";
 import "garmin/gdi_data_types.proto";
 
 
-message DataTransferService {
-    optional DataDownloadRequest data_download_request = 1;
-    optional DataDownloadResponse data_download_response = 2;
-    optional InitiateDataUploadRequest initiate_data_upload_request = 3;
-    optional InitiateDataUploadResponse initiate_data_upload_response = 4;
-    optional DataUploadRequest data_upload_request = 5;
-    optional DataUploadResponse data_upload_response = 6;
-    optional DataUploadCanceledNotification data_upload_canceled_notification = 7;
-    optional FileAccessItemRequest file_access_item_request = 8;
-    optional FileAccessItemResponse file_access_item_response = 9;
-}
-
 message DataDownloadRequest {
     optional uint32 id = 1;
     optional uint32 offset = 2;
@@ -38,19 +26,20 @@ message DataDownloadResponse {
     optional bytes payload = 4;
 }
 
-
-message InitiateDataUploadRequest {
-    optional uint32 id = 1;
+message DataTransferService {
+    optional DataDownloadRequest data_download_request = 1;
+    optional DataDownloadResponse data_download_response = 2;
+    optional InitiateDataUploadRequest initiate_data_upload_request = 3;
+    optional InitiateDataUploadResponse initiate_data_upload_response = 4;
+    optional DataUploadRequest data_upload_request = 5;
+    optional DataUploadResponse data_upload_response = 6;
+    optional DataUploadCanceledNotification data_upload_canceled_notification = 7;
+    optional FileAccessItemRequest file_access_item_request = 8;
+    optional FileAccessItemResponse file_access_item_response = 9;
 }
 
-message InitiateDataUploadResponse {
-    enum Status {
-        UNKNOWN = 0;
-        OK = 1;
-        INVALID_ID = 2;
-    }
+message DataUploadCanceledNotification {
     optional uint32 id = 1;
-    optional Status status = 2;
 }
 
 message DataUploadRequest {
@@ -69,11 +58,7 @@ message DataUploadResponse {
         ABORT = 5;
     }
     optional uint32 id = 1;
-    optional DataUploadResponse.Status status = 2;
-}
-
-message DataUploadCanceledNotification {
-    optional uint32 id = 1;
+    optional Status status = 2;
 }
 
 message FileAccessItemRequest {
@@ -96,4 +81,18 @@ message FileAccessItemResponse {
     optional Status status = 1;
     optional uint32 data_xfer_id = 2;
     optional GDI.Proto.DataTypes.UUID file_access_item_uid = 3;
+}
+
+message InitiateDataUploadRequest {
+    optional uint32 id = 1;
+}
+
+message InitiateDataUploadResponse {
+    enum Status {
+        UNKNOWN = 0;
+        OK = 1;
+        INVALID_ID = 2;
+    }
+    optional uint32 id = 1;
+    optional Status status = 2;
 }

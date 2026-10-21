@@ -2,7 +2,7 @@ syntax = "proto2";
 
 package GDI.Proto.ConnectIQHTTP;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
-//TODO option java_outer_classname = "GdiGroupLiveTrack";
+option java_outer_classname = "GdiHttp";
 
 import "garmin/gdi_data_types.proto";
 

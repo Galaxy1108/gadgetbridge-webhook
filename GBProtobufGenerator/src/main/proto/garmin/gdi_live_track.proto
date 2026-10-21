@@ -4,24 +4,6 @@ package GDI.Proto.LiveTrack;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiLiveTrack";
 
-message LiveTrackService {
-    optional ShareMetaConfigurationNotification share_meta_config_notification = 1;
-    optional ShareSocialCredentialsNotification share_social_notification = 2;
-    optional StartRequest start_request = 3;
-    optional StartResponse start_response = 4;
-    optional StopNotification stop_notification = 5;
-    optional ShareDeviceSettingNotification share_device_setting_notification = 6;
-    optional StatusNotification status_notification = 7;
-    optional ConsentChangedNotification consent_changed_notification = 8;
-    optional LiveEventSharingNotification live_event_sharing_notification = 9;
-    optional SessionSupportRequest session_support_request = 10;
-    optional SessionSupportResponse session_support_response = 11;
-    optional UpdateSettingsNotification update_settings_notification = 12;
-    optional EmergencyCountdownNotification emergency_countdown_notification = 13;
-    optional ConsentNotification consent_notification = 14;
-    optional GroupRideNotification group_ride_notification = 15;
-}
-
 enum DeviceType {
     PND = 0;
     GTU10 = 1;
@@ -45,9 +27,71 @@ enum DeviceType {
 }
 
 enum SessionType {
+    UNKNOWN = -1;
     STANDARD = 0;
     SOS = 1;
     INCIDENT_DETECT = 2;
+    FALL_DETECTION = 3;
+    FAMILY_EMERGENCY = 4;
+}
+
+message CapabilitiesRequest {
+    optional uint32 service_version = 1;
+}
+
+message CapabilitiesResponse {
+}
+
+message ConsentChangedNotification {
+    optional bool has_strava_consent = 2;
+}
+
+message ConsentNotification {
+    enum ConsentPageAction {
+        GRANTED = 0;
+        REJECTED = 1;
+    }
+    optional bool prompt_group_ride_consent = 1;
+    optional ConsentPageAction consent_page_action = 2;
+}
+
+message EmergencyCountdownNotification {
+    enum State {
+        PAUSED = 0;
+        IN_PROGRESS = 1;
+        CANCELED = 2;
+        EXPIRED = 3;
+    }
+    optional State state = 1;
+    optional uint32 time_left_s = 2;
+    optional uint32 utc_time_s = 3;
+    optional SessionType session_type = 4;
+}
+
+message GroupRideNotification {
+    optional string share_session_code = 1;
+}
+
+message LiveEventSharingNotification {
+    optional bool livetrack_requested = 1;
+}
+
+message LiveTrackService {
+    optional ShareMetaConfigurationNotification share_meta_config_notification = 1;
+    optional ShareSocialCredentialsNotification share_social_notification = 2;
+    optional StartRequest start_request = 3;
+    optional StartResponse start_response = 4;
+    optional StopNotification stop_notification = 5;
+    optional ShareDeviceSettingNotification share_device_setting_notification = 6;
+    optional StatusNotification status_notification = 7;
+    optional ConsentChangedNotification consent_changed_notification = 8;
+    optional LiveEventSharingNotification live_event_sharing_notification = 9;
+    optional SessionSupportRequest session_support_request = 10;
+    optional SessionSupportResponse session_support_response = 11;
+    optional UpdateSettingsNotification update_settings_notification = 12;
+    optional EmergencyCountdownNotification emergency_countdown_notification = 13;
+    optional ConsentNotification consent_notification = 14;
+    optional GroupRideNotification group_ride_notification = 15;
 }
 
 message Session {
@@ -64,19 +108,19 @@ message SessionGroup {
     repeated Session sessions = 5;
 }
 
+message SessionSupportRequest {
+}
+
+message SessionSupportResponse {
+    repeated DeviceType supported_session_types = 1;
+    optional bool spectator_messaging_supported = 2;
+}
+
 message ShareDeviceSettingNotification {
     optional bool auto_start_enabled = 1;
     optional bool spectator_audio_enabled = 2;
     optional bool spectator_text_enabled = 3;
     optional bool course_sharing_enabled = 4;
-}
-
-message ConsentChangedNotification {
-    optional bool has_strava_consent = 2;
-}
-
-message LiveEventSharingNotification {
-    optional bool livetrack_requested = 1;
 }
 
 message ShareMetaConfigurationNotification {
@@ -91,14 +135,6 @@ message ShareMetaConfigurationNotification {
 message ShareSocialCredentialsNotification {
     optional TwitterCredentials twitter = 2;
     optional bool strava_beacon_connected = 3;
-}
-
-message SessionSupportRequest {
-}
-
-message SessionSupportResponse {
-    repeated DeviceType supported_session_types = 1;
-    optional bool spectator_messaging_supported = 2;
 }
 
 message StartRequest {
@@ -140,29 +176,4 @@ message TwitterCredentials {
 }
 
 message UpdateSettingsNotification {
-}
-
-message EmergencyCountdownNotification {
-    enum State {
-        PAUSED = 0;
-        IN_PROGRESS = 1;
-        CANCELED = 2;
-        EXPIRED = 3;
-    }
-    optional State state = 1;
-    optional uint32 time_left_s = 2;
-    optional uint32 utc_time_s = 3;
-}
-
-message ConsentNotification {
-    enum ConsentPageAction {
-        GRANTED = 0;
-        REJECTED = 1;
-    }
-    optional bool prompt_group_ride_consent = 1;
-    optional ConsentPageAction consent_page_action = 2;
-}
-
-message GroupRideNotification {
-    optional string share_session_code = 1;
 }

@@ -4,6 +4,33 @@ package GDI.Proto.InstantInput;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiInstantInput";
 
+enum CommandResult {;
+    UNKNOWN = 0;
+    SUCCESS = 1;
+    FAILURE = 2;
+}
+
+message InstantInputEndRequest {
+    enum Command {
+        UNKNOWN = 0;
+        CANCEL = 1;
+        CONFIRM = 2;
+    }
+    optional Command command = 1;
+}
+
+message InstantInputEndResponse {
+    optional CommandResult result = 1;
+}
+
+message InstantInputMessage {
+    optional string content = 1;
+    optional uint32 content_size = 2;
+}
+
+message InstantInputRestartRequest {
+}
+
 message InstantInputService {
     optional InstantInputMessage input_content = 1;
     optional InstantInputStartRequest start_request = 2;
@@ -12,17 +39,6 @@ message InstantInputService {
     optional InstantInputEndResponse end_response = 5;
     optional InstantInputRestartRequest restart_request = 6;
     optional InstantInputSyncRequest sync_request = 7;
-}
-
-enum CommandResult {
-    UNKNOWN = 0;
-    SUCCESS = 1;
-    FAILURE = 2;
-}
-
-message InstantInputMessage {
-    optional string content = 1;
-    optional uint32 content_size = 2;
 }
 
 message InstantInputStartRequest {
@@ -35,28 +51,12 @@ message InstantInputStartRequest {
     optional uint32 max_size = 2;
     optional string content = 3;
     optional uint32 content_size = 4;
-    optional InstantInputStartRequest.Command command = 5;
-}
-
-message InstantInputRestartRequest {
-}
-
-message InstantInputSyncRequest {
+    optional Command command = 5;
 }
 
 message InstantInputStartResponse {
     optional CommandResult result = 1;
 }
 
-message InstantInputEndRequest {
-    enum Command {
-        UNKNOWN = 0;
-        CANCEL = 1;
-        CONFIRM = 2;
-    }
-    optional InstantInputEndRequest.Command command = 1;
-}
-
-message InstantInputEndResponse {
-    optional CommandResult result = 1;
+message InstantInputSyncRequest {
 }

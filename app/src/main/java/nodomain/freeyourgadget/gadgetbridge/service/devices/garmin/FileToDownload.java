@@ -30,6 +30,6 @@ public class FileToDownload {
 
     public long getSize() {
         return directoryEntry != null ? directoryEntry.getFileSize() :
-                syncFile != null ? syncFile.getSize() : -1;
+                syncFile != null ? syncFile.getDataSize() : -1;
     }
 }

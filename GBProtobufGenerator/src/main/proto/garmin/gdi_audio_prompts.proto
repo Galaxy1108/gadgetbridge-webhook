@@ -26,9 +26,6 @@ message AudioPromptsService {
     optional PhraseNotification phrase_notification = 14;
 }
 
-message AudioSettingsUpdatedNotification {
-}
-
 message AudioSettingsRequest {
 }
 
@@ -40,26 +37,12 @@ message AudioSettingsResponse {
     optional bool speakNavigation = 5;
 }
 
-message LapNotification {
-    optional uint32 lap_number = 1;
-    optional uint64 lap_time = 2;
-    optional float lap_speed = 3;
-    optional Language audio_prompt_language = 4;
+message AudioSettingsUpdatedNotification {
 }
 
-message SpeedNotification {
-    optional float average_speed = 1;
-    optional float current_speed = 2;
-    optional float lap_speed = 3;
-    optional bool device_is_displaying_metric_units = 4;
-    optional Language audio_prompt_language = 5;
-}
-
-message PaceNotification {
-    optional uint64 average_pace = 1;
-    optional uint64 current_pace = 2;
-    optional uint64 lap_pace = 3;
-    optional Language audio_prompt_language = 4;
+message GravelPhrase {
+    optional string phrase_template = 1;
+    optional string context_json = 2;
 }
 
 message HeartRateNotification {
@@ -70,16 +53,28 @@ message HeartRateNotification {
     optional Language audio_prompt_language = 5;
 }
 
-message PowerNotification {
-    optional uint32 average_power = 1;
-    optional uint32 normalized_power = 2;
-    optional uint32 lap_power = 3;
+message Language {
+    optional string language_code = 1;
+    optional string country_code = 2;
+}
+
+message LapNotification {
+    optional uint32 lap_number = 1;
+    optional uint64 lap_time = 2;
+    optional float lap_speed = 3;
     optional Language audio_prompt_language = 4;
 }
 
-message SpeechNotification {
-    optional SpeechType speech_type = 1;
-    optional string text_to_speak = 2;
+message PaceNotification {
+    optional uint64 average_pace = 1;
+    optional uint64 current_pace = 2;
+    optional uint64 lap_pace = 3;
+    optional Language audio_prompt_language = 4;
+}
+
+message Phrase {
+    optional uint32 phrase_id = 1;
+    repeated SlotValue slot_values = 2;
 }
 
 message PhraseNotification {
@@ -88,21 +83,11 @@ message PhraseNotification {
     repeated GravelPhrase gravel_phrases = 3;
 }
 
-message Phrase {
-    optional uint32 phrase_id = 1;
-    repeated SlotValue slot_values = 2;
-}
-
-message SlotValue {
-    oneof value {
-        sint32 int_value = 1;
-        float float_value = 2;
-    }
-}
-
-message GravelPhrase {
-    optional string phrase_template = 1;
-    optional string context_json = 2;
+message PowerNotification {
+    optional uint32 average_power = 1;
+    optional uint32 normalized_power = 2;
+    optional uint32 lap_power = 3;
+    optional Language audio_prompt_language = 4;
 }
 
 message SetLanguageRequest {
@@ -113,9 +98,22 @@ message SetLanguageResponse {
     optional bool success = 1;
 }
 
-message Language {
-    optional string language_code = 1;
-    optional string country_code = 2;
+message SlotValue {
+    optional sint32 int_value = 1;
+    optional float float_value = 2;
+}
+
+message SpeechNotification {
+    optional SpeechType speech_type = 1;
+    optional string text_to_speak = 2;
+}
+
+message SpeedNotification {
+    optional float average_speed = 1;
+    optional float current_speed = 2;
+    optional float lap_speed = 3;
+    optional bool device_is_displaying_metric_units = 4;
+    optional Language audio_prompt_language = 5;
 }
 
 message SupportedLanguagesRequest {
@@ -124,3 +122,4 @@ message SupportedLanguagesRequest {
 message SupportedLanguagesResponse {
     repeated Language languages = 1;
 }
+

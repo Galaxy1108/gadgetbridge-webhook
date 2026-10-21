@@ -333,8 +333,8 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
     public void addFileToDownloadList(GdiFileAccess.ItemReference file) {
         filesToDownload.add(new FileToDownload(file));
-        if (isBusyFetching && file.hasSize()) {
-            transferNotification.incrementTotalSize(file.getSize());
+        if (isBusyFetching && file.hasDataSize()) {
+            transferNotification.incrementTotalSize(file.getDataSize());
         }
     }
 
@@ -2084,8 +2084,8 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 } else {
                     try {
                         Date fileDate = null;
-                        if(gdiFile != null && gdiFile.hasTimestamp()) {
-                            int ts = gdiFile.getTimestamp();
+                        if(gdiFile != null && gdiFile.hasModifiedTime()) {
+                            int ts = gdiFile.getModifiedTime();
                             if(ts != 0){
                                 fileDate = new Date(GarminTimeUtils.garminTimestampToJavaMillis(ts));
                             }
@@ -2126,7 +2126,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                 }
 
                 if (gdiFile != null && !getKeepActivityDataOnDevice()) { // delete file from watch upon successful download
-                    final GdiFileAccess.FileSyncService syncedCommand = protocolBufferHandler.getFileSyncServiceHandler()
+                    final GdiFileAccess.Service syncedCommand = protocolBufferHandler.getFileSyncServiceHandler()
                             .markSynced(gdiFile);
                     if (syncedCommand != null) {
                         sendProtobufRequest("mark file as synced",
@@ -2136,7 +2136,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
 
                 LOG.debug("New file sync success");
                 if (currentlyDownloading != null && currentlyDownloading.getSyncFile() != null) {
-                    transferNotification.incrementTotalProgress(currentlyDownloading.getSyncFile().getSize());
+                    transferNotification.incrementTotalProgress(currentlyDownloading.getSyncFile().getDataSize());
                     currentlyDownloading = null;
                 }
             }
@@ -2147,7 +2147,7 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
                     if (!ArrayUtils.equals(new byte[]{0, 0, 0}, value, 0)) {
                         LOG.error("Got unexpected first message");
                         if (currentlyDownloading != null && currentlyDownloading.getSyncFile() != null) {
-                            transferNotification.incrementTotalProgress(currentlyDownloading.getSyncFile().getSize());
+                            transferNotification.incrementTotalProgress(currentlyDownloading.getSyncFile().getDataSize());
                             currentlyDownloading = null;
                         }
                         return;
@@ -2222,12 +2222,12 @@ public class GarminSupport extends AbstractBTLESingleDeviceSupport implements IC
         final GdiFileAccess.ItemReference file = GdiFileAccess.ItemReference.newBuilder()
                 .setUid(fileId)
                 .setDataType(fileType)
-                .setSize(rawPrgBytes.length)
+                .setDataSize(rawPrgBytes.length)
                 .build();
 
         sendProtobufRequest("reserve app install slot for " + taskName,
                 Smart.newBuilder().setFileAccessService(
-                        GdiFileAccess.FileSyncService.newBuilder().setPushItemRequest(
+                        GdiFileAccess.Service.newBuilder().setPushItemRequest(
                                 GdiFileAccess.PushItemDataRequest.newBuilder()
                                         .setItem(file)
                                         .setPriority(37)

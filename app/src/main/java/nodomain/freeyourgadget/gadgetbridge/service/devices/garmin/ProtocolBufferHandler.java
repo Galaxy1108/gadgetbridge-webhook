@@ -42,13 +42,13 @@ import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCredentials;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCalendar;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiCore;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransfer.DataTransferService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTransfer;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDeviceStatus;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileAccess;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFindMyWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiGncs;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttpService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttp;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiInstalledApps;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiRealtimeSettings;
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto.Smart;
@@ -139,7 +139,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 return prepareProtobufResponse(processProtobufSmsNotificationMessage(smart.getSmsNotificationService()), message.getRequestId());
             }
             if (smart.hasConnectIqHttpService()) {
-                final GdiHttpService.ConnectIQHTTPService response = httpHandler.handle(smart.getConnectIqHttpService(), message.getRequestId());
+                final GdiHttp.ConnectIQHTTPService response = httpHandler.handle(smart.getConnectIqHttpService(), message.getRequestId());
                 if (response != null) {
                     return prepareProtobufResponse(Smart.newBuilder().setConnectIqHttpService(response).build(), message.getRequestId());
                 }
@@ -147,7 +147,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 // Response will be async
             }
             if (smart.hasDataTransferService()) {
-                final DataTransferService response = dataTransferHandler.handle(smart.getDataTransferService(), message.getRequestId());
+                final GdiDataTransfer.DataTransferService response = dataTransferHandler.handle(smart.getDataTransferService(), message.getRequestId());
                 if (response == null) {
                     return null;
                 }
@@ -223,7 +223,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 }
                 if (deviceSupport.newSyncProtocol()) {
                     processed = true;
-                    final GdiFileAccess.FileSyncService response = fileSyncServiceHandler.handle(smart.getFileAccessService());
+                    final GdiFileAccess.Service response = fileSyncServiceHandler.handle(smart.getFileAccessService());
                     if (response != null) {
                         return prepareProtobufResponse(Smart.newBuilder().setFileAccessService(response).build(), message.getRequestId());
                     }
@@ -517,7 +517,7 @@ public class ProtocolBufferHandler implements MessageHandler {
         return null;
     }
 
-    private Smart processProtobufNotificationsServiceMessage(final GdiGncs.GncsService notificationsService) {
+    private Smart processProtobufNotificationsServiceMessage(final GdiGncs.Service notificationsService) {
         if (notificationsService.hasMediaRequest()) {
             final GdiGncs.MediaRequest pictureRequest = notificationsService.getMediaRequest();
             final int notificationId = pictureRequest.getNotificationUid();
@@ -526,7 +526,7 @@ public class ProtocolBufferHandler implements MessageHandler {
                 return null;
             }
 
-            final GdiGncs.DisplayAttributes parameters = pictureRequest.getParameters();
+            final GdiGncs.DisplayAttributes parameters = pictureRequest.getAttributes();
             final int targetHeight = (int) Math.round(bmp.getHeight() * ((double) parameters.getWidthPx() / bmp.getWidth()));
 
             final Bitmap scaledBmp = Bitmap.createScaledBitmap(bmp, parameters.getWidthPx(), targetHeight, true);
@@ -539,7 +539,7 @@ public class ProtocolBufferHandler implements MessageHandler {
             final GdiGncs.MediaResponse.Builder response = GdiGncs.MediaResponse.newBuilder()
                     .setStatus(GdiGncs.MediaResponse.Status.SUCCESS)
                     .setNotificationUid(notificationId)
-                    .setMediaType(GdiGncs.MediaType.JPEG)
+                    .setType(GdiGncs.MediaType.JPEG)
                     .setTransferInfo(
                         GdiDataTypes.DataTransferItem.newBuilder()
                                     .setId(transferId)
@@ -552,7 +552,7 @@ public class ProtocolBufferHandler implements MessageHandler {
             }
 
             return Smart.newBuilder().setGncsService(
-                    GdiGncs.GncsService.newBuilder().setMediaResponse(response.build())
+                    GdiGncs.Service.newBuilder().setMediaResponse(response.build())
             ).build();
         }
 

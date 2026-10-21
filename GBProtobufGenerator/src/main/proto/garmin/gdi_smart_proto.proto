@@ -23,7 +23,7 @@ import "garmin/gdi_garmin_connect.proto";
 import "garmin/gdi_generic_item_transfer.proto";
 import "garmin/gdi_gncs.proto";
 import "garmin/gdi_group_live_track.proto";
-import "garmin/gdi_http_service.proto";
+import "garmin/gdi_http.proto";
 import "garmin/gdi_incident_detection.proto";
 import "garmin/gdi_inreach_tracking.proto";
 import "garmin/gdi_installed_apps.proto";
@@ -39,8 +39,9 @@ import "garmin/gdi_wifi_setup.proto";
 message Smart {
     optional GDI.Proto.Calendar.CalendarService calendar_events_service = 1;
     optional GDI.Proto.ConnectIQHTTP.ConnectIQHTTPService connect_iq_http_service = 2;
-    optional GDI.Proto.ConnectIQAppSettings.ConnectIQAppSettingsService connect_iq_app_settings_service = 4;
     optional GDI.Proto.ConnectIQInstalledApps.ConnectIQInstalledAppsService connect_iq_installed_apps_service = 3;
+    optional GDI.Proto.ConnectIQAppSettings.ConnectIQAppSettingsService connect_iq_app_settings_service = 4;
+
     optional GDI.Proto.DataTransfer.DataTransferService data_transfer_service = 7;
     optional GDI.Proto.DeviceStatus.DeviceStatusService device_status_service = 8;
     optional GDI.Proto.IncidentDetection.IncidentDetectionService incident_detection_service = 9;
@@ -64,11 +65,11 @@ message Smart {
     optional GDI.Proto.LaunchMonitor.LaunchMonitorService launch_monitor_service = 38;
     optional EcgService samd_service = 39;
     optional SettingsService realtime_settings_service = 42;
-    optional GDI.Proto.FileAccess.FileSyncService file_access_service = 43;
+    optional GDI.Proto.FileAccess.Service file_access_service = 43;
     optional Service44 service44 = 44;
     optional GDI.Proto.DeepLinking.DeepLinkingService deeplinking_service = 46;
     optional GDI.Proto.GarminConnect.Service garmin_connect_service = 47;
-    optional GDI.Proto.GNCS.GncsService gncs_service = 49;
+    optional GDI.Proto.GNCS.Service gncs_service = 49;
     optional GDI.Proto.LiveSession.LiveSessionService live_session_service = 56;
 }
 

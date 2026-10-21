@@ -40,7 +40,7 @@ import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes;
-import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttpService;
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiHttp;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.interceptors.AgpsInterceptor;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.http.interceptors.ContactsInterceptor;
@@ -70,19 +70,19 @@ public class HttpHandler {
         );
     }
 
-    public GdiHttpService.ConnectIQHTTPService handle(final GdiHttpService.ConnectIQHTTPService httpService, final int messageRequestId) {
+    public GdiHttp.ConnectIQHTTPService handle(final GdiHttp.ConnectIQHTTPService httpService, final int messageRequestId) {
         if (httpService.hasRawResourceRequest()) {
-            final GdiHttpService.RawResourceResponse rawResponse = handleRawRequest(httpService.getRawResourceRequest(), messageRequestId);
+            final GdiHttp.RawResourceResponse rawResponse = handleRawRequest(httpService.getRawResourceRequest(), messageRequestId);
             if (rawResponse != null) {
-                return GdiHttpService.ConnectIQHTTPService.newBuilder()
+                return GdiHttp.ConnectIQHTTPService.newBuilder()
                         .setRawResourceResponse(rawResponse)
                         .build();
             }
             return null;
         } else if (httpService.hasConnectIqHttpRequest()) {
-            final GdiHttpService.ConnectIQHTTPResponse webResponse = handleWebRequest(httpService.getConnectIqHttpRequest(), messageRequestId);
+            final GdiHttp.ConnectIQHTTPResponse webResponse = handleWebRequest(httpService.getConnectIqHttpRequest(), messageRequestId);
             if (webResponse != null) {
-                return GdiHttpService.ConnectIQHTTPService.newBuilder()
+                return GdiHttp.ConnectIQHTTPService.newBuilder()
                         .setConnectIqHttpResponse(webResponse)
                         .build();
             }
@@ -96,7 +96,7 @@ public class HttpHandler {
         return null;
     }
 
-    public GdiHttpService.RawResourceResponse handleRawRequest(final GdiHttpService.RawResourceRequest rawRequest,
+    public GdiHttp.RawResourceResponse handleRawRequest(final GdiHttp.RawResourceRequest rawRequest,
                                                                    final int messageRequestId) {
         LOG.debug("Got rawRequest {}: {} - {}", messageRequestId, rawRequest.getMethod(), rawRequest.getUrl());
 
@@ -110,8 +110,8 @@ public class HttpHandler {
         final GarminHttpResponse response = handleRequest(request);
 
         if (response == null) {
-            return GdiHttpService.RawResourceResponse.newBuilder()
-                    .setStatus(GdiHttpService.RawResourceResponse.ResponseStatus.UNKNOWN)
+            return GdiHttp.RawResourceResponse.newBuilder()
+                    .setStatus(GdiHttp.RawResourceResponse.ResponseStatus.UNKNOWN)
                     .build();
         }
 
@@ -150,14 +150,14 @@ public class HttpHandler {
         return response;
     }
 
-    public static GdiHttpService.RawResourceResponse createRawResponse(
+    public static GdiHttp.RawResourceResponse createRawResponse(
             final GarminHttpRequest request,
             final GarminHttpResponse response
     ) {
-        final List<GdiHttpService.RawResourceResponse.HTTPHeader> responseHeaders = new ArrayList<>();
+        final List<GdiHttp.RawResourceResponse.HTTPHeader> responseHeaders = new ArrayList<>();
         for (final Map.Entry<String, String> h : response.getHeaders().entrySet()) {
             responseHeaders.add(
-                    GdiHttpService.RawResourceResponse.HTTPHeader.newBuilder()
+                    GdiHttp.RawResourceResponse.HTTPHeader.newBuilder()
                             .setKey(h.getKey())
                             .setValue(h.getValue())
                             .build()
@@ -170,8 +170,8 @@ public class HttpHandler {
             if (response.getOnDataSuccessfullySentListener() != null) {
                 DataTransferHandler.addOnDataSuccessfullySentListener(id, response.getOnDataSuccessfullySentListener());
             }
-            return GdiHttpService.RawResourceResponse.newBuilder()
-                    .setStatus(GdiHttpService.RawResourceResponse.ResponseStatus.OK)
+            return GdiHttp.RawResourceResponse.newBuilder()
+                    .setStatus(GdiHttp.RawResourceResponse.ResponseStatus.OK)
                     .setHttpStatusCode(response.getStatus())
                     .addAllHeaders(responseHeaders)
                     .setXferData(
@@ -189,7 +189,7 @@ public class HttpHandler {
         if ("gzip".equals(request.getHeaders().get("accept-encoding"))) {
             LOG.debug("Compressing response");
             responseHeaders.add(
-                    GdiHttpService.RawResourceResponse.HTTPHeader.newBuilder()
+                    GdiHttp.RawResourceResponse.HTTPHeader.newBuilder()
                             .setKey("Content-Encoding")
                             .setValue("gzip")
                             .build()
@@ -209,15 +209,15 @@ public class HttpHandler {
             responseBody = response.getBody();
         }
 
-        return GdiHttpService.RawResourceResponse.newBuilder()
-                .setStatus(GdiHttpService.RawResourceResponse.ResponseStatus.OK)
+        return GdiHttp.RawResourceResponse.newBuilder()
+                .setStatus(GdiHttp.RawResourceResponse.ResponseStatus.OK)
                 .setHttpStatusCode(response.getStatus())
                 .setResourceData(ByteString.copyFrom(responseBody))
                 .addAllHeaders(responseHeaders)
                 .build();
     }
 
-    public GdiHttpService.ConnectIQHTTPService handleShowURLRequest(final GdiHttpService.OpenWebpageNotification showURLNotification,
+    public GdiHttp.ConnectIQHTTPService handleShowURLRequest(final GdiHttp.OpenWebpageNotification showURLNotification,
                                                            final int messageRequestId) {
         LOG.warn("Got unsupported ShowUrlNotification {}: {} {} {}",
                 messageRequestId,
@@ -228,7 +228,7 @@ public class HttpHandler {
         return null;
     }
 
-    public GdiHttpService.ConnectIQHTTPResponse handleWebRequest(final GdiHttpService.ConnectIQHTTPRequest webRequest,
+    public GdiHttp.ConnectIQHTTPResponse handleWebRequest(final GdiHttp.ConnectIQHTTPRequest webRequest,
                                                                    final int messageRequestId) {
         LOG.debug("Got webRequest {}: {} {}", messageRequestId, webRequest.getHttpMethod(), webRequest.getUrl());
 
@@ -238,8 +238,8 @@ public class HttpHandler {
             final GarminHttpResponse response = handleRequest(request);
 
             if (response == null) {
-                return GdiHttpService.ConnectIQHTTPResponse.newBuilder()
-                        .setStatus(GdiHttpService.ConnectIQHTTPResponse.ResponseStatus.UNKNOWN)
+                return GdiHttp.ConnectIQHTTPResponse.newBuilder()
+                        .setStatus(GdiHttp.ConnectIQHTTPResponse.ResponseStatus.UNKNOWN)
                         .setHttpStatusCode(0)
                         .build();
             }
@@ -252,27 +252,27 @@ public class HttpHandler {
             return createWebResponse(request, response);
         } catch (final Exception e) {
             LOG.error("Failed to create web response", e);
-            return GdiHttpService.ConnectIQHTTPResponse.newBuilder()
-                    .setStatus(GdiHttpService.ConnectIQHTTPResponse.ResponseStatus.UNKNOWN)
+            return GdiHttp.ConnectIQHTTPResponse.newBuilder()
+                    .setStatus(GdiHttp.ConnectIQHTTPResponse.ResponseStatus.UNKNOWN)
                     .setHttpStatusCode(0)
                     .build();
         }
     }
 
-    public static GdiHttpService.ConnectIQHTTPService createSuccessResponse(final GarminHttpRequest request,
+    public static GdiHttp.ConnectIQHTTPService createSuccessResponse(final GarminHttpRequest request,
                                                                    final GarminHttpResponse response) {
         if (request.getRawRequest() != null) {
-            final GdiHttpService.RawResourceResponse rawResponse = createRawResponse(request, response);
+            final GdiHttp.RawResourceResponse rawResponse = createRawResponse(request, response);
             if (rawResponse != null) {
-                return GdiHttpService.ConnectIQHTTPService.newBuilder()
+                return GdiHttp.ConnectIQHTTPService.newBuilder()
                         .setRawResourceResponse(rawResponse)
                         .build();
             }
             return null;
         } else if (request.getWebRequest() != null) {
-            final GdiHttpService.ConnectIQHTTPResponse webResponse = createWebResponse(request, response);
+            final GdiHttp.ConnectIQHTTPResponse webResponse = createWebResponse(request, response);
             if (webResponse != null) {
-                return GdiHttpService.ConnectIQHTTPService.newBuilder()
+                return GdiHttp.ConnectIQHTTPService.newBuilder()
                         .setConnectIqHttpResponse(webResponse)
                         .build();
             }
@@ -282,17 +282,17 @@ public class HttpHandler {
         }
     }
 
-    public static GdiHttpService.ConnectIQHTTPService createErrorResponse(final GarminHttpRequest request) {
+    public static GdiHttp.ConnectIQHTTPService createErrorResponse(final GarminHttpRequest request) {
         if (request.getRawRequest() != null) {
-            return GdiHttpService.ConnectIQHTTPService.newBuilder()
-                    .setRawResourceResponse(GdiHttpService.RawResourceResponse.newBuilder()
-                            .setStatus(GdiHttpService.RawResourceResponse.ResponseStatus.UNKNOWN)
+            return GdiHttp.ConnectIQHTTPService.newBuilder()
+                    .setRawResourceResponse(GdiHttp.RawResourceResponse.newBuilder()
+                            .setStatus(GdiHttp.RawResourceResponse.ResponseStatus.UNKNOWN)
                             .build())
                     .build();
         } else if (request.getWebRequest() != null) {
-            return GdiHttpService.ConnectIQHTTPService.newBuilder()
-                    .setConnectIqHttpResponse(GdiHttpService.ConnectIQHTTPResponse.newBuilder()
-                            .setStatus(GdiHttpService.ConnectIQHTTPResponse.ResponseStatus.UNKNOWN)
+            return GdiHttp.ConnectIQHTTPService.newBuilder()
+                    .setConnectIqHttpResponse(GdiHttp.ConnectIQHTTPResponse.newBuilder()
+                            .setStatus(GdiHttp.ConnectIQHTTPResponse.ResponseStatus.UNKNOWN)
                             .setHttpStatusCode(0)
                             .build())
                     .build();
@@ -301,11 +301,11 @@ public class HttpHandler {
         }
     }
 
-    public static GdiHttpService.ConnectIQHTTPResponse createWebResponse(
+    public static GdiHttp.ConnectIQHTTPResponse createWebResponse(
             final GarminHttpRequest request,
             final GarminHttpResponse response
     ) {
-        final GdiHttpService.ConnectIQHTTPRequest webRequest = request.getWebRequest();
+        final GdiHttp.ConnectIQHTTPRequest webRequest = request.getWebRequest();
         try {
             final byte[] headers;
             if (webRequest.getIncludeHttpHeaderFieldsInResponse()) {
@@ -326,8 +326,8 @@ public class HttpHandler {
 
             if (response.getBody().length > webRequest.getMaxResponseLength()) {
                 // TODO figure out the compression algorithm
-                return GdiHttpService.ConnectIQHTTPResponse.newBuilder()
-                        .setStatus(GdiHttpService.ConnectIQHTTPResponse.ResponseStatus.NETWORK_RESPONSE_TOO_LARGE)
+                return GdiHttp.ConnectIQHTTPResponse.newBuilder()
+                        .setStatus(GdiHttp.ConnectIQHTTPResponse.ResponseStatus.NETWORK_RESPONSE_TOO_LARGE)
                         .setHttpStatusCode(0)
                         .build();
             }
@@ -338,15 +338,15 @@ public class HttpHandler {
                     jsonElement = JsonParser.parseReader(reader);
                 } catch (IOException e) {
                     LOG.error("Failed to decode body as JSON", e);
-                    return GdiHttpService.ConnectIQHTTPResponse.newBuilder()
-                            .setStatus(GdiHttpService.ConnectIQHTTPResponse.ResponseStatus.INVALID_HTTP_BODY_IN_NETWORK_RESPONSE)
+                    return GdiHttp.ConnectIQHTTPResponse.newBuilder()
+                            .setStatus(GdiHttp.ConnectIQHTTPResponse.ResponseStatus.INVALID_HTTP_BODY_IN_NETWORK_RESPONSE)
                             .setHttpStatusCode(0)
                             .build();
                 }
-            } else if (webRequest.getResponseType() == GdiHttpService.ConnectIQHTTPRequest.ResponseType.JSON) {
+            } else if (webRequest.getResponseType() == GdiHttp.ConnectIQHTTPRequest.ResponseType.JSON) {
                 // We got non-json
-                return GdiHttpService.ConnectIQHTTPResponse.newBuilder()
-                        .setStatus(GdiHttpService.ConnectIQHTTPResponse.ResponseStatus.INVALID_HTTP_BODY_IN_NETWORK_RESPONSE)
+                return GdiHttp.ConnectIQHTTPResponse.newBuilder()
+                        .setStatus(GdiHttp.ConnectIQHTTPResponse.ResponseStatus.INVALID_HTTP_BODY_IN_NETWORK_RESPONSE)
                         .setHttpStatusCode(response.getStatus())
                         .build();
             } else {
@@ -354,8 +354,8 @@ public class HttpHandler {
             }
             final byte[] body = GarminJson.encode(jsonElement);
 
-            final GdiHttpService.ConnectIQHTTPResponse.Builder builder = GdiHttpService.ConnectIQHTTPResponse.newBuilder()
-                    .setStatus(GdiHttpService.ConnectIQHTTPResponse.ResponseStatus.OK)
+            final GdiHttp.ConnectIQHTTPResponse.Builder builder = GdiHttp.ConnectIQHTTPResponse.newBuilder()
+                    .setStatus(GdiHttp.ConnectIQHTTPResponse.ResponseStatus.OK)
                     .setHttpStatusCode(response.getStatus())
                     .setHttpBody(ByteString.copyFrom(body))
                     .setInflatedSize(0); // 0 for non-compressed

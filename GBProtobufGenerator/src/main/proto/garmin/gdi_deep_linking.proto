@@ -5,8 +5,8 @@ option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiLaun
 option java_outer_classname = "GdiDeepLinking";
 
 message DeepLinkingService {
-    optional OpenDeepLinkingRequest deep_linking_request = 1;
-    optional OpenDeepLinkingResponse deep_linking_response = 2;
+    optional GDI.Proto.DeepLinking.OpenDeepLinkingRequest deep_linking_request = 1;
+    optional GDI.Proto.DeepLinking.OpenDeepLinkingResponse deep_linking_response = 2;
 }
 
 message OpenDeepLinkingRequest {
@@ -19,6 +19,6 @@ message OpenDeepLinkingResponse {
         UNHANDLED = 2;
         UNKNOWN_ERROR = 3;
     }
-    optional OpenDeepLinkingResponse.ResponseStatus status = 1;
+    optional GDI.Proto.DeepLinking.OpenDeepLinkingResponse.ResponseStatus status = 1;
     optional int32 used_schema_index = 2;
 }

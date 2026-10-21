@@ -29,20 +29,20 @@ message GetAppSettingsResponse {
         APP_NOT_INSTALLED = 2;
     }
     optional bytes app_identifier = 1;
-    optional GetAppSettingsResponse.Response response = 2;
+    optional Response response = 2;
 }
 
-message SendAppSettingsRequest {
-    optional bytes app_identifier = 1;
-    optional bytes settings_values = 2;
+message OpenAppSettingsRequest {
+    optional bytes store_uuid = 1;
 }
 
-message SendAppSettingsResponse {
-    enum Response {
+message OpenAppSettingsResponse {
+    enum ResponseStatus {
         UNKNOWN_RESPONSE = 0;
         SUCCESS = 1;
     }
-    optional Response response = 1;
+    optional bytes app_identifier = 1;
+    optional ResponseStatus status = 2;
 }
 
 message SaveAppSettingsRequest {
@@ -60,17 +60,30 @@ message SaveAppSettingsResponse {
     optional Response response = 2;
 }
 
-message OpenAppSettingsRequest {
-    optional bytes store_uuid = 1;
+message SendAppSettingsRequest {
+    optional bytes app_identifier = 1;
+    optional bytes settings_values = 2;
 }
 
-message OpenAppSettingsResponse {
-    enum ResponseStatus {
+message SendAppSettingsResponse {
+    enum Response {
         UNKNOWN_RESPONSE = 0;
         SUCCESS = 1;
     }
-    optional bytes app_identifier = 1;
-    optional ResponseStatus status = 2;
+    optional Response response = 1;
+}
+
+message VerifiedAppSettingsNotification {
+    enum Result {
+        VERIFIED = 0;
+        UNKNOWN_ERROR = 1;
+        APP_ERROR = 2;
+        VERIFICIATION_FAILED = 3;
+    }
+    optional bytes store_uuid = 1;
+    optional bytes key = 2;
+    optional Result result = 3;
+    optional bytes error = 4;
 }
 
 message VerifyAppSettingsRequest {
@@ -88,17 +101,4 @@ message VerifyAppSettingsResponse {
     }
     optional bytes store_uuid = 1;
     optional ResponseStatus status = 2;
-}
-
-message VerifiedAppSettingsNotification {
-    enum Result {
-        VERIFIED = 0;
-        UNKNOWN_ERROR = 1;
-        APP_ERROR = 2;
-        VERIFICIATION_FAILED = 3;
-    }
-    optional bytes store_uuid = 1;
-    optional bytes key = 2;
-    optional Result result = 3;
-    optional bytes error = 4;
 }

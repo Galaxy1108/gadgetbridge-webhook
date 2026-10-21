@@ -6,13 +6,8 @@ option java_outer_classname = "GdiWaypointTransfer";
 
 import "garmin/gdi_data_types.proto";
 
-message WaypointTransferService {
-    optional WaypointRequest waypoint_request = 1;
-    optional WaypointResponse waypoint_response = 2;
-}
-
 message WaypointRequest {
-    optional GDI.Proto.DataTypes.ScPoint location = 1;
+    required GDI.Proto.DataTypes.ScPoint location = 1;
     optional string name = 2;
     optional GDI.Proto.DataTypes.CoordinateSystem coordinate_system = 3;
 }
@@ -25,4 +20,9 @@ message WaypointResponse {
         ERROR = 3;
     }
     optional ResponseStatus status = 1;
+}
+
+message WaypointTransferService {
+    optional WaypointRequest waypoint_request = 1;
+    optional WaypointResponse waypoint_response = 2;
 }

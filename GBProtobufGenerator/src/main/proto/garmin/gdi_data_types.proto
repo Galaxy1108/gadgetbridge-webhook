@@ -4,6 +4,30 @@ package GDI.Proto.DataTypes;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiDataTypes";
 
+enum CompassDirection {
+    NORTH = 0;
+    NORTH_NORTHEAST = 1;
+    NORTHEAST = 2;
+    EAST_NORTHEAST = 3;
+    EAST = 4;
+    EAST_SOUTHEAST = 5;
+    SOUTHEAST = 6;
+    SOUTH_SOUTHEAST = 7;
+    SOUTH = 8;
+    SOUTH_SOUTHWEST = 9;
+    SOUTHWEST = 10;
+    WEST_SOUTHWEST = 11;
+    WEST = 12;
+    WEST_NORTHWEST = 13;
+    NORTHWEST = 14;
+    NORTH_NORTHWEST = 15;
+}
+
+enum CoordinateSystem {
+    WGS84 = 0;
+    GCJ02 = 1;
+}
+
 enum GPSFixType {
     FORCE_NO_SOLUTION = 1;
     NO_SOLUTION = 2;
@@ -93,33 +117,19 @@ enum Languages {
     ENGLISH_AUSTRALIA = 75;
 }
 
-enum CoordinateSystem {
-    WGS84 = 0;
-    GCJ02 = 1;
-}
-
-enum CompassDirection {
-    NORTH = 0;
-    NORTH_NORTHEAST = 1;
-    NORTHEAST = 2;
-    EAST_NORTHEAST = 3;
-    EAST = 4;
-    EAST_SOUTHEAST = 5;
-    SOUTHEAST = 6;
-    SOUTH_SOUTHEAST = 7;
-    SOUTH = 8;
-    SOUTH_SOUTHWEST = 9;
-    SOUTHWEST = 10;
-    WEST_SOUTHWEST = 11;
-    WEST = 12;
-    WEST_NORTHWEST = 13;
-    NORTHWEST = 14;
-    NORTH_NORTHWEST = 15;
-}
-
 enum MeasurementUnit {
     METRIC = 0;
     STATUTE = 1;
+}
+
+message DataTransferItem {
+    required uint32 id = 1;
+    required uint32 size = 2;
+}
+
+message Locale {
+    required string language_code = 1;
+    optional string country_code = 2;
 }
 
 message ScPoint {
@@ -130,14 +140,4 @@ message ScPoint {
 message UUID {
     required fixed64 most_significant = 1;
     required fixed64 least_significant = 2;
-}
-
-message Locale {
-    required string language_code = 1;
-    optional string country_code = 2;
-}
-
-message DataTransferItem {
-    required uint32 id = 1;
-    required uint32 size = 2;
 }
