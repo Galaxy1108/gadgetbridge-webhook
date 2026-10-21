@@ -121,25 +121,6 @@ public class HydrationSampleProvider extends AbstractTimeSampleProvider<GenericH
     }
 
     /**
-     * Returns the entries of the day (passed as yyyyMMdd), oldest first.
-     */
-    @NonNull
-    public List<GenericHydrationSample> getDayEntries(final int day) {
-        final Device dbDevice = DBHelper.findDevice(getDevice(), getSession());
-        if (dbDevice == null) {
-            return Collections.emptyList();
-        }
-
-        final QueryBuilder<GenericHydrationSample> qb = getSampleDao().queryBuilder();
-        qb.where(GenericHydrationSampleDao.Properties.DeviceId.eq(dbDevice.getId()))
-            .where(GenericHydrationSampleDao.Properties.Day.eq(day))
-            .orderAsc(GenericHydrationSampleDao.Properties.Timestamp);
-        final List<GenericHydrationSample> samples = qb.build().list();
-        detachFromSession();
-        return samples;
-    }
-
-    /**
      * Stores a change of {@code volumeMl} to the total of the day, as yyyyMMdd. If an entry with
      * the same timestamp exists, the timestamp is incremented by 1 ms until it is unique.
      */

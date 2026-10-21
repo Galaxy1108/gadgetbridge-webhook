@@ -2,13 +2,13 @@ package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.PointF
 import androidx.core.content.ContextCompat
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.BloodPressureSample
 import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
 import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
+import nodomain.freeyourgadget.gadgetbridge.widgets.RangeSeries
 import nodomain.freeyourgadget.gadgetbridge.widgets.Stat
 import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
 import nodomain.freeyourgadget.gadgetbridge.widgets.TileAxis
@@ -34,7 +34,6 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
     private const val SECONDS_PER_DAY = 24 * 60 * 60L
     private const val CHART_MIN = 65f
     private const val CHART_MAX = 135f
-    private const val SPARKLINE_WIDTH_DP = 1.5f
 
     // Normal, elevated, stage 1 and stage 2+
     private val COLORS = intArrayOf(
@@ -88,7 +87,7 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
             reading?.bpSystolic ?: 0,
             reading?.bpDiastolic ?: 0,
             reading?.timestamp?.div(1000L) ?: 0L,
-            if (config.needsHistory) dailyAverages(history, scope.dayStart) else null,
+            if (config.needsHistory) dailyReadings(history, scope.dayStart) else null,
             scope.dayStart,
         )
     }
@@ -97,17 +96,25 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
         val dayStart = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
         val systolic = floatArrayOf(121f, 119f, Float.NaN, 124f, 118f, 122f, 117f, 120f, Float.NaN, 123f, 119f, 116f, 121f, 118f)
         val diastolic = floatArrayOf(79f, 77f, Float.NaN, 81f, 76f, 78f, 75f, 77f, Float.NaN, 80f, 78f, 74f, 78f, 76f)
-        return Data(118, 76, dayStart + 8 * 3600L, DailyAverages(systolic, diastolic), dayStart)
+        val daily = DailyReadings(
+            systolic,
+            diastolic,
+            FloatArray(systolic.size) { systolic[it] - 6f },
+            FloatArray(systolic.size) { systolic[it] + 5f },
+            FloatArray(diastolic.size) { diastolic[it] - 4f },
+            FloatArray(diastolic.size) { diastolic[it] + 3f },
+        )
+        return Data(118, 76, dayStart + 8 * 3600L, daily, dayStart)
     }
 
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
-        val line = data.daily?.let { historyLine(context, it, dots = config.isLargeStyle) }
-        val axis = if (line != null) historyAxis(data.dayStart) else emptyList()
+        val bars = data.daily?.let { historyBars(context, it) }
+        val axis = if (bars != null) historyAxis(data.dayStart) else emptyList()
         if (data.systolic <= 0 || data.diastolic <= 0) {
             val empty = emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f), MiniChart.ZoneBar(COLORS, SEGMENTS, -1f))
             return when {
-                config.isTall && line != null -> empty.copy(chart = null, largeChart = line, axis = axis)
-                config.isLarge -> empty.copy(largeChart = line, axis = axis)
+                config.isTall && bars != null -> empty.copy(chart = null, largeChart = bars, axis = axis)
+                config.isLarge -> empty.copy(largeChart = bars, axis = axis)
                 else -> empty
             }
         }
@@ -119,9 +126,8 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
         } else {
             TileAxis.dateRange(readingDay, readingDay).first()
         }
-        val withUnit = config.variant.id == WidgetVariant.NUMBER.id || config.isWide || config.isLargeStyle
         val model = TileModel(
-            value = if (withUnit) format(context, data.systolic, data.diastolic) else {
+            value = if (config.isLargeStyle) format(context, data.systolic, data.diastolic) else {
                 context.getString(R.string.blood_pressure_avg_format, data.systolic, data.diastolic)
             },
             gauge = GaugeSpec.Progress(COLORS[category], POSITIONS[category]),
@@ -140,12 +146,11 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
                         )
                     },
                 ),
-                largeChart = line,
+                largeChart = bars,
                 axis = axis,
             )
-            config.isTall -> model.copy(chart = if (line != null) null else model.chart, largeChart = line, axis = axis)
-            config.isLarge -> model.copy(largeChart = line, axis = axis)
-            config.variant.id == WidgetVariant.NUMBER.id -> model.copy(chart = data.daily?.let { sparkline(context, it) } ?: model.chart)
+            config.isTall -> model.copy(chart = if (bars != null) null else model.chart, largeChart = bars, axis = axis)
+            config.isLarge -> model.copy(largeChart = bars, axis = axis)
             else -> model
         }
     }
@@ -162,14 +167,24 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
         context.getString(R.string.blood_pressure_avg_format, systolic, diastolic) + " " +
             context.getString(R.string.unit_millimetre_of_mercury)
 
-    /** Mean systolic and diastolic per day of the last [HISTORY_DAYS] days, NaN for days without a reading. */
-    internal fun dailyAverages(samples: List<BloodPressureSample>, dayStart: Long): DailyAverages {
+    /** Mean, lowest and highest systolic and diastolic per day of the last [HISTORY_DAYS] days, NaN for days without a reading. */
+    internal fun dailyReadings(samples: List<BloodPressureSample>, dayStart: Long): DailyReadings {
         val first = dayStart - (HISTORY_DAYS - 1) * SECONDS_PER_DAY
         val byDay = samples.filter { it.bpSystolic > 0 && it.bpDiastolic > 0 }
             .groupBy { ((it.timestamp / 1000L - first).floorDiv(SECONDS_PER_DAY)).toInt() }
-        val systolic = FloatArray(HISTORY_DAYS) { day -> byDay[day]?.map { it.bpSystolic }?.average()?.toFloat() ?: Float.NaN }
-        val diastolic = FloatArray(HISTORY_DAYS) { day -> byDay[day]?.map { it.bpDiastolic }?.average()?.toFloat() ?: Float.NaN }
-        return DailyAverages(systolic, diastolic)
+        fun perDay(valueOf: (BloodPressureSample) -> Int, reduce: (List<Int>) -> Float) =
+            FloatArray(HISTORY_DAYS) { day -> byDay[day]?.map(valueOf)?.let(reduce) ?: Float.NaN }
+        val average: (List<Int>) -> Float = { it.average().toFloat() }
+        val lowest: (List<Int>) -> Float = { it.min().toFloat() }
+        val highest: (List<Int>) -> Float = { it.max().toFloat() }
+        return DailyReadings(
+            perDay({ it.bpSystolic }, average),
+            perDay({ it.bpDiastolic }, average),
+            perDay({ it.bpSystolic }, lowest),
+            perDay({ it.bpSystolic }, highest),
+            perDay({ it.bpDiastolic }, lowest),
+            perDay({ it.bpDiastolic }, highest),
+        )
     }
 
     private fun historyAxis(dayStart: Long): List<String> {
@@ -177,51 +192,39 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
         return TileAxis.dateRange(day.minusDays(HISTORY_DAYS - 1L), day)
     }
 
-    /** Systolic over diastolic per day. Days without a reading are skipped. */
-    private fun historyLine(context: Context, daily: DailyAverages, dots: Boolean): MiniChart.Line {
-        val known = (daily.systolic + daily.diastolic).filter { !it.isNaN() }
-        return MiniChart.Line(
-            points = points(daily.systolic),
-            xMin = 0f,
-            xMax = (HISTORY_DAYS - 1).toFloat(),
-            yMin = minOf(CHART_MIN, known.minOrNull() ?: CHART_MIN),
-            yMax = maxOf(CHART_MAX, known.maxOrNull() ?: CHART_MAX),
-            color = ContextCompat.getColor(context, R.color.blood_pressure_systolic_color),
-            secondary = points(daily.diastolic),
-            secondaryColor = ContextCompat.getColor(context, R.color.blood_pressure_diastolic_color),
-            dots = dots,
+    /** Systolic and diastolic range per day. */
+    private fun historyBars(context: Context, daily: DailyReadings): MiniChart.RangeBars {
+        val known = (daily.systolicLow + daily.systolicHigh + daily.diastolicLow + daily.diastolicHigh).filter { !it.isNaN() }
+        return MiniChart.RangeBars(
+            listOf(
+                RangeSeries(daily.systolicLow, daily.systolicHigh, ContextCompat.getColor(context, R.color.blood_pressure_systolic_color)),
+                RangeSeries(daily.diastolicLow, daily.diastolicHigh, ContextCompat.getColor(context, R.color.blood_pressure_diastolic_color)),
+            ),
+            minOf(CHART_MIN, known.minOrNull() ?: CHART_MIN),
+            maxOf(CHART_MAX, known.maxOrNull() ?: CHART_MAX),
         )
     }
-
-    private fun sparkline(context: Context, daily: DailyAverages): MiniChart.Line {
-        val known = daily.systolic.filter { !it.isNaN() }
-        return MiniChart.Line(
-            points = points(daily.systolic),
-            xMin = 0f,
-            xMax = (HISTORY_DAYS - 1).toFloat(),
-            yMin = (known.minOrNull() ?: CHART_MIN) - 5f,
-            yMax = (known.maxOrNull() ?: CHART_MAX) + 5f,
-            color = ContextCompat.getColor(context, R.color.blood_pressure_systolic_color),
-            lineWidthDp = SPARKLINE_WIDTH_DP,
-        )
-    }
-
-    private fun points(values: FloatArray): List<PointF> =
-        values.indices.filter { !values[it].isNaN() }.map { PointF(it.toFloat(), values[it]) }
 
     /**
-     * [timestamp] is the latest reading's time in seconds. [daily] holds the last 14 days' averages, only when the
+     * [timestamp] is the latest reading's time in seconds. [daily] holds the last 14 days' readings, only when the
      * style shows history.
      */
     data class Data(
         val systolic: Int,
         val diastolic: Int,
         val timestamp: Long = 0,
-        val daily: DailyAverages? = null,
+        val daily: DailyReadings? = null,
         val dayStart: Long = 0,
     )
 
-    class DailyAverages(val systolic: FloatArray, val diastolic: FloatArray) {
+    class DailyReadings(
+        val systolic: FloatArray,
+        val diastolic: FloatArray,
+        val systolicLow: FloatArray,
+        val systolicHigh: FloatArray,
+        val diastolicLow: FloatArray,
+        val diastolicHigh: FloatArray,
+    ) {
         /** Mean of the last [days] days' averages, or null without a reading in them. */
         fun average(days: Int): Pair<Int, Int>? {
             val from = systolic.size - days

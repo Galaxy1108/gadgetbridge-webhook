@@ -98,6 +98,12 @@ sealed interface MiniChart {
     ) : MiniChart
 
     /**
+     * One bar per slot and [RangeSeries] from its low to its high value, the series drawn over each other.
+     * Slots without any range draw a stub.
+     */
+    class RangeBars(val series: List<RangeSeries>, val min: Float, val max: Float) : MiniChart
+
+    /**
      * Stretches of a night on [colors].size lanes, the first lane at the top, between [start] and [end].
      */
     class Hypnogram(
@@ -131,6 +137,11 @@ sealed interface MiniChart {
 }
 
 data class Band(val from: Float, val to: Float, val color: Int)
+
+/**
+ * A range from [low] to [high] per slot. A NaN limit leaves the slot empty.
+ */
+class RangeSeries(val low: FloatArray, val high: FloatArray, val color: Int)
 
 /**
  * An area from [low] to [high] at each [x]. A NaN limit breaks the area.

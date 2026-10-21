@@ -179,7 +179,7 @@ object LargeTileRenderer : TileRenderer {
         renderChart(view.findViewById(R.id.tile_chart), model.chart?.takeIf { isBar(it) }, 0f)
         val large = model.largeChart
         val height = when (large) {
-            is MiniChart.Line -> LINE_HEIGHT_DP
+            is MiniChart.Line, is MiniChart.RangeBars -> LINE_HEIGHT_DP
             is MiniChart.Hypnogram -> HYPNOGRAM_HEIGHT_DP
             is MiniChart.StackedBars -> STACKED_HEIGHT_DP
             else -> BARS_HEIGHT_DP

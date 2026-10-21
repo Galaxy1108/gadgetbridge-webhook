@@ -1,21 +1,20 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
-import android.graphics.PointF
+import android.graphics.Color
 import androidx.core.content.ContextCompat
-import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import androidx.core.graphics.ColorUtils
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.devices.HydrationSampleProvider
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.HydrationUnit
+import nodomain.freeyourgadget.gadgetbridge.widgets.Band
 import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
 import nodomain.freeyourgadget.gadgetbridge.widgets.TileAxis
 import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
-import nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -23,7 +22,10 @@ import java.time.ZoneId
 import java.util.Locale
 
 object HydrationWidget : MetricWidget<HydrationWidget.Data>() {
-    private const val SECONDS_PER_HOUR = 3600f
+    private const val DAYS = 7
+    private const val SCALE_ABOVE = 1.1f
+    private const val BAND_ALPHA = 36
+    private const val MISSED_DARKEN = 0.35f
 
     override val id = "hydration"
     override val label = R.string.pref_header_hydration
@@ -42,31 +44,30 @@ object HydrationWidget : MetricWidget<HydrationWidget.Data>() {
                 device.deviceCoordinator.getHydrationSampleProvider(device, db.daoSession)?.getDayTotal(day) ?: 0.0
             }
         }
-        val entries = if (config.isLarge) {
-            scope.db { db ->
-                devices.flatMap { device ->
-                    device.deviceCoordinator.getHydrationSampleProvider(device, db.daoSession)?.getDayEntries(day).orEmpty()
-                        .map { TimedValue(it.timestamp / 1000L, it.volumeMl.toFloat()) }
-                }.sortedBy { it.seconds }
+        val days = if (config.isLarge) {
+            val totals = scope.db { db ->
+                devices.map { device ->
+                    device.deviceCoordinator.getHydrationSampleProvider(device, db.daoSession)
+                        ?.getDayTotals(HydrationSampleProvider.toDay(date.minusDays(DAYS - 1L)), day).orEmpty()
+                }
+            }
+            FloatArray(DAYS) { i ->
+                val key = HydrationSampleProvider.toDay(date.minusDays(DAYS - 1L - i))
+                totals.mapNotNull { it[key] }.takeIf { it.isNotEmpty() }?.sum()?.toFloat() ?: Float.NaN
             }
         } else {
             null
         }
-        val untilHours = if (scope.isToday) {
-            ((System.currentTimeMillis() / 1000L - scope.dayStart) / SECONDS_PER_HOUR).coerceIn(0f, WidgetHistory.HOURS_PER_DAY.toFloat())
-        } else {
-            WidgetHistory.HOURS_PER_DAY.toFloat()
-        }
         val unit = devices.firstOrNull()?.let { HydrationUnit.forDevice(it) } ?: HydrationUnit.MILLILITER
-        return Data(totalMl, ActivityUser().hydrationGoalMl, unit, entries, scope.dayStart, untilHours)
+        return Data(totalMl, ActivityUser().hydrationGoalMl, unit, days, date)
     }
 
-    override fun previewData(): Data {
-        val dayStart = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
-        val drinks = listOf(7.5f to 300f, 9f to 250f, 12.5f to 400f, 15f to 250f, 17.5f to 250f)
-        val entries = drinks.map { (hour, ml) -> TimedValue(dayStart + (hour * SECONDS_PER_HOUR).toLong(), ml) }
-        return Data(1450.0, 2000, HydrationUnit.MILLILITER, entries, dayStart, 19f)
-    }
+    override fun previewData() = Data(
+        1450.0,
+        2000,
+        HydrationUnit.MILLILITER,
+        floatArrayOf(1800f, 2250f, 1600f, 2000f, 2400f, 1900f, 1450f),
+    )
 
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
         val color = ContextCompat.getColor(context, R.color.hydration_color)
@@ -84,36 +85,18 @@ object HydrationWidget : MetricWidget<HydrationWidget.Data>() {
             ratio = data.totalMl / data.goalMl,
             toGo = toGo,
         )
-        val line = data.entries?.takeIf { it.isNotEmpty() }
-            ?.let { intakeLine(it, data, color, GBApplication.getSecondaryTextColor(context)) }
-            ?: return tile
-        return tile.copy(largeChart = line, axis = TileAxis.HOURS)
-    }
-
-    /**
-     * The day's running total, stepping up at each entry, up to [Data.untilHours] with the goal as reference.
-     */
-    private fun intakeLine(entries: List<TimedValue>, data: Data, color: Int, goalColor: Int): MiniChart.Line {
-        var total = 0f
-        val points = mutableListOf(PointF(0f, 0f))
-        for (entry in entries) {
-            val hour = ((entry.seconds - data.dayStart) / SECONDS_PER_HOUR).coerceIn(0f, data.untilHours)
-            points += PointF(hour, total)
-            total += entry.value
-            points += PointF(hour, total)
-        }
-        points += PointF(data.untilHours, total)
-        return MiniChart.Line(
-            points = points,
-            xMin = 0f,
-            xMax = WidgetHistory.HOURS_PER_DAY.toFloat(),
-            yMin = 0f,
-            yMax = maxOf(data.goalMl.toFloat(), points.maxOf { it.y }),
-            color = color,
-            fill = true,
-            reference = data.goalMl.toFloat(),
-            referenceColor = goalColor,
+        val days = data.days ?: return tile
+        val goal = data.goalMl.toFloat()
+        val max = maxOf(goal, days.filter { !it.isNaN() }.maxOrNull() ?: 0f) * SCALE_ABOVE
+        val missed = ColorUtils.blendARGB(color, Color.BLACK, MISSED_DARKEN)
+        val bars = MiniChart.Bars(
+            days,
+            IntArray(DAYS) { if (days[it] >= goal) color else missed },
+            0f,
+            max,
+            band = Band(goal, max, ColorUtils.setAlphaComponent(color, BAND_ALPHA)),
         )
+        return tile.copy(largeChart = bars, axis = TileAxis.weekdays(data.day, DAYS))
     }
 
     private fun format(context: Context, ml: Double, unit: HydrationUnit): String =
@@ -126,14 +109,13 @@ object HydrationWidget : MetricWidget<HydrationWidget.Data>() {
         }
 
     /**
-     * [entries] holds the day's intake changes in ml, oldest first, only for the tall and full-width styles.
+     * [days] holds the total in ml of each of the [DAYS] days ending on [day], only for the tall and full-width styles.
      */
     data class Data(
         val totalMl: Double,
         val goalMl: Int,
         val unit: HydrationUnit,
-        val entries: List<TimedValue>? = null,
-        val dayStart: Long = 0,
-        val untilHours: Float = WidgetHistory.HOURS_PER_DAY.toFloat(),
+        val days: FloatArray? = null,
+        val day: LocalDate = LocalDate.now(),
     )
 }

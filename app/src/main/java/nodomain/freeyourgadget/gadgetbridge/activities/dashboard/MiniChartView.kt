@@ -67,6 +67,7 @@ class MiniChartView @JvmOverloads constructor(
             is MiniChart.Bars -> drawBars(canvas, chart)
             is MiniChart.Line -> drawLine(canvas, chart)
             is MiniChart.StackedBars -> drawStackedBars(canvas, chart)
+            is MiniChart.RangeBars -> drawRangeBars(canvas, chart)
             is MiniChart.Hypnogram -> drawHypnogram(canvas, chart)
         }
     }
@@ -109,6 +110,39 @@ class MiniChartView @JvmOverloads constructor(
             referencePaint.color = chart.referenceColor
             val y = valueY(it, 0f, chart.max, chartHeight)
             canvas.drawLine(0f, y, width.toFloat(), y, referencePaint)
+        }
+    }
+
+    private fun drawRangeBars(canvas: Canvas, chart: MiniChart.RangeBars) {
+        val count = chart.series.maxOfOrNull { it.low.size } ?: 0
+        if (count == 0) return
+        val chartHeight = height.toFloat()
+        val slot = width.toFloat() / count
+        val barWidth = slot * BAR_WIDTH_FRACTION
+        val radius = BAR_RADIUS_DP * density
+        val minHeight = MIN_BAR_DP * density
+        for (i in 0 until count) {
+            val left = i * slot + (slot - barWidth) / 2
+            var drawn = false
+            for (series in chart.series) {
+                val low = series.low.getOrNull(i) ?: Float.NaN
+                val high = series.high.getOrNull(i) ?: Float.NaN
+                if (low.isNaN() || high.isNaN()) continue
+                var top = valueY(high, chart.min, chart.max, chartHeight)
+                var bottom = valueY(low, chart.min, chart.max, chartHeight)
+                if (bottom - top < minHeight) {
+                    val center = (top + bottom) / 2
+                    top = center - minHeight / 2
+                    bottom = center + minHeight / 2
+                }
+                fillPaint.color = series.color
+                rect.set(left, top, left + barWidth, bottom)
+                canvas.drawRoundRect(rect, radius, radius, fillPaint)
+                drawn = true
+            }
+            if (!drawn) {
+                drawStub(canvas, left, barWidth, chartHeight)
+            }
         }
     }
 
