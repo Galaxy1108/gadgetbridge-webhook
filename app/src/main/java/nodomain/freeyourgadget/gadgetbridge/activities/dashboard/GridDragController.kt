@@ -14,8 +14,8 @@ import kotlin.math.roundToInt
 
 /**
  * The widget goes to the column under its left edge.
- * When it covers at least half of another widget, it takes the place of that widget, and that widget goes to the first
- * free column after it.
+ * When it covers at least half of another widget, it goes before the first widget that it overlaps and whose top is not
+ * above the top of the covered widget. The covered widget goes to the first free column after it.
  * Otherwise, it goes before the first other widget whose top is below its top.
  * The other widgets stay in their columns.
  */
@@ -90,7 +90,7 @@ class GridDragController(
         }
         val under = covered.indices.maxByOrNull { covered[it] }?.takeIf { covered[it] >= MIN_COVERED } ?: -1
         val index = if (under >= 0) {
-            under
+            stacked.indices.first { covered[it] > 0f && stacked[it].y >= stacked[under].y }
         } else {
             stacked.indexOfFirst { it.y > top }.takeIf { it >= 0 } ?: others.size
         }
