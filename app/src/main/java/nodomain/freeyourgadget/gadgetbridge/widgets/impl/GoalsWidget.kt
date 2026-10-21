@@ -23,6 +23,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.DistanceUnit
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetActions
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
@@ -42,10 +43,10 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     private const val MILES_PER_METER = 0.000621371
 
     enum class Goal(val label: Int, val color: Int) {
-        STEPS(R.string.steps, Color.rgb(0x4A, 0xDE, 0x80)),
-        DISTANCE(R.string.distance, Color.rgb(0x81, 0x8C, 0xF8)),
-        ACTIVE_TIME(R.string.activity_list_summary_active_time, Color.rgb(0xC0, 0x84, 0xFC)),
-        SLEEP(R.string.menuitem_sleep, Color.rgb(0x38, 0xBD, 0xF8)),
+        STEPS(R.string.steps, WidgetColors.activity),
+        DISTANCE(R.string.distance, WidgetColors.distance),
+        ACTIVE_TIME(R.string.activity_list_summary_active_time, WidgetColors.activeTime),
+        SLEEP(R.string.menuitem_sleep, WidgetColors.lightSleep),
     }
 
     /**
