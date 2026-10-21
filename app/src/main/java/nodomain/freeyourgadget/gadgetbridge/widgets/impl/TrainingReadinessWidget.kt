@@ -40,7 +40,7 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
     private const val SHORT_FACTORS = 4
 
     override val id = "trainingreadiness"
-    override val label = R.string.metric_garmin_training_readiness
+    override val label = R.string.menuitem_readiness
     override val icon = R.drawable.ic_widget_training_readiness
     override val chartTab = "trainingreadiness"
 
