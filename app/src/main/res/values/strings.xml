@@ -4912,6 +4912,13 @@
     <string name="dashboard_edit">Edit dashboard</string>
     <string name="dashboard_discard_changes">Discard changes</string>
     <string name="widgets_deleted">Widget deleted</string>
+    <string name="dashboard_notice_new_design_title">The dashboard has a new design</string>
+    <string name="dashboard_notice_new_design_text">Widgets can now have different sizes and styles. You can edit the dashboard to add, move and resize widgets.</string>
+    <string name="dashboard_notice_restore_design">Restore old design</string>
+    <string name="dashboard_notice_design_restored">Old design restored</string>
+    <string name="dashboard_notice_widgets_added">Widgets added for %1$s</string>
+    <string name="dashboard_notice_remove_widgets">Remove widgets</string>
+    <string name="dashboard_notice_widgets_removed">Widgets removed</string>
     <string name="undo">Undo</string>
     <plurals name="widgets_variant_count">
         <item quantity="one">%d variant</item>

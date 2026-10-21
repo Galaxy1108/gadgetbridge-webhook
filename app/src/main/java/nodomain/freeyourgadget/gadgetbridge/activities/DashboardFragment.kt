@@ -30,8 +30,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
@@ -70,6 +73,10 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.BarShade
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardMigration
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardNotices
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardSnapshot
+import nodomain.freeyourgadget.gadgetbridge.widgets.DeviceNotice
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
@@ -90,6 +97,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private lateinit var scrollView: NestedScrollView
     private lateinit var editBar: View
     private lateinit var discardButton: MaterialButton
+    private lateinit var notices: LinearLayout
     private lateinit var grid: WidgetGridLayout
     private lateinit var binder: DashboardGridBinder
     private lateinit var dragController: GridDragController
@@ -182,6 +190,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         discardButton.setOnClickListener { confirmDiscard() }
         view.findViewById<View>(R.id.dashboard_add_widget).setOnClickListener { addWidget() }
         view.findViewById<View>(R.id.dashboard_done).setOnClickListener { actionMode?.finish() }
+        notices = view.findViewById(R.id.dashboard_notices)
         grid = view.findViewById(R.id.dashboard_grid)
         arrowLeft = view.findViewById(R.id.arrow_left)
         arrowRight = view.findViewById(R.id.arrow_right)
@@ -296,7 +305,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
                 updateDiscardButton()
                 newInstanceId?.let { instanceId ->
                     newInstanceId = null
-                    binder.cardOf(instanceId)?.doOnLayout { scrollView.smoothScrollTo(0, it.top) }
+                    binder.cardOf(instanceId)?.doOnLayout { scrollView.smoothScrollTo(0, grid.top + it.top) }
                     binder.highlight(instanceId)
                 }
             }
@@ -337,6 +346,96 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         }
 
         viewModel.refresh(day, grid.columns, showAllDevices, deviceList)
+        bindNotices()
+    }
+
+    private fun bindNotices() {
+        notices.removeAllViews()
+        val state = DashboardNotices.state()
+        if (state.migration) {
+            addNotice(
+                getString(R.string.dashboard_notice_new_design_title),
+                getString(R.string.dashboard_notice_new_design_text),
+                R.string.dashboard_notice_restore_design to ::restoreClassicDesign,
+                R.string.dashboard_edit to ::startEditing,
+            ) {
+                DashboardNotices.set(DashboardNotices.state().copy(migration = false))
+            }
+        }
+        state.device?.let { device ->
+            val name = GBApplication.app().deviceManager.getDeviceByAddress(device.address)?.aliasOrName
+                ?: device.address
+            addNotice(
+                null,
+                getString(R.string.dashboard_notice_widgets_added, name),
+                null,
+                R.string.dashboard_notice_remove_widgets to { removeAddedWidgets(device) },
+            ) {
+                DashboardNotices.set(DashboardNotices.state().copy(device = null))
+            }
+        }
+    }
+
+    private fun addNotice(
+        title: String?,
+        text: String,
+        secondary: Pair<Int, () -> Unit>?,
+        primary: Pair<Int, () -> Unit>,
+        dismiss: () -> Unit,
+    ) {
+        val notice = layoutInflater.inflate(R.layout.dashboard_notice, notices, false)
+        notice.findViewById<TextView>(R.id.dashboard_notice_title).apply {
+            this.text = title
+            isVisible = title != null
+        }
+        notice.findViewById<TextView>(R.id.dashboard_notice_text).text = text
+        notice.findViewById<View>(R.id.dashboard_notice_dismiss).setOnClickListener {
+            dismiss()
+            bindNotices()
+        }
+        notice.findViewById<Button>(R.id.dashboard_notice_secondary).apply {
+            isVisible = secondary != null
+            secondary?.let { (label, action) ->
+                setText(label)
+                setOnClickListener { action() }
+            }
+        }
+        notice.findViewById<Button>(R.id.dashboard_notice_primary).apply {
+            setText(primary.first)
+            setOnClickListener { primary.second() }
+        }
+        notices.addView(notice)
+    }
+
+    private fun restoreClassicDesign() {
+        val snapshot = WidgetLayoutStore.snapshot()
+        val state = DashboardNotices.state()
+        DashboardMigration.restoreClassic()
+        DashboardNotices.set(DashboardNotices.State.NONE)
+        fullRefresh()
+        showUndo(R.string.dashboard_notice_design_restored, snapshot, state)
+    }
+
+    private fun removeAddedWidgets(notice: DeviceNotice) {
+        val snapshot = WidgetLayoutStore.snapshot()
+        val state = DashboardNotices.state()
+        WidgetLayoutStore.deleteInstances(notice.instanceIds)
+        DashboardNotices.set(state.copy(device = null))
+        fullRefresh()
+        showUndo(R.string.dashboard_notice_widgets_removed, snapshot, state)
+    }
+
+    /**
+     * Shows [message] with an action that restores [snapshot] and [notices].
+     */
+    private fun showUndo(@StringRes message: Int, snapshot: DashboardSnapshot, notices: DashboardNotices.State) {
+        Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
+            .setAction(R.string.undo) {
+                WidgetLayoutStore.restore(snapshot)
+                DashboardNotices.set(notices)
+                fullRefresh()
+            }
+            .show()
     }
 
     private fun startEditing() {
@@ -345,6 +444,8 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         if (viewModel.editSnapshot == null) {
             viewModel.editSnapshot = WidgetLayoutStore.snapshot()
         }
+        DashboardNotices.set(DashboardNotices.State.NONE)
+        bindNotices()
         binder.editing = true
         setEditControls(true)
         updateDiscardButton()

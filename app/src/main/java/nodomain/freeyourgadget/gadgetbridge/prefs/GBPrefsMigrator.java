@@ -18,6 +18,7 @@ import nodomain.freeyourgadget.gadgetbridge.prefs.migrators.PreferenceMigrator64
 import nodomain.freeyourgadget.gadgetbridge.prefs.migrators.PreferenceMigrator65;
 import nodomain.freeyourgadget.gadgetbridge.prefs.migrators.PreferenceMigrator66;
 import nodomain.freeyourgadget.gadgetbridge.prefs.migrators.PreferenceMigrator67;
+import nodomain.freeyourgadget.gadgetbridge.prefs.migrators.PreferenceMigrator68;
 
 public class GBPrefsMigrator {
     private static final Logger LOG = LoggerFactory.getLogger(GBPrefsMigrator.class);
@@ -48,6 +49,7 @@ public class GBPrefsMigrator {
             if (oldVersion < 65) new PreferenceMigrator65().migrate(oldVersion, sharedPrefs, editor);
             if (oldVersion < 66) new PreferenceMigrator66().migrate(oldVersion, sharedPrefs, editor);
             if (oldVersion < 67) new PreferenceMigrator67().migrate(oldVersion, sharedPrefs, editor);
+            if (oldVersion < 68) new PreferenceMigrator68().migrate(oldVersion, sharedPrefs, editor);
 
             editor.putString(PREFS_VERSION, Integer.toString(CURRENT_PREFS_VERSION));
             editor.apply();

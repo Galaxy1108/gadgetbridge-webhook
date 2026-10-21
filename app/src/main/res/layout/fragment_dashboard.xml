@@ -56,11 +56,23 @@
             android:layout_height="match_parent"
             android:clipToPadding="false">
 
-            <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridLayout
-                android:id="@+id/dashboard_grid"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp" />
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/dashboard_notices"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridLayout
+                    android:id="@+id/dashboard_grid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp" />
+            </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
         <View

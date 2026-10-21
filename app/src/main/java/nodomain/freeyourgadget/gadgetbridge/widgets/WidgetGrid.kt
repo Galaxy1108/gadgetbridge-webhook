@@ -52,4 +52,21 @@ object WidgetGrid {
         val clampedWidth = width.coerceAtMost(columns)
         return (0..columns - clampedWidth).minBy { x -> (x until x + clampedWidth).maxOf { bottoms[it] } }
     }
+
+    /**
+     * [placement] at the first free column of a layout with [columns], under the placements in [occupied].
+     */
+    fun placeAtFirstFree(columns: Int, occupied: List<WidgetPlacement>, placement: WidgetPlacement): WidgetPlacement {
+        val width = (sizeOf(placement) ?: WidgetVariant.GAUGE).width
+        val stacked = stack(columns, occupied.mapNotNull { rectOf(it) })
+        return placement.copy(x = firstFreeColumn(columns, stacked, width))
+    }
+
+    private fun sizeOf(placement: WidgetPlacement): WidgetVariant? =
+        WidgetRegistry.byId(placement.instance.typeId)?.variant(placement.variantId)
+
+    private fun rectOf(placement: WidgetPlacement): GridRect? {
+        val size = sizeOf(placement) ?: return null
+        return GridRect(placement.x, 0, size.width, size.heightDp)
+    }
 }
