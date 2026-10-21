@@ -149,10 +149,7 @@ abstract class OppoHeadphonesCoordinator : AbstractBLClassicDeviceCoordinator() 
     }
 
     private fun DeviceSettingsScope.touchOptions(device: GBDevice) {
-        screen(
-            DeviceSpecificSettingsScreen.TOUCH_OPTIONS,
-            R.drawable.ic_touch,
-        ) {
+        DeviceSpecificSettingsScreen.TOUCH_OPTIONS.screen {
             touchOptions
                 .entries
                 .groupBy({ it.key.first }, { it.key.second to it.value })
