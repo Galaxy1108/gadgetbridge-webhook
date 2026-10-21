@@ -11,6 +11,7 @@ import "garmin/gdi_calendar.proto";
 import "garmin/gdi_core.proto";
 import "garmin/gdi_credentials.proto";
 import "garmin/gdi_data_transfer.proto";
+import "garmin/gdi_deep_linking.proto";
 import "garmin/gdi_device_messages.proto";
 import "garmin/gdi_device_status.proto";
 import "garmin/gdi_ecg_service.proto";
@@ -64,7 +65,7 @@ message Smart {
     optional SettingsService realtime_settings_service = 42;
     optional GDI.Proto.FileAccess.FileSyncService file_access_service = 43;
     optional Service44 service44 = 44;
-    optional Service46 deeplinking_service = 46;
+    optional GDI.Proto.DeepLinking.DeepLinkingService deeplinking_service = 46;
     optional GDI.Proto.GarminConnect.Service garmin_connect_service = 47;
     optional GDI.Proto.GNCS.GncsService gncs_service = 49;
     optional GDI.Proto.LiveSession.LiveSessionService live_session_service = 56;
@@ -183,11 +184,4 @@ message Service44 {
         optional uint32 unk1 = 1;
     }
     optional Message2 unk2 = 2;
-}
-
-message Service46 {
-    message Message1 {
-        optional string uri = 1;
-    }
-    optional Message1 message_1 = 1;
 }
