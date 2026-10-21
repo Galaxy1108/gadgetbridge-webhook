@@ -4916,6 +4916,12 @@
         <item quantity="one">%d variant</item>
         <item quantity="other">%d variants</item>
     </plurals>
+    <plurals name="widgets_device_count">
+        <item quantity="one">%d device</item>
+        <item quantity="other">%d devices</item>
+    </plurals>
+    <string name="widgets_picker_summary">%1$s • %2$s</string>
+    <string name="widgets_picker_unsupported">No supported devices</string>
     <string name="pref_widget_devices_mode_inherit">Inherit from dashboard</string>
     <string name="pref_widget_variant_title">Variant</string>
     <string name="widget_variant_gauge">Gauge</string>
