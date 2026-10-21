@@ -37,4 +37,6 @@ object BasalMetabolicRateWidget : BodyCompositionWidget() {
     override fun scale(value: Float): Float = fraction(value, 1000f, 2500f)
 
     override val showsScale = false
+
+    override val showsHistory = false
 }

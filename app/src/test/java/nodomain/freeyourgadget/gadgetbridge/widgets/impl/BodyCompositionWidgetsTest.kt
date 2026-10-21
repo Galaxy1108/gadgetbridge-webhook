@@ -22,7 +22,6 @@ import android.widget.TextView
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
-import nodomain.freeyourgadget.gadgetbridge.model.WeightUnit
 import nodomain.freeyourgadget.gadgetbridge.test.TestBase
 import nodomain.freeyourgadget.gadgetbridge.util.BodyCompositionCalculator
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
@@ -53,7 +52,7 @@ class BodyCompositionWidgetsTest : TestBase() {
         val c = composition!!
         assertEquals(context.getString(R.string.body_composition_percent, c.bodyFatPercent), render(BodyFatWidget, data()))
         assertEquals(context.getString(R.string.body_composition_percent, c.bodyWaterPercent), render(BodyWaterWidget, data()))
-        assertEquals(WeightUnit.formatWeight(context, c.muscleMassKg.toDouble(), GBApplication.getPrefs().weightUnit), render(MuscleMassWidget, data()))
+        assertEquals(WeightWidget.formatWeight(context, c.muscleMassKg.toDouble()), render(MuscleMassWidget, data()))
         assertEquals(context.getString(R.string.body_composition_kcal, c.basalMetabolicRate), render(BasalMetabolicRateWidget, data()))
         // and they are four different numbers, so a mix-up between them would show
         assertEquals(4, setOf(c.bodyFatPercent, c.bodyWaterPercent, c.muscleMassKg, c.basalMetabolicRate.toFloat()).size)

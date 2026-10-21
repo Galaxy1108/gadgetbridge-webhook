@@ -4965,6 +4965,9 @@
     <string name="widget_status_healthy">Healthy</string>
     <!-- Weight change over the last 30 days, e.g. "-0.6 kg in 30 days" -->
     <string name="widget_status_weight_change">%s in 30 days</string>
+    <string name="widget_weight_kilogram_format">%1$.1f kg</string>
+    <string name="widget_weight_pound_format">%1$.1f lb</string>
+    <string name="widget_weight_jin_format">%1$.1f 市斤</string>
     <!-- PAI earned today, e.g. "+12 today" -->
     <string name="widget_status_pai_today">+%d today</string>
     <!-- Body energy drained since the day's peak, e.g. "-24 since 09:10" -->

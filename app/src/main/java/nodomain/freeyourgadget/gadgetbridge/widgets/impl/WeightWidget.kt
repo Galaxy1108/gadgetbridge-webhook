@@ -21,6 +21,7 @@ import android.graphics.Color
 import android.graphics.PointF
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.WeightSample
@@ -63,7 +64,7 @@ object WeightWidget : MetricWidget<WeightWidget.Data>() {
         return Data(
             latest?.weightKg?.toDouble() ?: 0.0,
             ActivityUser().heightCm,
-            if (config.needsHistory) history(scope) else null,
+            if (config.needsHistory) history(scope) { _, sample -> sample.weightKg.takeIf { it > 0 } } else null,
             scope.dayStart,
         )
     }
@@ -92,54 +93,65 @@ object WeightWidget : MetricWidget<WeightWidget.Data>() {
             return emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f))
         }
 
-        val unit = GBApplication.getPrefs().weightUnit
         val bmi = Bmi.of(data.weightKg, data.heightCm)
         val color = bmi?.let { Bmi.colorFor(it) } ?: Color.rgb(76, 175, 80)
         val history = data.history
         val change = if (history != null && history.size > 1) history.last().value - history.first().value else null
-        val line = history?.takeIf { it.isNotEmpty() }?.let { historyLine(it, data.dayStart, color) }
+        val line = history?.takeIf { it.isNotEmpty() }?.let { historyLine(it, data.dayStart, color, HISTORY_PADDING_KG) }
         return TileModel(
-            value = WeightUnit.formatWeight(context, data.weightKg, unit),
+            value = formatWeight(context, data.weightKg),
             // no height in the profile, so no BMI to colour by
             gauge = GaugeSpec.Progress(color, bmi?.let { Bmi.gaugeFraction(it) } ?: -1f),
             status = change?.let {
                 val sign = if (it < 0) "-" else "+"
                 StatusLine.Text(
-                    context.getString(R.string.widget_status_weight_change, sign + WeightUnit.formatWeight(context, abs(it).toDouble(), unit))
+                    context.getString(R.string.widget_status_weight_change, sign + formatWeight(context, abs(it).toDouble()))
                 )
             },
             chart = line,
             largeChart = if (config.isLarge) line else null,
-            axis = if (config.isLarge && line != null) {
-                val day = Instant.ofEpochSecond(data.dayStart).atZone(ZoneId.systemDefault()).toLocalDate()
-                TileAxis.dateRange(day.minusDays(HISTORY_DAYS - 1L), day)
-            } else {
-                emptyList()
-            },
+            axis = if (config.isLarge && line != null) historyAxis(data.dayStart) else emptyList(),
         )
     }
 
-    private fun historyLine(history: List<TimedValue>, dayStart: Long, color: Int): MiniChart.Line {
+    /** [kg] in the preferred unit, with one decimal. */
+    internal fun formatWeight(context: Context, kg: Double): String {
+        val unit = GBApplication.getPrefs().weightUnit
+        val converted = WeightUnit.convertWeight(kg, unit)
+        return when (unit) {
+            WeightUnit.KILOGRAM -> context.getString(R.string.widget_weight_kilogram_format, converted)
+            WeightUnit.POUND -> context.getString(R.string.widget_weight_pound_format, converted)
+            WeightUnit.JIN -> context.getString(R.string.widget_weight_jin_format, converted)
+            WeightUnit.STONE -> WeightUnit.formatConvertedWeight(context, converted, unit)
+        }
+    }
+
+    internal fun historyAxis(dayStart: Long): List<String> {
+        val day = Instant.ofEpochSecond(dayStart).atZone(ZoneId.systemDefault()).toLocalDate()
+        return TileAxis.dateRange(day.minusDays(HISTORY_DAYS - 1L), day)
+    }
+
+    internal fun historyLine(history: List<TimedValue>, dayStart: Long, color: Int, padding: Float): MiniChart.Line {
         val start = dayStart - (HISTORY_DAYS - 1) * SECONDS_PER_DAY
         return MiniChart.Line(
             points = history.map { PointF((it.seconds - start).toFloat() / SECONDS_PER_DAY, it.value) },
             xMin = 0f,
             xMax = HISTORY_DAYS.toFloat(),
-            yMin = history.minOf { it.value } - HISTORY_PADDING_KG,
-            yMax = history.maxOf { it.value } + HISTORY_PADDING_KG,
+            yMin = history.minOf { it.value } - padding,
+            yMax = history.maxOf { it.value } + padding,
             color = color,
         )
     }
 
-    private suspend fun history(scope: WidgetDataScope): List<TimedValue> = try {
+    /** [valueOf] of each measurement of the last 30 days, oldest first, skipping those it returns null for. */
+    internal suspend fun history(scope: WidgetDataScope, valueOf: (DaoSession, WeightSample) -> Float?): List<TimedValue> = try {
         val from = (scope.dayStart - (HISTORY_DAYS - 1) * SECONDS_PER_DAY) * 1000L
         scope.db { db ->
             scope.devices.flatMap { dev ->
                 dev.deviceCoordinator.getWeightSampleProvider(dev, db.daoSession)
                     ?.getAllSamples(from, scope.query.timeTo * 1000L)
                     .orEmpty()
-                    .filter { it.weightKg > 0 }
-                    .map { TimedValue(it.timestamp / 1000L, it.weightKg) }
+                    .mapNotNull { sample -> valueOf(db.daoSession, sample)?.let { TimedValue(sample.timestamp / 1000L, it) } }
             }.sortedBy { it.seconds }
         }
     } catch (e: Exception) {

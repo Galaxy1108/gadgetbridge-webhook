@@ -21,10 +21,12 @@ import android.graphics.Color
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
+import nodomain.freeyourgadget.gadgetbridge.util.BodyCompositionEstimates
 import nodomain.freeyourgadget.gadgetbridge.widgets.GaugeSpec
 import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
 import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
 import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
+import nodomain.freeyourgadget.gadgetbridge.widgets.TimedValue
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import java.util.Locale
@@ -44,21 +46,34 @@ object BmiWidget : MetricWidget<WeightWidget.Data>() {
 
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): WeightWidget.Data {
         val latest = WeightWidget.latestWeightSample(scope)
-        return WeightWidget.Data(latest?.weightKg?.toDouble() ?: 0.0, ActivityUser().heightCm)
+        val history = if (config.isLarge) WeightWidget.history(scope) { session, s -> BodyCompositionEstimates.bmi(session, s) } else null
+        return WeightWidget.Data(latest?.weightKg?.toDouble() ?: 0.0, ActivityUser().heightCm, history, scope.dayStart)
     }
 
-    override fun previewData() = WeightWidget.Data(76.0, 178)
+    override fun previewData(): WeightWidget.Data {
+        val weight = WeightWidget.previewData()
+        val history = weight.history.orEmpty().mapNotNull { point ->
+            Bmi.of(point.value.toDouble(), 178)?.let { TimedValue(point.seconds, it.toFloat()) }
+        }
+        return WeightWidget.Data(76.0, 178, history, weight.dayStart)
+    }
 
     override fun model(context: Context, config: WidgetConfig, data: WeightWidget.Data): TileModel {
         val bmi = Bmi.of(data.weightKg, data.heightCm)
             ?: return emptyModel(context, GaugeSpec.Progress(Color.GRAY, -1f), MiniChart.ZoneBar(Bmi.COLORS, Bmi.SEGMENTS, -1f))
+        val line = data.history?.takeIf { config.isLarge && it.isNotEmpty() }
+            ?.let { WeightWidget.historyLine(it, data.dayStart, Bmi.colorFor(bmi), HISTORY_PADDING) }
         return TileModel(
             value = String.format(Locale.getDefault(), "%.1f", bmi),
             gauge = GaugeSpec.Progress(Bmi.colorFor(bmi), Bmi.gaugeFraction(bmi)),
             status = StatusLine.Chip(Bmi.colorFor(bmi), context.getString(LABELS[Bmi.categoryOf(bmi)])),
             chart = MiniChart.ZoneBar(Bmi.COLORS, Bmi.SEGMENTS, Bmi.scaleFraction(bmi)),
+            largeChart = line,
+            axis = if (line != null) WeightWidget.historyAxis(data.dayStart) else emptyList(),
         )
     }
+
+    private const val HISTORY_PADDING = 0.2f
 
     private val LABELS = intArrayOf(
         R.string.widget_status_underweight,

@@ -21,7 +21,6 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
-import nodomain.freeyourgadget.gadgetbridge.model.WeightUnit
 import nodomain.freeyourgadget.gadgetbridge.test.TestBase
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
@@ -40,8 +39,7 @@ class WeightWidgetTest : TestBase() {
         return view.findViewById<TextView>(R.id.gauge_value).text.toString()
     }
 
-    private fun expected(kg: Double): String =
-        WeightUnit.formatWeight(context, kg, GBApplication.getPrefs().weightUnit)
+    private fun expected(kg: Double): String = WeightWidget.formatWeight(context, kg)
 
     @Test
     fun noMeasurementShowsEmptyValue() {
@@ -53,6 +51,11 @@ class WeightWidgetTest : TestBase() {
         val text = render(WeightWidget.Data(80.0, 0))
         assertEquals(expected(80.0), text)
         assertTrue("expected the value in '$text'", text.contains("80"))
+    }
+
+    @Test
+    fun weightShownWithOneDecimal() {
+        assertEquals("80.3 kg", render(WeightWidget.Data(80.26, 180)))
     }
 
     @Test
