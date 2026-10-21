@@ -4981,6 +4981,8 @@
     <!-- Sport and start of the last workout, e.g. "Cycling · Yesterday, 18:40" -->
     <string name="widget_last_activity_subline">%1$s · %2$s, %3$s</string>
     <string name="widget_last_activity_avg_hr">Avg HR</string>
+    <string name="last_activity_hr_zones">Heart Rate Zones</string>
+    <string name="last_activity_dominant_zone">Z%1$d · %2$s</string>
     <!-- Screen reader summary, e.g. "Last activity, Morning run, Running · Today, 07:15. Distance 5.21 km, Duration 28:14, Pace 5:25 /km" -->
     <string name="widget_last_activity_description">%1$s, %2$s, %3$s. %4$s</string>
     <!-- e.g. "60 min" -->

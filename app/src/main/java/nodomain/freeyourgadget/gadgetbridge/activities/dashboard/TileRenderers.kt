@@ -2,9 +2,12 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
+import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
+import android.text.style.TypefaceSpan
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -57,14 +60,26 @@ object NumberTileRenderer : TileRenderer {
         renderHeader(view, title, icon)
         renderValue(view, model)
         renderStatus(view, model.status, null)
+        keepStatusSpace(view)
         renderChart(view.findViewById(R.id.tile_chart), model.chart, SMALL_CHART_HEIGHT_DP)
     }
 
     override fun renderLoading(view: View, title: String, icon: Int) {
         renderHeader(view, title, icon)
         renderValueLoading(view)
-        view.findViewById<View>(R.id.tile_status).visibility = View.GONE
+        view.findViewById<View>(R.id.tile_status).visibility = View.INVISIBLE
         view.findViewById<View>(R.id.tile_chart).visibility = View.GONE
+    }
+
+    /**
+     * Keeps the value at the same height in every widget, with or without a status line.
+     */
+    private fun keepStatusSpace(view: View) {
+        val status = view.findViewById<View>(R.id.tile_status)
+        if (status.visibility == View.GONE) {
+            view.findViewById<TextView>(R.id.tile_status_text).text = " "
+            status.visibility = View.INVISIBLE
+        }
     }
 
     private const val SMALL_CHART_HEIGHT_DP = 22f
@@ -275,9 +290,7 @@ private fun renderValue(view: View, model: TileModel) {
     value.text = model.value
     value.setTextColor(valueColor(value, model.valueDimmed))
     shrinkUnits(value)
-    val note: TextView? = view.findViewById(R.id.tile_value_note)
-    note?.text = model.valueNote
-    note?.visibility = if (model.valueNote == null) View.GONE else View.VISIBLE
+    model.valueNote?.let { appendNote(value, it) }
     val placeholder: View? = view.findViewById(R.id.tile_placeholder)
     placeholder?.visibility = View.GONE
 }
@@ -290,8 +303,6 @@ private fun valueColor(view: TextView, dimmed: Boolean): Int = if (dimmed) {
 
 private fun renderValueLoading(view: View) {
     view.findViewById<View>(R.id.tile_value).visibility = View.GONE
-    val note: View? = view.findViewById(R.id.tile_value_note)
-    note?.visibility = View.GONE
     view.findViewById<View>(R.id.tile_placeholder).visibility = View.VISIBLE
 }
 
@@ -479,10 +490,27 @@ private const val DARK_SWATCH_LUMINANCE = 0.019
 
 private val UNIT_REGEX = Regex("[\\p{L}%]+(?:(?:\\s+|/)[\\p{L}%]+)*")
 private const val UNIT_SIZE = 0.5f
+private const val NOTE_SIZE_SP = 12
 
 /**
  * Draws the unit part of a value, like "kcal" or "%", smaller and in the secondary colour.
  */
+/**
+ * [note] after the value, in the note size and colour.
+ */
+private fun appendNote(value: TextView, note: CharSequence) {
+    val text = SpannableStringBuilder(value.text).append(' ')
+    val start = text.length
+    text.append(note)
+    text.setSpan(AbsoluteSizeSpan(NOTE_SIZE_SP, true), start, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    text.setSpan(TypefaceSpan("sans-serif"), start, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    text.setSpan(
+        ForegroundColorSpan(MaterialColors.getColor(value, com.google.android.material.R.attr.colorOnSurfaceVariant)),
+        start, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+    )
+    value.text = text
+}
+
 private fun shrinkUnits(value: TextView) {
     val text = value.text
     if (text is Spanned || text.none { it.isDigit() }) {

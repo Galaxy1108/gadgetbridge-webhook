@@ -45,6 +45,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 /**
  * The most recent workout of the selected devices, independent of the dashboard day.
@@ -52,6 +53,9 @@ import kotlin.math.roundToInt
 object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
     private val LOG = LoggerFactory.getLogger(LastActivityWidget::class.java)
     private const val BADGE_ALPHA = 0.16f
+    private const val MIN_ZONES_SECONDS = 60L
+    private const val ZONE_GAP_DP = 2f
+    private const val ZONE_RADIUS_DP = 4f
 
     private class StatSizes(val valueSp: Float, val unitSp: Float, val labelSp: Float, val labelTopDp: Float, val gapDp: Float)
 
@@ -71,6 +75,8 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
         val distanceMeters: Float?,
         val calories: Int?,
         val avgHr: Int?,
+        val zoneSeconds: List<Float>? = null,
+        val belowZonesSeconds: Float = 0f,
     )
 
     data class Data(val workout: Workout?)
@@ -119,8 +125,25 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
                 calories = data.number(ActivitySummaryEntries.CALORIES_BURNT, ActivitySummaryEntries.CALORIES_TOTAL)
                     ?.roundToInt(),
                 avgHr = data.number(ActivitySummaryEntries.HR_AVG)?.roundToInt(),
+                zoneSeconds = data?.let { zoneSeconds(it) },
+                belowZonesSeconds = data.number(ActivitySummaryEntries.HR_ZONE_NA)?.toFloat() ?: 0f,
             )
         )
+    }
+
+    /**
+     * Seconds in zones 1 to 5, merging the device-specific zone names that share a zone colour.
+     */
+    private fun zoneSeconds(data: ActivitySummaryData): List<Float> {
+        val zoneColors = ActivitySummaryEntries.HR_ZONES.values.filter { it != 0 }.distinct()
+        val seconds = FloatArray(zoneColors.size)
+        for ((key, color) in ActivitySummaryEntries.HR_ZONES) {
+            val zone = zoneColors.indexOf(color)
+            if (zone >= 0 && data.has(key)) {
+                seconds[zone] += data.getNumber(key, 0).toFloat().coerceAtLeast(0f)
+            }
+        }
+        return seconds.toList()
     }
 
     override fun previewData(): Data = Data(
@@ -135,6 +158,7 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
             distanceMeters = 5000f,
             calories = 342,
             avgHr = 152,
+            zoneSeconds = listOf(67f, 300f, 694f, 500f, 104f),
         )
     )
 
@@ -165,6 +189,7 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
         view.findViewById<View>(R.id.last_activity_name_placeholder).visibility = View.VISIBLE
         view.findViewById<View>(R.id.last_activity_subline_placeholder).visibility = View.VISIBLE
         renderStats(view, statSizes(variant), List(3) { null to "" })
+        renderZones(view, null)
         view.contentDescription = null
     }
 
@@ -187,6 +212,7 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
             name.setTextColor(secondary)
             subline.visibility = View.GONE
             renderStats(view, statSizes(variant), emptyList())
+            renderZones(view, null)
             view.contentDescription = "$title, ${name.text}"
             return
         }
@@ -204,6 +230,7 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
         val stats = LastActivityFormat.stats(LastActivityFormat.statGroup(workout.kind, workout.distanceMeters))
             .map { stat(context, workout, it, sizes) }
         renderStats(view, sizes, stats.map { it.value to it.label })
+        renderZones(view, workout.takeIf { variant.id == WidgetVariant.METRIC_LARGE.id })
 
         val statsDescription = stats.joinToString(", ") { "${it.label} ${it.value ?: context.getString(R.string.stats_empty_value)}" }
         view.contentDescription = context.getString(
@@ -306,6 +333,52 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
             start, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         return text
+    }
+
+    /**
+     * Time in each heart rate zone as one bar under the zone with the most time, hidden without heart rate data or
+     * for workouts under a minute.
+     */
+    private fun renderZones(view: View, workout: Workout?) {
+        val block = view.findViewById<View?>(R.id.last_activity_zones_block) ?: return
+        val container = view.findViewById<LinearLayout>(R.id.last_activity_zones)
+        container.removeAllViews()
+        val zones = workout?.zoneSeconds
+        val total = zones?.sum() ?: 0f
+        if (workout == null || zones == null || workout.durationSec < MIN_ZONES_SECONDS || total + workout.belowZonesSeconds <= 0f) {
+            block.visibility = View.GONE
+            return
+        }
+        block.visibility = View.VISIBLE
+        val context = container.context
+        val dominant = zones.indices.lastOrNull { zone -> zones[zone] > 0f && zones[zone] == zones.max() }
+        view.findViewById<TextView>(R.id.last_activity_dominant_zone).text = dominant?.let {
+            context.getString(R.string.last_activity_dominant_zone, it + 1, LastActivityFormat.duration(zones[it].roundToLong()))
+        } ?: context.getString(R.string.stats_empty_value)
+        val density = container.resources.displayMetrics.density
+        val radius = ZONE_RADIUS_DP * density
+        val colors = ActivitySummaryEntries.HR_ZONES.values.filter { it != 0 }.distinct()
+        val segments = if (total > 0f) {
+            zones.indices.filter { zones[it] > 0f }.map { ContextCompat.getColor(context, colors[it]) to zones[it] }
+        } else {
+            listOf(MaterialColors.getColor(container, R.attr.gauge_track) to 1f)
+        }
+        for ((index, segment) in segments.withIndex()) {
+            val start = if (index == 0) radius else 0f
+            val end = if (index == segments.lastIndex) radius else 0f
+            val background = GradientDrawable()
+            background.setColor(segment.first)
+            background.cornerRadii = if (container.layoutDirection == View.LAYOUT_DIRECTION_RTL) {
+                floatArrayOf(end, end, start, start, start, start, end, end)
+            } else {
+                floatArrayOf(start, start, end, end, end, end, start, start)
+            }
+            val bar = View(context)
+            bar.background = background
+            val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, segment.second)
+            if (index > 0) params.marginStart = (ZONE_GAP_DP * density).roundToInt()
+            container.addView(bar, params)
+        }
     }
 
     private fun renderBadge(view: View, background: Int, iconRes: Int?, tint: Int?) {

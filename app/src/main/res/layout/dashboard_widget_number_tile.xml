@@ -30,17 +30,6 @@
         android:textColor="?attr/colorOnSurface"
         android:textSize="30sp" />
 
-    <TextView
-        android:id="@+id/tile_value_note"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFeatureSettings="tnum"
-        android:importantForAccessibility="no"
-        android:maxLines="1"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:textSize="12sp"
-        android:visibility="gone" />
-
     <LinearLayout
         android:id="@+id/tile_placeholder"
         android:layout_width="match_parent"
@@ -85,10 +74,17 @@
 
     </LinearLayout>
 
-    <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.MiniChartView
-        android:id="@+id/tile_chart"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="22dp"
-        android:importantForAccessibility="no" />
+        android:layout_height="22dp">
+
+        <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.MiniChartView
+            android:id="@+id/tile_chart"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:layout_gravity="bottom"
+            android:importantForAccessibility="no" />
+
+    </FrameLayout>
 
 </LinearLayout>
