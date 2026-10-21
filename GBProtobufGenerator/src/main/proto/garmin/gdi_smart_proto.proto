@@ -26,6 +26,7 @@ import "garmin/gdi_incident_detection.proto";
 import "garmin/gdi_installed_apps.proto";
 import "garmin/gdi_instant_input.proto";
 import "garmin/gdi_launch_monitor.proto";
+import "garmin/gdi_live_session.proto";
 import "garmin/gdi_live_track.proto";
 import "garmin/gdi_realtime_settings.proto";
 import "garmin/gdi_sms_notification.proto";
@@ -65,7 +66,7 @@ message Smart {
     optional Service46 deeplinking_service = 46;
     optional Service47 garmin_connect_service = 47;
     optional GDI.Proto.GNCS.GncsService gncs_service = 49;
-    optional Service56 live_session_service = 56;
+    optional GDI.Proto.LiveSession.LiveSessionService live_session_service = 56;
 }
 
 message UUID {
@@ -203,29 +204,4 @@ message Service47 {
     optional Message1 device_checks_for_software_update = 1;
     optional Message4 unk4 = 4;
     optional Message5 unk5 = 5;
-}
-
-message Service56 {
-    message Message2 {
-    }
-    message Message4 {
-    }
-    message Message6 {
-    }
-    message Message8 {
-    }
-    message Message12 {
-    }
-    message Message18 {
-        message Message1 {
-            optional uint32 unk1 = 1;
-        }
-        optional Message1 unk1 = 1;
-    }
-    optional Message2 unk2 = 2;
-    optional Message4 unk4 = 4;
-    optional Message4 unk6 = 6;
-    optional Message8 unk8 = 8;
-    optional Message12 unk12 = 12;
-    optional Message18 unk18 = 18;
 }
