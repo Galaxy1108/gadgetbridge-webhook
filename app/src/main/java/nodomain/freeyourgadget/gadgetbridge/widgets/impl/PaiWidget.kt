@@ -54,13 +54,24 @@ object PaiWidget : MetricWidget<PaiWidget.Data>() {
     override fun labelFor(variant: WidgetVariant, config: WidgetConfig): Int = nameOf(config.resolveDevices(this))
 
     override fun displayName(context: Context): String =
-        context.getString(nameOf(GBApplication.app().deviceManager.devices))
+        namesOf(GBApplication.app().deviceManager.devices)
+            .map { context.getString(it) }
+            .distinct()
+            .sorted()
+            .joinToString(" / ")
+            .ifEmpty { context.getString(label) }
+
+    /**
+     * The distinct names of the metric across the [devices] that support it.
+     */
+    internal fun namesOf(devices: List<GBDevice>): List<Int> =
+        devices.filter { isSupportedBy(it) }.map { it.deviceCoordinator.paiName }.distinct()
 
     /**
      * The devices' own name for the metric, such as Intensity Minutes, or PAI when they disagree.
      */
     internal fun nameOf(devices: List<GBDevice>): Int =
-        devices.filter { isSupportedBy(it) }.map { it.deviceCoordinator.paiName }.distinct().singleOrNull() ?: label
+        namesOf(devices).singleOrNull() ?: label
 
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         // Bounded by timeFrom/timeTo (not getLatestSample, which has no lower bound) so a day
