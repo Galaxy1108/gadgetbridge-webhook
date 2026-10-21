@@ -111,9 +111,9 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
                 (HIGHLIGHT_STROKE_DP * density).roundToInt(),
                 MaterialColors.getColor(card, androidx.appcompat.R.attr.colorPrimary),
             )
-            border.setBounds(0, 0, card.width, card.height)
             border.alpha = 0
-            card.overlay.add(border)
+            // In the overlay of the grid, so that it draws above the dashed border, in the foreground of the card
+            grid.overlay.add(border)
 
             val alpha = PropertyValuesHolder.ofKeyframe(
                 "alpha",
@@ -124,8 +124,14 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
             )
             ValueAnimator.ofPropertyValuesHolder(alpha).apply {
                 duration = HIGHLIGHT_DURATION_MS
-                addUpdateListener { border.alpha = it.animatedValue as Int }
-                doOnEnd { card.overlay.remove(border) }
+                addUpdateListener {
+                    // The card can move while the border shows
+                    val left = card.left + card.translationX.roundToInt()
+                    val top = card.top + card.translationY.roundToInt()
+                    border.setBounds(left, top, left + card.width, top + card.height)
+                    border.alpha = it.animatedValue as Int
+                }
+                doOnEnd { grid.overlay.remove(border) }
                 start()
             }
         }
@@ -269,7 +275,7 @@ class DashboardGridBinder(private val grid: WidgetGridLayout) {
 private const val TILE_STROKE_DP = 1.5f
 private const val TILE_RADIUS_DP = 12f
 private const val EDIT_DASH_DP = 6f
-private const val HIGHLIGHT_STROKE_DP = 3f
+private const val HIGHLIGHT_STROKE_DP = 2f
 private const val HIGHLIGHT_DURATION_MS = 2500L
 
 /**
