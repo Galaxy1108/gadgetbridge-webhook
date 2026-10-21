@@ -43,6 +43,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -84,6 +85,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private lateinit var arrowRight: TextView
     private lateinit var scrollView: NestedScrollView
     private lateinit var addButton: FloatingActionButton
+    private lateinit var saveButton: FloatingActionButton
     private lateinit var grid: WidgetGridLayout
     private lateinit var binder: DashboardGridBinder
     private lateinit var dragController: GridDragController
@@ -92,6 +94,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private var isConfigChanged = false
     private var startEditingOnResume = false
     private var actionMode: ActionMode? = null
+    private var deleteSnackbar: Snackbar? = null
 
     /**
      * The instance whose settings are open, to reload them when they close.
@@ -117,15 +120,21 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private val editCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.setTitle(R.string.dashboard_edit)
+            mode.menuInflater.inflate(R.menu.dashboard_edit_menu, menu)
             return true
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
 
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = false
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            if (item.itemId != R.id.dashboard_edit_undo) return false
+            resetEdits()
+            return true
+        }
 
         override fun onDestroyActionMode(mode: ActionMode) {
             actionMode = null
+            viewModel.editSnapshot = null
             binder.editing = false
             setEditControls(false)
         }
@@ -165,6 +174,8 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         scrollView = view.findViewById(R.id.dashboard_scroll)
         addButton = view.findViewById(R.id.dashboard_add_widget)
         addButton.setOnClickListener { addWidget() }
+        saveButton = view.findViewById(R.id.dashboard_save)
+        saveButton.setOnClickListener { actionMode?.finish() }
         grid = view.findViewById(R.id.dashboard_grid)
         arrowLeft = view.findViewById(R.id.arrow_left)
         arrowRight = view.findViewById(R.id.arrow_right)
@@ -228,7 +239,10 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     override fun onDestroyView() {
+        // Keep the snapshot when the edit mode continues in the new view
+        val snapshot = viewModel.editSnapshot
         actionMode?.finish()
+        viewModel.editSnapshot = snapshot
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
         super.onDestroyView()
     }
@@ -318,23 +332,39 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private fun startEditing() {
         if (actionMode != null) return
         actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(editCallback) ?: return
+        if (viewModel.editSnapshot == null) {
+            viewModel.editSnapshot = WidgetLayoutStore.snapshot()
+        }
         binder.editing = true
         setEditControls(true)
     }
 
     /**
-     * Shows the add FAB and hides the date arrows in the edit mode.
+     * Restores the dashboard to its state at the start of the edit mode.
+     */
+    private fun resetEdits() {
+        val snapshot = viewModel.editSnapshot ?: return
+        deleteSnackbar?.dismiss()
+        WidgetLayoutStore.restore(snapshot)
+        fullRefresh()
+    }
+
+    /**
+     * Shows the add and save FABs, and hides the date arrows and disables the page swipe in the edit mode.
      */
     private fun setEditControls(editing: Boolean) {
         arrowLeft.isInvisible = editing
         arrowRight.isInvisible = editing
         if (editing) {
             addButton.show()
+            saveButton.show()
         } else {
             addButton.hide()
+            saveButton.hide()
         }
-        // Reserve space for the add button and its margin
-        val bottom = if (editing) (88f * resources.displayMetrics.density).roundToInt() else 0
+        activity?.findViewById<ViewPager2>(R.id.dashboard_viewpager)?.isUserInputEnabled = !editing
+        // Reserve space for the two buttons and their margins
+        val bottom = if (editing) (160f * resources.displayMetrics.density).roundToInt() else 0
         scrollView.updatePadding(bottom = bottom)
     }
 
@@ -403,12 +433,12 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             viewModel.updateLayout(columns)
             sheet.dismiss()
             if (deleted != null) {
-                Snackbar.make(requireView(), R.string.widgets_deleted, Snackbar.LENGTH_LONG)
+                deleteSnackbar = Snackbar.make(requireView(), R.string.widgets_deleted, Snackbar.LENGTH_LONG)
                     .setAction(R.string.undo) {
                         WidgetLayoutStore.restore(deleted)
                         viewModel.updateLayout(columns)
                     }
-                    .show()
+                    .apply { show() }
             }
         }
 

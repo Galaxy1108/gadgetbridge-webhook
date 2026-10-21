@@ -47,6 +47,14 @@ class DeletedWidget(
 )
 
 /**
+ * The stored layouts and the settings of their instances, at one point in time.
+ */
+class DashboardSnapshot(
+    internal val layouts: Map<Int, List<WidgetPlacement>>,
+    internal val settings: Map<String, Map<String, *>>,
+)
+
+/**
  * Persists the layouts as JSON in one preference, and the settings of each widget instance in its own
  * SharedPreferences file (see [GBApplication.getWidgetSharedPrefs]).
  * <p>
@@ -185,6 +193,38 @@ object WidgetLayoutStore {
             copyAllPrefs(deleted.settings, dest) { it }
         }
         saveLayout(deleted.columns, placements)
+    }
+
+    /**
+     * The stored layouts and the settings of their instances.
+     */
+    fun snapshot(): DashboardSnapshot {
+        val layouts = load().layouts
+        val settings = layouts.values.flatten().associate { placement ->
+            val instanceId = placement.instance.instanceId
+            instanceId to GBApplication.getWidgetSharedPrefs(instanceId)?.all.orEmpty()
+        }
+        return DashboardSnapshot(layouts, settings)
+    }
+
+    /**
+     * Replaces the stored layouts and the settings of their instances with [snapshot]. Deletes the settings of the
+     * instances that are not in [snapshot].
+     */
+    fun restore(snapshot: DashboardSnapshot) {
+        LOG.info("Restoring the dashboard with layouts {}", snapshot.layouts.mapValues { it.value.size })
+        for (instance in instances()) {
+            if (instance.instanceId !in snapshot.settings) {
+                GBApplication.deleteWidgetSharedPrefs(instance.instanceId)
+            }
+        }
+        for ((instanceId, settings) in snapshot.settings) {
+            GBApplication.deleteWidgetSharedPrefs(instanceId)
+            GBApplication.getWidgetSharedPrefs(instanceId)?.let { dest ->
+                copyAllPrefs(settings, dest) { it }
+            }
+        }
+        save(Dashboard(snapshot.layouts))
     }
 
     /**

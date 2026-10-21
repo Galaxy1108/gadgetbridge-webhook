@@ -16,6 +16,7 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardSnapshot
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
@@ -46,6 +47,11 @@ class DashboardViewModel : ViewModel() {
 
     private val _state = MutableStateFlow<Map<String, WidgetState>>(emptyMap())
     val state: StateFlow<Map<String, WidgetState>> = _state.asStateFlow()
+
+    /**
+     * The dashboard at the start of the edit mode.
+     */
+    var editSnapshot: DashboardSnapshot? = null
 
     private var refreshJob: Job? = null
     private var query: DashboardQuery? = null
