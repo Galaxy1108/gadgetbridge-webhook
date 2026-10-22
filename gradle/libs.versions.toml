@@ -59,6 +59,7 @@ security-crypto = "1.1.0"
 browser = "1.10.0"
 exifinterface = "1.4.2"
 kaitai-struct-runtime = "0.11"
+kotlinx-coroutines = "1.10.2"
 
 [libraries]
 ahocorasick = { group = "org.ahocorasick", name = "ahocorasick", version.ref = "ahocorasick" }
@@ -129,6 +130,7 @@ androidx-security-crypto = { group = "androidx.security", name = "security-crypt
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 kaitai-struct-runtime = { group = "io.kaitai", name = "kaitai-struct-runtime", version.ref = "kaitai-struct-runtime" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 
 [bundles]

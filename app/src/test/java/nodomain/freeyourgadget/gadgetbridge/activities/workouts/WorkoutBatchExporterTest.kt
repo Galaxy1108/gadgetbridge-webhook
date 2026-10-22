@@ -29,7 +29,7 @@ class WorkoutBatchExporterTest : TestBase() {
     }
 
     private fun export(summaries: List<BaseActivitySummary>, parts: Set<Part>, asZip: Boolean) =
-        WorkoutBatchExporter.export(getContext(), createDummyGDevice("00:00:00:00:00:01"), summaries, parts, asZip)
+        WorkoutBatchExporter.export(getContext(), summaries, parts, asZip)
 
     private val base get() = ActivitySummaryUtils.getExportBaseName(getContext(), summary(1))
 
