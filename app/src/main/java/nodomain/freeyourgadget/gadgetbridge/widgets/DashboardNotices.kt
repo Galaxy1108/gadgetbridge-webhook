@@ -1,6 +1,9 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets
 
 import androidx.core.content.edit
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -13,6 +16,9 @@ object DashboardNotices {
 
     private const val PREF_MIGRATION = "pref_dashboard_notice_migration"
     private const val PREF_DEVICE = "pref_dashboard_notice_device"
+
+    private val _changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val changes: SharedFlow<Unit> = _changes.asSharedFlow()
 
     /**
      * The notices to display:
@@ -41,5 +47,6 @@ object DashboardNotices {
                 remove(PREF_DEVICE)
             }
         }
+        _changes.tryEmit(Unit)
     }
 }

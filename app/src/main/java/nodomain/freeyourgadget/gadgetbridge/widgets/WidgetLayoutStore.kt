@@ -4,6 +4,9 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.util.gson.GsonSerialized
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid.placeAtFirstFree
@@ -59,6 +62,9 @@ object WidgetLayoutStore {
 
     private val gson = Gson()
     private val dashboardType = object : TypeToken<Dashboard>() {}.type
+
+    private val _changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val changes: SharedFlow<Unit> = _changes.asSharedFlow()
 
     /**
      * The widget instances of all stored layouts.
@@ -300,6 +306,7 @@ object WidgetLayoutStore {
         sharedPreferences().edit {
             putString(PREF_DASHBOARD, gson.toJson(dashboard))
         }
+        _changes.tryEmit(Unit)
     }
 
     private fun saveLayout(columns: Int, placements: List<WidgetPlacement>) {
