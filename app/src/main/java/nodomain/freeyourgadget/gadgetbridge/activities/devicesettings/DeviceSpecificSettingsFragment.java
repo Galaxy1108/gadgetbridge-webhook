@@ -377,11 +377,12 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         for (final DeviceSpecificSettingsScreen value : DeviceSpecificSettingsScreen.values()) {
             final PreferenceScreen prefScreen = findPreference(value.getKey());
             if (prefScreen != null) {
-                if (modelSpec != null && modelSpec.findScreen(value.getKey()) != null) {
+                if (modelSpec != null && modelSpec.findScreen(value.getKey()) != null && prefScreen.getPreferenceCount() > 0) {
                     // This screen is a model ScreenSetting rendered in-memory by
                     // DeviceSettingRenderer; it already navigates via the default nested
                     // PreferenceScreen click handling, so wiring this listener too would push a
-                    // second, redundant navigation onto the back stack.
+                    // second, redundant navigation onto the back stack. The default handling
+                    // ignores a screen without children, such as one with only xml sub-screens.
                     continue;
                 }
                 prefScreen.setOnPreferenceClickListener(p -> {

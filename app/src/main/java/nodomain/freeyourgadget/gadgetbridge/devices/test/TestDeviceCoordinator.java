@@ -36,9 +36,7 @@ import java.util.Set;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.appmanager.AppManagerActivity;
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettings;
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.HeartRateCapability;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.BarcodeFormat;
 import nodomain.freeyourgadget.gadgetbridge.capabilities.password.PasswordCapabilityImpl;
@@ -96,7 +94,6 @@ import nodomain.freeyourgadget.gadgetbridge.model.HrvValueSample;
 import nodomain.freeyourgadget.gadgetbridge.model.MetricSample;
 import nodomain.freeyourgadget.gadgetbridge.model.PaiSample;
 import nodomain.freeyourgadget.gadgetbridge.model.RespiratoryRateSample;
-import nodomain.freeyourgadget.gadgetbridge.model.RestingMetabolicRateSample;
 import nodomain.freeyourgadget.gadgetbridge.model.SleepScoreSample;
 import nodomain.freeyourgadget.gadgetbridge.model.SolarChargeSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
@@ -125,7 +122,7 @@ public class TestDeviceCoordinator extends AbstractDeviceCoordinator {
 
     @NonNull
     @Override
-    public Class<? extends DeviceSupport> getDeviceSupportClass(final GBDevice device) {
+    public Class<? extends DeviceSupport> getDeviceSupportClass(@NonNull final GBDevice device) {
         return TestDeviceSupport.class;
     }
 
@@ -351,6 +348,11 @@ public class TestDeviceCoordinator extends AbstractDeviceCoordinator {
     @Override
     public boolean supportsScreenshots(@NonNull final GBDevice device) {
         return supports(device, TestFeature.SCREENSHOTS);
+    }
+
+    @Override
+    public boolean supportsGallery(@NonNull final GBDevice device) {
+        return supports(device, TestFeature.GALLERY);
     }
 
     @Override
@@ -753,37 +755,15 @@ public class TestDeviceCoordinator extends AbstractDeviceCoordinator {
         return super.getSupportedDeviceSpecificConnectionSettings();
     }
 
+    @Nullable
     @Override
-    public DeviceSpecificSettings getDeviceSpecificSettings(final GBDevice device) {
-        final DeviceSpecificSettings deviceSpecificSettings = new DeviceSpecificSettings();
-
-        deviceSpecificSettings.addRootScreen(R.xml.devicesettings_loyalty_cards);
-
-        if (getWorldClocksSlotCount() > 0) {
-            final List<Integer> dateTime = deviceSpecificSettings.addRootScreen(DeviceSpecificSettingsScreen.DATE_TIME);
-            dateTime.add(R.xml.devicesettings_world_clocks);
-        }
-
-        if (getContactsSlotCount(device) > 0) {
-            deviceSpecificSettings.addRootScreen(R.xml.devicesettings_contacts);
-        }
-
-        deviceSpecificSettings.addRootScreen(R.xml.devicesettings_test_features);
-
-        final List<Integer> developer = deviceSpecificSettings.addRootScreen(DeviceSpecificSettingsScreen.DEVELOPER);
-        developer.add(R.xml.devicesettings_developer_add_test_activities);
-
-        return deviceSpecificSettings;
+    public DeviceSettingsSpec getDeviceSettings(@NonNull final GBDevice device) {
+        return TestDeviceSettingsKt.testDeviceSettings(device, this);
     }
 
     @Override
     public int[] getSupportedDeviceSpecificAuthenticationSettings() {
         return new int[]{R.xml.devicesettings_pairingkey};
-    }
-
-    @Override
-    public DeviceSpecificSettingsCustomizer getDeviceSpecificSettingsCustomizer(final GBDevice device) {
-        return new TestDeviceSpecificSettingsCustomizer();
     }
 
     @Override
