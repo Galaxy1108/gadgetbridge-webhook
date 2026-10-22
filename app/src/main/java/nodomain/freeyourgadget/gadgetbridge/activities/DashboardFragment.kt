@@ -340,7 +340,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             }
             .apply {
                 if (action == DashboardUndoAction.DELETE_WIDGET) {
-                    setAnchorView(binding.dashboardEditBar)
+                    anchorView = binding.dashboardEditBar
                 }
                 show()
             }

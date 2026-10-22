@@ -3,6 +3,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 import android.animation.Keyframe
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -47,7 +48,7 @@ class DashboardGridBinder(
         fun onMove(item: PlacedWidget, offset: Int)
     }
 
-    inner class CellHolder(val cell: Cell) : RecyclerView.ViewHolder(cell.card)
+    class CellHolder(val cell: Cell) : RecyclerView.ViewHolder(cell.card)
 
     class Cell(
         val card: MaterialCardView,
@@ -228,6 +229,7 @@ class DashboardGridBinder(
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun submitItems(newItems: List<PlacedWidget>) {
         items.clear()
         items.addAll(newItems)

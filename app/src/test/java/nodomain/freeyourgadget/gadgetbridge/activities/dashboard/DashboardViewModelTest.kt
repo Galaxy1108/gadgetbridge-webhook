@@ -1,5 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -43,7 +44,11 @@ class DashboardViewModelTest {
     @Test
     fun loadsWidgetsForTheSelectedDate() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
 
         advanceUntilIdle()
 
@@ -60,7 +65,11 @@ class DashboardViewModelTest {
     @Test
     fun changingDateLoadsTheNewDay() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
 
         advanceUntilIdle()
         viewModel.onPreviousDay()
@@ -74,7 +83,11 @@ class DashboardViewModelTest {
     @Test
     fun columnsChangeRequestsANewLayout() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
 
         advanceUntilIdle()
         viewModel.onColumnsChanged(6)
@@ -86,7 +99,11 @@ class DashboardViewModelTest {
     @Test
     fun settingsChangeReloadsWidgets() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
 
         advanceUntilIdle()
         repository.settings.value = DashboardSettings(cardsEnabled = false)
@@ -99,7 +116,11 @@ class DashboardViewModelTest {
     @Test
     fun onlyNewDataForDashboardDevicesReloads() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
         val device = GBDevice("AA:BB:CC:DD:EE:FF", "Test", null, null, DeviceType.UNKNOWN)
 
         advanceUntilIdle()
@@ -117,7 +138,11 @@ class DashboardViewModelTest {
     @Test
     fun startEditingRequestIsConsumedOnce() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
         repository.startEditingRequested = true
 
         advanceUntilIdle()
@@ -130,7 +155,11 @@ class DashboardViewModelTest {
     @Test
     fun editModeTracksChangesAndRestoresDeletedWidgets() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
 
         advanceUntilIdle()
         viewModel.onStartEditing()
@@ -156,7 +185,11 @@ class DashboardViewModelTest {
     @Test
     fun discardRestoresTheSnapshotTakenAtTheStartOfEditing() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
 
         advanceUntilIdle()
         viewModel.onStartEditing()
@@ -175,7 +208,11 @@ class DashboardViewModelTest {
     @Test
     fun restoreClassicDesignCanBeUndone() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
-        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        val viewModel = DashboardViewModel(
+            savedStateHandle = SavedStateHandle(),
+            repository = repository,
+            widgetLoader = repository.loader
+        )
 
         advanceUntilIdle()
         val undo = async(start = CoroutineStart.UNDISPATCHED) { viewModel.events.first() }
@@ -253,7 +290,7 @@ class DashboardViewModelTest {
             revision++
         }
 
-        override suspend fun duplicate(columns: Int, instanceId: String): WidgetInstance? {
+        override suspend fun duplicate(columns: Int, instanceId: String): WidgetInstance {
             revision++
             return WidgetInstance("copy-$revision", StepsWidget.id)
         }

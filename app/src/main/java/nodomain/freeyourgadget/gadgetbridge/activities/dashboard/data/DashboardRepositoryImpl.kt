@@ -26,7 +26,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
  *
  * The store is synchronous, so every write and every observed read runs on [ioDispatcher].
  */
-class DefaultDashboardRepository(
+class DashboardRepositoryImpl(
     private val preferences: DashboardPreferences = DashboardPreferences(),
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : DashboardRepository {

@@ -29,9 +29,9 @@ class WorkoutBatchExporterTest : TestBase() {
     }
 
     private fun export(summaries: List<BaseActivitySummary>, parts: Set<Part>, asZip: Boolean) =
-        WorkoutBatchExporter.export(getContext(), summaries, parts, asZip)
+        WorkoutBatchExporter.export(context, summaries, parts, asZip)
 
-    private val base get() = ActivitySummaryUtils.getExportBaseName(getContext(), summary(1))
+    private val base get() = ActivitySummaryUtils.getExportBaseName(context, summary(1))
 
     private fun assertFit(bytes: ByteArray) {
         assertTrue(bytes.size > 12)
@@ -98,7 +98,7 @@ class WorkoutBatchExporterTest : TestBase() {
             val result = export(listOf(summary(1)), setOf(Part.RAW), asZip)
             assertTrue(result.files.isEmpty())
             assertEquals(0, result.entries)
-            assertFalse(File(getContext().cacheDir, "raw/workouts").exists())
+            assertFalse(File(context.cacheDir, "raw/workouts").exists())
         }
     }
 

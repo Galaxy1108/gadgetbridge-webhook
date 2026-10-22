@@ -13,7 +13,6 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.test.TestBase
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardNotices
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StepsWidget
 import org.junit.Assert.assertEquals
@@ -22,7 +21,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DefaultDashboardRepositoryTest : TestBase() {
+class DashboardRepositoryImplTest : TestBase() {
     @Test
     fun layoutFlowEmitsLayoutChanges() = runTest {
         val repository = repository()
@@ -99,7 +98,7 @@ class DefaultDashboardRepositoryTest : TestBase() {
         repository.setNotices(initial)
     }
 
-    private fun repository() = DefaultDashboardRepository(
+    private fun repository() = DashboardRepositoryImpl(
         ioDispatcher = Dispatchers.Unconfined,
     )
 }

@@ -49,9 +49,6 @@ data class DashboardUiState(
     val notices: List<DashboardNotice>,
 ) {
     val cardsEnabled: Boolean get() = settings.cardsEnabled
-
-    fun stateOf(instanceId: String): WidgetState =
-        items.firstOrNull { it.instanceId == instanceId }?.state ?: WidgetState.Loading
 }
 
 /**

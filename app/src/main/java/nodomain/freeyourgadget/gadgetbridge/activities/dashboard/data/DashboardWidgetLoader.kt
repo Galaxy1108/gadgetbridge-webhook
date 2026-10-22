@@ -20,7 +20,7 @@ fun interface DashboardWidgetLoader {
 /**
  * The [DashboardWidgetLoader] that reads the instance preferences and calls the widget's own loader.
  */
-class DefaultDashboardWidgetLoader(
+class DashboardWidgetLoaderImpl(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : DashboardWidgetLoader {
     override suspend fun load(

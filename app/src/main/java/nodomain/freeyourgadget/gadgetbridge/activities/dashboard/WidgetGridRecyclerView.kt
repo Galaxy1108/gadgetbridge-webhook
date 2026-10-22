@@ -3,7 +3,6 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.View.MeasureSpec
 import androidx.recyclerview.widget.RecyclerView
 
 /**

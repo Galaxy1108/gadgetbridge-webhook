@@ -29,8 +29,8 @@ import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardRepository
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardSettings
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardWidgetLoader
-import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DefaultDashboardRepository
-import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DefaultDashboardWidgetLoader
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardRepositoryImpl
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardWidgetLoaderImpl
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardNotices
@@ -52,10 +52,11 @@ import java.time.ZoneId
  * [DashboardWidgetLoader], and every new layout, day, settings or reload request cancels the previous loads.
  */
 class DashboardViewModel(
-    private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
-    private val repository: DashboardRepository = DefaultDashboardRepository(),
-    private val widgetLoader: DashboardWidgetLoader = DefaultDashboardWidgetLoader(),
+    private val savedStateHandle: SavedStateHandle,
+    private val repository: DashboardRepository = DashboardRepositoryImpl(),
+    private val widgetLoader: DashboardWidgetLoader = DashboardWidgetLoaderImpl(),
 ) : ViewModel() {
+
     private data class Content(
         val date: LocalDate,
         val layout: List<PlacedWidget>,
@@ -137,7 +138,6 @@ class DashboardViewModel(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeLoadRequests() {
         viewModelScope.launch {
             combine(
@@ -394,7 +394,6 @@ class DashboardViewModel(
 
     override fun onCleared() {
         _events.close()
-        super.onCleared()
     }
 
     companion object {
