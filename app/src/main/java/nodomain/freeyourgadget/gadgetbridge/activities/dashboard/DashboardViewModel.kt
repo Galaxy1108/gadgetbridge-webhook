@@ -2,7 +2,11 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -27,6 +31,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardS
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardWidgetLoader
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DefaultDashboardRepository
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DefaultDashboardWidgetLoader
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardNotices
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
@@ -320,6 +325,12 @@ class DashboardViewModel(
         }
     }
 
+    fun onNewData(device: GBDevice) {
+        if (repository.isDeviceInScope(device)) {
+            reload.update { it + 1 }
+        }
+    }
+
     fun onSettingsClosed() {
         reload.update { it + 1 }
         viewModelScope.launch { updateEditDirty() }
@@ -372,6 +383,12 @@ class DashboardViewModel(
     }
 
     companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                DashboardViewModel(savedStateHandle = createSavedStateHandle())
+            }
+        }
+
         private val LOG = LoggerFactory.getLogger(DashboardViewModel::class.java)
 
         private const val KEY_DAY = "dashboard_day"

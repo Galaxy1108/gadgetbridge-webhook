@@ -31,10 +31,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
@@ -43,21 +41,19 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
-import androidx.core.view.updatePadding
 import androidx.core.view.isVisible
-import androidx.core.widget.NestedScrollView
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.viewpager2.widget.ViewPager2
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
@@ -74,13 +70,13 @@ import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridLayou
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetInstanceSettingsActivity
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetPickerActivity
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.showVariantPreviews
+import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentDashboardBinding
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.BarShade
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.Date
@@ -91,21 +87,17 @@ import java.util.Date
  * widgets can be moved, added, changed and deleted.
  */
 class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGridBinder.Callbacks {
-    private lateinit var textViewDate: TextView
-    private lateinit var arrowLeft: TextView
-    private lateinit var arrowRight: TextView
-    private lateinit var scrollView: NestedScrollView
-    private lateinit var editBar: View
-    private lateinit var discardButton: MaterialButton
-    private lateinit var notices: LinearLayout
-    private lateinit var grid: WidgetGridLayout
-    private lateinit var binder: DashboardGridBinder
+    private var _binding: FragmentDashboardBinding? = null
+    private val binding get() = _binding!!
+
+    private var binder: DashboardGridBinder? = null
     private lateinit var dragController: GridDragController
-    private lateinit var viewModel: DashboardViewModel
+    private val viewModel: DashboardViewModel by viewModels { DashboardViewModel.Factory }
 
     private var isConfigChanged = false
     private var startEditingOnResume = false
     private var preserveEditingOnDestroy = false
+    private var receiverRegistered = false
     private var actionMode: ActionMode? = null
     private var snackbar: Snackbar? = null
     private var lastItems: List<PlacedWidget> = emptyList()
@@ -134,7 +126,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         override fun onDestroyActionMode(mode: ActionMode) {
             actionMode = null
             snackbar?.dismiss()
-            binder.editing = false
+            binder?.editing = false
             setEditControls(false)
             if (!preserveEditingOnDestroy) {
                 viewModel.onFinishEditing()
@@ -157,13 +149,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
-                GBApplication.ACTION_NEW_DATA -> {
-                    val dev: GBDevice? = intent.getDevice()
-                    if (dev != null && isDeviceInScope(dev)) {
-                        viewModel.onSettingsClosed()
-                    }
-                }
-
+                GBApplication.ACTION_NEW_DATA -> intent.getDevice()?.let(viewModel::onNewData)
                 ACTION_CONFIG_CHANGE -> isConfigChanged = true
                 ACTION_START_EDITING -> startEditingOnResume = true
             }
@@ -171,43 +157,39 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        textViewDate = view.findViewById(R.id.dashboard_date)
-        scrollView = view.findViewById(R.id.dashboard_scroll)
-        editBar = view.findViewById(R.id.dashboard_edit_bar)
-        editBar.setBackgroundColor(MaterialColors.getColor(editBar, R.attr.main_bar_bg))
-        ViewCompat.setOnApplyWindowInsetsListener(editBar) { bar, insets ->
+        val binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        _binding = binding
+        lastItems = emptyList()
+        lastNotices = emptyList()
+
+        binding.dashboardEditBar.setBackgroundColor(MaterialColors.getColor(binding.dashboardEditBar, R.attr.main_bar_bg))
+        ViewCompat.setOnApplyWindowInsetsListener(binding.dashboardEditBar) { bar, insets ->
             bar.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom)
             insets
         }
-        discardButton = view.findViewById(R.id.dashboard_discard)
-        discardButton.setOnClickListener { confirmDiscard() }
-        view.findViewById<View>(R.id.dashboard_add_widget).setOnClickListener { viewModel.onAddWidgetClicked() }
-        view.findViewById<View>(R.id.dashboard_done).setOnClickListener { actionMode?.finish() }
-        notices = view.findViewById(R.id.dashboard_notices)
-        grid = view.findViewById(R.id.dashboard_grid)
-        arrowLeft = view.findViewById(R.id.arrow_left)
-        arrowRight = view.findViewById(R.id.arrow_right)
+        binding.dashboardDiscard.setOnClickListener { confirmDiscard() }
+        binding.dashboardAddWidget.setOnClickListener { viewModel.onAddWidgetClicked() }
+        binding.dashboardDone.setOnClickListener { actionMode?.finish() }
 
-        viewModel = ViewModelProvider(this)[DashboardViewModel::class.java]
-        binder = DashboardGridBinder(grid)
-        binder.callbacks = this
-        grid.columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
-        dragController = GridDragController(grid, scrollView, binder::instanceIdOf) { arrangement ->
+        binder = DashboardGridBinder(binding.dashboardGrid).apply {
+            callbacks = this@DashboardFragment
+        }
+        binding.dashboardGrid.columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
+        dragController = GridDragController(
+            binding.dashboardGrid,
+            binding.dashboardScroll,
+            binder!!::instanceIdOf,
+        ) { arrangement ->
             viewModel.onArrange(arrangement)
         }
 
-        arrowLeft.setOnClickListener { viewModel.onPreviousDay() }
-        arrowRight.setOnClickListener { viewModel.onNextDay() }
-
-        savedInstanceState?.let {
-            startEditingOnResume = it.getBoolean(KEY_EDITING)
-        }
+        binding.arrowLeft.setOnClickListener { viewModel.onPreviousDay() }
+        binding.arrowRight.setOnClickListener { viewModel.onNextDay() }
 
         // The pager resumes only the visible page
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         observeViewModel()
-        viewModel.onColumnsChanged(grid.columns)
+        viewModel.onColumnsChanged(binding.dashboardGrid.columns)
 
         val filter = IntentFilter()
         filter.addAction(GBDevice.ACTION_DEVICE_CHANGED)
@@ -215,8 +197,9 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         filter.addAction(ACTION_CONFIG_CHANGE)
         filter.addAction(ACTION_START_EDITING)
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
+        receiverRegistered = true
 
-        return view
+        return binding.root
     }
 
     override fun onResume() {
@@ -237,13 +220,13 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         preserveEditingOnDestroy = requireActivity().isChangingConfigurations &&
             viewModel.uiState.value.editState != null
         actionMode?.finish()
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
+        if (receiverRegistered) {
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
+            receiverRegistered = false
+        }
+        binder = null
+        _binding = null
         super.onDestroyView()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(KEY_EDITING, viewModel.uiState.value.editState != null)
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -291,6 +274,8 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     private fun render(state: DashboardUiState) {
+        val binding = _binding ?: return
+        val binder = binder ?: return
         binder.cardsEnabled = state.settings.cardsEnabled
         binder.dashboardShowAllDevices = state.settings.showAllDevices
         binder.dashboardDeviceList = state.settings.deviceAddresses
@@ -303,30 +288,35 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         }
         binder.submitStates(state.items.associate { it.instanceId to it.state })
 
-        renderDate(state)
+        renderDate(state, binding)
         bindNotices(state.notices)
-        discardButton.isEnabled = state.editState?.canDiscard == true
+        binding.dashboardDiscard.isEnabled = state.editState?.canDiscard == true
         binder.editing = state.editState != null
+
+        if (state.editState != null && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            startEditingActionMode()
+        }
     }
 
-    private fun renderDate(state: DashboardUiState) {
+    private fun renderDate(state: DashboardUiState, binding: FragmentDashboardBinding) {
         if (state.isToday) {
-            textViewDate.text = requireContext().getString(R.string.activity_summary_today)
-            arrowRight.alpha = 0.5f
+            binding.dashboardDate.text = requireContext().getString(R.string.activity_summary_today)
+            binding.arrowRight.alpha = 0.5f
         } else {
             val date = Date.from(state.date.atStartOfDay(ZoneId.systemDefault()).toInstant())
-            textViewDate.text = DateTimeUtils.formatDate(date, DateUtils.FORMAT_SHOW_WEEKDAY)
-            arrowRight.alpha = 1f
+            binding.dashboardDate.text = DateTimeUtils.formatDate(date, DateUtils.FORMAT_SHOW_WEEKDAY)
+            binding.arrowRight.alpha = 1f
         }
     }
 
     private fun handleEvent(event: DashboardEvent) {
+        if (_binding == null) return
         when (event) {
             is DashboardEvent.WidgetAdded -> {
-                binder.cardOf(event.instanceId)?.doOnLayout {
-                    scrollView.smoothScrollTo(0, grid.top + it.top)
+                binder?.cardOf(event.instanceId)?.doOnLayout { card ->
+                    binding.dashboardScroll.smoothScrollTo(0, binding.dashboardGrid.top + card.top)
                 }
-                binder.highlight(event.instanceId)
+                binder?.highlight(event.instanceId)
             }
 
             DashboardEvent.OpenWidgetPicker -> {
@@ -346,6 +336,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     private fun showUndo(action: DashboardUndoAction) {
+        if (_binding == null) return
         val message = when (action) {
             DashboardUndoAction.DELETE_WIDGET -> R.string.widgets_deleted
             DashboardUndoAction.RESTORE_CLASSIC_DESIGN -> R.string.dashboard_notice_design_restored
@@ -360,7 +351,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             }
             .apply {
                 if (action == DashboardUndoAction.DELETE_WIDGET) {
-                    setAnchorView(editBar)
+                    setAnchorView(binding.dashboardEditBar)
                 }
                 show()
             }
@@ -370,7 +361,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         if (notices == lastNotices) return
         lastNotices = notices
 
-        this.notices.removeAllViews()
+        binding.dashboardNotices.removeAllViews()
         for (notice in notices) {
             when (notice) {
                 DashboardNotice.Migration -> addNotice(
@@ -406,7 +397,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         primary: Pair<Int, () -> Unit>,
         dismiss: () -> Unit,
     ) {
-        val notice = layoutInflater.inflate(R.layout.dashboard_notice, notices, false)
+        val notice = layoutInflater.inflate(R.layout.dashboard_notice, binding.dashboardNotices, false)
         notice.findViewById<TextView>(R.id.dashboard_notice_title).apply {
             this.text = title
             isVisible = title != null
@@ -426,7 +417,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             setText(primary.first)
             setOnClickListener { primary.second() }
         }
-        notices.addView(notice)
+        binding.dashboardNotices.addView(notice)
     }
 
     private fun restoreClassicDesign() {
@@ -457,9 +448,10 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
      * the edit mode.
      */
     private fun setEditControls(editing: Boolean) {
-        arrowLeft.isInvisible = editing
-        arrowRight.isInvisible = editing
-        editBar.isVisible = editing
+        val binding = _binding ?: return
+        binding.arrowLeft.isInvisible = editing
+        binding.arrowRight.isInvisible = editing
+        binding.dashboardEditBar.isVisible = editing
         (activity as? ControlCenterv2)?.setPageBottomBarShown(editing)
         activity?.findViewById<ViewPager2>(R.id.dashboard_viewpager)?.isUserInputEnabled = !editing
     }
@@ -470,7 +462,8 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     override fun onEditClick(item: PlacedWidget, button: View) {
-        val columns = grid.columns
+        val binding = _binding ?: return
+        val columns = binding.dashboardGrid.columns
         val instanceId = item.instance.instanceId
         val popup = PopupMenu(requireContext(), button)
         popup.inflate(R.menu.dashboard_widget_edit_menu)
@@ -521,18 +514,11 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     override fun getHeaderShade(): View? {
-        val shade = view?.findViewById<View>(R.id.dashboard_date_row_shade) ?: return null
+        val shade = _binding?.root?.findViewById<View>(R.id.dashboard_date_row_shade) ?: return null
         return if (BarShade.continuesToolbar(shade.context, R.attr.datestep_row_bg)) shade else null
     }
 
-    private fun isDeviceInScope(device: GBDevice): Boolean {
-        val prefs = GBApplication.getPrefs()
-        val showAllDevices = prefs.getBoolean("dashboard_devices_all", true)
-        val deviceList = prefs.getStringSet("dashboard_devices_multiselect", HashSet())
-        return showAllDevices || deviceList.contains(device.address)
-    }
-
-    private fun endOfDaySeconds(date: LocalDate): Int =
+    private fun endOfDaySeconds(date: java.time.LocalDate): Int =
         date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toEpochSecond().toInt()
 
     companion object {
@@ -540,6 +526,5 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             "nodomain.freeyourgadget.gadgetbridge.activities.dashboardfragment.action.config_change"
         const val ACTION_START_EDITING =
             "nodomain.freeyourgadget.gadgetbridge.activities.dashboardfragment.action.start_editing"
-        private const val KEY_EDITING = "dashboard_editing"
     }
 }
