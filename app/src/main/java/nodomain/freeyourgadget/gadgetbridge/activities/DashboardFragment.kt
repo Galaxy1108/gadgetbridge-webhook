@@ -49,7 +49,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.color.MaterialColors
@@ -452,8 +451,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         binding.arrowLeft.isInvisible = editing
         binding.arrowRight.isInvisible = editing
         binding.dashboardEditBar.isVisible = editing
-        (activity as? ControlCenterv2)?.setPageBottomBarShown(editing)
-        activity?.findViewById<ViewPager2>(R.id.dashboard_viewpager)?.isUserInputEnabled = !editing
+        (activity as? DashboardHost)?.onDashboardEditingChanged(editing)
     }
 
     override fun onLongPress(item: PlacedWidget, card: View) {

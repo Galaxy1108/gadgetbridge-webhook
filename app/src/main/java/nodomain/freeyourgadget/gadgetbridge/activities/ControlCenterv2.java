@@ -92,7 +92,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.PermissionsUtils;
 
 //TODO: extend AbstractGBActivity, but it requires actionbar that is not available
 public class ControlCenterv2 extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GBActivity {
+        implements NavigationView.OnNavigationItemSelectedListener, GBActivity, DashboardHost {
     private static final Logger LOG = LoggerFactory.getLogger(ControlCenterv2.class);
     public static final long REALTIME_HR_SAMPLE_TTL_MS = 5_000L;
     public static final int MENU_REFRESH_CODE = 1;
@@ -494,6 +494,12 @@ public class ControlCenterv2 extends AppCompatActivity
         navigationView.setVisibility(bottomNavigationEnabled && !shown ? View.VISIBLE : View.GONE);
         barShades.setBottomShade(bottomNavigationEnabled || shown ? findViewById(R.id.bottom_nav_shade) : null);
         ViewCompat.requestApplyInsets(mainContent);
+    }
+
+    @Override
+    public void onDashboardEditingChanged(final boolean editing) {
+        setPageBottomBarShown(editing);
+        viewPager.setUserInputEnabled(!editing);
     }
 
     @Override
