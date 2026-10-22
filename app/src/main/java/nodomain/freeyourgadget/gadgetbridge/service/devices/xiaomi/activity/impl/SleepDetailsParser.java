@@ -430,7 +430,7 @@ public class SleepDetailsParser extends XiaomiActivityParser {
             try (DBHandler handler = GBApplication.acquireDB()) {
                 final DaoSession session = handler.getDaoSession();
                 new GenericRespiratoryRateSampleProvider(gbDevice, session)
-                        .persistForDevice(context, gbDevice, respiratoryRateSamples);
+                        .persistSamples(respiratoryRateSamples, context);
             } catch (final Exception e) {
                 LOG.error("Error acquiring db for sleep respiratory rate samples", e);
                 persistSuccess = false;
