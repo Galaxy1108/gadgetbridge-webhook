@@ -123,11 +123,11 @@ class DashboardGridBinder(
         }
 
     init {
+        setHasStableIds(true)
         layoutManager.itemSpecs = this
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = this
         recyclerView.itemAnimator = null
-        setHasStableIds(true)
     }
 
     override fun getItemCount(): Int = items.size
