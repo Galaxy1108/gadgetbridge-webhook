@@ -236,37 +236,19 @@ object WidgetLayoutStore {
     }
 
     /**
-     * Adds a new instance of each widget, with its variant, to each stored layout at the first free column. Returns
-     * the ids of the new instances.
+     * Adds a new instance of each widget, with its variant, to each stored layout at the first free column.
      */
-    fun addToStoredLayouts(widgets: List<Pair<GBWidget<*>, WidgetVariant>>): List<String> {
-        val instanceIds = mutableListOf<String>()
+    private fun addToStoredLayouts(widgets: List<Pair<GBWidget<*>, WidgetVariant>>) {
         val layouts = load().layouts.mapValues { (columns, stored) ->
             val placements = stored.toMutableList()
             for ((widget, variant) in widgets) {
                 LOG.info("Adding widget {} with variant {} to {} columns", widget.id, variant.id, columns)
                 val instance = WidgetInstance(newInstanceId(), widget.id)
                 placements += placeAtFirstFree(columns, placements, WidgetPlacement(instance, variant.id, 0))
-                instanceIds += instance.instanceId
             }
             placements
         }
         save(Dashboard(layouts))
-        return instanceIds
-    }
-
-    /**
-     * Removes [instanceIds] from all layouts, and deletes their settings.
-     */
-    fun deleteInstances(instanceIds: Collection<String>) {
-        LOG.info("Deleting widget instances {}", instanceIds)
-        val dashboard = load()
-        for (instanceId in instanceIds) {
-            GBApplication.deleteWidgetSharedPrefs(instanceId)
-        }
-        save(Dashboard(dashboard.layouts.mapValues { (_, placements) ->
-            placements.filterNot { it.instance.instanceId in instanceIds }
-        }))
     }
 
     /**

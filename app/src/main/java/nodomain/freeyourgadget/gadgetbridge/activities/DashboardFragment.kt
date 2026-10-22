@@ -73,10 +73,10 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.BarShade
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardDefaults
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardMigration
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardNotices
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardSnapshot
-import nodomain.freeyourgadget.gadgetbridge.widgets.DeviceNotice
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
@@ -362,16 +362,20 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
                 DashboardNotices.set(DashboardNotices.state().copy(migration = false))
             }
         }
-        state.device?.let { device ->
-            val name = GBApplication.app().deviceManager.getDeviceByAddress(device.address)?.aliasOrName
-                ?: device.address
+        val device = state.deviceAddress?.let { GBApplication.app().deviceManager.getDeviceByAddress(it) }
+        if (device != null && DashboardDefaults.newWidgets(device).isNotEmpty()) {
             addNotice(
                 null,
-                getString(R.string.dashboard_notice_widgets_added, name),
+                getString(R.string.dashboard_notice_new_widgets, device.aliasOrName),
                 null,
-                R.string.dashboard_notice_remove_widgets to { removeAddedWidgets(device) },
+                R.string.dashboard_notice_add_widgets to {
+                    pickWidget.launch(
+                        Intent(requireContext(), WidgetPickerActivity::class.java)
+                            .putExtra(WidgetPickerActivity.EXTRA_NEW_DEVICE, device.address)
+                    )
+                },
             ) {
-                DashboardNotices.set(DashboardNotices.state().copy(device = null))
+                DashboardNotices.set(DashboardNotices.state().copy(deviceAddress = null))
             }
         }
     }
@@ -414,15 +418,6 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         DashboardNotices.set(DashboardNotices.State.NONE)
         fullRefresh()
         showUndo(R.string.dashboard_notice_design_restored, snapshot, state)
-    }
-
-    private fun removeAddedWidgets(notice: DeviceNotice) {
-        val snapshot = WidgetLayoutStore.snapshot()
-        val state = DashboardNotices.state()
-        WidgetLayoutStore.deleteInstances(notice.instanceIds)
-        DashboardNotices.set(state.copy(device = null))
-        fullRefresh()
-        showUndo(R.string.dashboard_notice_widgets_removed, snapshot, state)
     }
 
     /**

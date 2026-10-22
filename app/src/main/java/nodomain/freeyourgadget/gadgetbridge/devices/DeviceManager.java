@@ -186,11 +186,12 @@ public class DeviceManager {
 
     private void refreshPairedDevices() {
         final Set<GBDevice> availableDevices = DeviceHelper.getInstance().getAvailableDevices();
+        final List<GBDevice> addedDevices = new ArrayList<>();
         if (knownAddresses != null) {
             for (final GBDevice availableDevice : availableDevices) {
                 if (!knownAddresses.contains(availableDevice.getAddress())) {
                     LOG.info("Device {} was added", availableDevice.getAddress());
-                    DashboardDefaults.INSTANCE.onDeviceAdded(availableDevice, availableDevices);
+                    addedDevices.add(availableDevice);
                 }
             }
         }
@@ -200,6 +201,9 @@ public class DeviceManager {
             if (!deviceList.contains(availableDevice)) {
                 deviceList.add(availableDevice);
             }
+        }
+        for (final GBDevice addedDevice : addedDevices) {
+            DashboardDefaults.INSTANCE.onDeviceAdded(addedDevice);
         }
 
         sortDevices();

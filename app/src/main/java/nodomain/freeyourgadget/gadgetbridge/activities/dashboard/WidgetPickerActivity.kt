@@ -16,14 +16,20 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardDefaults
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import java.text.Collator
 
 /**
- * Lists all widgets in three groups: supported by a dashboard device, supported only by a device that is not
- * enabled for the dashboard, and supported by no device.
+ * Lists all widgets in groups:
+ * - new widgets of the device in [EXTRA_NEW_DEVICE]
+ * - supported by a dashboard device
+ * - supported only by a device that is not enabled for the dashboard
+ * - supported by no device
+ *
  * - A tap on a widget expands section with previews for all its variants.
  * - A tap on a preview returns the widget and the variant.
  *
@@ -37,12 +43,17 @@ class WidgetPickerActivity : AbstractGBActivity() {
     private lateinit var layoutManager: LinearLayoutManager
     private var expanded = RecyclerView.NO_POSITION
     private var forLauncher = false
+    private var newDevice: GBDevice? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_widget_picker)
 
         forLauncher = intent.getBooleanExtra(EXTRA_LAUNCHER, false)
+        newDevice = intent.getStringExtra(EXTRA_NEW_DEVICE)?.let {
+            GBApplication.app().deviceManager.getDeviceByAddress(it)
+        }
+        val newTypes = newDevice?.let { device -> DashboardDefaults.newWidgets(device).map { it.id }.toSet() }.orEmpty()
         val collator = Collator.getInstance()
         val dashboardDevices = WidgetRegistry.dashboardDevices()
         val allDevices = GBApplication.app().deviceManager.devices
@@ -52,6 +63,7 @@ class WidgetPickerActivity : AbstractGBActivity() {
                 val dashboardCount = dashboardDevices.count { widget.isSupportedBy(it) }
                 val allCount = allDevices.count { widget.isSupportedBy(it) }
                 when {
+                    widget.id in newTypes -> Triple(widget, allCount, SupportGroup.NEW)
                     dashboardCount > 0 -> Triple(widget, dashboardCount, SupportGroup.DASHBOARD)
                     allCount > 0 -> Triple(widget, allCount, SupportGroup.OTHER_DEVICES)
                     else -> Triple(widget, 0, SupportGroup.NONE)
@@ -112,11 +124,13 @@ class WidgetPickerActivity : AbstractGBActivity() {
             val deviceCount = deviceCounts[position]
             val group = groups[position]
             val firstInGroup = position == 0 || groups[position - 1] != group
-            holder.section.isVisible = firstInGroup && group != SupportGroup.DASHBOARD
+            holder.section.isVisible = firstInGroup && (group != SupportGroup.DASHBOARD || newDevice != null)
             when (group) {
+                SupportGroup.NEW -> holder.section.text =
+                    context.getString(R.string.widgets_picker_new, newDevice?.aliasOrName)
+                SupportGroup.DASHBOARD -> holder.section.setText(R.string.widgets_picker_dashboard_devices)
                 SupportGroup.OTHER_DEVICES -> holder.section.setText(R.string.widgets_picker_other_devices)
                 SupportGroup.NONE -> holder.section.setText(R.string.widgets_picker_unsupported)
-                SupportGroup.DASHBOARD -> {}
             }
             holder.icon.setImageResource(widget.icon)
             holder.name.text = widget.displayName(context)
@@ -162,6 +176,7 @@ class WidgetPickerActivity : AbstractGBActivity() {
     }
 
     private enum class SupportGroup {
+        NEW,
         DASHBOARD,
         OTHER_DEVICES,
         NONE,
@@ -171,5 +186,6 @@ class WidgetPickerActivity : AbstractGBActivity() {
         const val EXTRA_TYPE_ID = "widget_type_id"
         const val EXTRA_VARIANT_ID = "widget_variant_id"
         const val EXTRA_LAUNCHER = "widget_launcher"
+        const val EXTRA_NEW_DEVICE = "widget_new_device"
     }
 }

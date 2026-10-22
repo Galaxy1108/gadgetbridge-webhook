@@ -14,7 +14,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * The widgets of a new dashboard, and the widgets that a new device adds.
+ * The widgets of a new dashboard, and the new widgets of a paired device.
  */
 object DashboardDefaults {
     private val LOG: Logger = LoggerFactory.getLogger(DashboardDefaults::class.java)
@@ -47,25 +47,32 @@ object DashboardDefaults {
     }
 
     /**
-     * Adds to each stored layout the default widgets that [device] is the only one in [devices] to support, if no
-     * layout has them. Shows a notice for the added widgets.
+     * The widgets that [device] supports, that no other device supports, and that no layout has.
      */
-    fun onDeviceAdded(device: GBDevice, devices: Collection<GBDevice>) {
-        if (!GBApplication.getPrefs().getBoolean("dashboard_devices_all", true)) {
-            LOG.debug("Not adding widgets for {}, the dashboard displays only the selected devices", device.address)
-            return
-        }
-
-        val others = devices.filter { it.address != device.address }
+    fun newWidgets(device: GBDevice): List<GBWidget<*>> {
+        val others = GBApplication.app().deviceManager.devices.filter { it.address != device.address }
         val placedTypes = WidgetLayoutStore.instances().map { it.typeId }.toSet()
-        val widgets = WIDGETS.filter { (widget, _) ->
+        return WidgetRegistry.all().filter { widget ->
             widget.id !in placedTypes && widget.isSupportedBy(device) && others.none { widget.isSupportedBy(it) }
         }
-        if (widgets.isEmpty()) return
+    }
 
-        LOG.info("Adding widgets {} for {}", widgets.map { it.first.id }, device.address)
-        val instanceIds = WidgetLayoutStore.addToStoredLayouts(widgets)
-        DashboardNotices.set(DashboardNotices.state().copy(device = DeviceNotice(device.address, instanceIds)))
+    /**
+     * Fills an empty dashboard with the default widgets, and shows a notice for the new widgets of [device].
+     */
+    fun onDeviceAdded(device: GBDevice) {
+        if (WidgetLayoutStore.instances().isEmpty()) {
+            val placements = placements()
+            LOG.info("Adding default widgets {} to the empty dashboard", placements.map { it.instance.typeId })
+            WidgetLayoutStore.replaceLayouts(mapOf(WidgetGrid.BASE_COLUMNS to placements))
+        }
+
+        val widgets = newWidgets(device)
+        if (widgets.isNotEmpty()) {
+            LOG.info("Device {} supports new widgets {}", device.address, widgets.map { it.id })
+            DashboardNotices.set(DashboardNotices.state().copy(deviceAddress = device.address))
+        }
+
         LocalBroadcastManager.getInstance(GBApplication.getContext())
             .sendBroadcast(Intent(DashboardFragment.ACTION_CONFIG_CHANGE))
     }

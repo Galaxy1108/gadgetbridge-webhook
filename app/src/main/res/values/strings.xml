@@ -4916,9 +4916,8 @@
     <string name="dashboard_notice_new_design_text">Widgets can now have different sizes and styles. You can edit the dashboard to add, move and resize widgets.</string>
     <string name="dashboard_notice_restore_design">Restore old design</string>
     <string name="dashboard_notice_design_restored">Old design restored</string>
-    <string name="dashboard_notice_widgets_added">Widgets added for %1$s</string>
-    <string name="dashboard_notice_remove_widgets">Remove widgets</string>
-    <string name="dashboard_notice_widgets_removed">Widgets removed</string>
+    <string name="dashboard_notice_new_widgets">%1$s supports new widgets</string>
+    <string name="dashboard_notice_add_widgets">Add widgets</string>
     <string name="undo">Undo</string>
     <plurals name="widgets_variant_count">
         <item quantity="one">%d variant</item>
@@ -4929,6 +4928,8 @@
         <item quantity="other">%d devices</item>
     </plurals>
     <string name="widgets_picker_summary">%1$s • %2$s</string>
+    <string name="widgets_picker_new">New for %1$s</string>
+    <string name="widgets_picker_dashboard_devices">Dashboard devices</string>
     <string name="widgets_picker_other_devices">Devices not included in the dashboard</string>
     <string name="widgets_picker_unsupported">No supported devices</string>
     <string name="pref_widget_devices_mode_inherit">Inherit from dashboard</string>
