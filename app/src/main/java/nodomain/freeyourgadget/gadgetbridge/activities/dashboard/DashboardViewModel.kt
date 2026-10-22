@@ -337,6 +337,15 @@ class DashboardViewModel(
         }
     }
 
+    /**
+     * Starts editing when the dashboard preferences requested it. Returns whether a request was consumed.
+     */
+    fun consumeStartEditingRequest(): Boolean {
+        if (!repository.consumeStartEditingRequest()) return false
+        onStartEditing()
+        return true
+    }
+
     fun onSettingsClosed() {
         reload.update { it + 1 }
         viewModelScope.launch { updateEditDirty() }

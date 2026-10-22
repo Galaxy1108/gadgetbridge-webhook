@@ -225,6 +225,7 @@ object WidgetLayoutStore {
             remove(PREF_DASHBOARD)
             putBoolean(DashboardMigration.PREF_UPGRADE, true)
         }
+        _changes.tryEmit(Unit)
     }
 
     /**

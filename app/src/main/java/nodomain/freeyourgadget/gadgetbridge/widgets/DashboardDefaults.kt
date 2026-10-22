@@ -1,9 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets
 
-import android.content.Intent
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
-import nodomain.freeyourgadget.gadgetbridge.activities.DashboardFragment
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid.placeAtFirstFree
@@ -72,8 +69,5 @@ object DashboardDefaults {
             LOG.info("Device {} supports new widgets {}", device.address, widgets.map { it.id })
             DashboardNotices.set(DashboardNotices.state().copy(deviceAddress = device.address))
         }
-
-        LocalBroadcastManager.getInstance(GBApplication.getContext())
-            .sendBroadcast(Intent(DashboardFragment.ACTION_CONFIG_CHANGE))
     }
 }

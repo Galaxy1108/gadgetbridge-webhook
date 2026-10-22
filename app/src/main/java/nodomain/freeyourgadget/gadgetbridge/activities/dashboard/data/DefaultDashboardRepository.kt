@@ -52,6 +52,8 @@ class DefaultDashboardRepository(
 
     override fun isDeviceInScope(device: GBDevice): Boolean = preferences.isDeviceInScope(device)
 
+    override fun consumeStartEditingRequest(): Boolean = preferences.consumeStartEditingRequest()
+
     override fun deviceByAddress(address: String): GBDevice? =
         GBApplication.app().deviceManager.getDeviceByAddress(address)
 

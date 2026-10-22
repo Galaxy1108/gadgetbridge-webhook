@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -33,10 +34,22 @@ class DashboardPreferences(
 
     fun isDeviceInScope(device: GBDevice): Boolean = current().includesDevice(device.address)
 
+    fun requestStartEditing() {
+        preferences.edit { putBoolean(PREF_START_EDITING, true) }
+    }
+
+    fun consumeStartEditingRequest(): Boolean {
+        if (!preferences.getBoolean(PREF_START_EDITING, false)) return false
+        preferences.edit(commit = true) { remove(PREF_START_EDITING) }
+        return true
+    }
+
     companion object {
         const val PREF_CARDS_ENABLED = "dashboard_cards_enabled"
         const val PREF_DEVICES_ALL = "dashboard_devices_all"
         const val PREF_DEVICES_MULTISELECT = "dashboard_devices_multiselect"
+
+        private const val PREF_START_EDITING = "dashboard_start_editing"
 
         private val WATCHED_KEYS = setOf(
             PREF_CARDS_ENABLED,

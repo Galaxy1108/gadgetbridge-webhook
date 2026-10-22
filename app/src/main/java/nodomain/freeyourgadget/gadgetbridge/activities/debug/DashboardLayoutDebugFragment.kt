@@ -38,7 +38,6 @@ class DashboardLayoutDebugFragment : AbstractDebugFragment() {
                 .setMessage(R.string.are_you_sure)
                 .setPositiveButton(if (isBase) R.string.reset else R.string.delete) { _, _ ->
                     WidgetLayoutStore.resetLayout(columns)
-                    DashboardDebugFragment.notifyDashboard(requireContext())
                     if (isBase) {
                         reloadWidgets()
                     } else {

@@ -3,10 +3,8 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceFragmentCompat
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractSettingsActivityV2
-import nodomain.freeyourgadget.gadgetbridge.activities.DashboardFragment
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
@@ -30,8 +28,6 @@ class WidgetInstanceSettingsActivity : AbstractSettingsActivityV2() {
     override fun onPause() {
         if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             LauncherWidgets.update(this, intArrayOf(appWidgetId))
-        } else {
-            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(DashboardFragment.ACTION_CONFIG_CHANGE))
         }
         super.onPause()
     }
@@ -41,6 +37,15 @@ class WidgetInstanceSettingsActivity : AbstractSettingsActivityV2() {
          * Opens the settings of [instanceId] in the layout of [columns] columns. If that layout is derived,
          * it is stored first, and the settings of the copy are opened.
          */
+        fun createIntent(context: Context, columns: Int, instanceId: String): Intent? {
+            val instance = WidgetLayoutStore.instanceForEdit(columns, instanceId) ?: return null
+            return Intent(context, WidgetInstanceSettingsActivity::class.java).apply {
+                putExtra(WidgetInstanceSettingsFragment.ARG_INSTANCE_ID, instance.instanceId)
+                putExtra(WidgetInstanceSettingsFragment.ARG_TYPE_ID, instance.typeId)
+                putExtra(WidgetInstanceSettingsFragment.ARG_COLUMNS, columns)
+            }
+        }
+
         fun startForWidget(context: Context, columns: Int, instanceId: String): WidgetInstance? {
             val instance = WidgetLayoutStore.instanceForEdit(columns, instanceId) ?: return null
             val intent = Intent(context, WidgetInstanceSettingsActivity::class.java)

@@ -16,11 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.activities;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.MultiSelectListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -28,11 +25,11 @@ import androidx.preference.PreferenceFragmentCompat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardPreferences;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry;
 
@@ -48,22 +45,6 @@ public class DashboardPreferencesActivity extends AbstractSettingsActivityV2 {
     }
 
     public static class DashboardPreferencesFragment extends AbstractPreferenceFragment {
-        /**
-         * Preferences on this screen that affects the dashboard's rendering (not an individual widget instance's).
-         */
-        private static final List<String> DASHBOARD_WIDE_PREFS = List.of(
-                "dashboard_cards_enabled",
-                "dashboard_devices_all",
-                "dashboard_devices_multiselect"
-        );
-
-        private final SharedPreferences.OnSharedPreferenceChangeListener changeListener =
-                (sharedPreferences, key) -> {
-                    if (DASHBOARD_WIDE_PREFS.contains(key)) {
-                        sendDashboardConfigChangedIntent();
-                    }
-                };
-
         @Override
         public void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
             setPreferencesFromResource(R.xml.dashboard_preferences, rootKey);
@@ -89,35 +70,11 @@ public class DashboardPreferencesActivity extends AbstractSettingsActivityV2 {
             final Preference manageWidgets = findPreference("pref_dashboard_manage_widgets");
             if (manageWidgets != null) {
                 manageWidgets.setOnPreferenceClickListener(preference -> {
-                    LocalBroadcastManager.getInstance(requireContext())
-                            .sendBroadcast(new Intent(DashboardFragment.ACTION_START_EDITING));
+                    new DashboardPreferences().requestStartEditing();
                     requireActivity().finish();
                     return true;
                 });
             }
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-            Objects.requireNonNull(getPreferenceManager().getSharedPreferences())
-                    .registerOnSharedPreferenceChangeListener(changeListener);
-        }
-
-        @Override
-        public void onPause() {
-            Objects.requireNonNull(getPreferenceManager().getSharedPreferences())
-                    .unregisterOnSharedPreferenceChangeListener(changeListener);
-            super.onPause();
-        }
-
-        /**
-         * Signal dashboard that its config has changed
-         */
-        private void sendDashboardConfigChangedIntent() {
-            final Intent intent = new Intent();
-            intent.setAction(DashboardFragment.ACTION_CONFIG_CHANGE);
-            LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(intent);
         }
     }
 }

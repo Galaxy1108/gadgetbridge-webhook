@@ -17,6 +17,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StepsWidget
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -71,6 +72,15 @@ class DefaultDashboardRepositoryTest : TestBase() {
 
         assertEquals(notice, updated.await())
         repository.setNotices(initial)
+    }
+
+    @Test
+    fun startEditingRequestIsConsumedOnce() {
+        val preferences = DashboardPreferences()
+
+        preferences.requestStartEditing()
+        assertTrue(preferences.consumeStartEditingRequest())
+        assertFalse(preferences.consumeStartEditingRequest())
     }
 
     @Test

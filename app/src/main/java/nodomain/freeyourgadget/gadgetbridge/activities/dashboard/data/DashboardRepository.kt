@@ -27,6 +27,8 @@ interface DashboardRepository {
 
     fun isDeviceInScope(device: GBDevice): Boolean
 
+    fun consumeStartEditingRequest(): Boolean
+
     fun deviceByAddress(address: String): GBDevice?
 
     fun availableWidgets(): List<GBWidget<*>>

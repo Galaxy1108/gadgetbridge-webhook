@@ -115,6 +115,19 @@ class DashboardViewModelTest {
     }
 
     @Test
+    fun startEditingRequestIsConsumedOnce() = runTest {
+        val repository = FakeDashboardRepository(listOf(placedWidget()))
+        val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
+        repository.startEditingRequested = true
+
+        advanceUntilIdle()
+        assertTrue(viewModel.consumeStartEditingRequest())
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.editState != null)
+        assertFalse(viewModel.consumeStartEditingRequest())
+    }
+
+    @Test
     fun editModeTracksChangesAndRestoresDeletedWidgets() = runTest {
         val repository = FakeDashboardRepository(listOf(placedWidget()))
         val viewModel = DashboardViewModel(repository = repository, widgetLoader = repository.loader)
@@ -191,6 +204,7 @@ class DashboardViewModelTest {
         val settings = MutableStateFlow(DashboardSettings())
         val notices = MutableStateFlow(DashboardNotices.State.NONE)
         var inScope = true
+        var startEditingRequested = false
         var snapshotCalls = 0
         var restoreDeletedCalls = 0
         var restoreSnapshotCalls = 0
@@ -213,6 +227,12 @@ class DashboardViewModelTest {
         override fun currentNotices(): DashboardNotices.State = notices.value
 
         override fun isDeviceInScope(device: GBDevice): Boolean = inScope
+
+        override fun consumeStartEditingRequest(): Boolean {
+            val requested = startEditingRequested
+            startEditingRequested = false
+            return requested
+        }
 
         override fun deviceByAddress(address: String): GBDevice? = null
 

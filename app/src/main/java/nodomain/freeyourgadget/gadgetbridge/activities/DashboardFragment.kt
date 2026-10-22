@@ -67,7 +67,6 @@ import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetInstanceS
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetPickerActivity
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.showVariantPreviews
 import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentDashboardBinding
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.BarShade
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
@@ -93,8 +92,6 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private var noticesController: DashboardNoticesController? = null
     private var editModeController: DashboardEditModeController? = null
 
-    private var isConfigChanged = false
-    private var startEditingOnResume = false
     private var receiverRegistered = false
     private var snackbar: Snackbar? = null
     private var lastItems: List<PlacedWidget> = emptyList()
@@ -120,12 +117,16 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         }
     }
 
+    private val widgetSettingsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) {
+        viewModel.onSettingsClosed()
+    }
+
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 GBApplication.ACTION_NEW_DATA -> intent.getDevice()?.let(viewModel::onNewData)
-                ACTION_CONFIG_CHANGE -> isConfigChanged = true
-                ACTION_START_EDITING -> startEditingOnResume = true
             }
         }
     }
@@ -185,10 +186,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         viewModel.onColumnsChanged(binder!!.columns)
 
         val filter = IntentFilter()
-        filter.addAction(GBDevice.ACTION_DEVICE_CHANGED)
         filter.addAction(GBApplication.ACTION_NEW_DATA)
-        filter.addAction(ACTION_CONFIG_CHANGE)
-        filter.addAction(ACTION_START_EDITING)
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
         receiverRegistered = true
 
@@ -197,12 +195,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
 
     override fun onResume() {
         super.onResume()
-        if (isConfigChanged) {
-            isConfigChanged = false
-            viewModel.onSettingsClosed()
-        }
-        if (startEditingOnResume) {
-            startEditingOnResume = false
+        if (viewModel.consumeStartEditingRequest()) {
             startEditing()
         } else {
             editModeController?.startIfEditing()
@@ -372,11 +365,11 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.dashboard_widget_variant -> showVariantSheet(item)
-                R.id.dashboard_widget_settings -> WidgetInstanceSettingsActivity.startForWidget(
-                    requireContext(),
-                    columns,
-                    instanceId,
-                )
+                R.id.dashboard_widget_settings -> {
+                    val intent = WidgetInstanceSettingsActivity.createIntent(requireContext(), columns, instanceId)
+                        ?: return@setOnMenuItemClickListener false
+                    widgetSettingsLauncher.launch(intent)
+                }
 
                 R.id.dashboard_widget_duplicate -> viewModel.onDuplicate(instanceId)
 
@@ -421,11 +414,4 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
 
     private fun endOfDaySeconds(date: java.time.LocalDate): Int =
         date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toEpochSecond().toInt()
-
-    companion object {
-        const val ACTION_CONFIG_CHANGE =
-            "nodomain.freeyourgadget.gadgetbridge.activities.dashboardfragment.action.config_change"
-        const val ACTION_START_EDITING =
-            "nodomain.freeyourgadget.gadgetbridge.activities.dashboardfragment.action.start_editing"
-    }
 }
