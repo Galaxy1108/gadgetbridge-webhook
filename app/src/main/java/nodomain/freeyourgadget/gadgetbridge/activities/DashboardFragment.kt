@@ -50,6 +50,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager2.widget.ViewPager2
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -62,7 +63,11 @@ import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardCalendarActivity
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardEvent
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardGridBinder
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardNotice
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardUiState
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardUndoAction
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardViewModel
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.GridDragController
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridLayout
@@ -73,16 +78,12 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.BarShade
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
-import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardDefaults
-import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardMigration
-import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardNotices
-import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardSnapshot
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
-import java.util.Calendar
-import java.util.GregorianCalendar
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.util.Date
 
 /**
  * Hosts the widget grid: date header, calendar/settings menu, and the [WidgetGridLayout] the
@@ -90,7 +91,6 @@ import java.util.GregorianCalendar
  * widgets can be moved, added, changed and deleted.
  */
 class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGridBinder.Callbacks {
-    private val day: Calendar = GregorianCalendar.getInstance()
     private lateinit var textViewDate: TextView
     private lateinit var arrowLeft: TextView
     private lateinit var arrowRight: TextView
@@ -105,18 +105,11 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
 
     private var isConfigChanged = false
     private var startEditingOnResume = false
+    private var preserveEditingOnDestroy = false
     private var actionMode: ActionMode? = null
-    private var deleteSnackbar: Snackbar? = null
-
-    /**
-     * The instance whose settings are open, to reload them when they close.
-     */
-    private var settingsInstanceId: String? = null
-
-    /**
-     * The new instance to scroll to and highlight after the next layout.
-     */
-    private var newInstanceId: String? = null
+    private var snackbar: Snackbar? = null
+    private var lastItems: List<PlacedWidget> = emptyList()
+    private var lastNotices: List<DashboardNotice> = emptyList()
 
     private val pickWidget = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -125,8 +118,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         if (result.resultCode != Activity.RESULT_OK || data == null) return@registerForActivityResult
         val typeId = data.getStringExtra(WidgetPickerActivity.EXTRA_TYPE_ID) ?: return@registerForActivityResult
         val variantId = data.getStringExtra(WidgetPickerActivity.EXTRA_VARIANT_ID) ?: return@registerForActivityResult
-        newInstanceId = WidgetLayoutStore.add(grid.columns, typeId, variantId).instanceId
-        viewModel.updateLayout(grid.columns)
+        viewModel.onWidgetPicked(typeId, variantId)
     }
 
     private val editCallback = object : ActionMode.Callback {
@@ -141,10 +133,13 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
 
         override fun onDestroyActionMode(mode: ActionMode) {
             actionMode = null
-            deleteSnackbar?.dismiss()
-            viewModel.editSnapshot = null
+            snackbar?.dismiss()
             binder.editing = false
             setEditControls(false)
+            if (!preserveEditingOnDestroy) {
+                viewModel.onFinishEditing()
+            }
+            preserveEditingOnDestroy = false
         }
     }
 
@@ -154,8 +149,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val timeMillis = result.data!!.getLongExtra(DashboardCalendarActivity.EXTRA_TIMESTAMP, 0)
             if (timeMillis != 0L) {
-                day.timeInMillis = timeMillis
-                fullRefresh()
+                viewModel.onDaySelected(timeMillis)
             }
         }
     }
@@ -166,7 +160,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
                 GBApplication.ACTION_NEW_DATA -> {
                     val dev: GBDevice? = intent.getDevice()
                     if (dev != null && isDeviceInScope(dev)) {
-                        refresh()
+                        viewModel.onSettingsClosed()
                     }
                 }
 
@@ -188,7 +182,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         }
         discardButton = view.findViewById(R.id.dashboard_discard)
         discardButton.setOnClickListener { confirmDiscard() }
-        view.findViewById<View>(R.id.dashboard_add_widget).setOnClickListener { addWidget() }
+        view.findViewById<View>(R.id.dashboard_add_widget).setOnClickListener { viewModel.onAddWidgetClicked() }
         view.findViewById<View>(R.id.dashboard_done).setOnClickListener { actionMode?.finish() }
         notices = view.findViewById(R.id.dashboard_notices)
         grid = view.findViewById(R.id.dashboard_grid)
@@ -200,33 +194,20 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         binder.callbacks = this
         grid.columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
         dragController = GridDragController(grid, scrollView, binder::instanceIdOf) { arrangement ->
-            WidgetLayoutStore.arrange(grid.columns, arrangement)
-            viewModel.updateLayout(grid.columns)
+            viewModel.onArrange(arrangement)
         }
 
-        arrowLeft.setOnClickListener {
-            day.add(Calendar.DAY_OF_MONTH, -1)
-            refresh()
-        }
-        arrowRight.setOnClickListener {
-            val today = GregorianCalendar.getInstance()
-            if (!DateTimeUtils.isSameDay(today, day)) {
-                day.add(Calendar.DAY_OF_MONTH, 1)
-                refresh()
-            }
-        }
+        arrowLeft.setOnClickListener { viewModel.onPreviousDay() }
+        arrowRight.setOnClickListener { viewModel.onNextDay() }
 
         savedInstanceState?.let {
-            if (it.containsKey(KEY_DAY)) {
-                day.timeInMillis = it.getLong(KEY_DAY)
-            }
             startEditingOnResume = it.getBoolean(KEY_EDITING)
         }
 
         // The pager resumes only the visible page
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         observeViewModel()
-        refresh()
+        viewModel.onColumnsChanged(grid.columns)
 
         val filter = IntentFilter()
         filter.addAction(GBDevice.ACTION_DEVICE_CHANGED)
@@ -242,33 +223,27 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         super.onResume()
         if (isConfigChanged) {
             isConfigChanged = false
-            if (actionMode != null) {
-                viewModel.updateLayout(grid.columns, setOfNotNull(settingsInstanceId))
-            } else {
-                fullRefresh()
-            }
+            viewModel.onSettingsClosed()
         }
-        settingsInstanceId = null
-        updateDiscardButton()
         if (startEditingOnResume) {
             startEditingOnResume = false
             startEditing()
+        } else if (viewModel.uiState.value.editState != null) {
+            startEditingActionMode()
         }
     }
 
     override fun onDestroyView() {
-        // Keep the snapshot when the edit mode continues in the new view
-        val snapshot = viewModel.editSnapshot
+        preserveEditingOnDestroy = requireActivity().isChangingConfigurations &&
+            viewModel.uiState.value.editState != null
         actionMode?.finish()
-        viewModel.editSnapshot = snapshot
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
         super.onDestroyView()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putLong(KEY_DAY, day.timeInMillis)
-        outState.putBoolean(KEY_EDITING, actionMode != null)
+        outState.putBoolean(KEY_EDITING, viewModel.uiState.value.editState != null)
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -279,7 +254,11 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         return when (menuItem.itemId) {
             R.id.dashboard_show_calendar -> {
                 val intent = Intent(requireActivity(), DashboardCalendarActivity::class.java)
-                intent.putExtra(DashboardCalendarActivity.EXTRA_TIMESTAMP, day.timeInMillis)
+                val date = viewModel.uiState.value.date
+                intent.putExtra(
+                    DashboardCalendarActivity.EXTRA_TIMESTAMP,
+                    date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                )
                 calendarLauncher.launch(intent)
                 true
             }
@@ -300,82 +279,122 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.items.collect { items ->
-                binder.submitItems(items)
-                updateDiscardButton()
-                newInstanceId?.let { instanceId ->
-                    newInstanceId = null
-                    binder.cardOf(instanceId)?.doOnLayout { scrollView.smoothScrollTo(0, grid.top + it.top) }
-                    binder.highlight(instanceId)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.uiState.collect { state -> render(state) }
+                }
+                launch {
+                    viewModel.events.collect { event -> handleEvent(event) }
                 }
             }
         }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.state.collect { states ->
-                binder.submitStates(states)
-            }
+    }
+
+    private fun render(state: DashboardUiState) {
+        binder.cardsEnabled = state.settings.cardsEnabled
+        binder.dashboardShowAllDevices = state.settings.showAllDevices
+        binder.dashboardDeviceList = state.settings.deviceAddresses
+        binder.timestamp = endOfDaySeconds(state.date)
+
+        val items = state.items.map { it.placed }
+        if (items != lastItems) {
+            lastItems = items
+            binder.submitItems(items)
         }
+        binder.submitStates(state.items.associate { it.instanceId to it.state })
+
+        renderDate(state)
+        bindNotices(state.notices)
+        discardButton.isEnabled = state.editState?.canDiscard == true
+        binder.editing = state.editState != null
     }
 
-    private fun fullRefresh() {
-        refresh()
-    }
-
-    private fun refresh() {
-        day.set(Calendar.HOUR_OF_DAY, 23)
-        day.set(Calendar.MINUTE, 59)
-        day.set(Calendar.SECOND, 59)
-
-        val prefs = GBApplication.getPrefs()
-        val showAllDevices = prefs.getBoolean("dashboard_devices_all", true)
-        val deviceList = prefs.getStringSet("dashboard_devices_multiselect", HashSet())
-        val timestamp = (day.timeInMillis / 1000L).toInt()
-
-        binder.cardsEnabled = prefs.getBoolean("dashboard_cards_enabled", true)
-        binder.dashboardShowAllDevices = showAllDevices
-        binder.dashboardDeviceList = deviceList
-        binder.timestamp = timestamp
-
-        val today = GregorianCalendar.getInstance()
-        if (DateTimeUtils.isSameDay(today, day)) {
+    private fun renderDate(state: DashboardUiState) {
+        if (state.isToday) {
             textViewDate.text = requireContext().getString(R.string.activity_summary_today)
             arrowRight.alpha = 0.5f
         } else {
-            textViewDate.text = DateTimeUtils.formatDate(day.time, DateUtils.FORMAT_SHOW_WEEKDAY)
+            val date = Date.from(state.date.atStartOfDay(ZoneId.systemDefault()).toInstant())
+            textViewDate.text = DateTimeUtils.formatDate(date, DateUtils.FORMAT_SHOW_WEEKDAY)
             arrowRight.alpha = 1f
         }
-
-        viewModel.refresh(day, grid.columns, showAllDevices, deviceList)
-        bindNotices()
     }
 
-    private fun bindNotices() {
-        notices.removeAllViews()
-        val state = DashboardNotices.state()
-        if (state.migration) {
-            addNotice(
-                getString(R.string.dashboard_notice_new_design_title),
-                getString(R.string.dashboard_notice_new_design_text),
-                R.string.dashboard_notice_restore_design to ::restoreClassicDesign,
-                R.string.dashboard_edit to ::startEditing,
-            ) {
-                DashboardNotices.set(DashboardNotices.state().copy(migration = false))
+    private fun handleEvent(event: DashboardEvent) {
+        when (event) {
+            is DashboardEvent.WidgetAdded -> {
+                binder.cardOf(event.instanceId)?.doOnLayout {
+                    scrollView.smoothScrollTo(0, grid.top + it.top)
+                }
+                binder.highlight(event.instanceId)
             }
+
+            DashboardEvent.OpenWidgetPicker -> {
+                pickWidget.launch(Intent(requireContext(), WidgetPickerActivity::class.java))
+            }
+
+            DashboardEvent.NoWidgetsAvailable -> {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.widgets_add_widget)
+                    .setMessage(R.string.no_supported_devices_found)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+
+            is DashboardEvent.ShowUndo -> showUndo(event.action)
         }
-        val device = state.deviceAddress?.let { GBApplication.app().deviceManager.getDeviceByAddress(it) }
-        if (device != null && DashboardDefaults.newWidgets(device).isNotEmpty()) {
-            addNotice(
-                null,
-                getString(R.string.dashboard_notice_new_widgets, device.aliasOrName),
-                null,
-                R.string.dashboard_notice_add_widgets to {
-                    pickWidget.launch(
-                        Intent(requireContext(), WidgetPickerActivity::class.java)
-                            .putExtra(WidgetPickerActivity.EXTRA_NEW_DEVICE, device.address)
-                    )
-                },
-            ) {
-                DashboardNotices.set(DashboardNotices.state().copy(deviceAddress = null))
+    }
+
+    private fun showUndo(action: DashboardUndoAction) {
+        val message = when (action) {
+            DashboardUndoAction.DELETE_WIDGET -> R.string.widgets_deleted
+            DashboardUndoAction.RESTORE_CLASSIC_DESIGN -> R.string.dashboard_notice_design_restored
+        }
+        snackbar?.dismiss()
+        snackbar = Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
+            .setAction(R.string.undo) {
+                when (action) {
+                    DashboardUndoAction.DELETE_WIDGET -> viewModel.onUndoDelete()
+                    DashboardUndoAction.RESTORE_CLASSIC_DESIGN -> viewModel.onUndoRestoreClassicDesign()
+                }
+            }
+            .apply {
+                if (action == DashboardUndoAction.DELETE_WIDGET) {
+                    setAnchorView(editBar)
+                }
+                show()
+            }
+    }
+
+    private fun bindNotices(notices: List<DashboardNotice>) {
+        if (notices == lastNotices) return
+        lastNotices = notices
+
+        this.notices.removeAllViews()
+        for (notice in notices) {
+            when (notice) {
+                DashboardNotice.Migration -> addNotice(
+                    getString(R.string.dashboard_notice_new_design_title),
+                    getString(R.string.dashboard_notice_new_design_text),
+                    R.string.dashboard_notice_restore_design to ::restoreClassicDesign,
+                    R.string.dashboard_edit to ::startEditing,
+                ) {
+                    viewModel.onDismissMigrationNotice()
+                }
+
+                is DashboardNotice.NewWidgets -> addNotice(
+                    null,
+                    getString(R.string.dashboard_notice_new_widgets, notice.deviceName),
+                    null,
+                    R.string.dashboard_notice_add_widgets to {
+                        pickWidget.launch(
+                            Intent(requireContext(), WidgetPickerActivity::class.java)
+                                .putExtra(WidgetPickerActivity.EXTRA_NEW_DEVICE, notice.deviceAddress)
+                        )
+                    },
+                ) {
+                    viewModel.onDismissNewWidgetsNotice()
+                }
             }
         }
     }
@@ -395,7 +414,6 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         notice.findViewById<TextView>(R.id.dashboard_notice_text).text = text
         notice.findViewById<View>(R.id.dashboard_notice_dismiss).setOnClickListener {
             dismiss()
-            bindNotices()
         }
         notice.findViewById<Button>(R.id.dashboard_notice_secondary).apply {
             isVisible = secondary != null
@@ -412,62 +430,26 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     private fun restoreClassicDesign() {
-        val snapshot = WidgetLayoutStore.snapshot()
-        val state = DashboardNotices.state()
-        DashboardMigration.restoreClassic()
-        DashboardNotices.set(DashboardNotices.State.NONE)
-        fullRefresh()
-        showUndo(R.string.dashboard_notice_design_restored, snapshot, state)
-    }
-
-    /**
-     * Shows [message] with an action that restores [snapshot] and [notices].
-     */
-    private fun showUndo(@StringRes message: Int, snapshot: DashboardSnapshot, notices: DashboardNotices.State) {
-        Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
-            .setAction(R.string.undo) {
-                WidgetLayoutStore.restore(snapshot)
-                DashboardNotices.set(notices)
-                fullRefresh()
-            }
-            .show()
+        viewModel.onRestoreClassicDesign()
     }
 
     private fun startEditing() {
-        if (actionMode != null) return
-        actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(editCallback) ?: return
-        if (viewModel.editSnapshot == null) {
-            viewModel.editSnapshot = WidgetLayoutStore.snapshot()
-        }
-        DashboardNotices.set(DashboardNotices.State.NONE)
-        bindNotices()
-        binder.editing = true
-        setEditControls(true)
-        updateDiscardButton()
+        viewModel.onStartEditing()
+        startEditingActionMode()
     }
 
-    private fun updateDiscardButton() {
-        val snapshot = viewModel.editSnapshot
-        discardButton.isEnabled = snapshot != null && snapshot != WidgetLayoutStore.snapshot()
+    private fun startEditingActionMode() {
+        if (actionMode != null) return
+        actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(editCallback) ?: return
+        setEditControls(true)
     }
 
     private fun confirmDiscard() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.workout_template_discard_title)
-            .setPositiveButton(R.string.workout_template_discard) { _, _ -> discardEdits() }
+            .setPositiveButton(R.string.workout_template_discard) { _, _ -> viewModel.onDiscardEditing() }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
-    }
-
-    /**
-     * Restores the dashboard to its state at the start of the edit mode, and ends the edit mode.
-     */
-    private fun discardEdits() {
-        val snapshot = viewModel.editSnapshot ?: return
-        deleteSnackbar?.dismiss()
-        WidgetLayoutStore.restore(snapshot)
-        actionMode?.finish()
-        fullRefresh()
     }
 
     /**
@@ -480,18 +462,6 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         editBar.isVisible = editing
         (activity as? ControlCenterv2)?.setPageBottomBarShown(editing)
         activity?.findViewById<ViewPager2>(R.id.dashboard_viewpager)?.isUserInputEnabled = !editing
-    }
-
-    private fun addWidget() {
-        if (WidgetRegistry.available().isEmpty()) {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.widgets_add_widget)
-                .setMessage(R.string.no_supported_devices_found)
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
-            return
-        }
-        pickWidget.launch(Intent(requireContext(), WidgetPickerActivity::class.java))
     }
 
     override fun onLongPress(item: PlacedWidget, card: View) {
@@ -508,15 +478,15 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.dashboard_widget_variant -> showVariantSheet(item)
-                R.id.dashboard_widget_settings -> settingsInstanceId =
-                    WidgetInstanceSettingsActivity.startForWidget(requireContext(), columns, instanceId)?.instanceId
+                R.id.dashboard_widget_settings -> WidgetInstanceSettingsActivity.startForWidget(
+                    requireContext(),
+                    columns,
+                    instanceId,
+                )
 
-                R.id.dashboard_widget_duplicate -> {
-                    newInstanceId = WidgetLayoutStore.duplicate(columns, instanceId)?.instanceId
-                    viewModel.updateLayout(columns)
-                }
+                R.id.dashboard_widget_duplicate -> viewModel.onDuplicate(instanceId)
 
-                R.id.dashboard_widget_delete -> deleteWidget(instanceId)
+                R.id.dashboard_widget_delete -> viewModel.onDelete(instanceId)
                 else -> return@setOnMenuItemClickListener false
             }
             true
@@ -525,23 +495,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     override fun onMove(item: PlacedWidget, offset: Int) {
-        val index = viewModel.items.value.indexOfFirst { it.instance.instanceId == item.instance.instanceId } + offset
-        if (index < 0) return
-        WidgetLayoutStore.move(grid.columns, item.instance.instanceId, index, item.x)
-        viewModel.updateLayout(grid.columns)
-    }
-
-    private fun deleteWidget(instanceId: String) {
-        val columns = grid.columns
-        val deleted = WidgetLayoutStore.delete(columns, instanceId) ?: return
-        viewModel.updateLayout(columns)
-        deleteSnackbar = Snackbar.make(requireView(), R.string.widgets_deleted, Snackbar.LENGTH_LONG)
-            .setAnchorView(editBar)
-            .setAction(R.string.undo) {
-                WidgetLayoutStore.restore(deleted)
-                viewModel.updateLayout(columns)
-            }
-            .apply { show() }
+        viewModel.onMove(item.instance.instanceId, offset, item.x)
     }
 
     /**
@@ -549,15 +503,13 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
      */
     @SuppressLint("InflateParams")  // The bottom sheet sets the layout params of its content view
     private fun showVariantSheet(item: PlacedWidget) {
-        val columns = grid.columns
         val sheet = BottomSheetDialog(requireContext())
         val view = layoutInflater.inflate(R.layout.dashboard_widget_edit_sheet, null)
 
         view.findViewById<TextView>(R.id.dashboard_edit_title).text = item.widget.displayName(requireContext())
         val variants = view.findViewById<WidgetGridLayout>(R.id.dashboard_edit_variants)
         showVariantPreviews(variants, item.widget, item.variant.id) { variant ->
-            WidgetLayoutStore.setVariant(columns, item.instance.instanceId, variant.id)
-            viewModel.updateLayout(columns)
+            viewModel.onVariantSelected(item.instance.instanceId, variant.id)
             sheet.dismiss()
         }
 
@@ -580,12 +532,14 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         return showAllDevices || deviceList.contains(device.address)
     }
 
+    private fun endOfDaySeconds(date: LocalDate): Int =
+        date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toEpochSecond().toInt()
+
     companion object {
         const val ACTION_CONFIG_CHANGE =
             "nodomain.freeyourgadget.gadgetbridge.activities.dashboardfragment.action.config_change"
         const val ACTION_START_EDITING =
             "nodomain.freeyourgadget.gadgetbridge.activities.dashboardfragment.action.start_editing"
-        private const val KEY_DAY = "dashboard_day"
         private const val KEY_EDITING = "dashboard_editing"
     }
 }

@@ -1,114 +1,165 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
-import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import kotlinx.coroutines.launch
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardRepository
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardSettings
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardWidgetLoader
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DefaultDashboardRepository
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DefaultDashboardWidgetLoader
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
-import nodomain.freeyourgadget.gadgetbridge.util.Prefs
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardNotices
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardSnapshot
+import nodomain.freeyourgadget.gadgetbridge.widgets.DeletedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import org.slf4j.LoggerFactory
-import java.util.Calendar
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 /**
- * The loading state of one configured widget instance.
- */
-sealed interface WidgetState {
-    data object Loading : WidgetState
-    data class Ready(val data: Any?) : WidgetState
-    data class Error(val cause: Throwable) : WidgetState
-}
-
-/**
- * Drives the dashboard's widget grid: loads the [PlacedWidget]s for a column count from
- * [WidgetLayoutStore], and for the selected day loads each instance's data through its own
- * [nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget.loadData].
+ * Owns the dashboard UI state and all actions on the widget layout.
  *
- * Each instance loads concurrently on [Dispatchers.IO] and publishes to [state] as soon as it's
- * ready.
+ * The layout, preferences and notices come from [DashboardRepository]. Widget data is loaded through
+ * [DashboardWidgetLoader], and every new layout, day, settings or reload request cancels the previous loads.
  */
-class DashboardViewModel : ViewModel() {
-    private val _items = MutableStateFlow<List<PlacedWidget>>(emptyList())
-    val items: StateFlow<List<PlacedWidget>> = _items.asStateFlow()
+class DashboardViewModel(
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
+    private val repository: DashboardRepository = DefaultDashboardRepository(),
+    private val widgetLoader: DashboardWidgetLoader = DefaultDashboardWidgetLoader(),
+) : ViewModel() {
+    private data class Content(
+        val date: LocalDate,
+        val layout: List<PlacedWidget>,
+        val settings: DashboardSettings,
+    )
 
-    private val _state = MutableStateFlow<Map<String, WidgetState>>(emptyMap())
-    val state: StateFlow<Map<String, WidgetState>> = _state.asStateFlow()
+    private data class LoadRequest(
+        val date: LocalDate,
+        val layout: List<PlacedWidget>,
+        val settings: DashboardSettings,
+        val reload: Long,
+    )
 
-    /**
-     * The dashboard at the start of the edit mode.
-     */
-    var editSnapshot: DashboardSnapshot? = null
+    private val _uiState = MutableStateFlow(
+        DashboardUiState(
+            date = LocalDate.now(),
+            isToday = true,
+            settings = DashboardSettings(),
+            items = emptyList(),
+            editState = null,
+            notices = emptyList(),
+        )
+    )
+    val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
-    private var refreshJob: Job? = null
-    private var query: DashboardQuery? = null
-    private var dashboardShowAllDevices = true
-    private var dashboardDeviceList: Set<String> = emptySet()
+    private val _events = Channel<DashboardEvent>(Channel.BUFFERED)
+    val events: Flow<DashboardEvent> = _events.receiveAsFlow()
 
-    /**
-     * Re-reads the layout for [columns] from [WidgetLayoutStore] and reloads every instance for [day].
-     */
-    fun refresh(day: Calendar, columns: Int, dashboardShowAllDevices: Boolean, dashboardDeviceList: Set<String>) {
-        refreshJob?.cancel()
+    private val selectedEpochDay = MutableStateFlow(
+        savedStateHandle.get<Long>(KEY_DAY) ?: LocalDate.now().toEpochDay()
+    )
+    private val columns = MutableStateFlow(
+        savedStateHandle.get<Int>(KEY_COLUMNS) ?: WidgetGrid.BASE_COLUMNS
+    )
+    private val states = MutableStateFlow<Map<String, WidgetState>>(emptyMap())
+    private val editState = MutableStateFlow<DashboardEditState?>(null)
+    private val reload = MutableStateFlow(0L)
 
-        LOG.debug("Reloading all widgets for {} in {} columns", DateTimeUtils.formatIso8601(day), columns)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val layoutFlow = columns.flatMapLatest { repository.layoutFlow(it) }
 
-        val layout = WidgetLayoutStore.placedWidgets(columns)
-        _items.value = layout
-        _state.value = layout.associate { it.instance.instanceId to WidgetState.Loading }
+    private var editSnapshot: DashboardSnapshot? = null
+    private var deletedWidget: DeletedWidget? = null
+    private var classicUndo: Pair<DashboardSnapshot, DashboardNotices.State>? = null
 
-        val timeTo = (day.timeInMillis / 1000L).toInt()
-        val timeFrom = DateTimeUtils.shiftDays(timeTo, -1)
-        val query = DashboardQuery(timeFrom, timeTo)
-        this.query = query
-        this.dashboardShowAllDevices = dashboardShowAllDevices
-        this.dashboardDeviceList = dashboardDeviceList
-
-        refreshJob = viewModelScope.launch(Dispatchers.IO) {
-            val jobs = layout.map { placed ->
-                async {
-                    loadInstance(placed, query, dashboardShowAllDevices, dashboardDeviceList)
-                }
-            }
-            jobs.awaitAll()
-            LOG.debug("Reloading finished")
+    init {
+        observeUiState()
+        observeLoadRequests()
+        if (savedStateHandle.get<Boolean>(KEY_EDITING) == true) {
+            onStartEditing()
         }
     }
 
-    /**
-     * Re-reads the layout for [columns] from [WidgetLayoutStore]. Loads only the instances that are new, that have a
-     * different variant, or that are in [reload], for the day of the last [refresh].
-     */
-    fun updateLayout(columns: Int, reload: Set<String> = emptySet()) {
-        val query = query ?: return
-        val previous = _items.value.associate { it.instance.instanceId to it.variant }
-        val layout = WidgetLayoutStore.placedWidgets(columns)
-        val changed = layout.filter { previous[it.instance.instanceId] != it.variant || it.instance.instanceId in reload }
-        LOG.debug("Updating the layout in {} columns, reloading {} widgets", columns, changed.size)
+    private fun observeUiState() {
+        viewModelScope.launch {
+            combine(
+                combine(selectedEpochDay, layoutFlow, repository.settingsFlow()) { epochDay, layout, settings ->
+                    Content(LocalDate.ofEpochDay(epochDay), layout, settings)
+                },
+                states,
+                editState,
+                repository.noticesFlow(),
+            ) { content, loadedStates, edit, notices ->
+                DashboardUiState(
+                    date = content.date,
+                    isToday = content.date == LocalDate.now(),
+                    settings = content.settings,
+                    items = content.layout.map { placed ->
+                        DashboardItemState(
+                            placed,
+                            loadedStates[placed.instance.instanceId] ?: WidgetState.Loading,
+                        )
+                    },
+                    editState = edit,
+                    notices = noticesOf(notices),
+                )
+            }.collect { _uiState.value = it }
+        }
+    }
 
-        val ids = layout.map { it.instance.instanceId }.toSet()
-        _items.value = layout
-        _state.update { states ->
-            states.filterKeys { it in ids } + changed.associate { it.instance.instanceId to WidgetState.Loading }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeLoadRequests() {
+        viewModelScope.launch {
+            combine(
+                selectedEpochDay,
+                layoutFlow,
+                repository.settingsFlow(),
+                reload,
+            ) { epochDay, layout, settings, reloadCount ->
+                LoadRequest(LocalDate.ofEpochDay(epochDay), layout, settings, reloadCount)
+            }
+                .distinctUntilChanged()
+                .collectLatest(::loadWidgets)
+        }
+    }
+
+    private suspend fun loadWidgets(request: LoadRequest) {
+        val instanceIds = request.layout.map { it.instance.instanceId }.toSet()
+        states.update { previous ->
+            previous.filterKeys { it in instanceIds } +
+                instanceIds.associateWith { WidgetState.Loading }
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            changed.map { placed ->
+        val timeTo = endOfDaySeconds(request.date)
+        val query = DashboardQuery(DateTimeUtils.shiftDays(timeTo, -1), timeTo)
+        coroutineScope {
+            request.layout.map { placed ->
                 async {
-                    loadInstance(placed, query, dashboardShowAllDevices, dashboardDeviceList)
+                    loadInstance(placed, query, request.settings)
                 }
             }.awaitAll()
         }
@@ -117,35 +168,214 @@ class DashboardViewModel : ViewModel() {
     private suspend fun loadInstance(
         placed: PlacedWidget,
         query: DashboardQuery,
-        dashboardShowAllDevices: Boolean,
-        dashboardDeviceList: Set<String>,
+        settings: DashboardSettings,
     ) {
-        val instance = placed.instance
-        val widget = placed.widget
+        val instanceId = placed.instance.instanceId
         try {
-            val prefs = Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId))
-            val config = WidgetConfig(instance, prefs, dashboardShowAllDevices, dashboardDeviceList, placed.variant)
-            val devices = config.resolveDevices(widget)
-            val scope = WidgetDataScope(query, devices)
-            val data = widget.loadData(scope, config)
-            publish(instance.instanceId, WidgetState.Ready(data))
+            val data = widgetLoader.load(placed, query, settings)
+            currentCoroutineContext().ensureActive()
+            publish(instanceId, WidgetState.Ready(data))
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            LOG.error("Failed to load data for widget instance {}", instance.instanceId, e)
-            publish(instance.instanceId, WidgetState.Error(e))
+            LOG.error("Failed to load data for widget instance {}", instanceId, e)
+            publish(instanceId, WidgetState.Error(e))
         }
     }
 
-    private fun publish(instanceId: String, newState: WidgetState) {
-        _state.update { it + (instanceId to newState) }
+    private fun publish(instanceId: String, state: WidgetState) {
+        states.update { it + (instanceId to state) }
     }
 
+    private fun noticesOf(state: DashboardNotices.State): List<DashboardNotice> {
+        val notices = mutableListOf<DashboardNotice>()
+        if (state.migration) {
+            notices += DashboardNotice.Migration
+        }
+        state.deviceAddress?.let { address ->
+            val device = repository.deviceByAddress(address)
+            if (device != null && repository.newWidgets(device).isNotEmpty()) {
+                notices += DashboardNotice.NewWidgets(address, device.aliasOrName)
+            }
+        }
+        return notices
+    }
+
+    fun onColumnsChanged(columns: Int) {
+        if (columns <= 0 || this.columns.value == columns) return
+        this.columns.value = columns
+        savedStateHandle[KEY_COLUMNS] = columns
+    }
+
+    fun onPreviousDay() = onDate(selectedDate().minusDays(1))
+
+    fun onNextDay() {
+        if (selectedDate() < LocalDate.now()) {
+            onDate(selectedDate().plusDays(1))
+        }
+    }
+
+    fun onDaySelected(epochMillis: Long) {
+        onDate(Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate())
+    }
+
+    private fun onDate(date: LocalDate) {
+        selectedEpochDay.value = date.toEpochDay()
+        savedStateHandle[KEY_DAY] = date.toEpochDay()
+    }
+
+    private fun selectedDate(): LocalDate = LocalDate.ofEpochDay(selectedEpochDay.value)
+
+    fun onAddWidgetClicked() {
+        val event = if (repository.availableWidgets().isEmpty()) {
+            DashboardEvent.NoWidgetsAvailable
+        } else {
+            DashboardEvent.OpenWidgetPicker
+        }
+        _events.trySend(event)
+    }
+
+    fun onWidgetPicked(typeId: String, variantId: String) {
+        viewModelScope.launch {
+            val instance = repository.add(columns.value, typeId, variantId)
+            updateEditDirty()
+            _events.send(DashboardEvent.WidgetAdded(instance.instanceId))
+        }
+    }
+
+    fun onStartEditing() {
+        if (editState.value != null) return
+        viewModelScope.launch {
+            if (editSnapshot == null) {
+                editSnapshot = repository.snapshot()
+            }
+            editState.value = DashboardEditState(canDiscard = false)
+            savedStateHandle[KEY_EDITING] = true
+            repository.setNotices(DashboardNotices.State.NONE)
+        }
+    }
+
+    fun onFinishEditing() {
+        editSnapshot = null
+        deletedWidget = null
+        classicUndo = null
+        editState.value = null
+        savedStateHandle[KEY_EDITING] = false
+    }
+
+    fun onDiscardEditing() {
+        viewModelScope.launch {
+            val snapshot = editSnapshot ?: return@launch
+            repository.restore(snapshot)
+            onFinishEditing()
+        }
+    }
+
+    fun onArrange(arrangement: List<Pair<String, Int>>) {
+        viewModelScope.launch {
+            repository.arrange(columns.value, arrangement)
+            updateEditDirty()
+        }
+    }
+
+    fun onMove(instanceId: String, offset: Int, x: Int) {
+        val index = _uiState.value.items.indexOfFirst { it.instanceId == instanceId } + offset
+        if (index < 0) return
+        viewModelScope.launch {
+            repository.move(columns.value, instanceId, index, x)
+            updateEditDirty()
+        }
+    }
+
+    fun onDuplicate(instanceId: String) {
+        viewModelScope.launch {
+            val copy = repository.duplicate(columns.value, instanceId) ?: return@launch
+            updateEditDirty()
+            _events.send(DashboardEvent.WidgetAdded(copy.instanceId))
+        }
+    }
+
+    fun onDelete(instanceId: String) {
+        viewModelScope.launch {
+            val deleted = repository.delete(columns.value, instanceId) ?: return@launch
+            deletedWidget = deleted
+            updateEditDirty()
+            _events.send(DashboardEvent.ShowUndo(DashboardUndoAction.DELETE_WIDGET))
+        }
+    }
+
+    fun onUndoDelete() {
+        viewModelScope.launch {
+            val deleted = deletedWidget ?: return@launch
+            repository.restore(deleted)
+            deletedWidget = null
+            updateEditDirty()
+        }
+    }
+
+    fun onVariantSelected(instanceId: String, variantId: String) {
+        viewModelScope.launch {
+            repository.setVariant(columns.value, instanceId, variantId)
+            updateEditDirty()
+        }
+    }
+
+    fun onSettingsClosed() {
+        reload.update { it + 1 }
+        viewModelScope.launch { updateEditDirty() }
+    }
+
+    fun onDismissMigrationNotice() {
+        viewModelScope.launch {
+            repository.setNotices(repository.currentNotices().copy(migration = false))
+        }
+    }
+
+    fun onDismissNewWidgetsNotice() {
+        viewModelScope.launch {
+            repository.setNotices(repository.currentNotices().copy(deviceAddress = null))
+        }
+    }
+
+    fun onRestoreClassicDesign() {
+        viewModelScope.launch {
+            val snapshot = repository.snapshot()
+            val notices = repository.currentNotices()
+            repository.restoreClassicDesign()
+            repository.setNotices(DashboardNotices.State.NONE)
+            classicUndo = snapshot to notices
+            _events.send(DashboardEvent.ShowUndo(DashboardUndoAction.RESTORE_CLASSIC_DESIGN))
+        }
+    }
+
+    fun onUndoRestoreClassicDesign() {
+        viewModelScope.launch {
+            val undo = classicUndo ?: return@launch
+            repository.restore(undo.first)
+            repository.setNotices(undo.second)
+            classicUndo = null
+        }
+    }
+
+    private suspend fun updateEditDirty() {
+        val currentEditState = editState.value ?: return
+        val snapshot = editSnapshot ?: return
+        editState.value = currentEditState.copy(canDiscard = snapshot != repository.snapshot())
+    }
+
+    private fun endOfDaySeconds(date: LocalDate): Int =
+        date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toEpochSecond().toInt()
+
     override fun onCleared() {
-        refreshJob?.cancel()
+        _events.close()
+        super.onCleared()
     }
 
     companion object {
         private val LOG = LoggerFactory.getLogger(DashboardViewModel::class.java)
+
+        private const val KEY_DAY = "dashboard_day"
+        private const val KEY_EDITING = "dashboard_editing"
+        private const val KEY_COLUMNS = "dashboard_columns"
     }
 }
