@@ -5,6 +5,7 @@ package garmin_vivomovehr;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto";
 option java_multiple_files = true;
 
+import "garmin/gdi_accessory_utilities.proto";
 import "garmin/gdi_app_settings.proto";
 import "garmin/gdi_audio_prompts.proto";
 import "garmin/gdi_calendar.proto";
@@ -33,6 +34,8 @@ import "garmin/gdi_launch_monitor.proto";
 import "garmin/gdi_live_session.proto";
 import "garmin/gdi_live_track.proto";
 import "garmin/gdi_realtime_settings.proto";
+import "garmin/gdi_running.proto";
+import "garmin/gdi_simple_setup.proto";
 import "garmin/gdi_sms_notification.proto";
 import "garmin/gdi_waypoint_transfer.proto";
 import "garmin/gdi_wifi_setup.proto";
@@ -59,10 +62,11 @@ message Smart {
     optional GDI.Proto.Credentials.CredentialsService credentials_service = 27;
     optional GDI.Proto.InReachTracking.InReachTrackingService inreach_tracking_service = 28;
     optional InReachMessagingService inreach_messaging_service = 29;
-    optional GDI.Proto.EventSharing.EventSharing event_sharing = 30;
+    optional GDI.Proto.EventSharing.EventSharingService event_sharing = 30;
     optional GDI.Proto.GenericItemTransfer.GenericItemTransferService generic_item_transfer_service = 31;
     optional GDI.Proto.InReachContactSync.InReachContactSyncService inreach_contact_sync_service = 32;
-    optional GDI.Proto.LaunchMonitor.LaunchMonitorService launch_monitor_service = 38;
+    optional GDI.Proto.SimpleSetup.SimpleSetupService simple_setup_service = 36;
+    optional GDI.Proto.LaunchMonitor.Service launch_monitor_service = 38;
     optional EcgService samd_service = 39;
     optional RealtimeSettingsService realtime_settings_service = 42;
     optional GDI.Proto.FileAccess.Service file_access_service = 43;
@@ -71,6 +75,8 @@ message Smart {
     optional GDI.Proto.GarminConnect.Service garmin_connect_service = 47;
     optional GDI.Proto.GNCS.Service gncs_service = 49;
     optional GDI.Proto.LiveSession.LiveSessionService live_session_service = 56;
+    optional GDI.Proto.Running.Service running_service = 62;
+    optional GDI.Proto.AccessoryUtilities.Service accessory_utilities_service = 63;
 }
 
 message UUID {
