@@ -172,12 +172,12 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
 
         binder = DashboardGridBinder(binding.dashboardGrid).apply {
             callbacks = this@DashboardFragment
+            columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
         }
-        binding.dashboardGrid.columns = WidgetGrid.columnsForWidth(resources.configuration.screenWidthDp)
         dragController = GridDragController(
             binding.dashboardGrid,
             binding.dashboardScroll,
-            binder!!::instanceIdOf,
+            binder!!,
         ) { arrangement ->
             viewModel.onArrange(arrangement)
         }
@@ -188,7 +188,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         // The pager resumes only the visible page
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         observeViewModel()
-        viewModel.onColumnsChanged(binding.dashboardGrid.columns)
+        viewModel.onColumnsChanged(binder!!.columns)
 
         val filter = IntentFilter()
         filter.addAction(GBDevice.ACTION_DEVICE_CHANGED)
@@ -312,10 +312,13 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         if (_binding == null) return
         when (event) {
             is DashboardEvent.WidgetAdded -> {
-                binder?.cardOf(event.instanceId)?.doOnLayout { card ->
-                    binding.dashboardScroll.smoothScrollTo(0, binding.dashboardGrid.top + card.top)
+                binding.dashboardGrid.post {
+                    if (_binding == null) return@post
+                    binder?.cardOf(event.instanceId)?.doOnLayout { card ->
+                        binding.dashboardScroll.smoothScrollTo(0, binding.dashboardGrid.top + card.top)
+                    }
+                    binder?.highlight(event.instanceId)
                 }
-                binder?.highlight(event.instanceId)
             }
 
             DashboardEvent.OpenWidgetPicker -> {
@@ -460,8 +463,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     override fun onEditClick(item: PlacedWidget, button: View) {
-        val binding = _binding ?: return
-        val columns = binding.dashboardGrid.columns
+        val columns = binder?.columns ?: return
         val instanceId = item.instance.instanceId
         val popup = PopupMenu(requireContext(), button)
         popup.inflate(R.menu.dashboard_widget_edit_menu)

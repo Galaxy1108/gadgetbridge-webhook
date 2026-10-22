@@ -4,7 +4,7 @@
     android:id="@+id/dashboard_widget_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
+    android:layout_margin="@dimen/dashboard_grid_spacing"
     android:clickable="true"
     android:focusable="true">
 

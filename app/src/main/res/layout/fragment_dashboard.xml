@@ -67,10 +67,13 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
 
-                <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridLayout
+                <nodomain.freeyourgadget.gadgetbridge.activities.dashboard.WidgetGridRecyclerView
                     android:id="@+id/dashboard_grid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
                     android:padding="10dp" />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

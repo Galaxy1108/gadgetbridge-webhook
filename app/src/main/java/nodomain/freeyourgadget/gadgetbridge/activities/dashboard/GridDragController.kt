@@ -1,13 +1,10 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
 import android.annotation.SuppressLint
-import android.transition.ChangeBounds
-import android.transition.TransitionManager
 import android.view.MotionEvent
 import android.view.View
-import androidx.core.view.children
-import androidx.core.view.isGone
 import androidx.core.widget.NestedScrollView
+import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.widgets.GridRect
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import kotlin.math.roundToInt
@@ -20,17 +17,21 @@ import kotlin.math.roundToInt
  * The other widgets stay in their columns.
  */
 class GridDragController(
-    private val grid: WidgetGridLayout,
+    private val grid: WidgetGridRecyclerView,
     private val scrollView: NestedScrollView,
-    private val instanceIdOf: (View) -> String?,
+    private val binder: DashboardGridBinder,
     private val onDrop: (arrangement: List<Pair<String, Int>>) -> Unit,
 ) {
     private var dragged: View? = null
+    private var draggedId: String? = null
     private var grabX = 0f
     private var grabY = 0f
     private var fingerX = 0f
     private var fingerY = 0f
     private val density = grid.resources.displayMetrics.density
+    private val spacing = grid.resources.getDimensionPixelSize(R.dimen.dashboard_grid_spacing)
+    private val columnWidth: Float
+        get() = (grid.width - grid.paddingLeft - grid.paddingRight).toFloat() / binder.columns
 
     private val followFinger = View.OnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
         view.translationX = fingerX - grabX - view.left
@@ -42,7 +43,9 @@ class GridDragController(
      */
     @SuppressLint("ClickableViewAccessibility")
     fun start(child: View) {
+        val instanceId = binder.instanceIdOf(child) ?: return
         dragged = child
+        draggedId = instanceId
         fingerX = grid.lastDownX
         fingerY = grid.lastDownY
         grabX = fingerX - child.left
@@ -65,24 +68,25 @@ class GridDragController(
     }
 
     private fun move(x: Float, y: Float) {
+        val instanceId = draggedId ?: return
         val child = dragged ?: return
         fingerX = x
         fingerY = y
         autoScroll(y)
 
-        val lp = child.layoutParams as WidgetGridLayout.LayoutParams
-        val maxColumn = (grid.columns - lp.cellWidth).coerceAtLeast(0)
-        val column = ((x - grabX - grid.paddingLeft) / grid.columnWidth).roundToInt().coerceIn(0, maxColumn)
+        val width = binder.widthOf(instanceId)
+        val maxColumn = (binder.columns - width).coerceAtLeast(0)
+        val column = ((x - grabX - grid.paddingLeft) / columnWidth).roundToInt().coerceIn(0, maxColumn)
 
-        val others = grid.children.filter { it !== child && !it.isGone }.toList()
-        val stacked = WidgetGrid.stack(grid.columns, others.map { rectOf(it) })
+        val others = binder.ids().filter { it != instanceId }
+        val stacked = WidgetGrid.stack(binder.columns, others.map(::rectOf))
         val left = x - grabX - grid.paddingLeft
         val top = y - grabY - grid.paddingTop
-        val right = left + lp.cellWidth * grid.columnWidth
-        val bottom = top + lp.childHeight + lp.topMargin + lp.bottomMargin
+        val right = left + width * columnWidth
+        val bottom = top + binder.heightPxOf(instanceId) + spacing * 2
         val covered = stacked.map { rect ->
-            val rectLeft = rect.x * grid.columnWidth
-            val rectRight = (rect.x + rect.width) * grid.columnWidth
+            val rectLeft = rect.x * columnWidth
+            val rectRight = (rect.x + rect.width) * columnWidth
             val rectBottom = (rect.y + rect.height).toFloat()
             val overlapX = (minOf(right, rectRight) - maxOf(left, rectLeft)).coerceAtLeast(0f)
             val overlapY = (minOf(bottom, rectBottom) - maxOf(top, rect.y.toFloat())).coerceAtLeast(0f)
@@ -95,34 +99,25 @@ class GridDragController(
             stacked.indexOfFirst { it.y > top }.takeIf { it >= 0 } ?: others.size
         }
 
-        if (column != lp.cellX || index != grid.indexOfChild(child)) {
-            TransitionManager.beginDelayedTransition(grid, ChangeBounds().excludeTarget(child, true))
-            lp.cellX = column
-            grid.removeView(child)
-            grid.addView(child, index)
-            if (under >= 0) {
-                placeAtFirstFree(others[under])
-            }
+        binder.setColumn(instanceId, column)
+        binder.moveBefore(instanceId, others.getOrNull(index))
+        if (under >= 0) {
+            binder.placeAtFirstFree(others[under])
         }
         followFinger.onLayoutChange(child, 0, 0, 0, 0, 0, 0, 0, 0)
         grid.invalidate()
     }
 
     /**
-     * Puts [child] at the first free column under the children before it.
+     * The rectangle of the widget [instanceId], with its height in pixels and its margins.
      */
-    private fun placeAtFirstFree(child: View) {
-        val before = grid.children.takeWhile { it !== child }.filter { !it.isGone }.map { rectOf(it) }.toList()
-        val lp = child.layoutParams as WidgetGridLayout.LayoutParams
-        lp.cellX = WidgetGrid.firstFreeColumn(grid.columns, WidgetGrid.stack(grid.columns, before), lp.cellWidth)
-    }
-
-    /**
-     * The rectangle of [child], with its height in pixels and its margins.
-     */
-    private fun rectOf(child: View): GridRect {
-        val lp = child.layoutParams as WidgetGridLayout.LayoutParams
-        return GridRect(lp.cellX, 0, lp.cellWidth, lp.childHeight + lp.topMargin + lp.bottomMargin)
+    private fun rectOf(instanceId: String): GridRect {
+        return GridRect(
+            binder.columnOf(instanceId),
+            0,
+            binder.widthOf(instanceId),
+            binder.heightPxOf(instanceId) + spacing * 2,
+        )
     }
 
     /**
@@ -138,18 +133,18 @@ class GridDragController(
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun drop() {
         val child = dragged ?: return
         dragged = null
+        draggedId = null
         child.removeOnLayoutChangeListener(followFinger)
         child.animate().translationX(0f).translationY(0f).translationZ(0f)
 
         grid.interceptTouches = false
         grid.setOnTouchListener(null)
 
-        onDrop(grid.children.filter { !it.isGone }.mapNotNull { view ->
-            instanceIdOf(view)?.let { it to (view.layoutParams as WidgetGridLayout.LayoutParams).cellX }
-        }.toList())
+        onDrop(binder.arrangement())
     }
 
     private companion object {
