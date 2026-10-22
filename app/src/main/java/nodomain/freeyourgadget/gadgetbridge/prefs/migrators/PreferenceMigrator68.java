@@ -11,6 +11,7 @@ public class PreferenceMigrator68 extends AbstractPreferenceMigrator {
         // Version 0 is a fresh install, which has no dashboard to migrate
         if (oldVersion > 0) {
             editor.putBoolean(DashboardMigration.PREF_UPGRADE, true);
+            editor.putBoolean("dashboard_cards_enabled", true);
         }
     }
 }
