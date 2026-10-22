@@ -2,26 +2,27 @@ syntax = "proto2";
 
 package garmin_vivomovehr;
 
-option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSettingsService";
-option java_multiple_files = true;
+option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
+option java_outer_classname = "GdiRealtimeSettings";
 
-message SettingsService {
-  optional ScreenDefinitionRequest definitionRequest = 1;
-  optional ScreenDefinitionResponse definitionResponse = 2;
+message RealtimeSettingsService {
+    optional ScreenDefinitionRequest definitionRequest = 1;
+    optional ScreenDefinitionResponse definitionResponse = 2;
 
-  optional ScreenStateRequest stateRequest = 3;
-  optional ScreenStateResponse stateResponse = 4;
+    optional ScreenStateRequest stateRequest = 3;
+    optional ScreenStateResponse stateResponse = 4;
 
-  optional ChangeRequest changeRequest = 5;
-  optional ChangeResponse changeResponse = 6;
+    optional ChangeRequest changeRequest = 5;
+    optional ChangeResponse changeResponse = 6;
 
-  optional ChangeNotification changeNotification = 7;
+    optional ChangeNotification changeNotification = 7;
 
-  optional InitRequest initRequest = 8;
-  optional InitResponse initResponse = 9;
+    optional InitRequest initRequest = 8;
+    optional InitResponse initResponse = 9;
 
-  optional Message11 unk11 = 11;
-  optional Message13 unk13 = 13;
+    optional Message11 unk11 = 11;
+    optional Message13 unk13 = 13;
+}
 
   message Message11 {
     optional uint32 unk1 = 1;
@@ -29,7 +30,7 @@ message SettingsService {
 
   message Message13 {
   }
-}
+
 
 message ScreenDefinitionRequest {
   optional uint32 screenId = 1;
