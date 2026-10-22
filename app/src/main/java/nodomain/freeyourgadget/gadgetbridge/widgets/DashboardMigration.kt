@@ -34,27 +34,6 @@ object DashboardMigration {
     const val PREF_UPGRADE = "pref_dashboard_upgrade"
 
     /**
-     * The variants that replace the gauge of a widget type from before the cell grid, by legacy type.
-     */
-    private val MIGRATED_VARIANTS: Map<String, WidgetVariant> = mapOf(
-        "steps" to WidgetVariant.NUMBER,
-        "distance" to WidgetVariant.NUMBER,
-        "activetime" to WidgetVariant.NUMBER,
-        "calories_active" to WidgetVariant.NUMBER,
-        "heartrate" to WidgetVariant.NUMBER,
-        "spo2" to WidgetVariant.NUMBER,
-        "pai" to WidgetVariant.NUMBER,
-        "weight" to WidgetVariant.NUMBER,
-        "bmi" to WidgetVariant.NUMBER,
-        "bmr" to WidgetVariant.NUMBER,
-        "bodyfat" to WidgetVariant.NUMBER,
-        "bodywater" to WidgetVariant.NUMBER,
-        "musclemass" to WidgetVariant.NUMBER,
-        "hydration" to WidgetVariant.NUMBER,
-        "sleep" to WidgetVariant.TALL,
-    )
-
-    /**
      * The default widgets before the cell grid, in order.
      */
     private val DEFAULT_ORDER = listOf(
@@ -145,7 +124,7 @@ object DashboardMigration {
 
                 else -> type to (WidgetRegistry.byId(type)?.variants?.first()?.id ?: "")
             }
-            val migratedVariantId = MIGRATED_VARIANTS[type]?.id?.takeIf { migrateVariants } ?: variantId
+            val migratedVariantId = if (migrateVariants) migratedVariant(typeId, variantId) else variantId
             placements += placeAtFirstFree(
                 WidgetGrid.BASE_COLUMNS,
                 placements,
@@ -154,6 +133,16 @@ object DashboardMigration {
         }
         return placements
     }
+
+    /**
+     * The variant that replaces the gauge design [variantId] of [typeId]: default to NUMBER, if the widget supports it.
+     */
+    private fun migratedVariant(typeId: String, variantId: String): String =
+        if (WidgetRegistry.byId(typeId)?.variants?.contains(WidgetVariant.NUMBER) == true) {
+            WidgetVariant.NUMBER.id
+        } else {
+            variantId
+        }
 
     private fun setVo2MaxSport(instanceId: String, sport: String) {
         GBApplication.getWidgetSharedPrefs(instanceId)?.edit {
