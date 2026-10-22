@@ -29,7 +29,6 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.compon
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.enumList
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.multiEnumList
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.multipointPairing
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.screen
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractBLClassicDeviceCoordinator
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
