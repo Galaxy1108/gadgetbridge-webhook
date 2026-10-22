@@ -30,18 +30,14 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
-import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -58,9 +54,10 @@ import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardCalendarActivity
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardEditModeController
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardEvent
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardGridBinder
-import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardNotice
+import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardNoticesController
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardUiState
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardUndoAction
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.DashboardViewModel
@@ -81,9 +78,9 @@ import java.time.ZoneId
 import java.util.Date
 
 /**
- * Hosts the widget grid: date header, calendar/settings menu, and the [WidgetGridLayout] the
- * [DashboardGridBinder] renders the placed widgets into, driven by [DashboardViewModel]. In edit mode, the
- * widgets can be moved, added, changed and deleted.
+ * Hosts the widget grid: date header, calendar/settings menu, and the grid the [DashboardGridBinder] renders the
+ * placed widgets into, driven by [DashboardViewModel]. In edit mode, the widgets can be moved, added, changed and
+ * deleted.
  */
 class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGridBinder.Callbacks {
     private var _binding: FragmentDashboardBinding? = null
@@ -93,14 +90,14 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private lateinit var dragController: GridDragController
     private val viewModel: DashboardViewModel by viewModels { DashboardViewModel.Factory }
 
+    private var noticesController: DashboardNoticesController? = null
+    private var editModeController: DashboardEditModeController? = null
+
     private var isConfigChanged = false
     private var startEditingOnResume = false
-    private var preserveEditingOnDestroy = false
     private var receiverRegistered = false
-    private var actionMode: ActionMode? = null
     private var snackbar: Snackbar? = null
     private var lastItems: List<PlacedWidget> = emptyList()
-    private var lastNotices: List<DashboardNotice> = emptyList()
 
     private val pickWidget = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -110,28 +107,6 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         val typeId = data.getStringExtra(WidgetPickerActivity.EXTRA_TYPE_ID) ?: return@registerForActivityResult
         val variantId = data.getStringExtra(WidgetPickerActivity.EXTRA_VARIANT_ID) ?: return@registerForActivityResult
         viewModel.onWidgetPicked(typeId, variantId)
-    }
-
-    private val editCallback = object : ActionMode.Callback {
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.setTitle(R.string.dashboard_edit)
-            return true
-        }
-
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
-
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = false
-
-        override fun onDestroyActionMode(mode: ActionMode) {
-            actionMode = null
-            snackbar?.dismiss()
-            binder?.editing = false
-            setEditControls(false)
-            if (!preserveEditingOnDestroy) {
-                viewModel.onFinishEditing()
-            }
-            preserveEditingOnDestroy = false
-        }
     }
 
     private val calendarLauncher = registerForActivityResult(
@@ -159,16 +134,35 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         val binding = FragmentDashboardBinding.inflate(inflater, container, false)
         _binding = binding
         lastItems = emptyList()
-        lastNotices = emptyList()
+
+        editModeController = DashboardEditModeController(
+            requireActivity() as AppCompatActivity,
+            binding,
+            viewModel,
+        ) { snackbar?.dismiss() }
+        noticesController = DashboardNoticesController(
+            requireContext(),
+            binding.dashboardNotices,
+            onRestoreClassicDesign = viewModel::onRestoreClassicDesign,
+            onEdit = ::startEditing,
+            onAddWidgets = { address ->
+                pickWidget.launch(
+                    Intent(requireContext(), WidgetPickerActivity::class.java)
+                        .putExtra(WidgetPickerActivity.EXTRA_NEW_DEVICE, address)
+                )
+            },
+            onDismissMigration = viewModel::onDismissMigrationNotice,
+            onDismissNewWidgets = viewModel::onDismissNewWidgetsNotice,
+        )
 
         binding.dashboardEditBar.setBackgroundColor(MaterialColors.getColor(binding.dashboardEditBar, R.attr.main_bar_bg))
         ViewCompat.setOnApplyWindowInsetsListener(binding.dashboardEditBar) { bar, insets ->
             bar.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom)
             insets
         }
-        binding.dashboardDiscard.setOnClickListener { confirmDiscard() }
+        binding.dashboardDiscard.setOnClickListener { editModeController?.confirmDiscard() }
         binding.dashboardAddWidget.setOnClickListener { viewModel.onAddWidgetClicked() }
-        binding.dashboardDone.setOnClickListener { actionMode?.finish() }
+        binding.dashboardDone.setOnClickListener { editModeController?.finish() }
 
         binder = DashboardGridBinder(binding.dashboardGrid).apply {
             callbacks = this@DashboardFragment
@@ -210,19 +204,19 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         if (startEditingOnResume) {
             startEditingOnResume = false
             startEditing()
-        } else if (viewModel.uiState.value.editState != null) {
-            startEditingActionMode()
+        } else {
+            editModeController?.startIfEditing()
         }
     }
 
     override fun onDestroyView() {
-        preserveEditingOnDestroy = requireActivity().isChangingConfigurations &&
-            viewModel.uiState.value.editState != null
-        actionMode?.finish()
+        editModeController?.onDestroyView(requireActivity().isChangingConfigurations)
         if (receiverRegistered) {
             LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
             receiverRegistered = false
         }
+        editModeController = null
+        noticesController = null
         binder = null
         _binding = null
         super.onDestroyView()
@@ -288,12 +282,12 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         binder.submitStates(state.items.associate { it.instanceId to it.state })
 
         renderDate(state, binding)
-        bindNotices(state.notices)
+        noticesController?.submit(state.notices)
         binding.dashboardDiscard.isEnabled = state.editState?.canDiscard == true
         binder.editing = state.editState != null
 
         if (state.editState != null && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            startEditingActionMode()
+            editModeController?.start()
         }
     }
 
@@ -359,102 +353,9 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             }
     }
 
-    private fun bindNotices(notices: List<DashboardNotice>) {
-        if (notices == lastNotices) return
-        lastNotices = notices
-
-        binding.dashboardNotices.removeAllViews()
-        for (notice in notices) {
-            when (notice) {
-                DashboardNotice.Migration -> addNotice(
-                    getString(R.string.dashboard_notice_new_design_title),
-                    getString(R.string.dashboard_notice_new_design_text),
-                    R.string.dashboard_notice_restore_design to ::restoreClassicDesign,
-                    R.string.dashboard_edit to ::startEditing,
-                ) {
-                    viewModel.onDismissMigrationNotice()
-                }
-
-                is DashboardNotice.NewWidgets -> addNotice(
-                    null,
-                    getString(R.string.dashboard_notice_new_widgets, notice.deviceName),
-                    null,
-                    R.string.dashboard_notice_add_widgets to {
-                        pickWidget.launch(
-                            Intent(requireContext(), WidgetPickerActivity::class.java)
-                                .putExtra(WidgetPickerActivity.EXTRA_NEW_DEVICE, notice.deviceAddress)
-                        )
-                    },
-                ) {
-                    viewModel.onDismissNewWidgetsNotice()
-                }
-            }
-        }
-    }
-
-    private fun addNotice(
-        title: String?,
-        text: String,
-        secondary: Pair<Int, () -> Unit>?,
-        primary: Pair<Int, () -> Unit>,
-        dismiss: () -> Unit,
-    ) {
-        val notice = layoutInflater.inflate(R.layout.dashboard_notice, binding.dashboardNotices, false)
-        notice.findViewById<TextView>(R.id.dashboard_notice_title).apply {
-            this.text = title
-            isVisible = title != null
-        }
-        notice.findViewById<TextView>(R.id.dashboard_notice_text).text = text
-        notice.findViewById<View>(R.id.dashboard_notice_dismiss).setOnClickListener {
-            dismiss()
-        }
-        notice.findViewById<Button>(R.id.dashboard_notice_secondary).apply {
-            isVisible = secondary != null
-            secondary?.let { (label, action) ->
-                setText(label)
-                setOnClickListener { action() }
-            }
-        }
-        notice.findViewById<Button>(R.id.dashboard_notice_primary).apply {
-            setText(primary.first)
-            setOnClickListener { primary.second() }
-        }
-        binding.dashboardNotices.addView(notice)
-    }
-
-    private fun restoreClassicDesign() {
-        viewModel.onRestoreClassicDesign()
-    }
-
     private fun startEditing() {
         viewModel.onStartEditing()
-        startEditingActionMode()
-    }
-
-    private fun startEditingActionMode() {
-        if (actionMode != null) return
-        actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(editCallback) ?: return
-        setEditControls(true)
-    }
-
-    private fun confirmDiscard() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.workout_template_discard_title)
-            .setPositiveButton(R.string.workout_template_discard) { _, _ -> viewModel.onDiscardEditing() }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    /**
-     * Shows the edit bar in place of the bottom navigation, and hides the date arrows and disables the page swipe in
-     * the edit mode.
-     */
-    private fun setEditControls(editing: Boolean) {
-        val binding = _binding ?: return
-        binding.arrowLeft.isInvisible = editing
-        binding.arrowRight.isInvisible = editing
-        binding.dashboardEditBar.isVisible = editing
-        (activity as? DashboardHost)?.onDashboardEditingChanged(editing)
+        editModeController?.start()
     }
 
     override fun onLongPress(item: PlacedWidget, card: View) {

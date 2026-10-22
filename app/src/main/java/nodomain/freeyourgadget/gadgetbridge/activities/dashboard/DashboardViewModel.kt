@@ -98,6 +98,7 @@ class DashboardViewModel(
     private val layoutFlow = columns.flatMapLatest { repository.layoutFlow(it) }
 
     private var editSnapshot: DashboardSnapshot? = null
+    private var editGeneration = 0
     private var deletedWidget: DeletedWidget? = null
     private var classicUndo: Pair<DashboardSnapshot, DashboardNotices.State>? = null
 
@@ -250,17 +251,22 @@ class DashboardViewModel(
 
     fun onStartEditing() {
         if (editState.value != null) return
+        val generation = ++editGeneration
+        editState.value = DashboardEditState(canDiscard = false)
+        savedStateHandle[KEY_EDITING] = true
         viewModelScope.launch {
             if (editSnapshot == null) {
-                editSnapshot = repository.snapshot()
+                val snapshot = repository.snapshot()
+                if (generation != editGeneration) return@launch
+                editSnapshot = snapshot
             }
-            editState.value = DashboardEditState(canDiscard = false)
-            savedStateHandle[KEY_EDITING] = true
+            updateEditDirty()
             repository.setNotices(DashboardNotices.State.NONE)
         }
     }
 
     fun onFinishEditing() {
+        editGeneration++
         editSnapshot = null
         deletedWidget = null
         classicUndo = null
@@ -269,8 +275,8 @@ class DashboardViewModel(
     }
 
     fun onDiscardEditing() {
+        val snapshot = editSnapshot ?: return
         viewModelScope.launch {
-            val snapshot = editSnapshot ?: return@launch
             repository.restore(snapshot)
             onFinishEditing()
         }
