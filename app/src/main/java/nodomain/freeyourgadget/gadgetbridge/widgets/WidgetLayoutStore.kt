@@ -94,6 +94,7 @@ object WidgetLayoutStore {
      * Stores the layout for [columns] if it is derived. Returns the instance in it that [instanceId] is, or was copied
      * to.
      */
+    @Synchronized
     fun instanceForEdit(columns: Int, instanceId: String): WidgetInstance? {
         val layout = ownLayout(columns)
         return layout.placements.find { it.instance.instanceId == layout.idOf(instanceId) }?.instance
@@ -103,6 +104,7 @@ object WidgetLayoutStore {
      * Stores the layout for [columns] in the order of [arrangement], each instance at its column. Instances that are
      * not in [arrangement] go to the end.
      */
+    @Synchronized
     fun arrange(columns: Int, arrangement: List<Pair<String, Int>>) {
         val layout = ownLayout(columns)
         val byId = layout.placements.associateBy { it.instance.instanceId }
@@ -114,6 +116,7 @@ object WidgetLayoutStore {
     /**
      * Moves [instanceId] in the layout for [columns] to [index] in the order, at column [x].
      */
+    @Synchronized
     fun move(columns: Int, instanceId: String, index: Int, x: Int) {
         val layout = ownLayout(columns)
         val id = layout.idOf(instanceId)
@@ -126,6 +129,7 @@ object WidgetLayoutStore {
     /**
      * Adds a new instance of [typeId] with [variantId] to the layout for [columns], and returns it.
      */
+    @Synchronized
     fun add(columns: Int, typeId: String, variantId: String): WidgetInstance {
         val instance = WidgetInstance(newInstanceId(), typeId)
         val placements = ownLayout(columns).placements
@@ -137,6 +141,7 @@ object WidgetLayoutStore {
      * Duplicates [instanceId] (settings included) in the layout for [columns], with the same variant. Returns the copy,
      * if the original was found.
      */
+    @Synchronized
     fun duplicate(columns: Int, instanceId: String): WidgetInstance? {
         val layout = ownLayout(columns)
         val original = layout.placements.find { it.instance.instanceId == layout.idOf(instanceId) } ?: return null
@@ -152,6 +157,7 @@ object WidgetLayoutStore {
      * Removes [instanceId] from the layout for [columns], and deletes its settings. Returns the [DeletedWidget] if it
      * was found, so that the change can be undone.
      */
+    @Synchronized
     fun delete(columns: Int, instanceId: String): DeletedWidget? {
         val layout = ownLayout(columns)
         val id = layout.idOf(instanceId)
@@ -166,6 +172,7 @@ object WidgetLayoutStore {
     /**
      * Restores a widget instance that [delete] removed back into its layout, with its settings.
      */
+    @Synchronized
     fun restore(deleted: DeletedWidget) {
         val placements = ownLayout(deleted.columns).placements.toMutableList()
         placements.add(deleted.index.coerceAtMost(placements.size), deleted.placement)
@@ -178,6 +185,7 @@ object WidgetLayoutStore {
     /**
      * The stored layouts and the settings of their instances.
      */
+    @Synchronized
     fun snapshot(): DashboardSnapshot {
         val layouts = load().layouts
         val settings = layouts.values.flatten().associate { placement ->
@@ -191,6 +199,7 @@ object WidgetLayoutStore {
      * Replaces the stored layouts and the settings of their instances with [snapshot]. Deletes the settings of the
      * instances that are not in [snapshot].
      */
+    @Synchronized
     fun restore(snapshot: DashboardSnapshot) {
         LOG.info("Restoring the dashboard with layouts {}", snapshot.layouts.mapValues { it.value.size })
         for (instance in instances()) {
@@ -211,6 +220,7 @@ object WidgetLayoutStore {
      * Adds a new instance for each variant of each widget to each stored layout, also for the widgets that no device
      * supports.
      */
+    @Synchronized
     fun addAllVariants() {
         addToStoredLayouts(WidgetRegistry.all().flatMap { widget -> widget.variants.map { widget to it } })
     }
@@ -218,6 +228,7 @@ object WidgetLayoutStore {
     /**
      * Removes the dashboard and its notices. The next load migrates the legacy config again.
      */
+    @Synchronized
     fun reset() {
         LOG.info("Resetting the dashboard")
         DashboardNotices.set(DashboardNotices.State.NONE)
@@ -231,6 +242,7 @@ object WidgetLayoutStore {
     /**
      * Replaces all layouts with [layouts], and deletes the settings of the instances that are not in them.
      */
+    @Synchronized
     fun replaceLayouts(layouts: Map<Int, List<WidgetPlacement>>) {
         LOG.info("Replacing the dashboard with layouts {}", layouts.mapValues { it.value.size })
         val keptIds = layouts.values.flatten().map { it.instance.instanceId }.toSet()
@@ -261,6 +273,7 @@ object WidgetLayoutStore {
     /**
      * Removes the stored layout for [columns] and deletes the settings of its instances.
      */
+    @Synchronized
     fun resetLayout(columns: Int) {
         LOG.info("Resetting the layout for {} columns", columns)
         val dashboard = load()
@@ -277,6 +290,7 @@ object WidgetLayoutStore {
     /**
      * Changes the variant of [instanceId] in the layout for [columns].
      */
+    @Synchronized
     fun setVariant(columns: Int, instanceId: String, variantId: String) {
         val layout = ownLayout(columns)
         val id = layout.idOf(instanceId)
@@ -286,6 +300,7 @@ object WidgetLayoutStore {
         )
     }
 
+    @Synchronized
     private fun load(): Dashboard {
         val json = GBApplication.getPrefs().getString(PREF_DASHBOARD, "")
         if (json.isBlank()) {
@@ -302,6 +317,7 @@ object WidgetLayoutStore {
         }
     }
 
+    @Synchronized
     private fun save(dashboard: Dashboard) {
         LOG.debug("Saving dashboard with layouts {}", dashboard.layouts.mapValues { it.value.size })
         sharedPreferences().edit {

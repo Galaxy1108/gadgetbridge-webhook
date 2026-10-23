@@ -1,14 +1,23 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import nodomain.freeyourgadget.gadgetbridge.devices.DeviceManager
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardDefaults
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardMigration
@@ -30,8 +39,13 @@ class DashboardRepositoryImpl(
     private val preferences: DashboardPreferences = DashboardPreferences(),
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : DashboardRepository {
+    /**
+     * Runs the layout writes one at a time, in call order.
+     */
+    private val writeDispatcher = ioDispatcher.limitedParallelism(1)
+
     override fun layoutFlow(columns: Int): Flow<List<PlacedWidget>> =
-        WidgetLayoutStore.changes
+        merge(WidgetLayoutStore.changes, devicesChanges())
             .onStart { emit(Unit) }
             .map { WidgetLayoutStore.placedWidgets(columns) }
             .flowOn(ioDispatcher)
@@ -62,35 +76,49 @@ class DashboardRepositoryImpl(
     override fun newWidgets(device: GBDevice): List<GBWidget<*>> = DashboardDefaults.newWidgets(device)
 
     override suspend fun add(columns: Int, typeId: String, variantId: String): WidgetInstance =
-        withContext(ioDispatcher) { WidgetLayoutStore.add(columns, typeId, variantId) }
+        withContext(writeDispatcher) { WidgetLayoutStore.add(columns, typeId, variantId) }
 
     override suspend fun arrange(columns: Int, arrangement: List<Pair<String, Int>>) =
-        withContext(ioDispatcher) { WidgetLayoutStore.arrange(columns, arrangement) }
+        withContext(writeDispatcher) { WidgetLayoutStore.arrange(columns, arrangement) }
 
     override suspend fun move(columns: Int, instanceId: String, index: Int, x: Int) =
-        withContext(ioDispatcher) { WidgetLayoutStore.move(columns, instanceId, index, x) }
+        withContext(writeDispatcher) { WidgetLayoutStore.move(columns, instanceId, index, x) }
 
     override suspend fun duplicate(columns: Int, instanceId: String): WidgetInstance? =
-        withContext(ioDispatcher) { WidgetLayoutStore.duplicate(columns, instanceId) }
+        withContext(writeDispatcher) { WidgetLayoutStore.duplicate(columns, instanceId) }
 
     override suspend fun delete(columns: Int, instanceId: String): DeletedWidget? =
-        withContext(ioDispatcher) { WidgetLayoutStore.delete(columns, instanceId) }
+        withContext(writeDispatcher) { WidgetLayoutStore.delete(columns, instanceId) }
 
     override suspend fun restore(deleted: DeletedWidget) =
-        withContext(ioDispatcher) { WidgetLayoutStore.restore(deleted) }
+        withContext(writeDispatcher) { WidgetLayoutStore.restore(deleted) }
 
     override suspend fun setVariant(columns: Int, instanceId: String, variantId: String) =
-        withContext(ioDispatcher) { WidgetLayoutStore.setVariant(columns, instanceId, variantId) }
+        withContext(writeDispatcher) { WidgetLayoutStore.setVariant(columns, instanceId, variantId) }
 
     override suspend fun snapshot(): DashboardSnapshot =
-        withContext(ioDispatcher) { WidgetLayoutStore.snapshot() }
+        withContext(writeDispatcher) { WidgetLayoutStore.snapshot() }
 
     override suspend fun restore(snapshot: DashboardSnapshot) =
-        withContext(ioDispatcher) { WidgetLayoutStore.restore(snapshot) }
+        withContext(writeDispatcher) { WidgetLayoutStore.restore(snapshot) }
 
     override suspend fun restoreClassicDesign() =
-        withContext(ioDispatcher) { DashboardMigration.restoreClassic() }
+        withContext(writeDispatcher) { DashboardMigration.restoreClassic() }
+
+    /**
+     * Emits when the list of devices changes.
+     */
+    private fun devicesChanges(): Flow<Unit> = callbackFlow {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                trySend(Unit)
+            }
+        }
+        val broadcastManager = LocalBroadcastManager.getInstance(GBApplication.getContext())
+        broadcastManager.registerReceiver(receiver, IntentFilter(DeviceManager.ACTION_DEVICES_CHANGED))
+        awaitClose { broadcastManager.unregisterReceiver(receiver) }
+    }
 
     override suspend fun setNotices(state: DashboardNotices.State) =
-        withContext(ioDispatcher) { DashboardNotices.set(state) }
+        withContext(writeDispatcher) { DashboardNotices.set(state) }
 }
