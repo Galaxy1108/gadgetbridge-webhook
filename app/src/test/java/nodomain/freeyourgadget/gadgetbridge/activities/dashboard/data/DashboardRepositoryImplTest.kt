@@ -2,11 +2,12 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data
 
 import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
@@ -98,7 +99,7 @@ class DashboardRepositoryImplTest : TestBase() {
         repository.setNotices(initial)
     }
 
-    private fun repository() = DashboardRepositoryImpl(
-        ioDispatcher = Dispatchers.Unconfined,
+    private fun TestScope.repository() = DashboardRepositoryImpl(
+        ioDispatcher = StandardTestDispatcher(testScheduler),
     )
 }

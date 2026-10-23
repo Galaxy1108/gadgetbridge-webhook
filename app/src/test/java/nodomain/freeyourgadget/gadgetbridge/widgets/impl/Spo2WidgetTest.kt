@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -34,7 +35,8 @@ class Spo2WidgetTest : TestBase() {
     private fun render(data: Spo2Widget.Data): String {
         val instance = WidgetInstance("test-spo2", Spo2Widget.id)
         val config = WidgetConfig(instance, Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId)), true, emptySet())
-        val view = Spo2Widget.createView(LayoutInflater.from(context), FrameLayout(context), WidgetVariant.GAUGE)
+        val themed = ContextThemeWrapper(context, R.style.GadgetbridgeTheme)
+        val view = Spo2Widget.createView(LayoutInflater.from(themed), FrameLayout(themed), WidgetVariant.GAUGE)
         Spo2Widget.bind(view, WidgetVariant.GAUGE, config, data)
         return view.findViewById<TextView>(R.id.gauge_value).text.toString()
     }

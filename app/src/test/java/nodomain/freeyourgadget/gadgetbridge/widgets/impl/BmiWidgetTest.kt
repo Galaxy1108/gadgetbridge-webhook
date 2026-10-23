@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -33,7 +34,8 @@ class BmiWidgetTest : TestBase() {
     private fun render(data: WeightWidget.Data): String {
         val instance = WidgetInstance("test-bmi", BmiWidget.id)
         val config = WidgetConfig(instance, Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId)), true, emptySet())
-        val view = BmiWidget.createView(LayoutInflater.from(context), FrameLayout(context), WidgetVariant.GAUGE)
+        val themed = ContextThemeWrapper(context, R.style.GadgetbridgeTheme)
+        val view = BmiWidget.createView(LayoutInflater.from(themed), FrameLayout(themed), WidgetVariant.GAUGE)
         BmiWidget.bind(view, WidgetVariant.GAUGE, config, data)
         return view.findViewById<TextView>(R.id.gauge_value).text.toString()
     }

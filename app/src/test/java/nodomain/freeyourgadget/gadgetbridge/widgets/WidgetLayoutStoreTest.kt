@@ -15,6 +15,7 @@ import org.junit.Test
 class WidgetLayoutStoreTest : TestBase() {
     @Before
     fun setUpLegacyLayout() {
+        WidgetLayoutStore.reset()
         GBApplication.getPrefs().preferences.edit {
             putString(
                 "pref_dashboard_layout",
@@ -38,11 +39,11 @@ class WidgetLayoutStoreTest : TestBase() {
     fun migratesLegacyLayoutIntoBaseLayout() {
         val placements = WidgetLayoutStore.layout(WidgetGrid.BASE_COLUMNS).associateBy { it.instance.instanceId }
 
-        assertEquals(WidgetVariant.SMALL.id, placements["today"]?.variantId)
+        assertEquals(WidgetVariant.OVERVIEW_TALL.id, placements["today"]?.variantId)
         assertEquals(WidgetVariant.NUMBER.id, placements["c"]?.variantId)
         assertEquals(listOf("today", "a", "b", "c", "d"), order(WidgetGrid.BASE_COLUMNS))
         assertEquals(
-            mapOf("today" to 0, "a" to 0, "b" to 3, "c" to 0, "d" to 3),
+            mapOf("today" to 0, "a" to 3, "b" to 3, "c" to 3, "d" to 0),
             columns(WidgetGrid.BASE_COLUMNS),
         )
 
@@ -56,7 +57,7 @@ class WidgetLayoutStoreTest : TestBase() {
     @Test
     fun derivesWiderLayoutFromBaseLayout() {
         assertEquals(listOf("today", "a", "b", "c", "d"), order(12))
-        assertEquals(mapOf("today" to 0, "a" to 6, "b" to 9, "c" to 6, "d" to 9), columns(12))
+        assertEquals(mapOf("today" to 0, "a" to 3, "b" to 6, "c" to 9, "d" to 3), columns(12))
     }
 
     @Test
@@ -88,7 +89,7 @@ class WidgetLayoutStoreTest : TestBase() {
         val instance = WidgetLayoutStore.add(WidgetGrid.BASE_COLUMNS, "sleep", WidgetVariant.GAUGE.id)
 
         assertEquals(instance.instanceId, order(WidgetGrid.BASE_COLUMNS).last())
-        assertEquals(0, columns(WidgetGrid.BASE_COLUMNS)[instance.instanceId])
+        assertEquals(3, columns(WidgetGrid.BASE_COLUMNS)[instance.instanceId])
         assertFalse(columns(12).containsKey(instance.instanceId))
     }
 
@@ -107,6 +108,6 @@ class WidgetLayoutStoreTest : TestBase() {
         WidgetLayoutStore.arrange(WidgetGrid.BASE_COLUMNS, listOf("b" to 0, "a" to 3, "today" to 0))
 
         assertEquals(listOf("b", "a", "today", "c", "d"), order(WidgetGrid.BASE_COLUMNS))
-        assertEquals(mapOf("b" to 0, "a" to 3, "today" to 0, "c" to 0, "d" to 3), columns(WidgetGrid.BASE_COLUMNS))
+        assertEquals(mapOf("b" to 0, "a" to 3, "today" to 0, "c" to 3, "d" to 0), columns(WidgetGrid.BASE_COLUMNS))
     }
 }

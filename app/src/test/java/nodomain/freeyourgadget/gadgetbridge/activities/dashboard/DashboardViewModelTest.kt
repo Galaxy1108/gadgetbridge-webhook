@@ -90,10 +90,10 @@ class DashboardViewModelTest {
         )
 
         advanceUntilIdle()
-        viewModel.onColumnsChanged(6)
+        viewModel.onColumnsChanged(9)
         advanceUntilIdle()
 
-        assertEquals(listOf(WidgetGrid.BASE_COLUMNS, 6), repository.requestedColumns)
+        assertEquals(listOf(WidgetGrid.BASE_COLUMNS, 9), repository.requestedColumns)
     }
 
     @Test

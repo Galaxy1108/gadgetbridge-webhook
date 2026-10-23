@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -39,7 +40,8 @@ class BodyCompositionWidgetsTest : TestBase() {
     private fun render(widget: BodyCompositionWidget, data: BodyCompositionWidget.Data): String {
         val instance = WidgetInstance("test-" + widget.id, widget.id)
         val config = WidgetConfig(instance, Prefs(GBApplication.getWidgetSharedPrefs(instance.instanceId)), true, emptySet())
-        val view = widget.createView(LayoutInflater.from(context), FrameLayout(context), WidgetVariant.GAUGE)
+        val themed = ContextThemeWrapper(context, R.style.GadgetbridgeTheme)
+        val view = widget.createView(LayoutInflater.from(themed), FrameLayout(themed), WidgetVariant.GAUGE)
         widget.bind(view, WidgetVariant.GAUGE, config, data)
         return view.findViewById<TextView>(R.id.gauge_value).text.toString()
     }
