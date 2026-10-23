@@ -9,8 +9,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
@@ -49,7 +48,8 @@ import java.time.ZoneId
  * Owns the dashboard UI state and all actions on the widget layout.
  *
  * The layout, preferences and notices come from [DashboardRepository]. Widget data is loaded through
- * [DashboardWidgetLoader], and every new layout, day, settings or reload request cancels the previous loads.
+ * [DashboardWidgetLoader]. A new day, settings or reload request cancels the previous loads.
+ * A new layout loads only the instances that are new, or that have a different widget or variant.
  */
 class DashboardViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -63,12 +63,13 @@ class DashboardViewModel(
         val settings: DashboardSettings,
     )
 
-    private data class LoadRequest(
+    private data class LoadContext(
         val date: LocalDate,
-        val layout: List<PlacedWidget>,
         val settings: DashboardSettings,
         val reload: Long,
     )
+
+    private class InstanceLoad(val placed: PlacedWidget, val job: Job)
 
     private val _uiState = MutableStateFlow(
         DashboardUiState(
@@ -146,32 +147,37 @@ class DashboardViewModel(
         viewModelScope.launch {
             combine(
                 selectedEpochDay,
-                layoutFlow,
                 repository.settingsFlow(),
                 reload,
-            ) { epochDay, layout, settings, reloadCount ->
-                LoadRequest(LocalDate.ofEpochDay(epochDay), layout, settings, reloadCount)
+            ) { epochDay, settings, reloadCount ->
+                LoadContext(LocalDate.ofEpochDay(epochDay), settings, reloadCount)
             }
                 .distinctUntilChanged()
                 .collectLatest(::loadWidgets)
         }
     }
 
-    private suspend fun loadWidgets(request: LoadRequest) {
-        val instanceIds = request.layout.map { it.instance.instanceId }.toSet()
-        states.update { previous ->
-            previous.filterKeys { it in instanceIds } +
-                instanceIds.associateWith { WidgetState.Loading }
-        }
-
-        val timeTo = endOfDaySeconds(request.date)
+    private suspend fun loadWidgets(context: LoadContext) = coroutineScope {
+        val timeTo = endOfDaySeconds(context.date)
         val query = DashboardQuery(DateTimeUtils.shiftDays(timeTo, -1), timeTo)
-        coroutineScope {
-            request.layout.map { placed ->
-                async {
-                    loadInstance(placed, query, request.settings)
-                }
-            }.awaitAll()
+        val loads = mutableMapOf<String, InstanceLoad>()
+        layoutFlow.collect { layout ->
+            val byId = layout.associateBy { it.instance.instanceId }
+            loads.entries.removeAll { (instanceId, load) ->
+                val placed = byId[instanceId]
+                val stale = placed == null ||
+                    placed.widget != load.placed.widget ||
+                    placed.variant != load.placed.variant
+                if (stale) load.job.cancel()
+                stale
+            }
+            val started = byId.filterKeys { it !in loads }
+            states.update { previous ->
+                previous.filterKeys { it in byId } + started.mapValues { WidgetState.Loading }
+            }
+            for ((instanceId, placed) in started) {
+                loads[instanceId] = InstanceLoad(placed, launch { loadInstance(placed, query, context.settings) })
+            }
         }
     }
 
@@ -282,6 +288,7 @@ class DashboardViewModel(
         val snapshot = editSnapshot ?: return
         viewModelScope.launch {
             repository.restore(snapshot)
+            reload.update { it + 1 }
             onFinishEditing()
         }
     }
@@ -372,6 +379,7 @@ class DashboardViewModel(
             val snapshot = repository.snapshot()
             val notices = repository.currentNotices()
             repository.restoreClassicDesign()
+            reload.update { it + 1 }
             repository.setNotices(DashboardNotices.State.NONE)
             classicUndo = snapshot to notices
             _events.send(DashboardEvent.ShowUndo(DashboardUndoAction.RESTORE_CLASSIC_DESIGN))
@@ -382,6 +390,7 @@ class DashboardViewModel(
         viewModelScope.launch {
             val undo = classicUndo ?: return@launch
             repository.restore(undo.first)
+            reload.update { it + 1 }
             repository.setNotices(undo.second)
             classicUndo = null
         }
