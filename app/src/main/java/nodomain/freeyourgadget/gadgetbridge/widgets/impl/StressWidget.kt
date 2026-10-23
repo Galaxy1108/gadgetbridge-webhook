@@ -77,7 +77,7 @@ object StressWidget : MetricWidget<StressData?>() {
             (data.ranges[1] - data.ranges[0]) / 100f,
             (data.ranges[2] - data.ranges[1]) / 100f,
             (data.ranges[3] - data.ranges[2]) / 100f,
-            1 - data.ranges[2] / 100f,
+            1 - data.ranges[3] / 100f,
         )
         return stressTile(context, config, data, data.value.toString(), GaugeSpec.Zones(colors, segments, data.value / 100f))
     }
