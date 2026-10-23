@@ -43,7 +43,6 @@ object Vo2MaxWidget : MetricWidget<Vo2MaxWidget.Data>() {
 
     private val LOG = LoggerFactory.getLogger(Vo2MaxWidget::class.java)
     private const val WEEKS = 12
-    private const val SECONDS_PER_DAY = 24 * 60 * 60L
     private const val BAND_ALPHA = 46
 
     private val ZONE_LABELS = intArrayOf(
@@ -178,7 +177,7 @@ object Vo2MaxWidget : MetricWidget<Vo2MaxWidget.Data>() {
     }
 
     private suspend fun weeks(scope: WidgetDataScope, vo2MaxType: Vo2MaxSample.Type): FloatArray {
-        val from = (scope.dayStart - (WEEKS * 7 - 1) * SECONDS_PER_DAY) * 1000L
+        val from = scope.dayStartMinusDays(WEEKS * 7 - 1) * 1000L
         val samples = try {
             scope.db { db ->
                 scope.devices.flatMap { dev ->

@@ -15,6 +15,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.TileAxis
 import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -22,6 +23,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 /**
@@ -31,7 +33,6 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
     private val LOG = LoggerFactory.getLogger(BloodPressureWidget::class.java)
     private const val HISTORY_DAYS = 14
     private const val AVERAGE_DAYS = 7
-    private const val SECONDS_PER_DAY = 24 * 60 * 60L
     private const val CHART_MIN = 65f
     private const val CHART_MAX = 135f
 
@@ -62,7 +63,7 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         var latest: BloodPressureSample? = null
         val history = mutableListOf<BloodPressureSample>()
-        val from = (scope.dayStart - (HISTORY_DAYS - 1) * SECONDS_PER_DAY) * 1000L
+        val from = scope.dayStartMinusDays(HISTORY_DAYS - 1) * 1000L
 
         try {
             scope.db { db ->
@@ -169,9 +170,9 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
 
     /** Mean, lowest and highest systolic and diastolic per day of the last [HISTORY_DAYS] days, NaN for days without a reading. */
     internal fun dailyReadings(samples: List<BloodPressureSample>, dayStart: Long): DailyReadings {
-        val first = dayStart - (HISTORY_DAYS - 1) * SECONDS_PER_DAY
+        val lastDay = WidgetHistory.dayOf(dayStart)
         val byDay = samples.filter { it.bpSystolic > 0 && it.bpDiastolic > 0 }
-            .groupBy { ((it.timestamp / 1000L - first).floorDiv(SECONDS_PER_DAY)).toInt() }
+            .groupBy { HISTORY_DAYS - 1 - ChronoUnit.DAYS.between(WidgetHistory.dayOf(it.timestamp / 1000L), lastDay).toInt() }
         fun perDay(valueOf: (BloodPressureSample) -> Int, reduce: (List<Int>) -> Float) =
             FloatArray(HISTORY_DAYS) { day -> byDay[day]?.map(valueOf)?.let(reduce) ?: Float.NaN }
         val average: (List<Int>) -> Float = { it.average().toFloat() }

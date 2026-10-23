@@ -37,7 +37,6 @@ object TrainingLoadWidget : MetricWidget<TrainingLoadWidget.Data>() {
 
     private const val DAYS = 28
     private const val WEEKS = 4
-    private const val SECONDS_PER_DAY = 24 * 60 * 60L
     private const val MIN_SCALE = 600f
     private const val CHART_HEADROOM = 1.1f
     private const val HIGH_RATIO = 2f
@@ -54,7 +53,7 @@ object TrainingLoadWidget : MetricWidget<TrainingLoadWidget.Data>() {
         device.deviceCoordinator.supportsTrainingLoad(device)
 
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
-        val from = (scope.dayStart - (DAYS - 1) * SECONDS_PER_DAY) * 1000L
+        val from = scope.dayStartMinusDays(DAYS - 1) * 1000L
         val to = scope.query.timeTo * 1000L
         val acute = mutableListOf<TimedValue>()
         val chronic = mutableListOf<TimedValue>()

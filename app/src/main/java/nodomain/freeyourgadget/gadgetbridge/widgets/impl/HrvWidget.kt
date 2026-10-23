@@ -31,7 +31,6 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
     private val LOG = LoggerFactory.getLogger(HrvWidget::class.java)
     private const val NIGHTS = 7
     private const val LARGE_NIGHTS = 28
-    private const val SECONDS_PER_DAY = 24 * 60 * 60L
     private const val SCALE_BELOW = 0.8f
     private const val SCALE_ABOVE = 1.1f
     private const val BAND_ALPHA = 36
@@ -196,7 +195,7 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
     }
 
     private suspend fun nights(scope: WidgetDataScope, count: Int): FloatArray {
-        val from = (scope.dayStart - (count - 1) * SECONDS_PER_DAY) * 1000L
+        val from = scope.dayStartMinusDays(count - 1) * 1000L
         val samples = try {
             scope.db { db ->
                 scope.devices.flatMap { dev ->

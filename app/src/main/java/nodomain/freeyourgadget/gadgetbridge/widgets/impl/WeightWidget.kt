@@ -145,7 +145,7 @@ object WeightWidget : MetricWidget<WeightWidget.Data>() {
 
     /** [valueOf] of each measurement of the last 30 days, oldest first, skipping those it returns null for. */
     internal suspend fun history(scope: WidgetDataScope, valueOf: (DaoSession, WeightSample) -> Float?): List<TimedValue> = try {
-        val from = (scope.dayStart - (HISTORY_DAYS - 1) * SECONDS_PER_DAY) * 1000L
+        val from = scope.dayStartMinusDays(HISTORY_DAYS - 1) * 1000L
         scope.db { db ->
             scope.devices.flatMap { dev ->
                 dev.deviceCoordinator.getWeightSampleProvider(dev, db.daoSession)

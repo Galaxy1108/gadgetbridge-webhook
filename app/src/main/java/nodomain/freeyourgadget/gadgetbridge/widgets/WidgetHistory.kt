@@ -25,14 +25,17 @@ object WidgetHistory {
         bucketAverages(samples, dayStart, SECONDS_PER_HOUR, hours)
 
     /**
-     * The average per [bucketSeconds] long bucket from [start] (epoch seconds), NaN for buckets without samples.
+     * The average per [bucketSeconds] long bucket of the local time of the day starting at [dayStart] (epoch seconds),
+     * NaN for buckets without samples.
      */
-    fun bucketAverages(samples: List<TimedValue>, start: Long, bucketSeconds: Long, buckets: Int): FloatArray {
+    fun bucketAverages(samples: List<TimedValue>, dayStart: Long, bucketSeconds: Long, buckets: Int): FloatArray {
+        val day = dayOf(dayStart)
         val sums = FloatArray(buckets)
         val counts = IntArray(buckets)
         for (sample in samples) {
-            if (sample.seconds < start) continue
-            val bucket = ((sample.seconds - start) / bucketSeconds).toInt()
+            val second = secondOfDay(sample.seconds, day)
+            if (second < 0) continue
+            val bucket = (second / bucketSeconds).toInt()
             if (bucket < buckets) {
                 sums[bucket] += sample.value
                 counts[bucket]++
@@ -42,17 +45,22 @@ object WidgetHistory {
     }
 
     /**
-     * Minutes per hour of the day starting at [dayStart] covered by [intervals] of epoch seconds.
+     * Minutes per local hour of the day starting at [dayStart] covered by [intervals] of epoch seconds.
      */
     fun minutesPerHour(intervals: List<Pair<Long, Long>>, dayStart: Long, hours: Int = HOURS_PER_DAY): FloatArray {
+        val day = dayOf(dayStart)
+        val dayEnd = day.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
         val minutes = FloatArray(hours)
         for ((from, to) in intervals) {
             var start = maxOf(from, dayStart)
-            val end = minOf(to, dayStart + hours * SECONDS_PER_HOUR)
+            val end = minOf(to, dayEnd)
             while (start < end) {
-                val hour = ((start - dayStart) / SECONDS_PER_HOUR).toInt()
-                val hourEnd = minOf(end, dayStart + (hour + 1) * SECONDS_PER_HOUR)
-                minutes[hour] += (hourEnd - start) / 60f
+                val second = secondOfDay(start, day)
+                val hourEnd = minOf(end, start + SECONDS_PER_HOUR - second % SECONDS_PER_HOUR)
+                val hour = second / SECONDS_PER_HOUR.toInt()
+                if (hour < hours) {
+                    minutes[hour] += (hourEnd - start) / 60f
+                }
                 start = hourEnd
             }
         }
@@ -82,8 +90,27 @@ object WidgetHistory {
     /**
      * The number of hours of the day starting at [dayStart] that have begun by [now], at most [hours].
      */
-    fun hoursStarted(dayStart: Long, now: Long, hours: Int = HOURS_PER_DAY): Int =
-        (((now - dayStart) / SECONDS_PER_HOUR).toInt() + 1).coerceIn(0, hours)
+    fun hoursStarted(dayStart: Long, now: Long, hours: Int = HOURS_PER_DAY): Int {
+        val second = secondOfDay(now, dayOf(dayStart))
+        return when {
+            second >= 0 -> (second / SECONDS_PER_HOUR.toInt() + 1).coerceAtMost(hours)
+            now < dayStart -> 0
+            else -> hours
+        }
+    }
+
+    /**
+     * The local date of the epoch second [seconds].
+     */
+    fun dayOf(seconds: Long): LocalDate = Instant.ofEpochSecond(seconds).atZone(ZoneId.systemDefault()).toLocalDate()
+
+    /**
+     * The local seconds since midnight of the epoch second [seconds], or -1 if it is not on [day].
+     */
+    fun secondOfDay(seconds: Long, day: LocalDate): Int {
+        val time = Instant.ofEpochSecond(seconds).atZone(ZoneId.systemDefault())
+        return if (time.toLocalDate() == day) time.toLocalTime().toSecondOfDay() else -1
+    }
 
     /**
      * The latest value of each of the [days] days ending on [lastDay], oldest first, NaN for days without samples.

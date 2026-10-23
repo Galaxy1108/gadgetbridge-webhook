@@ -25,7 +25,6 @@ import java.time.LocalDate
 object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
     private val LOG = LoggerFactory.getLogger(SleepScoreWidget::class.java)
     private const val NIGHTS = 7
-    private const val SECONDS_PER_DAY = 24 * 60 * 60L
     private const val HISTORY_MIN = 40f
     private const val HISTORY_MAX = 100f
 
@@ -121,7 +120,7 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
     }
 
     private suspend fun nights(scope: WidgetDataScope): FloatArray {
-        val from = (scope.dayStart - (NIGHTS - 1) * SECONDS_PER_DAY) * 1000L
+        val from = scope.dayStartMinusDays(NIGHTS - 1) * 1000L
         val samples = try {
             scope.db { db ->
                 scope.devices.flatMap { dev ->

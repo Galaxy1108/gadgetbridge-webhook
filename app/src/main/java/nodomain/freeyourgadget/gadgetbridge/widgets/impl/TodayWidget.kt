@@ -22,6 +22,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySession
+import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetActions
@@ -134,7 +135,10 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         var yesterdayKinds = emptySet<ActivityKind>()
         if (now != null && config.prefs.getBoolean("show_yesterday", false)) {
             val yesterdayScope = WidgetDataScope(
-                DashboardQuery(timeFrom = scope.query.timeFrom - 86400, timeTo = scope.query.timeTo - 86400),
+                DashboardQuery(
+                    timeFrom = DateTimeUtils.shiftDays(scope.query.timeFrom, -1),
+                    timeTo = DateTimeUtils.shiftDays(scope.query.timeTo, -1),
+                ),
                 scope.devices,
             )
             val (yesterdaySegments, loadedKinds) = loadDay(yesterdayScope, hrIntervalSecs)

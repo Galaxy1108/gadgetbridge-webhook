@@ -52,6 +52,11 @@ class WidgetDataScope(
     val dayStart: Long get() = day.atStartOfDay(zone).toEpochSecond()
 
     /**
+     * Epoch second at which the day [days] days before the selected day starts.
+     */
+    fun dayStartMinusDays(days: Int): Long = day.minusDays(days.toLong()).atStartOfDay(zone).toEpochSecond()
+
+    /**
      * How many hours of the selected day have begun: all of them for a past day.
      */
     val hoursStarted: Int
@@ -182,10 +187,13 @@ class WidgetDataScope(
      * Per-hour sums of [valueOf] over the selected day's activity samples of [devices].
      */
     suspend fun hourlySums(devices: List<GBDevice>, valueOf: (ActivitySample) -> Float): FloatArray {
+        val selectedDay = day
         val sums = FloatArray(WidgetHistory.HOURS_PER_DAY)
         for (dev in devices) {
             for (sample in allSamples(dev)) {
-                val hour = ((sample.timestamp - dayStart) / 3600L).toInt()
+                val second = WidgetHistory.secondOfDay(sample.timestamp.toLong(), selectedDay)
+                if (second < 0) continue
+                val hour = second / 3600
                 if (hour in sums.indices) {
                     sums[hour] += valueOf(sample).coerceAtLeast(0f)
                 }

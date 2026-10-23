@@ -35,7 +35,6 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
     private val LOG = LoggerFactory.getLogger(TrainingReadinessWidget::class.java)
 
     private const val DAYS = 7
-    private const val SECONDS_PER_DAY = 24 * 60 * 60L
     private const val STALE_MILLIS = 12 * 60 * 60 * 1000L
 
     override val id = "trainingreadiness"
@@ -48,7 +47,7 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
 
     override suspend fun loadData(scope: WidgetDataScope, config: WidgetConfig): Data {
         val until = scope.query.timeTo * 1000L
-        val from = (scope.dayStart - (DAYS - 1) * SECONDS_PER_DAY) * 1000L
+        val from = scope.dayStartMinusDays(DAYS - 1) * 1000L
         var report: TrainingReadinessReport? = null
         val history = mutableListOf<TimedValue>()
         try {
