@@ -78,6 +78,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.debug.DebugActivityV2;
 import nodomain.freeyourgadget.gadgetbridge.activities.discovery.DiscoveryActivityV2;
 import nodomain.freeyourgadget.gadgetbridge.activities.welcome.WelcomeActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutListFragment;
+import nodomain.freeyourgadget.gadgetbridge.devices.DeviceManager;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceService;
@@ -132,8 +133,9 @@ public class ControlCenterv2 extends AppCompatActivity
 
     private final SharedPreferences.OnSharedPreferenceChangeListener prefListener = (p, key) -> {
         if ("main_screens".equals(key)) {
-            rebuildBottomNav();
-            pagerAdapter.notifyDataSetChanged();
+            if (rebuildBottomNav()) {
+                updateBottomNavigationVisibility();
+            }
         }
     };
 
@@ -159,6 +161,12 @@ public class ControlCenterv2 extends AppCompatActivity
                     GBDevice dev = intent.getParcelableExtra(GBDevice.EXTRA_DEVICE);
                     if (dev != null && !dev.isBusy()) {
                         swipeLayout.setRefreshing(false);
+                    }
+                    break;
+                case DeviceManager.ACTION_DEVICES_CHANGED:
+                    LOG.debug("Devices changed, {} devices", GBApplication.app().getDeviceManager().getDevices().size());
+                    if (rebuildBottomNav()) {
+                        updateBottomNavigationVisibility();
                     }
                     break;
             }
@@ -204,7 +212,12 @@ public class ControlCenterv2 extends AppCompatActivity
         }
     }
 
-    private void rebuildBottomNav() {
+    /**
+     * Rebuilds the bottom navigation tabs from the preferences and the paired devices.
+     *
+     * @return true if the visible tabs have changed
+     */
+    private boolean rebuildBottomNav() {
         boolean supportsActivityTracking = false;
         boolean supportsRecordedActivities = false;
 
@@ -220,31 +233,38 @@ public class ControlCenterv2 extends AppCompatActivity
             if (supportsActivityTracking && supportsRecordedActivities) break;
         }
 
+        GBPrefs prefs = GBApplication.getPrefs();
+        List<String> mainScreensPref = prefs.getList("main_screens", Arrays.asList("dashboard", "workouts", "devices"));
+        final List<NavTab> tabs = new ArrayList<>();
+        Set<NavTab> seen = EnumSet.noneOf(NavTab.class);
+        for (String token : mainScreensPref) {
+            NavTab tab = NavTab.fromKey(token.trim());
+            if (tab == null || !seen.add(tab)) continue;
+            if (tab == NavTab.DASHBOARD && !supportsActivityTracking) continue;
+            if (tab == NavTab.WORKOUTS && !supportsRecordedActivities) continue;
+            tabs.add(tab);
+        }
+
+        // Fallback: Devices is always available, so the bar is never empty
+        if (tabs.isEmpty()) {
+            tabs.add(NavTab.DEVICES);
+        }
+
+        if (tabs.equals(visibleTabs)) {
+            // If nothing changed, don't do anything
+            return false;
+        }
+
         BottomNavigationView nav = findViewById(R.id.bottom_nav_bar);
         int selectedId = nav.getSelectedItemId();
         Menu menu = nav.getMenu();
         rebuildingNav = true;
         menu.clear();
         visibleTabs.clear();
-
-        GBPrefs prefs = GBApplication.getPrefs();
-        List<String> mainScreensPref = prefs.getList("main_screens", Arrays.asList("dashboard", "workouts", "devices"));
-        Set<NavTab> seen = EnumSet.noneOf(NavTab.class);
-        int order = 0;
-        for (String token : mainScreensPref) {
-            NavTab tab = NavTab.fromKey(token.trim());
-            if (tab == null || !seen.add(tab)) continue;
-            if (tab == NavTab.DASHBOARD && !supportsActivityTracking) continue;
-            if (tab == NavTab.WORKOUTS && !supportsRecordedActivities) continue;
-            menu.add(Menu.NONE, tab.itemId, order++, tab.titleRes).setIcon(tab.iconRes);
-            visibleTabs.add(tab);
-        }
-
-        // Fallback: Devices is always available, so the bar is never empty
-        if (visibleTabs.isEmpty()) {
-            NavTab d = NavTab.DEVICES;
-            menu.add(Menu.NONE, d.itemId, 0, d.titleRes).setIcon(d.iconRes);
-            visibleTabs.add(d);
+        visibleTabs.addAll(tabs);
+        for (int i = 0; i < tabs.size(); i++) {
+            final NavTab tab = tabs.get(i);
+            menu.add(Menu.NONE, tab.itemId, i, tab.titleRes).setIcon(tab.iconRes);
         }
 
         pagerAdapter.notifyDataSetChanged();   // adapter reads visibleTabs
@@ -254,6 +274,15 @@ public class ControlCenterv2 extends AppCompatActivity
         nav.setSelectedItemId(target.itemId);
         viewPager.setCurrentItem(visibleTabs.indexOf(target), false);
         rebuildingNav = false;
+        return true;
+    }
+
+    private void updateBottomNavigationVisibility() {
+        bottomNavigationEnabled = visibleTabs.size() > 1 && GBApplication.getPrefs().getBoolean("display_bottom_navigation_bar", true);
+        LOG.debug("Bottom navigation: tabs={}, enabled={}, pageBottomBarShown={}", visibleTabs, bottomNavigationEnabled, pageBottomBarShown);
+        navigationView.setVisibility(bottomNavigationEnabled && !pageBottomBarShown ? View.VISIBLE : View.GONE);
+        barShades.setBottomShade(bottomNavigationEnabled || pageBottomBarShown ? findViewById(R.id.bottom_nav_shade) : null);
+        ViewCompat.requestApplyInsets(mainContent);
     }
 
     private void selectDefaultTab() {
@@ -309,8 +338,6 @@ public class ControlCenterv2 extends AppCompatActivity
         // Initialize bottom navigation
         rebuildBottomNav();
         navigationView = findViewById(R.id.bottom_nav_bar);
-        bottomNavigationEnabled = visibleTabs.size() > 1 && prefs.getBoolean("display_bottom_navigation_bar", true);
-        navigationView.setVisibility(bottomNavigationEnabled ? View.VISIBLE : View.GONE);
         navigationView.setOnItemSelectedListener(menuItem -> {
             NavTab tab = NavTab.fromItemId(menuItem.getItemId());
             int index = visibleTabs.indexOf(tab);
@@ -359,9 +386,7 @@ public class ControlCenterv2 extends AppCompatActivity
         navigationView.setBackgroundColor(MaterialColors.getColor(navigationView, R.attr.main_bar_bg));
         toolbarShade = findViewById(R.id.toolbar_shade);
         barShades = new BarShade.ScrollListener(findViewById(R.id.main_content));
-        if (bottomNavigationEnabled) {
-            barShades.setBottomShade(findViewById(R.id.bottom_nav_shade));
-        }
+        updateBottomNavigationVisibility();
 
         // A page's fragment, and its view, are created after the page is selected
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
@@ -444,6 +469,7 @@ public class ControlCenterv2 extends AppCompatActivity
         filterLocal.addAction(GBApplication.ACTION_QUIT);
         filterLocal.addAction(DeviceService.ACTION_REALTIME_SAMPLES);
         filterLocal.addAction(GBDevice.ACTION_DEVICE_CHANGED);
+        filterLocal.addAction(DeviceManager.ACTION_DEVICES_CHANGED);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filterLocal);
 
         // Open the Welcome flow on first run, only check permissions on next runs
@@ -491,9 +517,7 @@ public class ControlCenterv2 extends AppCompatActivity
             return;
         }
         pageBottomBarShown = shown;
-        navigationView.setVisibility(bottomNavigationEnabled && !shown ? View.VISIBLE : View.GONE);
-        barShades.setBottomShade(bottomNavigationEnabled || shown ? findViewById(R.id.bottom_nav_shade) : null);
-        ViewCompat.requestApplyInsets(mainContent);
+        updateBottomNavigationVisibility();
     }
 
     @Override
