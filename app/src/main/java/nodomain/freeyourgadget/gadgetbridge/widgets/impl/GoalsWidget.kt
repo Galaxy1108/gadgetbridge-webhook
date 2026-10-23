@@ -151,7 +151,7 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     }
 
     override fun onClick(view: View, variant: WidgetVariant, config: WidgetConfig, timestamp: Int) {
-        WidgetActions.openChart(view.context, config, this, "stepsweek", label, "", timestamp)
+        WidgetActions.openChart(view.context, config, this, "activitylist", label, "", timestamp)
     }
 
     private fun isSmall(config: WidgetConfig) = config.variant == WidgetVariant.SMALL
