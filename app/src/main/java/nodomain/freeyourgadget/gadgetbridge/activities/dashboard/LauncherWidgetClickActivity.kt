@@ -68,13 +68,22 @@ class LauncherWidgetClickActivity : AbstractGBActivity() {
             widget.bindUnsafe(view, variant, config, data)
             widget.onClick(view, variant, config, LauncherWidgets.endOfToday())
             clicked = true
-            // A dialog takes the focus after a short delay
-            window.decorView.postDelayed({
-                if (hasWindowFocus()) {
-                    finish()
-                }
-            }, FOCUS_DELAY_MS)
+            if (hasWindowFocus()) {
+                finishUnlessFocusLost()
+            }
         }
+    }
+
+    /**
+     * Closes the activity if it still has the focus after a short delay. A dialog of the click action takes the
+     * focus during this delay.
+     */
+    private fun finishUnlessFocusLost() {
+        window.decorView.postDelayed({
+            if (hasWindowFocus() && !lostFocus) {
+                finish()
+            }
+        }, FOCUS_DELAY_MS)
     }
 
     override fun startActivity(intent: Intent?, options: Bundle?) {
@@ -91,6 +100,8 @@ class LauncherWidgetClickActivity : AbstractGBActivity() {
             lostFocus = true
         } else if (lostFocus) {
             finish()
+        } else {
+            finishUnlessFocusLost()
         }
     }
 
