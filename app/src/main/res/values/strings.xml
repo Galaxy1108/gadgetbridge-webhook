@@ -4918,6 +4918,7 @@
     <string name="dashboard_notice_design_restored">Old design restored</string>
     <string name="dashboard_notice_new_widgets">%1$s supports new widgets</string>
     <string name="dashboard_notice_add_widgets">Add widgets</string>
+    <string name="dashboard_widget_load_failed">Failed to load the widget data</string>
     <string name="undo">Undo</string>
     <plurals name="widgets_variant_count">
         <item quantity="one">%d variant</item>

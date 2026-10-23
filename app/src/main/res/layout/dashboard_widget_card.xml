@@ -13,6 +13,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <ImageView
+        android:id="@+id/dashboard_widget_error"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/dashboard_widget_load_failed"
+        android:src="@drawable/ic_warning"
+        android:visibility="gone" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/dashboard_widget_edit"
         style="@style/Widget.App.WidgetEditButton"

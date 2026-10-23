@@ -14,6 +14,7 @@ import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView
@@ -54,6 +55,7 @@ class DashboardGridBinder(
     class Cell(
         val card: MaterialCardView,
         val slot: FrameLayout,
+        val error: View,
         val editButton: View,
         val foreground: Drawable?,
     ) {
@@ -174,6 +176,7 @@ class DashboardGridBinder(
             Cell(
                 card,
                 card.findViewById(R.id.dashboard_widget_content),
+                card.findViewById(R.id.dashboard_widget_error),
                 card.findViewById(R.id.dashboard_widget_edit),
                 card.foreground,
             ),
@@ -364,13 +367,21 @@ class DashboardGridBinder(
         val view = cell.content ?: return
 
         val config = configOf(item)
-        val state = states[item.instance.instanceId] as? WidgetState.Ready
-        if (state == null) {
-            item.widget.bindLoading(view, item.variant, config)
-            cell.card.contentDescription = null
-        } else {
-            item.widget.bindUnsafe(view, item.variant, config, state.data)
-            cell.card.contentDescription = view.contentDescription
+        val state = states[item.instance.instanceId]
+        cell.slot.isInvisible = state is WidgetState.Error
+        cell.error.isVisible = state is WidgetState.Error
+        when (state) {
+            is WidgetState.Ready -> {
+                item.widget.bindUnsafe(view, item.variant, config, state.data)
+                cell.card.contentDescription = view.contentDescription
+            }
+
+            is WidgetState.Error -> cell.card.contentDescription = cell.error.contentDescription
+
+            else -> {
+                item.widget.bindLoading(view, item.variant, config)
+                cell.card.contentDescription = null
+            }
         }
         bindListeners(cell)
     }
