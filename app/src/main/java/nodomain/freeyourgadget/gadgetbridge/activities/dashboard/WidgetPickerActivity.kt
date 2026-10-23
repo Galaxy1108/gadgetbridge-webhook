@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +41,7 @@ class WidgetPickerActivity : AbstractGBActivity() {
     private lateinit var widgets: List<GBWidget<*>>
     private lateinit var deviceCounts: List<Int>
     private lateinit var groups: List<SupportGroup>
+    private lateinit var recyclerView: RecyclerView
     private lateinit var layoutManager: LinearLayoutManager
     private var expanded = RecyclerView.NO_POSITION
     private var forLauncher = false
@@ -77,7 +79,7 @@ class WidgetPickerActivity : AbstractGBActivity() {
         deviceCounts = entries.map { it.second }
         groups = entries.map { it.third }
 
-        val recyclerView = findViewById<RecyclerView>(R.id.widget_picker_list)
+        recyclerView = findViewById(R.id.widget_picker_list)
         layoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = WidgetAdapter()
@@ -171,7 +173,23 @@ class WidgetPickerActivity : AbstractGBActivity() {
                 if (expanded != RecyclerView.NO_POSITION) notifyItemChanged(expanded)
                 // The row that collapses above would move the clicked row up
                 layoutManager.scrollToPositionWithOffset(clicked, top)
+                if (expanded != RecyclerView.NO_POSITION) {
+                    recyclerView.doOnNextLayout { scrollIntoView(clicked) }
+                }
             }
+        }
+    }
+
+    /**
+     * Scrolls up until the bottom of the row is visible, but not past the top of the row.
+     */
+    private fun scrollIntoView(position: Int) {
+        val view = layoutManager.findViewByPosition(position) ?: return
+        val overflow = view.bottom - (recyclerView.height - recyclerView.paddingBottom)
+        val headroom = view.top - recyclerView.paddingTop
+        val dy = minOf(overflow, headroom)
+        if (dy > 0) {
+            recyclerView.smoothScrollBy(0, dy)
         }
     }
 
