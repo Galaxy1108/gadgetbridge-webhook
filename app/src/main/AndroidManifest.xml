@@ -1057,7 +1057,9 @@
 
         <activity
             android:name=".activities.dashboard.LauncherWidgetClickActivity"
+            android:excludeFromRecents="true"
             android:exported="false"
+            android:taskAffinity=""
             android:theme="@style/Theme.App.Translucent" />
 
         <activity
