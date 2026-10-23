@@ -26,6 +26,7 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.net.toUri
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity
@@ -62,6 +63,25 @@ class RebbleAppStoreActivity : AbstractGBActivity()  {
         mGBDevice = gbDevice
         url = intent?.extras?.getString(DeviceService.EXTRA_URI, url)!!
         initViews()
+
+        // Let the back gesture/button walk the app loader WebView history first
+        // (which closes in-app dialogs and navigates back within the SPA) and
+        // only leave the activity once there is no WebView history left.
+        // Without this the system back finishes the activity immediately,
+        // closing the whole app instead of the WebView's current view.
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView?.canGoBack() == true) {
+                    webView?.goBack()
+                    return
+                }
+
+                // Nothing to go back to in the WebView—use the default
+                // behavior (finish the activity).
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
+        })
     }
 
     override fun onResume() {
