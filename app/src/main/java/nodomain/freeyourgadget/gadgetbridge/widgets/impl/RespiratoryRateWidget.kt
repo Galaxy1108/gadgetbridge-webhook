@@ -38,6 +38,7 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
     private const val BUCKET_SECONDS = 15 * 60L
     private const val BUCKETS = 24 * 4
     private const val LINE_WIDTH_DP = 1.5f
+    private const val SLEEP_LOOK_BACK_SECONDS = 12 * 60 * 60
 
     override val id = "respiratoryrate"
     override val label = R.string.respiratoryrate
@@ -54,7 +55,7 @@ object RespiratoryRateWidget : MetricWidget<RespiratoryRateWidget.Data>() {
                 scope.db { db ->
                     val sleep = if (dev.deviceCoordinator.supportsDayRespiratoryRate(dev)) {
                         dev.deviceCoordinator.getSleepSessionProvider(dev, db.daoSession)
-                            .getSleepSessions(scope.query.timeFrom, scope.query.timeTo)
+                            .getSleepSessions(scope.query.timeFrom - SLEEP_LOOK_BACK_SECONDS, scope.query.timeTo)
                             .map { it.startTime..it.endTime }
                     } else {
                         null
