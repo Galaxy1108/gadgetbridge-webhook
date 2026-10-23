@@ -124,7 +124,7 @@ class GridDragController(
      */
     private fun autoScroll(y: Float) {
         val edge = AUTO_SCROLL_EDGE_DP * density
-        val visibleY = y - scrollView.scrollY
+        val visibleY = grid.top + y - scrollView.scrollY
         val step = (AUTO_SCROLL_STEP_DP * density).roundToInt()
         when {
             visibleY < edge -> scrollView.scrollBy(0, -step)
