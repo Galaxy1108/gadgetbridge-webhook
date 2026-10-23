@@ -26,7 +26,7 @@ public class GBPrefsMigrator {
     public static final String PREFS_VERSION = "shared_preferences_version";
     //if preferences have to be migrated, increment the following and add the migration logic in migratePrefs below
     // see http://stackoverflow.com/questions/16397848/how-can-i-migrate-android-preferences-with-a-new-version
-    private static final int CURRENT_PREFS_VERSION = 67;
+    private static final int CURRENT_PREFS_VERSION = 68;
 
     public static void migratePrefsIfNeeded(final SharedPreferences sharedPrefs) {
         final int oldVersion = getPrefsFileVersion(sharedPrefs);

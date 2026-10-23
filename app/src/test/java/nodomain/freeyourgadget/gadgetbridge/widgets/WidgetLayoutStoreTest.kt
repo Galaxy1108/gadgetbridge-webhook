@@ -39,7 +39,7 @@ class WidgetLayoutStoreTest : TestBase() {
         val placements = WidgetLayoutStore.layout(WidgetGrid.BASE_COLUMNS).associateBy { it.instance.instanceId }
 
         assertEquals(WidgetVariant.SMALL.id, placements["today"]?.variantId)
-        assertEquals(StressWidget.SIMPLE.id, placements["c"]?.variantId)
+        assertEquals(WidgetVariant.NUMBER.id, placements["c"]?.variantId)
         assertEquals(listOf("today", "a", "b", "c", "d"), order(WidgetGrid.BASE_COLUMNS))
         assertEquals(
             mapOf("today" to 0, "a" to 0, "b" to 3, "c" to 0, "d" to 3),
