@@ -13,6 +13,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.DailyTotals
+import nodomain.freeyourgadget.gadgetbridge.util.SleepRangeUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -209,8 +210,8 @@ class WidgetDataScope(
      * from the sleep measuring device with the most sleep samples.
      */
     suspend fun sleepStretches(): List<HypnogramSegment> = db { db ->
-        val from = (dayStart - SLEEP_WINDOW_OFFSET_SECONDS).toInt()
-        val to = (dayStart + SLEEP_WINDOW_OFFSET_SECONDS - 1).toInt()
+        val (from, toExclusive) = SleepRangeUtils.getSleepRange(query.timeTo)
+        val to = toExclusive - 1
         val nights = devices.filter { it.deviceCoordinator.supportsSleepMeasurement(it) }.map { dev ->
             val provider = dev.deviceCoordinator.getSampleProvider(dev, db.daoSession)
             provider?.getAllActivitySamples(from, to).orEmpty().mapNotNull { sample ->
@@ -254,8 +255,6 @@ class WidgetDataScope(
     }
 
     private companion object {
-        // Sleep belongs to the day it ends on, so the night is looked up from noon the day before
-        const val SLEEP_WINDOW_OFFSET_SECONDS = 12 * 60 * 60L
         const val SLEEP_SAMPLE_SECONDS = 60L
         const val SLEEP_MAX_GAP_SECONDS = 120L
         const val SLEEP_LANE_AWAKE = 0
