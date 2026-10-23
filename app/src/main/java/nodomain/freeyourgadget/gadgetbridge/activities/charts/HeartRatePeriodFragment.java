@@ -130,7 +130,7 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
     @Override
     protected void init() {
         Prefs prefs = GBApplication.getPrefs();
-        if (prefs.getBoolean("chart_heartrate_color", false)) {
+        if (prefs.getBoolean("chart_heartrate_color", true)) {
             HEARTRATE_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_heartrate_alternative);
         } else {
             HEARTRATE_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_heartrate);
