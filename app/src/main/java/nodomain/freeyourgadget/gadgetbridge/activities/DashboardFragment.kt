@@ -287,11 +287,11 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     private fun renderDate(state: DashboardUiState, binding: FragmentDashboardBinding) {
         if (state.isToday) {
             binding.dashboardDate.text = requireContext().getString(R.string.activity_summary_today)
-            binding.arrowRight.alpha = 0.5f
+            binding.arrowRight.isEnabled = false
         } else {
             val date = Date.from(state.date.atStartOfDay(ZoneId.systemDefault()).toInstant())
             binding.dashboardDate.text = DateTimeUtils.formatDate(date, DateUtils.FORMAT_SHOW_WEEKDAY)
-            binding.arrowRight.alpha = 1f
+            binding.arrowRight.isEnabled = true
         }
     }
 

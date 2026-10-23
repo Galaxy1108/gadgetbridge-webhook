@@ -15,13 +15,12 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/arrow_left"
-            style="@style/Widget.App.DateStep.Primary"
+            style="@style/Widget.App.PeriodStep"
             android:layout_width="48dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:contentDescription="@string/datestep_prev_day"
-            android:text="@string/datestep_letter_day"
             app:icon="@drawable/ic_chevron_1" />
 
         <TextView
@@ -35,13 +34,12 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/arrow_right"
-            style="@style/Widget.App.DateStep.Primary.End"
+            style="@style/Widget.App.PeriodStep"
             android:layout_width="48dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:contentDescription="@string/datestep_next_day"
-            android:text="@string/datestep_letter_day"
             app:icon="@drawable/ic_chevron_1_right" />
     </RelativeLayout>
 
