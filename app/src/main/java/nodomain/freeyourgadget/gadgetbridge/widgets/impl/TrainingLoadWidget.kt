@@ -109,6 +109,7 @@ object TrainingLoadWidget : MetricWidget<TrainingLoadWidget.Data>() {
      * The day's acute or chronic load samples, from the metric samples like the Load chart when experimental
      * metrics are on.
      */
+    @Suppress("DEPRECATION")
     private fun samples(db: DBHandler, dev: GBDevice, metric: MetricSample.Metric, from: Long, to: Long): List<TimedValue> {
         if (GBApplication.getPrefs().experimentalMetrics() && GenericMetricSampleProvider.supportsMetrics(dev, metric)) {
             return GenericMetricSampleProvider.getMetricSamples(db, dev, metric, from, to)
