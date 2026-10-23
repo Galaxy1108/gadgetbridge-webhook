@@ -159,7 +159,7 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
     internal fun categoryOf(systolic: Int, diastolic: Int): Int = when {
         systolic < 120 && diastolic < 80 -> 0
         systolic < 130 && diastolic < 80 -> 1
-        systolic < 140 || diastolic < 90 -> 2
+        systolic < 140 && diastolic < 90 -> 2
         else -> 3
     }
 
