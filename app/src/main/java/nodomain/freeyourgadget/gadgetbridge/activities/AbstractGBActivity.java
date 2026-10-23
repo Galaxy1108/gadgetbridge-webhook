@@ -131,10 +131,9 @@ public abstract class AbstractGBActivity extends AppCompatActivity implements GB
     public static void applyThemeOverlays(final Resources.Theme theme, final boolean dark) {
         // Dynamic Color already ties tab/button/chip colors to the wallpaper palette, so the
         // user's chosen accent preset only applies to the static Light/Dark themes.
-        if (GBApplication.areDynamicColorsEnabled()) {
-            return;
+        if (!GBApplication.areDynamicColorsEnabled()) {
+            theme.applyStyle(GBApplication.getAccentColorOverlay(dark), true);
         }
-        theme.applyStyle(GBApplication.getAccentColorOverlay(dark), true);
         if (GBApplication.areContrastingSurfacesEnabled(dark)) {
             theme.applyStyle(GBApplication.getContrastingSurfacesOverlay(dark), true);
         }

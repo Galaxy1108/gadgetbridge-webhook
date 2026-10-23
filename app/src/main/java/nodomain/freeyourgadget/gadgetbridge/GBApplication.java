@@ -784,6 +784,12 @@ public class GBApplication extends Application {
 
     @StyleRes
     public static int getContrastingSurfacesOverlay(final boolean dark) {
+        if (areDynamicColorsEnabled()) {
+            if (dark && isAmoledBlackEnabled()) {
+                return R.style.ThemeOverlay_App_ContrastingSurfaces_Dynamic_Black;
+            }
+            return R.style.ThemeOverlay_App_ContrastingSurfaces_Dynamic;
+        }
         if (!dark) {
             return R.style.ThemeOverlay_App_ContrastingSurfaces_Light;
         }

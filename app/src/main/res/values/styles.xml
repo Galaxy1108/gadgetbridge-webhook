@@ -235,6 +235,7 @@
     <style name="GadgetbridgeThemeDynamicLight" parent="Theme.Material3.DynamicColors.Light">
         <item name="textColorPrimary">?attr/colorOnSurface</item>
         <item name="textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="elevationOverlayEnabled">false</item>
         <item name="actionBarStyle">@style/GadgetbridgeTheme.ActionBar</item>
         <item name="actionOverflowMenuStyle">@style/GadgetbridgeTheme.OverflowMenuStyle</item>
         <item name="actionModeStyle">@style/GadgetbridgeTheme.ActionMode</item>
@@ -251,7 +252,7 @@
         <item name="row_separator">@color/row_separator_light</item>
         <item name="stat_tile_bg">?attr/colorSurface</item>
         <item name="grid_tile_bg">?android:attr/windowBackground</item>
-        <item name="device_card_bg">?attr/colorSurfaceContainer</item>
+        <item name="device_card_bg">?attr/stat_tile_bg</item>
         <item name="bottom_bar_divider">@null</item>
         <item name="stat_tile_border">?attr/colorOutlineVariant</item>
         <item name="chart_marker_bg">?attr/colorSurfaceContainerHigh</item>
@@ -306,6 +307,7 @@
     <style name="GadgetbridgeThemeDynamicDark" parent="Theme.Material3.DynamicColors.Dark">
         <item name="textColorPrimary">?attr/colorOnSurface</item>
         <item name="textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="elevationOverlayEnabled">false</item>
         <item name="actionBarStyle">@style/GadgetbridgeTheme.ActionBar</item>
         <item name="actionOverflowMenuStyle">@style/GadgetbridgeTheme.OverflowMenuStyle</item>
         <item name="actionModeStyle">@style/GadgetbridgeTheme.ActionMode</item>
@@ -322,7 +324,7 @@
         <item name="row_separator">@color/row_separator_dark</item>
         <item name="stat_tile_bg">?attr/colorSurface</item>
         <item name="grid_tile_bg">?android:attr/windowBackground</item>
-        <item name="device_card_bg">?attr/colorSurfaceContainer</item>
+        <item name="device_card_bg">?attr/stat_tile_bg</item>
         <item name="bottom_bar_divider">@null</item>
         <item name="stat_tile_border">?attr/colorOutlineVariant</item>
         <item name="chart_marker_bg">?attr/colorSurfaceContainerHigh</item>
@@ -948,6 +950,13 @@
         <item name="toolbar_bg">?attr/stat_tile_bg</item>
         <item name="grid_tile_bg">@color/stat_tile_bg_amoled</item>
         <item name="bar_shade">@drawable/bar_shade_amoled</item>
+    </style>
+    <style name="ThemeOverlay.App.ContrastingSurfaces.Dynamic" parent="">
+        <item name="stat_tile_bg">?attr/colorSurfaceContainer</item>
+        <item name="grid_tile_bg">?attr/colorSurfaceContainer</item>
+    </style>
+    <style name="ThemeOverlay.App.ContrastingSurfaces.Dynamic.Black" parent="">
+        <item name="grid_tile_bg">@color/stat_tile_bg_amoled</item>
     </style>
 
     <style name="ThemeOverlay.App.MaterialAlertDialog.WindowBackground" parent="ThemeOverlay.Material3.MaterialAlertDialog">

@@ -560,7 +560,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             }
 
             if (contrastingSurfaces != null) {
-                contrastingSurfaces.setEnabled(!GBApplication.areDynamicColorsEnabled());
                 contrastingSurfaces.setChecked(GBApplication.areContrastingSurfacesEnabled(GBApplication.isDarkThemeEnabled()));
                 contrastingSurfaces.setOnPreferenceChangeListener((preference, newVal) -> {
                     GBApplication.getPrefs().getPreferences().edit()
@@ -590,9 +589,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                                         .apply();
                             }
                             updateAccentColorSummary(accentColor);
-                        }
-                        if (contrastingSurfaces != null) {
-                            contrastingSurfaces.setEnabled(!val.equals(requireContext().getString(R.string.pref_theme_value_dynamic)));
                         }
                         // Warn user if dynamic colors are not available
                         if (val.equals(requireContext().getString(R.string.pref_theme_value_dynamic)) && !DynamicColors.isDynamicColorAvailable()) {
