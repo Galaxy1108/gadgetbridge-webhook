@@ -51,7 +51,7 @@ object Vo2MaxWidget : MetricWidget<Vo2MaxWidget.Data>() {
         R.string.sleep_score_fair,
         R.string.sleep_score_good,
         R.string.sleep_score_excellent,
-        R.string.widget_status_superior,
+        R.string.widget_status_vo2_max_superior,
     )
 
     // Should match the percentiles in VO2MaxRanges
@@ -173,7 +173,7 @@ object Vo2MaxWidget : MetricWidget<Vo2MaxWidget.Data>() {
         val threshold = ranges[ZONE_LABELS.size - 2 - zone]
         return Stat(
             String.format(Locale.getDefault(), "%.1f", threshold),
-            context.getString(R.string.widget_stat_next_zone, context.getString(ZONE_LABELS[zone + 1])),
+            context.getString(R.string.widget_stat_next_vo2max_zone, context.getString(ZONE_LABELS[zone + 1])),
         )
     }
 

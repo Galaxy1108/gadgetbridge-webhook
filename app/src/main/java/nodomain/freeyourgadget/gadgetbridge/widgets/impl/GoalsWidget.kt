@@ -216,9 +216,9 @@ object GoalsWidget : GBWidget<GoalsWidget.Data> {
     }
 
     private fun duration(context: Context, minutes: Int): String = if (minutes % 60 == 0) {
-        context.getString(R.string.widget_duration_h, minutes / 60)
+        context.getString(R.string.widget_duration_hours, minutes / 60)
     } else {
-        context.getString(R.string.widget_duration_hm, minutes / 60, minutes % 60)
+        context.getString(R.string.widget_duration_hours_minutes, minutes / 60, minutes % 60)
     }
 
     private fun describe(context: Context, config: WidgetConfig, data: Data): String {

@@ -165,7 +165,7 @@ internal fun stressTimeInZones(context: Context, data: StressData, colors: IntAr
         LegendRow(
             colors[zone],
             context.getString(labels[zone]),
-            context.getString(R.string.widget_duration_hm, minutes[zone].toInt() / 60, minutes[zone].toInt() % 60),
+            context.getString(R.string.widget_duration_hours_minutes, minutes[zone].toInt() / 60, minutes[zone].toInt() % 60),
         )
     }
     return MiniChart.Composition(colors, minutes) to legend

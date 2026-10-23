@@ -139,7 +139,7 @@ object BodyEnergyWidget : MetricWidget<BodyEnergyWidget.Data>() {
                 value = context.getString(R.string.body_energy_percentage, level),
                 gauge = GaugeSpec.Progress(colorEnergy, level / 100f),
                 status = if (data.gained >= 0 && data.lost >= 0) {
-                    StatusLine.Text(context.getString(R.string.widget_status_charged_drained, data.gained, data.lost))
+                    StatusLine.Text(context.getString(R.string.widget_status_energy_charged_drained, data.gained, data.lost))
                 } else {
                     null
                 },
@@ -196,7 +196,7 @@ object BodyEnergyWidget : MetricWidget<BodyEnergyWidget.Data>() {
                     LegendRow(colorEnergy, context.getString(R.string.body_energy_gained), "+${data.gained.coerceAtLeast(0)}"),
                     LegendRow(colorLost, context.getString(R.string.body_energy_lost), "-${data.lost.coerceAtLeast(0)}"),
                     peak?.let {
-                        LegendRow(colorEnergy, context.getString(R.string.widget_legend_peak), context.getString(R.string.body_energy_percentage, it.value.toInt()))
+                        LegendRow(colorEnergy, context.getString(R.string.widget_legend_energy_peak), context.getString(R.string.body_energy_percentage, it.value.toInt()))
                     },
                 ),
             )
@@ -220,7 +220,7 @@ object BodyEnergyWidget : MetricWidget<BodyEnergyWidget.Data>() {
                 miniStats = listOfNotNull(
                     Stat("+${data.gained.coerceAtLeast(0)}", context.getString(R.string.body_energy_gained)),
                     Stat("-${data.lost.coerceAtLeast(0)}", context.getString(R.string.body_energy_lost)),
-                    peakTime?.let { Stat(it, context.getString(R.string.widget_legend_peak)) },
+                    peakTime?.let { Stat(it, context.getString(R.string.widget_legend_energy_peak)) },
                 ),
                 largeChart = line,
                 axis = TileAxis.HOURS,
@@ -230,7 +230,7 @@ object BodyEnergyWidget : MetricWidget<BodyEnergyWidget.Data>() {
             value = value,
             gauge = gauge,
             status = peak?.takeIf { it.value > level }?.let {
-                StatusLine.Chip(colorLost, context.getString(R.string.widget_status_since_peak, it.value.toInt() - level, peakTime))
+                StatusLine.Chip(colorLost, context.getString(R.string.widget_status_decrease_since_peak, it.value.toInt() - level, peakTime))
             },
             chart = MiniChart.Progress(colorEnergy, level / 100f),
             largeChart = line,

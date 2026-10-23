@@ -76,7 +76,7 @@ object CaloriesWidget : MetricWidget<CaloriesWidget.Data>() {
             status = if (config.isLargeStyle) {
                 null
             } else {
-                StatusLine.Text(context.getString(R.string.widget_status_active, data.activeCalories.toString()))
+                StatusLine.Text(context.getString(R.string.widget_status_number_active_calories, data.activeCalories.toString()))
             },
             chart = if (config.isLargeStyle || config.isTall) null else MiniChart.Composition(colors, values),
             miniStats = if (config.isLargeStyle) {

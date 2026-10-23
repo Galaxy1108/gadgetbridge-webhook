@@ -85,7 +85,7 @@ abstract class MetricWidget<D> : GBWidget<D> {
     protected fun emptyModel(context: Context, gauge: GaugeSpec = GaugeSpec.EMPTY, chart: MiniChart? = null) = TileModel(
         value = context.getString(R.string.stats_empty_value),
         gauge = gauge,
-        status = StatusLine.Text(context.getString(R.string.widget_status_no_data)),
+        status = StatusLine.Text(context.getString(R.string.no_data)),
         chart = chart,
     )
 
@@ -162,7 +162,7 @@ abstract class MetricWidget<D> : GBWidget<D> {
      * [minutes] as "1h 05m".
      */
     protected fun hoursMinutes(context: Context, minutes: Long): String =
-        context.getString(R.string.widget_duration_hm, minutes / 60, minutes % 60)
+        context.getString(R.string.widget_duration_hours_minutes, minutes / 60, minutes % 60)
 
     /**
      * The tile layout of [variant]. Variants that are only a gauge, such as the stress looks, get the gauge tile.

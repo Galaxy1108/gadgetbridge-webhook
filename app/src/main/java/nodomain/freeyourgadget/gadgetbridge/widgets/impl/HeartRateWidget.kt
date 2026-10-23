@@ -183,7 +183,7 @@ object HeartRateWidget : MetricWidget<HeartRateWidget.Data>() {
             value = value,
             gauge = gauge,
             valueNote = if (stale && (config.variant.id == WidgetVariant.NUMBER.id || config.isWide)) {
-                context.getString(R.string.widget_status_at, measuredAt)
+                context.getString(R.string.widget_status_at_time, measuredAt)
             } else {
                 null
             },

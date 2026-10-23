@@ -125,7 +125,7 @@ object TrainingReadinessWidget : MetricWidget<TrainingReadinessWidget.Data>() {
             status = StatusLine.Chip(zoneColors[zone], context.getString(TrainingReadinessReport.ZONE_NAME_RES[zone])),
             contentDescription = describe(context, config, score, zone, advice, factors),
             valueNote = report.timestamp?.takeIf { config.variant.id == WidgetVariant.NUMBER.id || config.isWide }
-                ?.let { context.getString(R.string.widget_status_at, measuredAt(it, data.day)) },
+                ?.let { context.getString(R.string.widget_status_at_time, measuredAt(it, data.day)) },
         )
         return when {
             config.isTall -> model.copy(largeChart = bars, axis = axis)

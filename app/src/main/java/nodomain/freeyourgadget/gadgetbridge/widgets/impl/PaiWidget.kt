@@ -192,7 +192,7 @@ object PaiWidget : MetricWidget<PaiWidget.Data>() {
         val model = TileModel(
             value = data.total.toString(),
             gauge = GaugeSpec.Zones(colors, segments, gapBetweenSegments = false),
-            status = StatusLine.Text(context.getString(R.string.widget_status_pai_today, data.today)),
+            status = StatusLine.Text(context.getString(R.string.widget_status_increase_today, data.today)),
             chart = composition,
         )
         val goalColor = GBApplication.getSecondaryTextColor(context)

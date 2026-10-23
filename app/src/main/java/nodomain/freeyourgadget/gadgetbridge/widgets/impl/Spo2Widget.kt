@@ -122,7 +122,7 @@ object Spo2Widget : MetricWidget<Spo2Widget.Data>() {
             gauge = GaugeSpec.Progress(colorFor(data.spo2), (data.spo2 - GAUGE_MIN).coerceAtLeast(0) / (100f - GAUGE_MIN)),
             status = if (data.lowest > 0) {
                 StatusLine.Text(
-                    context.getString(R.string.widget_status_lowest, context.getString(R.string.battery_percentage_str, data.lowest.toString()))
+                    context.getString(R.string.widget_status_spo2_lowest_value, context.getString(R.string.battery_percentage_str, data.lowest.toString()))
                 )
             } else {
                 null

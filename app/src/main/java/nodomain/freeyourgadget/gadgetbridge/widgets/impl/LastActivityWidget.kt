@@ -269,7 +269,7 @@ object LastActivityWidget : GBWidget<LastActivityWidget.Data> {
             is Day.Text -> day.text
         }
         val time = DateTimeUtils.formatTime(start.hour, start.minute)
-        return context.getString(R.string.widget_last_activity_subline, kindLabel, day, time)
+        return context.getString(R.string.widget_last_activity_subline__type_day_time, kindLabel, day, time)
     }
 
     private class StatText(val value: CharSequence?, val label: String)

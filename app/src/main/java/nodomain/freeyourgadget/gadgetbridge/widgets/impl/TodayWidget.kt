@@ -456,7 +456,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
             context.getString(
                 R.string.widget_description_item,
                 context.getString(label),
-                context.getString(R.string.widget_duration_hm, minutes / 60, minutes % 60),
+                context.getString(R.string.widget_duration_hours_minutes, minutes / 60, minutes % 60),
             )
         }
         return context.getString(R.string.widget_overview_description, config.title(context, label), parts)

@@ -44,9 +44,9 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
     )
     private val LABELS = intArrayOf(
         R.string.normal,
-        R.string.widget_status_elevated,
-        R.string.widget_status_stage_1,
-        R.string.widget_status_stage_2,
+        R.string.widget_status_blood_pressure_elevated,
+        R.string.widget_status_blood_pressure_hypertension_stage_1,
+        R.string.widget_status_blood_pressure_hypertension_stage_2,
     )
     private val POSITIONS = floatArrayOf(0.25f, 0.45f, 0.65f, 0.88f)
     private val SEGMENTS = floatArrayOf(0.35f, 0.2f, 0.2f, 0.25f)
