@@ -23,7 +23,6 @@ class GridDragController(
     private val onDrop: (arrangement: List<Pair<String, Int>>) -> Unit,
 ) {
     private var dragged: View? = null
-    private var draggedId: String? = null
     private var grabX = 0f
     private var grabY = 0f
     private var fingerX = 0f
@@ -45,7 +44,7 @@ class GridDragController(
     fun start(child: View) {
         val instanceId = binder.instanceIdOf(child) ?: return
         dragged = child
-        draggedId = instanceId
+        binder.draggedId = instanceId
         fingerX = grid.lastDownX
         fingerY = grid.lastDownY
         grabX = fingerX - child.left
@@ -68,7 +67,7 @@ class GridDragController(
     }
 
     private fun move(x: Float, y: Float) {
-        val instanceId = draggedId ?: return
+        val instanceId = binder.draggedId ?: return
         val child = dragged ?: return
         fingerX = x
         fingerY = y
@@ -137,7 +136,7 @@ class GridDragController(
     private fun drop() {
         val child = dragged ?: return
         dragged = null
-        draggedId = null
+        binder.draggedId = null
         child.removeOnLayoutChangeListener(followFinger)
         child.animate().translationX(0f).translationY(0f).translationZ(0f)
 

@@ -15,6 +15,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
@@ -104,6 +105,8 @@ class DashboardGridBinder(
 
     var callbacks: Callbacks? = null
 
+    var draggedId: String? = null
+
     /**
      * Whether the cards show their edit button instead of opening the chart on a tap.
      */
@@ -128,7 +131,26 @@ class DashboardGridBinder(
         layoutManager.itemSpecs = this
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = this
-        recyclerView.itemAnimator = null
+        recyclerView.itemAnimator = object : DefaultItemAnimator() {
+            override fun animateMove(
+                holder: RecyclerView.ViewHolder,
+                fromX: Int,
+                fromY: Int,
+                toX: Int,
+                toY: Int,
+            ): Boolean {
+                if (draggedId != null && (holder as? CellHolder)?.cell?.instanceId == draggedId) {
+                    dispatchMoveFinished(holder)
+                    return false
+                }
+                val moving = super.animateMove(holder, fromX, fromY, toX, toY)
+                // super cancels the animation that lowers a dropped card
+                if (holder.itemView.translationZ != 0f) {
+                    holder.itemView.animate().translationZ(0f)
+                }
+                return moving
+            }
+        }.apply { supportsChangeAnimations = false }
     }
 
     override fun getItemCount(): Int = items.size
