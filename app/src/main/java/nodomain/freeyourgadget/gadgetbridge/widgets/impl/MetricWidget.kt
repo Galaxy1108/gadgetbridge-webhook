@@ -1,10 +1,12 @@
 package nodomain.freeyourgadget.gadgetbridge.widgets.impl
 
 import android.content.Context
+import android.graphics.PointF
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.GaugeTileRenderer
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.LargeTileRenderer
@@ -24,6 +26,8 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Base for a widget showing one metric, as a gauge, number, tall, wide or large tile depending on the variant.
@@ -96,9 +100,9 @@ abstract class MetricWidget<D> : GBWidget<D> {
         StatusLine.Text(context.getString(R.string.widget_status_of_goal, goal))
 
     /**
-     * A goal metric's tile: value against the goal, with [hourly] bars in the tall, wide and large styles. The
-     * large style adds the goal after the value, the [ratio] as a percentage, and a stats row of [extraStats] and
-     * what's left to the goal ([toGo], null once the goal is met).
+     * A goal metric's tile: value against the goal, with [hourly] bars, or a running total up to [lineGoal] when set, in the
+     * tall, wide and large styles. The large style adds the goal after the value, the [ratio] as a percentage, and a stats row of
+     * [extraStats] and what's left to the goal ([toGo], null once the goal is met).
      */
     protected fun goalTile(
         context: Context,
@@ -112,8 +116,9 @@ abstract class MetricWidget<D> : GBWidget<D> {
         ratio: Double = fraction.toDouble(),
         toGo: CharSequence? = null,
         extraStats: List<Stat> = emptyList(),
+        lineGoal: Float? = null,
     ): TileModel {
-        val bars = hourly?.let { hourlyBars(it, color, hoursStarted) }
+        val bars = hourly?.let { if (lineGoal != null) hourlyLine(context, it, color, hoursStarted, lineGoal) else hourlyBars(it, color, hoursStarted) }
         val axis = if (bars != null) TileAxis.HOURS else emptyList()
         if (config.isLargeStyle) {
             val goalStat = if (toGo != null) {
@@ -154,6 +159,29 @@ abstract class MetricWidget<D> : GBWidget<D> {
     )
 
     /**
+     * A filled line of the running total at the end of each started hour in [color], with a dashed line at [goal].
+     */
+    protected fun hourlyLine(context: Context, hourly: FloatArray, color: Int, hoursStarted: Int, goal: Float): MiniChart.Line {
+        var total = 0f
+        val points = mutableListOf(PointF(0f, 0f))
+        for (hour in 0 until min(hoursStarted, hourly.size)) {
+            total += hourly[hour].takeUnless { it.isNaN() } ?: 0f
+            points.add(PointF(hour + 1f, total))
+        }
+        return MiniChart.Line(
+            points,
+            0f,
+            hourly.size.toFloat(),
+            0f,
+            (max(total, goal) * LINE_HEADROOM).coerceAtLeast(1f),
+            color,
+            fill = true,
+            reference = goal.takeIf { it > 0f },
+            referenceColor = GBApplication.getSecondaryTextColor(context),
+        )
+    }
+
+    /**
      * [minutes] as "1:05".
      */
     protected fun clock(minutes: Long): String = String.format(Locale.ROOT, "%d:%02d", minutes / 60, minutes % 60)
@@ -184,4 +212,7 @@ abstract class MetricWidget<D> : GBWidget<D> {
         return listOfNotNull(title, model.value, status).joinToString(", ")
     }
 
+    private companion object {
+        const val LINE_HEADROOM = 1.15f
+    }
 }

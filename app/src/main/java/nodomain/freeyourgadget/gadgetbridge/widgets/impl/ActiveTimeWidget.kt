@@ -56,6 +56,7 @@ object ActiveTimeWidget : MetricWidget<ActiveTimeWidget.Data>() {
             Stat(data.steps.toString(), context.getString(R.string.steps)),
             Stat(FormatUtils.getFormattedDistanceLabel(data.distanceMeters.toDouble()), context.getString(R.string.distance)),
         ),
+        lineGoal = data.goalMinutes.toFloat(),
     )
 
     /**

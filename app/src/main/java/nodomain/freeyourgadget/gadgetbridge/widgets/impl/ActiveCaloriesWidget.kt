@@ -65,6 +65,7 @@ object ActiveCaloriesWidget : MetricWidget<ActiveCaloriesWidget.Data>() {
             extraStats = listOfNotNull(
                 data.resting.takeIf { it > 0 }?.let { Stat(kcal(it), context.getString(R.string.hr_resting)) },
             ),
+            lineGoal = data.goal.toFloat(),
         )
     }
 

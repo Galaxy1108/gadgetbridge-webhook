@@ -83,6 +83,7 @@ object StepsWidget : MetricWidget<StepsWidget.Data>() {
                 Stat(FormatUtils.getFormattedDistanceLabel(data.distanceMeters.toDouble()), context.getString(R.string.distance)),
                 Stat(clock(data.activeMinutes), context.getString(R.string.activity_list_summary_active_time)),
             ),
+            lineGoal = data.goal.toFloat(),
         )
     }
 

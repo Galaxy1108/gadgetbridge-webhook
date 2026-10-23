@@ -25,6 +25,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivitySession
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileAxis
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetActions
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
@@ -47,7 +48,6 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
     private const val TALL_LABEL_SP = 9f
     private const val TIMELINE_NO_LEGEND_ROW_DP = 42f
     private const val TIMELINE_NO_LEGEND_BASE_DP = 16f
-    private val AXIS = listOf("00", "06", "12", "18", "24")
 
     override val id = "today"
     override val label = R.string.widget_day_clock_title
@@ -349,7 +349,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         if (isSmall(config)) {
             view.findViewById<DayTimelineView>(R.id.tile_day_timeline)
                 .setDay(data.segments, data.now, data.yesterday, dimYesterday, timeIndicator)
-            renderAxis(view.findViewById(R.id.tile_axis), AXIS, true)
+            renderAxis(view.findViewById(R.id.tile_axis), TileAxis.HOURS, true)
         } else {
             val clock = view.findViewById<DayClockView>(R.id.tile_day_clock)
             applyClockMode(clock, config)
@@ -369,7 +369,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         applySize(view, config)
         if (isSmall(config)) {
             view.findViewById<DayTimelineView>(R.id.tile_day_timeline).setLoading()
-            renderAxis(view.findViewById(R.id.tile_axis), AXIS, true)
+            renderAxis(view.findViewById(R.id.tile_axis), TileAxis.HOURS, true)
         } else {
             val clock = view.findViewById<DayClockView>(R.id.tile_day_clock)
             applyClockMode(clock, config)

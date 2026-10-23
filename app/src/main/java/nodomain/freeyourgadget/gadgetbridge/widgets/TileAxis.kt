@@ -15,7 +15,10 @@ import java.util.Locale
 object TileAxis {
     private const val DAYS_PER_WEEK = 7L
 
-    val HOURS = listOf("00", "06", "12", "18")
+    /**
+     * Hours of the day from midnight to midnight, the first and last at the chart's edges.
+     */
+    val HOURS = listOf("00", "06", "12", "18", "24")
 
     /**
      * Narrow weekday names of the [days] days ending on [lastDay], oldest first.

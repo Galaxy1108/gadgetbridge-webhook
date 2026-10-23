@@ -31,6 +31,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.LegendRow
 import nodomain.freeyourgadget.gadgetbridge.widgets.MiniChart
 import nodomain.freeyourgadget.gadgetbridge.widgets.Stat
 import nodomain.freeyourgadget.gadgetbridge.widgets.StatusLine
+import nodomain.freeyourgadget.gadgetbridge.widgets.TileAxis
 import nodomain.freeyourgadget.gadgetbridge.widgets.TileModel
 import kotlin.math.roundToInt
 
@@ -179,7 +180,7 @@ object LargeTileRenderer : TileRenderer {
         renderChart(view.findViewById(R.id.tile_chart), model.chart?.takeIf { isBar(it) }, 0f)
         val large = model.largeChart
         val height = when (large) {
-            is MiniChart.Line, is MiniChart.RangeBars -> LINE_HEIGHT_DP
+            is MiniChart.Line, is MiniChart.RangeBars -> if (model.stats.isEmpty()) LINE_HEIGHT_DP else BARS_HEIGHT_DP
             is MiniChart.Hypnogram -> HYPNOGRAM_HEIGHT_DP
             is MiniChart.StackedBars -> STACKED_HEIGHT_DP
             else -> BARS_HEIGHT_DP
@@ -372,9 +373,12 @@ internal fun renderAxis(container: LinearLayout, labels: List<String>, hasChart:
     while (container.childCount < labels.size) {
         LayoutInflater.from(container.context).inflate(R.layout.dashboard_widget_axis_label, container, true)
     }
+    val atEdges = labels == TileAxis.HOURS
     for (i in labels.indices) {
         val label = container.getChildAt(i) as TextView
         label.text = labels[i]
+        val edge = i == 0 || i == labels.size - 1
+        (label.layoutParams as LinearLayout.LayoutParams).weight = if (atEdges && edge) 0.5f else 1f
         label.gravity = when {
             labels.size == 1 -> Gravity.CENTER_HORIZONTAL
             i == 0 -> Gravity.START
