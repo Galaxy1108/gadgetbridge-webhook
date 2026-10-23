@@ -163,6 +163,9 @@ public class ZipBackupImportJob extends AbstractZipBackupJob {
             try (InputStream globalPrefsInputStream = zipFile.getInputStream(zipFile.getEntry(PREFS_GLOBAL_FILENAME))) {
                 final SharedPreferences globalPreferences = GBApplication.getPrefs().getPreferences();
 
+                // Keep existing local launcher widgets, since the IDs are local to the launcher anyway
+                final String launcherWidgets = globalPreferences.getString(LauncherWidgetStore.PREF_LAUNCHER_WIDGETS, null);
+
                 final JsonBackupPreferences jsonBackupPreferences = JsonBackupPreferences.fromJson(globalPrefsInputStream);
                 if (!jsonBackupPreferences.importInto(globalPreferences)) {
                     LOG.warn("Global preferences were not commited");
@@ -171,6 +174,7 @@ public class ZipBackupImportJob extends AbstractZipBackupJob {
                 // We may be restoring from different versions - reset the changelog version
                 globalPreferences.edit()
                         .putInt("ckChangeLog_last_version_code", BuildConfig.VERSION_CODE)
+                        .putString(LauncherWidgetStore.PREF_LAUNCHER_WIDGETS, launcherWidgets)
                         .apply();
             }
 
@@ -202,8 +206,7 @@ public class ZipBackupImportJob extends AbstractZipBackupJob {
             // At this point global preferences (which includes the dashboard layouts) are
             // already restored, so the widget stores reflect the imported instances.
             LOG.debug("Importing widget preferences");
-            final List<WidgetInstance> widgetInstances = new ArrayList<>(WidgetLayoutStore.INSTANCE.instances());
-            widgetInstances.addAll(LauncherWidgetStore.INSTANCE.instances());
+            final List<WidgetInstance> widgetInstances = WidgetLayoutStore.INSTANCE.instances();
             for (final WidgetInstance widgetInstance : widgetInstances) {
                 if (isAborted()) break;
 

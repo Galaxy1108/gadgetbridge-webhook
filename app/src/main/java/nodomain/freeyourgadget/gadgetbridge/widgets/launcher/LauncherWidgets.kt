@@ -151,8 +151,4 @@ object LauncherWidgets {
             variant,
         )
     }
-
-    /**
-     * The end of the current day, in epoch seconds.
-     */
 }

@@ -26,7 +26,7 @@ data class LauncherWidget(
 object LauncherWidgetStore {
     private val LOG: Logger = LoggerFactory.getLogger(LauncherWidgetStore::class.java)
 
-    private const val PREF_LAUNCHER_WIDGETS = "pref_launcher_widgets"
+    const val PREF_LAUNCHER_WIDGETS = "pref_launcher_widgets"
 
     private val gson = Gson()
     private val widgetsType = object : TypeToken<Map<Int, LauncherWidget>>() {}.type

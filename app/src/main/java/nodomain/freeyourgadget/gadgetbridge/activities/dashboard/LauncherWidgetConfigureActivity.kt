@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
 import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
@@ -9,9 +10,12 @@ import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherContent
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetProvider
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetRenderer
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgets
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * The configuration activity of a launcher widget. A new launcher widget gets a widget from [WidgetPickerActivity].
@@ -39,7 +43,9 @@ class LauncherWidgetConfigureActivity : AbstractGBActivity() {
 
         appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         setResult(RESULT_CANCELED, resultIntent())
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+        val provider = AppWidgetManager.getInstance(this).getAppWidgetInfo(appWidgetId)?.provider
+        if (provider != ComponentName(this, LauncherWidgetProvider::class.java)) {
+            LOG.warn("App widget ID {} is not a launcher widget from Gadgetbridge", appWidgetId)
             finish()
             return
         }
@@ -73,4 +79,8 @@ class LauncherWidgetConfigureActivity : AbstractGBActivity() {
     }
 
     private fun resultIntent(): Intent = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+
+    companion object {
+        private val LOG: Logger = LoggerFactory.getLogger(LauncherWidgetConfigureActivity::class.java)
+    }
 }
