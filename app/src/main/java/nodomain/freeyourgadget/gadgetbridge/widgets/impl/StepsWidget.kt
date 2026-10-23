@@ -27,6 +27,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetColors
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
+import java.text.NumberFormat
 
 /**
  * Total steps for the day against the user's step goal.
@@ -72,11 +73,12 @@ object StepsWidget : MetricWidget<StepsWidget.Data>() {
     )
 
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
+        val number = NumberFormat.getInstance()
         return goalTile(
-            context, config, data.total.toString(), WidgetColors.activity, data.goalFactor,
-            data.goal.toString(), data.hourly, data.hoursStarted,
+            context, config, number.format(data.total), WidgetColors.activity, data.goalFactor,
+            number.format(data.goal), data.hourly, data.hoursStarted,
             ratio = if (data.goal > 0) data.total / data.goal.toDouble() else 0.0,
-            toGo = (data.goal - data.total).takeIf { it > 0 }?.toString(),
+            toGo = (data.goal - data.total).takeIf { it > 0 }?.let { number.format(it) },
             extraStats = listOf(
                 Stat(FormatUtils.getFormattedDistanceLabel(data.distanceMeters.toDouble()), context.getString(R.string.distance)),
                 Stat(clock(data.activeMinutes), context.getString(R.string.activity_list_summary_active_time)),

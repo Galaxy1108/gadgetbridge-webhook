@@ -12,6 +12,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetHistory
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
+import java.text.NumberFormat
 
 /**
  * Active calories for the day against the user's goal.
@@ -54,12 +55,13 @@ object ActiveCaloriesWidget : MetricWidget<ActiveCaloriesWidget.Data>() {
     }
 
     override fun model(context: Context, config: WidgetConfig, data: Data): TileModel {
-        val kcal = { value: Int -> context.getString(R.string.widget_value_kcal, value.toString()) }
+        val number = NumberFormat.getInstance()
+        val kcal = { value: Int -> context.getString(R.string.widget_value_kcal, number.format(value)) }
         return goalTile(
-            context, config, data.active.toString(), ContextCompat.getColor(context, R.color.calories_color), data.goalFactor,
-            data.goal.toString(), data.hourly, data.hoursStarted,
+            context, config, number.format(data.active), ContextCompat.getColor(context, R.color.calories_color), data.goalFactor,
+            number.format(data.goal), data.hourly, data.hoursStarted,
             ratio = if (data.goal > 0) data.active / data.goal.toDouble() else 0.0,
-            toGo = (data.goal - data.active).takeIf { it > 0 }?.toString(),
+            toGo = (data.goal - data.active).takeIf { it > 0 }?.let { number.format(it) },
             extraStats = listOfNotNull(
                 data.resting.takeIf { it > 0 }?.let { Stat(kcal(it), context.getString(R.string.hr_resting)) },
             ),
