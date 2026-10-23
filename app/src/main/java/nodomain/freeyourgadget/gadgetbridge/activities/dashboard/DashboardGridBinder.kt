@@ -67,6 +67,7 @@ class DashboardGridBinder(
     private val density = recyclerView.resources.displayMetrics.density
     private val items = mutableListOf<PlacedWidget>()
     private var states: Map<String, WidgetState> = emptyMap()
+    private val stableIds = mutableMapOf<String, Long>()
 
     /**
      * The dashboard-wide device filter, inherited by instances whose own filter mode is "inherit".
@@ -142,7 +143,7 @@ class DashboardGridBinder(
         ((items.getOrNull(position)?.variant?.heightDp ?: 0) * density).roundToInt()
 
     override fun getItemId(position: Int): Long =
-        items[position].instance.instanceId.hashCode().toLong()
+        stableIds.getOrPut(items[position].instance.instanceId) { stableIds.size.toLong() }
 
     override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): CellHolder {
         val card =
