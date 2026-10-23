@@ -128,8 +128,10 @@ object BloodPressureWidget : MetricWidget<BloodPressureWidget.Data>() {
             TileAxis.dateRange(readingDay, readingDay).first()
         }
         val model = TileModel(
-            value = if (config.isLargeStyle) format(context, data.systolic, data.diastolic) else {
-                context.getString(R.string.blood_pressure_avg_format, data.systolic, data.diastolic)
+            value = when {
+                config.isLargeStyle -> format(context, data.systolic, data.diastolic)
+                config.variant.id == WidgetVariant.GAUGE.id || config.isTall -> "${data.systolic}\n${data.diastolic}"
+                else -> context.getString(R.string.blood_pressure_avg_format, data.systolic, data.diastolic)
             },
             gauge = GaugeSpec.Progress(COLORS[category], POSITIONS[category]),
             status = StatusLine.Chip(COLORS[category], context.getString(LABELS[category])),
