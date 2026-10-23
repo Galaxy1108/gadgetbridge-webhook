@@ -93,14 +93,6 @@ class WidgetLayoutStoreTest : TestBase() {
     }
 
     @Test
-    fun moveChangesOrderAndColumn() {
-        WidgetLayoutStore.move(WidgetGrid.BASE_COLUMNS, "d", 0, 3)
-
-        assertEquals(listOf("d", "today", "a", "b", "c"), order(WidgetGrid.BASE_COLUMNS))
-        assertEquals(3, columns(WidgetGrid.BASE_COLUMNS)["d"])
-    }
-
-    @Test
     fun restorePutsDeletedInstanceBackWithSettings() {
         val deleted = WidgetLayoutStore.delete(WidgetGrid.BASE_COLUMNS, "d")!!
         WidgetLayoutStore.restore(deleted)

@@ -286,10 +286,6 @@ class DashboardViewModelTest {
             revision++
         }
 
-        override suspend fun move(columns: Int, instanceId: String, index: Int, x: Int) {
-            revision++
-        }
-
         override suspend fun duplicate(columns: Int, instanceId: String): WidgetInstance {
             revision++
             return WidgetInstance("copy-$revision", StepsWidget.id)

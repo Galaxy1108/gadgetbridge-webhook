@@ -81,9 +81,6 @@ class DashboardRepositoryImpl(
     override suspend fun arrange(columns: Int, arrangement: List<Pair<String, Int>>) =
         withContext(writeDispatcher) { WidgetLayoutStore.arrange(columns, arrangement) }
 
-    override suspend fun move(columns: Int, instanceId: String, index: Int, x: Int) =
-        withContext(writeDispatcher) { WidgetLayoutStore.move(columns, instanceId, index, x) }
-
     override suspend fun duplicate(columns: Int, instanceId: String): WidgetInstance? =
         withContext(writeDispatcher) { WidgetLayoutStore.duplicate(columns, instanceId) }
 

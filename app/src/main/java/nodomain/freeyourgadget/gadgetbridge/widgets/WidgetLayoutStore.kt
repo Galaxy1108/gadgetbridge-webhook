@@ -115,19 +115,6 @@ object WidgetLayoutStore {
     }
 
     /**
-     * Moves [instanceId] in the layout for [columns] to [index] in the order, at column [x].
-     */
-    @Synchronized
-    fun move(columns: Int, instanceId: String, index: Int, x: Int) {
-        val layout = ownLayout(columns)
-        val id = layout.idOf(instanceId)
-        val placement = layout.placements.find { it.instance.instanceId == id } ?: return
-        val placements = layout.placements.filterNot { it.instance.instanceId == id }.toMutableList()
-        placements.add(index.coerceIn(0, placements.size), placement.copy(x = x))
-        saveLayout(columns, placements)
-    }
-
-    /**
      * Adds a new instance of [typeId] with [variantId] to the layout for [columns], and returns it.
      */
     @Synchronized

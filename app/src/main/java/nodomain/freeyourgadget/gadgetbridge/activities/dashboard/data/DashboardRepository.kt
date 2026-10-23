@@ -39,8 +39,6 @@ interface DashboardRepository {
 
     suspend fun arrange(columns: Int, arrangement: List<Pair<String, Int>>)
 
-    suspend fun move(columns: Int, instanceId: String, index: Int, x: Int)
-
     suspend fun duplicate(columns: Int, instanceId: String): WidgetInstance?
 
     suspend fun delete(columns: Int, instanceId: String): DeletedWidget?

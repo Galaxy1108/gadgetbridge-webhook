@@ -382,7 +382,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     override fun onMove(item: PlacedWidget, offset: Int) {
-        viewModel.onMove(item.instance.instanceId, offset, item.x)
+        viewModel.onMove(item.instance.instanceId, offset)
     }
 
     /**

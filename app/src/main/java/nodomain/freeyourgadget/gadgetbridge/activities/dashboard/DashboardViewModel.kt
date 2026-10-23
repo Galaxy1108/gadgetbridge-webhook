@@ -293,13 +293,13 @@ class DashboardViewModel(
         }
     }
 
-    fun onMove(instanceId: String, offset: Int, x: Int) {
-        val index = _uiState.value.items.indexOfFirst { it.instanceId == instanceId } + offset
-        if (index < 0) return
-        viewModelScope.launch {
-            repository.move(columns.value, instanceId, index, x)
-            updateEditDirty()
-        }
+    fun onMove(instanceId: String, offset: Int) {
+        val items = _uiState.value.items
+        val from = items.indexOfFirst { it.instanceId == instanceId }
+        val to = from + offset
+        if (from < 0 || to !in items.indices) return
+        val order = items.toMutableList().apply { add(to, removeAt(from)) }
+        onArrange(order.map { it.instanceId to it.placed.x })
     }
 
     fun onDuplicate(instanceId: String) {
