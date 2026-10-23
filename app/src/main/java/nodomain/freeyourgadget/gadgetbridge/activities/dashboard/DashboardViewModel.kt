@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardRepository
@@ -31,7 +33,6 @@ import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardW
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardRepositoryImpl
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardWidgetLoaderImpl
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
-import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardNotices
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
 import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardSnapshot
@@ -41,7 +42,6 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
 
 /**
@@ -71,6 +71,12 @@ class DashboardViewModel(
 
     private class InstanceLoad(val placed: PlacedWidget, val job: Job)
 
+    private data class LoadedState(
+        val placed: PlacedWidget,
+        val query: DashboardQuery,
+        val state: WidgetState,
+    )
+
     private val _uiState = MutableStateFlow(
         DashboardUiState(
             date = LocalDate.now(),
@@ -92,12 +98,15 @@ class DashboardViewModel(
     private val columns = MutableStateFlow(
         savedStateHandle.get<Int>(KEY_COLUMNS) ?: WidgetGrid.BASE_COLUMNS
     )
-    private val states = MutableStateFlow<Map<String, WidgetState>>(emptyMap())
+    private val states = MutableStateFlow<Map<String, LoadedState>>(emptyMap())
     private val editState = MutableStateFlow<DashboardEditState?>(null)
     private val reload = MutableStateFlow(0L)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val layoutFlow = columns.flatMapLatest { repository.layoutFlow(it) }
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    private val noticesFlow = combine(repository.noticesFlow(), layoutFlow) { notices, _ -> noticesOf(notices) }
 
     private var editSnapshot: DashboardSnapshot?
         get() = savedStateHandle[KEY_EDIT_SNAPSHOT]
@@ -124,7 +133,7 @@ class DashboardViewModel(
                 },
                 states,
                 editState,
-                repository.noticesFlow(),
+                noticesFlow,
             ) { content, loadedStates, edit, notices ->
                 DashboardUiState(
                     date = content.date,
@@ -133,11 +142,14 @@ class DashboardViewModel(
                     items = content.layout.map { placed ->
                         DashboardItemState(
                             placed,
-                            loadedStates[placed.instance.instanceId] ?: WidgetState.Loading,
+                            loadedStates[placed.instance.instanceId]
+                                ?.takeIf { it.placed.hasSameView(placed) }
+                                ?.state
+                                ?: WidgetState.Loading,
                         )
                     },
                     editState = edit,
-                    notices = noticesOf(notices),
+                    notices = notices,
                 )
             }.collect { _uiState.value = it }
         }
@@ -157,23 +169,24 @@ class DashboardViewModel(
         }
     }
 
-    private suspend fun loadWidgets(context: LoadContext) = coroutineScope {
-        val timeTo = endOfDaySeconds(context.date)
-        val query = DashboardQuery(DateTimeUtils.shiftDays(timeTo, -1), timeTo)
+    private suspend fun loadWidgets(context: LoadContext): Unit = coroutineScope {
+        val query = DashboardQuery.forDay(context.date)
         val loads = mutableMapOf<String, InstanceLoad>()
         layoutFlow.collect { layout ->
             val byId = layout.associateBy { it.instance.instanceId }
             loads.entries.removeAll { (instanceId, load) ->
                 val placed = byId[instanceId]
-                val stale = placed == null ||
-                    placed.widget != load.placed.widget ||
-                    placed.variant != load.placed.variant
+                val stale = placed == null || !load.placed.hasSameView(placed)
                 if (stale) load.job.cancel()
                 stale
             }
             val started = byId.filterKeys { it !in loads }
+            // A reload of the same day keeps the previous data visible, until the new data is available
             states.update { previous ->
-                previous.filterKeys { it in byId } + started.mapValues { WidgetState.Loading }
+                previous.filterKeys { it in byId } + started.mapValues { (instanceId, placed) ->
+                    previous[instanceId]?.takeIf { it.query == query && it.placed.hasSameView(placed) }
+                        ?: LoadedState(placed, query, WidgetState.Loading)
+                }
             }
             for ((instanceId, placed) in started) {
                 loads[instanceId] = InstanceLoad(placed, launch { loadInstance(placed, query, context.settings) })
@@ -190,20 +203,16 @@ class DashboardViewModel(
         try {
             val data = widgetLoader.load(placed, query, settings)
             currentCoroutineContext().ensureActive()
-            publish(instanceId, WidgetState.Ready(data))
+            states.update { it + (instanceId to LoadedState(placed, query, WidgetState.Ready(data))) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             LOG.error("Failed to load data for widget instance {}", instanceId, e)
-            publish(instanceId, WidgetState.Error(e))
+            states.update { it + (instanceId to LoadedState(placed, query, WidgetState.Error(e))) }
         }
     }
 
-    private fun publish(instanceId: String, state: WidgetState) {
-        states.update { it + (instanceId to state) }
-    }
-
-    private fun noticesOf(state: DashboardNotices.State): List<DashboardNotice> {
+    private suspend fun noticesOf(state: DashboardNotices.State): List<DashboardNotice> {
         val notices = mutableListOf<DashboardNotice>()
         if (state.migration) {
             notices += DashboardNotice.Migration
@@ -342,6 +351,14 @@ class DashboardViewModel(
         }
     }
 
+    fun onOpenSettings(instanceId: String) {
+        val columns = columns.value
+        viewModelScope.launch {
+            val instance = repository.instanceForEdit(columns, instanceId) ?: return@launch
+            _events.send(DashboardEvent.OpenWidgetSettings(columns, instance))
+        }
+    }
+
     fun onNewData(device: GBDevice) {
         if (repository.isDeviceInScope(device)) {
             reload.update { it + 1 }
@@ -402,8 +419,8 @@ class DashboardViewModel(
         editState.value = currentEditState.copy(canDiscard = snapshot != repository.snapshot())
     }
 
-    private fun endOfDaySeconds(date: LocalDate): Int =
-        date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toEpochSecond().toInt()
+    private fun PlacedWidget.hasSameView(other: PlacedWidget): Boolean =
+        widget == other.widget && variant == other.variant
 
     override fun onCleared() {
         _events.close()

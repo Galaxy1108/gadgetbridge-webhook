@@ -2,6 +2,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.dashboard
 
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.data.DashboardSettings
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
 import java.time.LocalDate
 
 /**
@@ -62,6 +63,8 @@ sealed interface DashboardEvent {
     data object NoWidgetsAvailable : DashboardEvent
 
     data class ShowUndo(val action: DashboardUndoAction) : DashboardEvent
+
+    data class OpenWidgetSettings(val columns: Int, val instance: WidgetInstance) : DashboardEvent
 }
 
 enum class DashboardUndoAction {

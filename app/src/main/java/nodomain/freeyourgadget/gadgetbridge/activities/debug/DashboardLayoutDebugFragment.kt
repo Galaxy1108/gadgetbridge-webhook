@@ -79,7 +79,8 @@ class DashboardLayoutDebugFragment : AbstractDebugFragment() {
             .setMessage("type = ${placement.instance.typeId}\nvariant = ${placement.variantId}\nx = ${placement.x}\n\n$message")
             .setPositiveButton(R.string.ok, null)
             .setNeutralButton(R.string.menuitem_settings) { _, _ ->
-                WidgetInstanceSettingsActivity.startForWidget(requireContext(), columns, instanceId)
+                val instance = WidgetLayoutStore.instanceForEdit(columns, instanceId) ?: return@setNeutralButton
+                startActivity(WidgetInstanceSettingsActivity.createIntent(requireContext(), columns, instance))
             }
             .show()
     }

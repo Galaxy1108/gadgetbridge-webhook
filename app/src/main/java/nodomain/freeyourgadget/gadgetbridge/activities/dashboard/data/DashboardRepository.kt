@@ -33,7 +33,7 @@ interface DashboardRepository {
 
     fun availableWidgets(): List<GBWidget<*>>
 
-    fun newWidgets(device: GBDevice): List<GBWidget<*>>
+    suspend fun newWidgets(device: GBDevice): List<GBWidget<*>>
 
     suspend fun add(columns: Int, typeId: String, variantId: String): WidgetInstance
 
@@ -46,6 +46,11 @@ interface DashboardRepository {
     suspend fun restore(deleted: DeletedWidget)
 
     suspend fun setVariant(columns: Int, instanceId: String, variantId: String)
+
+    /**
+     * Returns [instanceId] in the layout for [columns]. A derived layout is stored first, and the copy is returned.
+     */
+    suspend fun instanceForEdit(columns: Int, instanceId: String): WidgetInstance?
 
     suspend fun snapshot(): DashboardSnapshot
 

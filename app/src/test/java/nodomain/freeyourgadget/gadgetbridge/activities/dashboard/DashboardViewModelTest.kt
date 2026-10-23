@@ -275,7 +275,7 @@ class DashboardViewModelTest {
 
         override fun availableWidgets(): List<GBWidget<*>> = listOf(StepsWidget)
 
-        override fun newWidgets(device: GBDevice): List<GBWidget<*>> = emptyList()
+        override suspend fun newWidgets(device: GBDevice): List<GBWidget<*>> = emptyList()
 
         override suspend fun add(columns: Int, typeId: String, variantId: String): WidgetInstance {
             revision++
@@ -309,6 +309,9 @@ class DashboardViewModelTest {
         override suspend fun setVariant(columns: Int, instanceId: String, variantId: String) {
             revision++
         }
+
+        override suspend fun instanceForEdit(columns: Int, instanceId: String): WidgetInstance =
+            WidgetInstance(instanceId, StepsWidget.id)
 
         override suspend fun snapshot(): DashboardSnapshot {
             snapshotCalls++

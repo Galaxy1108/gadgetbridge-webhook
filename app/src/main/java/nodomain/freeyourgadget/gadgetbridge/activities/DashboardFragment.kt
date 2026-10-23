@@ -70,9 +70,9 @@ import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentDashboardBinding
 import nodomain.freeyourgadget.gadgetbridge.util.BarShade
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
 import nodomain.freeyourgadget.gadgetbridge.widgets.PlacedWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
-import java.time.LocalTime
 import java.time.ZoneId
 import java.util.Date
 
@@ -265,7 +265,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         binder.cardsEnabled = state.settings.cardsEnabled
         binder.dashboardShowAllDevices = state.settings.showAllDevices
         binder.dashboardDeviceList = state.settings.deviceAddresses
-        binder.timestamp = endOfDaySeconds(state.date)
+        binder.timestamp = DashboardQuery.forDay(state.date).timeTo
 
         val items = state.items.map { it.placed }
         if (items != lastItems) {
@@ -321,6 +321,10 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
             }
 
             is DashboardEvent.ShowUndo -> showUndo(event.action)
+
+            is DashboardEvent.OpenWidgetSettings -> widgetSettingsLauncher.launch(
+                WidgetInstanceSettingsActivity.createIntent(requireContext(), event.columns, event.instance)
+            )
         }
     }
 
@@ -357,7 +361,6 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
     }
 
     override fun onEditClick(item: PlacedWidget, button: View) {
-        val columns = binder?.columns ?: return
         val instanceId = item.instance.instanceId
         val popup = PopupMenu(requireContext(), button)
         popup.inflate(R.menu.dashboard_widget_edit_menu)
@@ -365,11 +368,7 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.dashboard_widget_variant -> showVariantSheet(item)
-                R.id.dashboard_widget_settings -> {
-                    val intent = WidgetInstanceSettingsActivity.createIntent(requireContext(), columns, instanceId)
-                        ?: return@setOnMenuItemClickListener false
-                    widgetSettingsLauncher.launch(intent)
-                }
+                R.id.dashboard_widget_settings -> viewModel.onOpenSettings(instanceId)
 
                 R.id.dashboard_widget_duplicate -> viewModel.onDuplicate(instanceId)
 
@@ -411,7 +410,4 @@ class DashboardFragment : Fragment(), MenuProvider, HeaderShadePage, DashboardGr
         val shade = _binding?.root?.findViewById<View>(R.id.dashboard_date_row_shade) ?: return null
         return if (BarShade.continuesToolbar(shade.context, R.attr.datestep_row_bg)) shade else null
     }
-
-    private fun endOfDaySeconds(date: java.time.LocalDate): Int =
-        date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toEpochSecond().toInt()
 }

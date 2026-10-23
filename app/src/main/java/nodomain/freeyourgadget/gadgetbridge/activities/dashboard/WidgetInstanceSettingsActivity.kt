@@ -7,7 +7,6 @@ import androidx.preference.PreferenceFragmentCompat
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractSettingsActivityV2
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgets
 
@@ -34,27 +33,14 @@ class WidgetInstanceSettingsActivity : AbstractSettingsActivityV2() {
 
     companion object {
         /**
-         * Opens the settings of [instanceId] in the layout of [columns] columns. If that layout is derived,
-         * it is stored first, and the settings of the copy are opened.
+         * Opens the settings of [instance] in the layout of [columns] columns.
          */
-        fun createIntent(context: Context, columns: Int, instanceId: String): Intent? {
-            val instance = WidgetLayoutStore.instanceForEdit(columns, instanceId) ?: return null
-            return Intent(context, WidgetInstanceSettingsActivity::class.java).apply {
+        fun createIntent(context: Context, columns: Int, instance: WidgetInstance): Intent =
+            Intent(context, WidgetInstanceSettingsActivity::class.java).apply {
                 putExtra(WidgetInstanceSettingsFragment.ARG_INSTANCE_ID, instance.instanceId)
                 putExtra(WidgetInstanceSettingsFragment.ARG_TYPE_ID, instance.typeId)
                 putExtra(WidgetInstanceSettingsFragment.ARG_COLUMNS, columns)
             }
-        }
-
-        fun startForWidget(context: Context, columns: Int, instanceId: String): WidgetInstance? {
-            val instance = WidgetLayoutStore.instanceForEdit(columns, instanceId) ?: return null
-            val intent = Intent(context, WidgetInstanceSettingsActivity::class.java)
-            intent.putExtra(WidgetInstanceSettingsFragment.ARG_INSTANCE_ID, instance.instanceId)
-            intent.putExtra(WidgetInstanceSettingsFragment.ARG_TYPE_ID, instance.typeId)
-            intent.putExtra(WidgetInstanceSettingsFragment.ARG_COLUMNS, columns)
-            context.startActivity(intent)
-            return instance
-        }
 
         fun startForLauncherWidget(context: Context, appWidgetId: Int, launcherWidget: LauncherWidget) {
             val intent = Intent(context, WidgetInstanceSettingsActivity::class.java)

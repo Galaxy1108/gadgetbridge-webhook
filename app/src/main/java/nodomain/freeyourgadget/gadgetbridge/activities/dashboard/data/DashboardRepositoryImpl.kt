@@ -73,7 +73,8 @@ class DashboardRepositoryImpl(
 
     override fun availableWidgets(): List<GBWidget<*>> = WidgetRegistry.available()
 
-    override fun newWidgets(device: GBDevice): List<GBWidget<*>> = DashboardDefaults.newWidgets(device)
+    override suspend fun newWidgets(device: GBDevice): List<GBWidget<*>> =
+        withContext(ioDispatcher) { DashboardDefaults.newWidgets(device) }
 
     override suspend fun add(columns: Int, typeId: String, variantId: String): WidgetInstance =
         withContext(writeDispatcher) { WidgetLayoutStore.add(columns, typeId, variantId) }
@@ -92,6 +93,9 @@ class DashboardRepositoryImpl(
 
     override suspend fun setVariant(columns: Int, instanceId: String, variantId: String) =
         withContext(writeDispatcher) { WidgetLayoutStore.setVariant(columns, instanceId, variantId) }
+
+    override suspend fun instanceForEdit(columns: Int, instanceId: String): WidgetInstance? =
+        withContext(writeDispatcher) { WidgetLayoutStore.instanceForEdit(columns, instanceId) }
 
     override suspend fun snapshot(): DashboardSnapshot =
         withContext(writeDispatcher) { WidgetLayoutStore.snapshot() }
