@@ -498,20 +498,20 @@
         <item name="android:theme">@style/GadgetbridgeTheme.ToolbarIconOverlay</item>
     </style>
     <style name="GadgetbridgeTheme.ActionMode" parent="Widget.AppCompat.ActionMode">
-        <item name="background">?attr/colorPrimary</item>
+        <item name="background">?attr/toolbar_bg</item>
         <item name="titleTextStyle">@style/GadgetbridgeTheme.ActionModeTitleStyle</item>
         <item name="subtitleTextStyle">@style/GadgetbridgeTheme.ActionModeTitleStyle</item>
         <item name="android:theme">@style/GadgetbridgeTheme.ActionModeOverlay</item>
     </style>
     <style name="GadgetbridgeTheme.ActionModeOverlay" parent="">
-        <item name="colorControlNormal">?attr/colorOnPrimary</item>
-        <item name="actionmenu_icon_color">?attr/colorOnPrimary</item>
+        <item name="colorControlNormal">?attr/toolbar_icon</item>
+        <item name="actionmenu_icon_color">?attr/toolbar_icon</item>
     </style>
     <style name="GadgetbridgeTheme.ActionModeCloseButton" parent="Widget.AppCompat.ActionButton">
-        <item name="android:tint">?attr/colorOnPrimary</item>
+        <item name="android:tint">?attr/toolbar_icon</item>
     </style>
     <style name="GadgetbridgeTheme.ActionModeTitleStyle" parent="TextAppearance.Material3.ActionBar.Title">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textColor">?attr/toolbar_title</item>
     </style>
     <style name="GadgetbridgeTheme.OverflowMenuStyle" parent="Widget.Material3.PopupMenu.Overflow" />
 
