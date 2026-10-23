@@ -39,9 +39,11 @@ class GridDragController(
 
     /**
      * Starts to move [child], at the position of the last touch down on the grid.
+     * Does nothing if no touch is in progress.
      */
     @SuppressLint("ClickableViewAccessibility")
     fun start(child: View) {
+        if (!grid.isTouchDown) return
         val instanceId = binder.instanceIdOf(child) ?: return
         dragged = child
         binder.draggedId = instanceId

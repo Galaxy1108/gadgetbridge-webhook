@@ -26,6 +26,12 @@ class WidgetGridRecyclerView @JvmOverloads constructor(
     var lastDownY = 0f
         private set
 
+    /**
+     * Whether a touch is in progress (between its down and its up, or cancel).
+     */
+    var isTouchDown = false
+        private set
+
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         super.onMeasure(widthSpec, heightSpec)
         val heightMode = MeasureSpec.getMode(heightSpec)
@@ -37,11 +43,18 @@ class WidgetGridRecyclerView @JvmOverloads constructor(
         )
     }
 
-    override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
-        if (e.actionMasked == MotionEvent.ACTION_DOWN) {
-            lastDownX = e.x
-            lastDownY = e.y
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                lastDownX = ev.x
+                lastDownY = ev.y
+                isTouchDown = true
+            }
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> isTouchDown = false
         }
-        return interceptTouches
+        return super.dispatchTouchEvent(ev)
     }
+
+    override fun onInterceptTouchEvent(e: MotionEvent): Boolean = interceptTouches
 }
