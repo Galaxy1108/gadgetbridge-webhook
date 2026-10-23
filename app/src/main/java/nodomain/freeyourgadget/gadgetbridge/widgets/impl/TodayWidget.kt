@@ -107,7 +107,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
             title = R.string.pref_dashboard_widget_show_legend_title,
             summary = R.string.pref_dashboard_widget_show_legend_summary,
             icon = R.drawable.ic_legend_toggle,
-            defaultValue = true,
+            defaultValue = false,
             connectedOnly = false,
         )
         text(
@@ -386,7 +386,7 @@ object TodayWidget : GBWidget<TodayWidget.Data> {
         clock.upsideDown = config.prefs.getBoolean("24h_upside_down", false)
     }
 
-    private fun showLegend(config: WidgetConfig) = config.prefs.getBoolean("legend", true)
+    private fun showLegend(config: WidgetConfig) = config.prefs.getBoolean("legend", false)
 
     /**
      * Grows the clock or the timeline into the space the legend leaves when it is hidden.

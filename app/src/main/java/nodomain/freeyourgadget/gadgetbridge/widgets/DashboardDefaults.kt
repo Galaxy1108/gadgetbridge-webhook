@@ -3,10 +3,22 @@ package nodomain.freeyourgadget.gadgetbridge.widgets
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper
-import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid.placeAtFirstFree
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BloodPressureWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.BodyEnergyWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.DistanceWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.GoalsWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.HeartRateWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.HrvWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.LastActivityWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.PaiWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.SleepScoreWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.SleepWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StepsWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.StressWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.impl.TodayWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.TrainingLoadWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.TrainingReadinessWidget
+import nodomain.freeyourgadget.gadgetbridge.widgets.impl.Vo2MaxWidget
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -17,28 +29,55 @@ object DashboardDefaults {
     private val LOG: Logger = LoggerFactory.getLogger(DashboardDefaults::class.java)
 
     /**
-     * The default widgets, in order.
+     * A row of the default dashboard: the common variant to all its widgets, and the widgets themselves, in order.
      */
-    private val WIDGETS: List<Pair<GBWidget<*>, WidgetVariant>> = listOf(
-        TodayWidget to WidgetVariant.LARGE,
-        StepsWidget to WidgetVariant.NUMBER,
-        SleepWidget to WidgetVariant.TALL,
+    private class Row(val variant: WidgetVariant, vararg val candidates: GBWidget<*>)
+
+    /**
+     * The default rows, in order.
+     */
+    private val ROWS: List<Row> = listOf(
+        Row(WidgetVariant.LARGE, TodayWidget),
+        Row(WidgetVariant.SMALL, GoalsWidget),
+        Row(WidgetVariant.NUMBER, StepsWidget, SleepWidget, DistanceWidget, HeartRateWidget),
+        Row(WidgetVariant.TALL, StressWidget, HrvWidget, BodyEnergyWidget, SleepScoreWidget),
+        Row(WidgetVariant.NUMBER, TrainingLoadWidget, TrainingReadinessWidget, Vo2MaxWidget, PaiWidget),
+        Row(WidgetVariant.WIDE, LastActivityWidget),
+        Row(WidgetVariant.WIDE, BloodPressureWidget),
     )
 
     /**
-     * The placements in the base layout of the default widgets that a device in the database supports. The instance
-     * ids are the widget ids, so that the settings of a legacy instance with the same id stay.
+     * Populates the default dashboard, one row at a time, with supported widgets, until it's full.
      */
     fun placements(): List<WidgetPlacement> {
         val devices = DeviceHelper.getInstance().availableDevices
+        val placed = mutableSetOf<GBWidget<*>>()
         val placements = mutableListOf<WidgetPlacement>()
-        for ((widget, variant) in WIDGETS) {
-            if (devices.none { widget.isSupportedBy(it) }) continue
-            placements += placeAtFirstFree(
-                WidgetGrid.BASE_COLUMNS,
-                placements,
-                WidgetPlacement(WidgetInstance(widget.id, widget.id), variant.id, 0)
-            )
+        for (row in ROWS) {
+            val perRow = WidgetGrid.BASE_COLUMNS / row.variant.width
+            val widgets = row.candidates
+                .filter { widget -> widget !in placed && devices.any { widget.isSupportedBy(it) } }
+                .take(perRow)
+            if (widgets.isEmpty()) continue
+
+            if (widgets.size == 1 && perRow > 1) {
+                val widget = widgets.single()
+                val fullWidth = widget.variants.find {
+                    it.width == WidgetGrid.BASE_COLUMNS && it.heightDp == row.variant.heightDp
+                } ?: continue
+                placed += widget
+                placements += WidgetPlacement(WidgetInstance(widget.id, widget.id), fullWidth.id, 0)
+                continue
+            }
+
+            widgets.forEachIndexed { index, widget ->
+                placed += widget
+                placements += WidgetPlacement(
+                    WidgetInstance(widget.id, widget.id),
+                    row.variant.id,
+                    index * row.variant.width
+                )
+            }
         }
         return placements
     }
