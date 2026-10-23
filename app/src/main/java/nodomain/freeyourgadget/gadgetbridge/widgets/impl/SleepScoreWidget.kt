@@ -96,7 +96,7 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
     }
 
     /**
-     * The latest sleep score up to the end of the selected day, or -1.
+     * The latest sleep score of the selected day, or -1.
      */
     internal suspend fun latestScore(scope: WidgetDataScope): Int {
         try {
@@ -106,7 +106,7 @@ object SleepScoreWidget : MetricWidget<SleepScoreWidget.Data>() {
                     dev.deviceCoordinator.getSleepScoreProvider(dev, db.daoSession)?.getLatestSample(
                         scope.query.timeTo * 1000L
                     )
-                }
+                }?.takeIf { it.timestamp >= scope.dayStart * 1000L }
                 if (sample != null && (latest == null || sample.timestamp > latest.timestamp)) {
                     latest = sample
                 }
