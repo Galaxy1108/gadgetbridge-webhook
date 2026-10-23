@@ -2043,6 +2043,8 @@
     <string name="hrv_status_day_avg_legend">Daily average (ms)</string>
     <string name="hrv_status_seven_days_avg">7-day average</string>
     <string name="hrv_status_seven_days_avg_legend">7-day average (ms)</string>
+    <string name="list_item_selected">Selected</string>
+    <string name="list_item_not_selected">Not selected</string>
     <string name="hrv_status_seven_days_avg_status">Status</string>
     <string name="hrv_status_balanced">Balanced</string>
     <string name="hrv_status_unbalanced">Unbalanced</string>
