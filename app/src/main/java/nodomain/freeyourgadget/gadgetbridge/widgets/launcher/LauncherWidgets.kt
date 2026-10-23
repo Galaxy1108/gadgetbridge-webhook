@@ -2,11 +2,13 @@ package nodomain.freeyourgadget.gadgetbridge.widgets.launcher
 
 import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
+import android.content.ComponentCallbacks
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -56,9 +58,25 @@ object LauncherWidgets {
         }
     }
 
+    private var nightMode = Configuration.UI_MODE_NIGHT_UNDEFINED
+
+    private val configurationCallbacks = object : ComponentCallbacks {
+        override fun onConfigurationChanged(newConfig: Configuration) {
+            val newNightMode = newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (newNightMode == nightMode) return
+            nightMode = newNightMode
+            LOG.debug("Night mode changed to {}, updating the launcher widgets", newNightMode)
+            updateAll(GBApplication.getContext(), 0)
+        }
+
+        @Deprecated("Deprecated in Java")
+        override fun onLowMemory() {
+        }
+    }
+
     /**
-     * Updates the launcher widgets when new data is stored, and when the language, the theme or the dashboard devices
-     * change.
+     * Updates the launcher widgets when new data is stored, and when the language, the theme, the night mode or the
+     * dashboard devices change.
      */
     @JvmStatic
     fun registerUpdateTriggers(context: Context) {
@@ -67,6 +85,8 @@ object LauncherWidgets {
         filter.addAction(GBApplication.ACTION_LANGUAGE_CHANGE)
         LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter)
         GBApplication.getPrefs().preferences.registerOnSharedPreferenceChangeListener(prefsListener)
+        nightMode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        context.registerComponentCallbacks(configurationCallbacks)
     }
 
     /**
