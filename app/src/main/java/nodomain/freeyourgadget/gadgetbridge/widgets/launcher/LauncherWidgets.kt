@@ -15,9 +15,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
-import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
-import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import org.slf4j.Logger
@@ -157,16 +155,4 @@ object LauncherWidgets {
     /**
      * The end of the current day, in epoch seconds.
      */
-    fun endOfToday(): Int {
-        val day = GregorianCalendar.getInstance()
-        day.set(Calendar.HOUR_OF_DAY, 23)
-        day.set(Calendar.MINUTE, 59)
-        day.set(Calendar.SECOND, 59)
-        return (day.timeInMillis / 1000L).toInt()
-    }
-
-    fun todayQuery(): DashboardQuery {
-        val timeTo = endOfToday()
-        return DashboardQuery(DateTimeUtils.shiftDays(timeTo, -1), timeTo)
-    }
 }

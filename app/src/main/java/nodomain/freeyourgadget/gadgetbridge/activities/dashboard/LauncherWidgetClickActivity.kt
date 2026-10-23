@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity
+import nodomain.freeyourgadget.gadgetbridge.widgets.DashboardQuery
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
 import nodomain.freeyourgadget.gadgetbridge.widgets.bindUnsafe
@@ -19,6 +20,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgets
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 /**
  * A transparent activity that handles the click action of a launcher widget.
@@ -47,11 +49,12 @@ class LauncherWidgetClickActivity : AbstractGBActivity() {
 
         val variant = LauncherWidgetRenderer.variantFor(this, appWidgetId, widget, launcherWidget)
         val config = LauncherWidgets.configOf(launcherWidget, variant)
+        val query = DashboardQuery.forDay(LocalDate.now())
         lifecycleScope.launch {
             val data = try {
                 withContext(Dispatchers.IO) {
                     widget.loadData(
-                        WidgetDataScope(LauncherWidgets.todayQuery(), config.resolveDevices(widget)),
+                        WidgetDataScope(query, config.resolveDevices(widget)),
                         config
                     )
                 }
@@ -66,7 +69,7 @@ class LauncherWidgetClickActivity : AbstractGBActivity() {
             // Some widgets read the bound data in onClick
             val view = widget.createView(layoutInflater, FrameLayout(this@LauncherWidgetClickActivity), variant)
             widget.bindUnsafe(view, variant, config, data)
-            widget.onClick(view, variant, config, LauncherWidgets.endOfToday())
+            widget.onClick(view, variant, config, query.timeTo)
             clicked = true
             if (hasWindowFocus()) {
                 finishUnlessFocusLost()

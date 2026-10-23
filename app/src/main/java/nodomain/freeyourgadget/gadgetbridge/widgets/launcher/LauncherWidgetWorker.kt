@@ -16,6 +16,7 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetDataScope
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 /**
  * Loads the data of launcher widgets for the current day, and renders them.
@@ -26,7 +27,7 @@ class LauncherWidgetWorker(context: Context, params: WorkerParameters) : Corouti
         val appWidgetIds = inputData.getIntArray(KEY_APP_WIDGET_IDS) ?: LauncherWidgets.appWidgetIds(applicationContext)
         LOG.debug("Updating launcher widgets {}", appWidgetIds.contentToString())
 
-        val query = LauncherWidgets.todayQuery()
+        val query = DashboardQuery.forDay(LocalDate.now())
         coroutineScope {
             appWidgetIds.map { async { update(it, query) } }.awaitAll()
         }

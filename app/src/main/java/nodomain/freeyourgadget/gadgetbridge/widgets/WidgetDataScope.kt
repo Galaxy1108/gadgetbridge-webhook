@@ -13,9 +13,11 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser
 import nodomain.freeyourgadget.gadgetbridge.model.DailyTotals
+import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.SleepRangeUtils
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.util.Date
 import java.util.GregorianCalendar
@@ -27,7 +29,17 @@ import kotlin.math.roundToInt
 data class DashboardQuery(
     val timeFrom: Int,
     val timeTo: Int,
-)
+) {
+    companion object {
+        /**
+         * The query for the 24 hours that end at the end of [day].
+         */
+        fun forDay(day: LocalDate): DashboardQuery {
+            val timeTo = day.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toEpochSecond().toInt()
+            return DashboardQuery(DateTimeUtils.shiftDays(timeTo, -1), timeTo)
+        }
+    }
+}
 
 /**
  * Per-widget-instance view over one dashboard refresh: the selected day ([query]) and the devices
