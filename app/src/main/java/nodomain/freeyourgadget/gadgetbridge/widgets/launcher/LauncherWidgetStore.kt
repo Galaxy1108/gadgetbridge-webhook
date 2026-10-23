@@ -33,6 +33,8 @@ object LauncherWidgetStore {
 
     fun get(appWidgetId: Int): LauncherWidget? = load()[appWidgetId]
 
+    fun instances(): List<WidgetInstance> = load().values.map { it.instance }
+
     /**
      * Stores a new instance of [typeId] for [appWidgetId]. A null [variantId] is the automatic variant.
      */

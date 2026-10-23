@@ -98,7 +98,11 @@ class DashboardViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     private val layoutFlow = columns.flatMapLatest { repository.layoutFlow(it) }
 
-    private var editSnapshot: DashboardSnapshot? = null
+    private var editSnapshot: DashboardSnapshot?
+        get() = savedStateHandle[KEY_EDIT_SNAPSHOT]
+        set(value) {
+            savedStateHandle[KEY_EDIT_SNAPSHOT] = value
+        }
     private var editGeneration = 0
     private var deletedWidget: DeletedWidget? = null
     private var classicUndo: Pair<DashboardSnapshot, DashboardNotices.State>? = null
@@ -407,6 +411,7 @@ class DashboardViewModel(
 
         private const val KEY_DAY = "dashboard_day"
         private const val KEY_EDITING = "dashboard_editing"
+        private const val KEY_EDIT_SNAPSHOT = "dashboard_edit_snapshot"
         private const val KEY_COLUMNS = "dashboard_columns"
     }
 }

@@ -6,6 +6,7 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 import nodomain.freeyourgadget.gadgetbridge.util.gson.GsonSerialized
+import java.io.Serializable
 
 /**
  * One copy of a widget that the user added. [typeId] is the [GBWidget.id].
@@ -14,7 +15,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.gson.GsonSerialized
 data class WidgetInstance(
     val instanceId: String,
     val typeId: String,
-)
+) : Serializable
 
 /**
  * A widget instance in one layout, at the column of its left edge. The order of the placements in the layout is the
@@ -25,7 +26,7 @@ data class WidgetPlacement(
     val instance: WidgetInstance,
     val variantId: String,
     val x: Int,
-)
+) : Serializable
 
 /**
  * A widget instance as the dashboard grid displays it.

@@ -12,6 +12,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.gson.GsonSerialized
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetGrid.placeAtFirstFree
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.Serializable
 import java.util.UUID
 
 /**
@@ -46,7 +47,7 @@ class DeletedWidget(
 data class DashboardSnapshot(
     internal val layouts: Map<Int, List<WidgetPlacement>>,
     internal val settings: Map<String, Map<String, *>>,
-)
+) : Serializable
 
 /**
  * Persists the layouts as JSON in one preference, and the settings of each widget instance in its own
