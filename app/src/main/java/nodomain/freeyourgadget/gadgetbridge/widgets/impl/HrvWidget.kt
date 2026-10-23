@@ -65,13 +65,15 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
             }
 
             if (latest != null) {
+                val history = if (config.needsHistory) nights(scope, if (config.isLargeStyle) LARGE_NIGHTS else NIGHTS) else null
                 return Data(
                     weeklyAverage = latest.weeklyAverage ?: 0,
                     baselineLowUpper = latest.baselineLowUpper ?: 0,
                     baselineBalancedLower = latest.baselineBalancedLower ?: 0,
                     baselineBalancedUpper = latest.baselineBalancedUpper ?: 0,
                     status = latest.status,
-                    nights = if (config.needsHistory) nights(scope, if (config.isLargeStyle) LARGE_NIGHTS else NIGHTS) else null,
+                    nights = history?.first,
+                    nightStatuses = history?.second,
                     day = scope.day,
                     lastNight = latest.lastNightAverage ?: 0,
                 )
@@ -89,6 +91,7 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
         baselineBalancedUpper = 56,
         status = HrvSummarySample.Status.BALANCED,
         nights = floatArrayOf(44f, 51f, 39f, 47f, 53f, 46f, 49f),
+        nightStatuses = Array(7) { HrvSummarySample.Status.BALANCED },
         lastNight = 49,
     )
 
@@ -156,34 +159,29 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
     private fun hasBaseline(data: Data) = data.baselineBalancedLower > 0 && data.baselineBalancedUpper > 0
 
     private fun statusOf(context: Context, data: Data): StatusLine.Chip {
-        val (label, color) = when (data.status) {
-            HrvSummarySample.Status.BALANCED -> R.string.hrv_status_balanced to R.color.hrv_status_balanced
-            HrvSummarySample.Status.UNBALANCED -> R.string.hrv_status_unbalanced to R.color.hrv_status_unbalanced
-            HrvSummarySample.Status.LOW -> R.string.hrv_status_low to R.color.hrv_status_low
-            HrvSummarySample.Status.POOR -> R.string.hrv_status_poor to R.color.hrv_status_poor
-            else -> null to null
-        }
+        val (label, color) = statusLabelAndColor(data.status)
         if (label == null || color == null || !hasBaseline(data)) {
             return StatusLine.Chip(Color.GRAY, context.getString(R.string.widget_status_building_baseline))
         }
         return StatusLine.Chip(ContextCompat.getColor(context, color), context.getString(label))
     }
 
+    private fun statusLabelAndColor(status: HrvSummarySample.Status?): Pair<Int?, Int?> =
+        when (status) {
+            HrvSummarySample.Status.BALANCED -> R.string.hrv_status_balanced to R.color.hrv_status_balanced
+            HrvSummarySample.Status.UNBALANCED -> R.string.hrv_status_unbalanced to R.color.hrv_status_unbalanced
+            HrvSummarySample.Status.LOW -> R.string.hrv_status_low to R.color.hrv_status_low
+            HrvSummarySample.Status.POOR -> R.string.hrv_status_poor to R.color.hrv_status_poor
+            else -> null to null
+        }
+
     private fun nightBars(context: Context, nights: FloatArray, data: Data): MiniChart.Bars {
         val balanced = ContextCompat.getColor(context, R.color.hrv_status_balanced)
-        val unbalanced = ContextCompat.getColor(context, R.color.hrv_status_unbalanced)
-        val lowColor = ContextCompat.getColor(context, R.color.hrv_status_low)
         val baseline = hasBaseline(data)
-        val lowUpper = data.baselineLowUpper.toFloat()
         val lower = data.baselineBalancedLower.toFloat()
         val upper = data.baselineBalancedUpper.toFloat()
         val colors = IntArray(nights.size) { night ->
-            when {
-                !baseline -> Color.GRAY
-                nights[night] in lower..upper -> balanced
-                lowUpper > 0 && nights[night] <= lowUpper -> lowColor
-                else -> unbalanced
-            }
+            statusLabelAndColor(data.nightStatuses?.getOrNull(night)).second?.let { ContextCompat.getColor(context, it) } ?: Color.GRAY
         }
         val known = nights.filter { !it.isNaN() } + if (baseline) listOf(lower, upper) else emptyList()
         val low = (known.minOrNull() ?: 0f) * SCALE_BELOW
@@ -197,7 +195,10 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
         )
     }
 
-    private suspend fun nights(scope: WidgetDataScope, count: Int): FloatArray {
+    /**
+     * Each of the [count] days' seven-day average and status, oldest first.
+     */
+    private suspend fun nights(scope: WidgetDataScope, count: Int): Pair<FloatArray, Array<HrvSummarySample.Status?>> {
         val from = scope.dayStartMinusDays(count - 1) * 1000L
         val samples = try {
             scope.db { db ->
@@ -205,16 +206,21 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
                     dev.deviceCoordinator.getHrvSummarySampleProvider(dev, db.daoSession)
                         ?.getAllSamples(from, scope.query.timeTo * 1000L)
                         .orEmpty()
-                        .mapNotNull { sample ->
-                            sample.lastNightAverage?.takeIf { it > 0 }?.let { TimedValue(sample.timestamp / 1000L, it.toFloat()) }
-                        }
                 }
             }
         } catch (e: Exception) {
             LOG.error("Could not get hrv history", e)
             emptyList()
         }
-        return WidgetHistory.dailyLatest(samples, scope.day, count, scope.zone)
+        val averages = samples.mapNotNull { sample ->
+            sample.weeklyAverage?.takeIf { it > 0 }?.let { TimedValue(sample.timestamp / 1000L, it.toFloat()) }
+        }
+        val statuses = samples.mapNotNull { sample ->
+            sample.status?.let { TimedValue(sample.timestamp / 1000L, it.num.toFloat()) }
+        }
+        val dailyStatuses = WidgetHistory.dailyLatest(statuses, scope.day, count, scope.zone)
+        return WidgetHistory.dailyLatest(averages, scope.day, count, scope.zone) to
+            Array(count) { day -> dailyStatuses[day].takeUnless { it.isNaN() }?.let { HrvSummarySample.Status.fromNum(it.toInt()) } }
     }
 
     @JvmStatic
@@ -272,8 +278,8 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
     }
 
     /**
-     * [nights] holds the averages of the nights ending on [day], oldest first, for every style but the gauge:
-     * seven, or 28 for the large style.
+     * [nights] holds the seven-day averages of the days ending on [day], oldest first, for every style but the gauge:
+     * seven, or 28 for the large style. [nightStatuses] holds each of those days' status.
      */
     class Data(
         val weeklyAverage: Int,
@@ -282,6 +288,7 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
         val baselineBalancedUpper: Int,
         val status: HrvSummarySample.Status? = null,
         val nights: FloatArray? = null,
+        val nightStatuses: Array<HrvSummarySample.Status?>? = null,
         val day: LocalDate = LocalDate.now(),
         val lastNight: Int = 0,
     )
