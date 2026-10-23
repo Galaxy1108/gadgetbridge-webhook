@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -418,6 +419,13 @@ public class ControlCenterv2 extends AppCompatActivity
 
                 bindTopShade();
             }
+
+            @Override
+            public void onPageScrollStateChanged(final int state) {
+                if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                    requestLostLayouts(viewPager.getChildAt(0));
+                }
+            }
         });
         if (savedInstanceState == null) {
             selectDefaultTab();
@@ -499,11 +507,31 @@ public class ControlCenterv2 extends AppCompatActivity
     }
 
     /**
+     * Requests the layout again for each view that waits for a layout, but whose parent does not.
+     */
+    private static void requestLostLayouts(final View view) {
+        if (view.getVisibility() == View.GONE) {
+            return;
+        }
+        // The pager detaches and attaches a page again while it scrolls. After that, a view can
+        // wait for a layout that its parents do not request, so it does not get one.
+        if (view.isLayoutRequested() && view.getParent() instanceof View && !((View) view.getParent()).isLayoutRequested()) {
+            view.requestLayout();
+        }
+        if (view instanceof ViewGroup) {
+            final ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                requestLostLayouts(group.getChildAt(i));
+            }
+        }
+    }
+
+    /**
      * Uses the shade of the visible page, if it has one of its own, instead of the shade below
      * the toolbar.
      */
     private void bindTopShade() {
-        final Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
+        final Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + pagerAdapter.getItemId(viewPager.getCurrentItem()));
         final View headerShade = fragment instanceof HeaderShadePage
                 ? ((HeaderShadePage) fragment).getHeaderShade() : null;
         barShades.setTopShade(headerShade != null ? headerShade : toolbarShade);
