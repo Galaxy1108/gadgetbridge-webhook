@@ -49,6 +49,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance;
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore;
+import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetStore;
 
 public class ZipBackupExportJob extends AbstractZipBackupJob {
     private static final Logger LOG = LoggerFactory.getLogger(ZipBackupExportJob.class);
@@ -147,7 +148,9 @@ public class ZipBackupExportJob extends AbstractZipBackupJob {
             throw new IOException("Failed to export device preferences", e);
         }
 
-        for (final WidgetInstance widgetInstance : WidgetLayoutStore.INSTANCE.instances()) {
+        final List<WidgetInstance> widgetInstances = new ArrayList<>(WidgetLayoutStore.INSTANCE.instances());
+        widgetInstances.addAll(LauncherWidgetStore.INSTANCE.instances());
+        for (final WidgetInstance widgetInstance : widgetInstances) {
             LOG.debug("Exporting widget preferences for {}", widgetInstance.getInstanceId());
             final SharedPreferences widgetPrefs = GBApplication.getWidgetSharedPrefs(widgetInstance.getInstanceId());
             if (widgetPrefs != null) {

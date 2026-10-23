@@ -46,6 +46,7 @@ import nodomain.freeyourgadget.gadgetbridge.entities.Device;
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetInstance;
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetLayoutStore;
+import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetStore;
 
 public class ZipBackupImportJob extends AbstractZipBackupJob {
     private static final Logger LOG = LoggerFactory.getLogger(ZipBackupImportJob.class);
@@ -199,9 +200,11 @@ public class ZipBackupImportJob extends AbstractZipBackupJob {
             if (isAborted()) return;
 
             // At this point global preferences (which includes the dashboard layouts) are
-            // already restored, so WidgetLayoutStore.instances() reflects the imported instances.
+            // already restored, so the widget stores reflect the imported instances.
             LOG.debug("Importing widget preferences");
-            for (final WidgetInstance widgetInstance : WidgetLayoutStore.INSTANCE.instances()) {
+            final List<WidgetInstance> widgetInstances = new ArrayList<>(WidgetLayoutStore.INSTANCE.instances());
+            widgetInstances.addAll(LauncherWidgetStore.INSTANCE.instances());
+            for (final WidgetInstance widgetInstance : widgetInstances) {
                 if (isAborted()) break;
 
                 LOG.debug("Importing widget preferences for {}", widgetInstance.getInstanceId());
