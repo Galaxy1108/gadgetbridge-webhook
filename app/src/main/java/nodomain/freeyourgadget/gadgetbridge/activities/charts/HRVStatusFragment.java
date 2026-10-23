@@ -121,7 +121,7 @@ public class HRVStatusFragment extends AbstractChartFragment<HRVStatusFragment.H
     private int totalDays = DEFAULT_TOTAL_DAYS;
     private boolean showDailyAverage = true;
     private boolean showLastNightAverage = true;
-    private boolean showWeeklyAverage = false;
+    private boolean showWeeklyAverage = true;
     private boolean showDailyRange = false;
 
     public static HRVStatusFragment newLastNightInstance() {
