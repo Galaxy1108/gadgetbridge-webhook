@@ -30,6 +30,8 @@ import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetVariant
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetRenderer
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetStore
 import nodomain.freeyourgadget.gadgetbridge.widgets.variant
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Renders the settings of one widget instance, on the dashboard or on the launcher: the common ones (device
@@ -50,7 +52,12 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
         val typeId = requireArguments().getString(ARG_TYPE_ID) ?: return
         val columns = requireArguments().getInt(ARG_COLUMNS, WidgetGrid.BASE_COLUMNS)
         val appWidgetId = requireArguments().getInt(ARG_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
-        val widget = WidgetRegistry.byId(typeId)!!
+        val widget = WidgetRegistry.byId(typeId)
+        if (widget == null) {
+            LOG.error("Widget type {} is not available", typeId)
+            requireActivity().finish()
+            return
+        }
         val launcherWidget = LauncherWidgetStore.get(appWidgetId)
         val placement = WidgetLayoutStore.layout(columns).find { it.instance.instanceId == instanceId }
         val variant = if (launcherWidget != null) {
@@ -253,6 +260,8 @@ class WidgetInstanceSettingsFragment : AbstractPreferenceFragment(), SettingsRen
     }
 
     companion object {
+        private val LOG: Logger = LoggerFactory.getLogger(WidgetInstanceSettingsFragment::class.java)
+
         const val ARG_INSTANCE_ID = "widget_instance_id"
         const val ARG_TYPE_ID = "widget_type_id"
         const val ARG_COLUMNS = "widget_columns"
