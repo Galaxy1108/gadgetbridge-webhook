@@ -172,13 +172,16 @@ object HrvWidget : MetricWidget<HrvWidget.Data?>() {
     private fun nightBars(context: Context, nights: FloatArray, data: Data): MiniChart.Bars {
         val balanced = ContextCompat.getColor(context, R.color.hrv_status_balanced)
         val unbalanced = ContextCompat.getColor(context, R.color.hrv_status_unbalanced)
+        val lowColor = ContextCompat.getColor(context, R.color.hrv_status_low)
         val baseline = hasBaseline(data)
+        val lowUpper = data.baselineLowUpper.toFloat()
         val lower = data.baselineBalancedLower.toFloat()
         val upper = data.baselineBalancedUpper.toFloat()
         val colors = IntArray(nights.size) { night ->
             when {
                 !baseline -> Color.GRAY
                 nights[night] in lower..upper -> balanced
+                lowUpper > 0 && nights[night] <= lowUpper -> lowColor
                 else -> unbalanced
             }
         }
