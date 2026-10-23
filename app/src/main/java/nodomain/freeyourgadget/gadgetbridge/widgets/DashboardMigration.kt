@@ -106,7 +106,7 @@ object DashboardMigration {
         val placements = mutableListOf<WidgetPlacement>()
         for ((id, type, cols) in entries) {
             val (typeId, variantId) = when (type) {
-                "today", "goals" -> type to if (cols >= 2) WidgetVariant.LARGE.id else WidgetVariant.SMALL.id
+                "today", "goals" -> type to if (cols >= 2) WidgetVariant.LARGE.id else WidgetVariant.OVERVIEW_TALL.id
                 "stress_segmented" -> StressWidget.id to StressWidget.SEGMENTED.id
                 "stress_simple" -> StressWidget.id to StressWidget.SIMPLE.id
                 "stress_breakdown" -> StressWidget.id to StressWidget.BREAKDOWN.id
