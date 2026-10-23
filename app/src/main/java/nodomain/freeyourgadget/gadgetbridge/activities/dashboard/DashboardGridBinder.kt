@@ -204,6 +204,19 @@ class DashboardGridBinder(
         bind(cell)
     }
 
+    override fun onBindViewHolder(holder: CellHolder, position: Int, payloads: List<Any>) {
+        val cell = holder.cell
+        if (payloads.isEmpty() ||
+            payloads.any { it != PAYLOAD_PLACEMENT } ||
+            cell.instanceId != items[position].instance.instanceId
+        ) {
+            onBindViewHolder(holder, position)
+            return
+        }
+        cell.placed = items[position]
+        bindListeners(cell)
+    }
+
     fun cardOf(instanceId: String): View? {
         val position = positionOf(instanceId)
         if (position < 0) return null

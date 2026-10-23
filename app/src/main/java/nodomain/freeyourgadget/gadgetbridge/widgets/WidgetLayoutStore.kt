@@ -86,9 +86,12 @@ object WidgetLayoutStore {
      * The widgets that the grid displays for [columns], in their order. Placements of widgets that are not available
      * now are left out.
      */
-    fun placedWidgets(columns: Int): List<PlacedWidget> = layout(columns).mapNotNull { placement ->
-        val widget = WidgetRegistry.byId(placement.instance.typeId) ?: return@mapNotNull null
-        PlacedWidget(placement.instance, widget, widget.variant(placement.variantId), placement.x)
+    fun placedWidgets(columns: Int): List<PlacedWidget> {
+        val widgets = WidgetRegistry.all().associateBy { it.id }
+        return layout(columns).mapNotNull { placement ->
+            val widget = widgets[placement.instance.typeId] ?: return@mapNotNull null
+            PlacedWidget(placement.instance, widget, widget.variant(placement.variantId), placement.x)
+        }
     }
 
     /**
@@ -163,6 +166,10 @@ object WidgetLayoutStore {
     @Synchronized
     fun restore(deleted: DeletedWidget) {
         val placements = ownLayout(deleted.columns).placements.toMutableList()
+        if (placements.any { it.instance.instanceId == deleted.placement.instance.instanceId }) {
+            LOG.warn("Not restoring widget {}, the layout already has it", deleted.placement.instance.instanceId)
+            return
+        }
         placements.add(deleted.index.coerceAtMost(placements.size), deleted.placement)
         GBApplication.getWidgetSharedPrefs(deleted.placement.instance.instanceId)?.let { dest ->
             copyAllPrefs(deleted.settings, dest) { it }

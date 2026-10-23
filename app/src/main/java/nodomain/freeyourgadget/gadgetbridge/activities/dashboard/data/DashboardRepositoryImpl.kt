@@ -45,7 +45,7 @@ class DashboardRepositoryImpl(
     private val writeDispatcher = ioDispatcher.limitedParallelism(1)
 
     override fun layoutFlow(columns: Int): Flow<List<PlacedWidget>> =
-        merge(WidgetLayoutStore.changes, devicesChanges())
+        merge(WidgetLayoutStore.changes, coordinatorChanges())
             .onStart { emit(Unit) }
             .map { WidgetLayoutStore.placedWidgets(columns) }
             .flowOn(ioDispatcher)
@@ -105,6 +105,14 @@ class DashboardRepositoryImpl(
 
     override suspend fun restoreClassicDesign() =
         withContext(writeDispatcher) { DashboardMigration.restoreClassic() }
+
+    /**
+     * Emits when the coordinators of the devices change. The available widgets depend only on them.
+     */
+    private fun coordinatorChanges(): Flow<Unit> = devicesChanges()
+        .map { GBApplication.app().deviceManager.devices.map { it.deviceCoordinator }.toSet() }
+        .distinctUntilChanged()
+        .map { }
 
     /**
      * Emits when the list of devices changes.

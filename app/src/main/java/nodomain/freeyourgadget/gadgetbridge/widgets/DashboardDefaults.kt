@@ -55,10 +55,12 @@ object DashboardDefaults {
     }
 
     /**
-     * Fills an empty dashboard with the default widgets, and shows a notice for the new widgets of [device].
+     * Fills an empty dashboard with the default widgets when [device] is the first device, and shows a notice for
+     * the new widgets of [device].
      */
     fun onDeviceAdded(device: GBDevice) {
-        if (WidgetLayoutStore.instances().isEmpty()) {
+        val others = GBApplication.app().deviceManager.devices.filter { it.address != device.address }
+        if (others.isEmpty() && WidgetLayoutStore.instances().isEmpty()) {
             val placements = placements()
             LOG.info("Adding default widgets {} to the empty dashboard", placements.map { it.instance.typeId })
             WidgetLayoutStore.replaceLayouts(mapOf(WidgetGrid.BASE_COLUMNS to placements))

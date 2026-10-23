@@ -57,7 +57,7 @@ class DashboardEditModeController(
     }
 
     /**
-     * Whether starting edit mode needs a confirmation to discard the unsaved changes.
+     * Asks to discard the unsaved changes, and leaves edit mode if the user agrees.
      */
     fun confirmDiscard() {
         MaterialAlertDialogBuilder(activity)
