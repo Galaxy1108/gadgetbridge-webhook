@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.activities.notifications.apps.NotificationAppListActivity;
 import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 
@@ -84,7 +85,7 @@ public class NotificationManagementActivity extends AbstractSettingsActivityV2 {
 
             pref = findPreference("pref_key_blacklist");
             pref.setOnPreferenceClickListener(preference -> {
-                final Intent enableIntent = new Intent(requireContext(), AppBlacklistActivity.class);
+                final Intent enableIntent = new Intent(requireContext(), NotificationAppListActivity.class);
                 startActivity(enableIntent);
                 return true;
             });

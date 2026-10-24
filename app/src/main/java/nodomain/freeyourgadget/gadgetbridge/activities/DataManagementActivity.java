@@ -48,6 +48,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.files.FileManagerActivity
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
+import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppRepository;
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.ImportExportSharedPreferences;
@@ -175,6 +176,7 @@ public class DataManagementActivity extends AbstractGBActivity {
         } catch (Exception ex) {
             GB.toast(DataManagementActivity.this, getString(R.string.dbmanagementactivity_error_importing_db, ex.getLocalizedMessage()), Toast.LENGTH_LONG, GB.ERROR, ex);
         }
+        NotificationAppRepository.INSTANCE.reload();
 
         try (DBHandler lockHandler = GBApplication.acquireDB()) {
             List<Device> activeDevices = DBHelper.getActiveDevices(lockHandler.getDaoSession());

@@ -110,7 +110,7 @@ public class GBDaoGenerator {
             outputDir.mkdirs();
         }
 
-        final Schema schema = new Schema(158, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(159, MAIN_PACKAGE + ".entities");
 
         final List<Entity> sampleProvidersToGenerate = new LinkedList<>();
         final List<Entity> batterySampleProvidersToGenerate = new LinkedList<>();
@@ -289,6 +289,10 @@ public class GBDaoGenerator {
         Entity notificationFilter = addNotificationFilters(schema);
 
         addNotificationFilterEntry(schema, notificationFilter);
+
+        final Entity notificationAppConfigEntry = addNotificationAppConfigEntry(schema);
+        addNotificationAppFilterEntry(schema, notificationAppConfigEntry);
+        addNotificationAppReplacementEntry(schema, notificationAppConfigEntry);
 
         addActivitySummary(schema, user, device);
         addWorkoutUpload(schema);
@@ -1833,6 +1837,59 @@ public class GBDaoGenerator {
         Property notificationFilterId = notificationFilterEntry.addLongProperty("notificationFilterId").notNull().getProperty();
         notificationFilterEntry.addStringProperty("notificationFilterContent").notNull();
         notificationFilterEntry.addToOne(notificationFilterEntity, notificationFilterId);
+    }
+
+    private static Entity addNotificationAppConfigEntry(final Schema schema) {
+        final Entity config = addEntity(schema, "NotificationAppConfigEntry");
+        config.setJavaDoc("The notification config for one app, global for all devices.");
+        config.addIdProperty().autoincrement();
+        final Property packageName = config.addStringProperty("packageName").notNull()
+                .javaDocGetterAndSetter("The app's package name, or the reserved value '*' if it applies to all apps.")
+                .getProperty();
+        final Index indexUnique = new Index();
+        indexUnique.addProperty(packageName);
+        indexUnique.makeUnique();
+        config.addIndex(indexUnique);
+
+        config.addStringProperty("sendState").notNull();
+        config.addStringProperty("pebbleState").notNull();
+
+        config.addStringProperty("filterMode").notNull();
+        config.addStringProperty("filterMatch").notNull();
+        config.addStringProperty("filterSyntax").notNull();
+        config.addBooleanProperty("filterIgnoreCase").notNull();
+
+        config.addStringProperty("privacyMode").notNull();
+        config.addStringProperty("whenScreenOn").notNull();
+        config.addStringProperty("preferLongText").notNull();
+        config.addStringProperty("blockIfOutOfNotificationTimes").notNull();
+        config.addStringProperty("ignoreLowPriority").notNull();
+
+        return config;
+    }
+
+    private static void addNotificationAppFilterEntry(final Schema schema, final Entity config) {
+        final Entity entry = addEntity(schema, "NotificationAppFilterEntry");
+        entry.setJavaDoc("One word or regular expression, for a NotificationAppConfigEntry filter.");
+        entry.addIdProperty().autoincrement();
+        final Property configId = entry.addLongProperty("configId").notNull().getProperty();
+        entry.addToOne(config, configId);
+        entry.addIntProperty("position").notNull();
+        entry.addStringProperty("content").notNull();
+    }
+
+    private static void addNotificationAppReplacementEntry(final Schema schema, final Entity config) {
+        final Entity replacement = addEntity(schema, "NotificationAppReplacementEntry");
+        replacement.setJavaDoc("One text replacement rule of a NotificationAppConfigEntry.");
+        replacement.addIdProperty().autoincrement();
+        final Property configId = replacement.addLongProperty("configId").notNull().getProperty();
+        replacement.addToOne(config, configId);
+        replacement.addIntProperty("position").notNull();
+        replacement.addStringProperty("pattern").notNull();
+        replacement.addStringProperty("replacement").notNull();
+        replacement.addStringProperty("target").notNull();
+        replacement.addBooleanProperty("ignoreCase").notNull();
+        replacement.addBooleanProperty("enabled").notNull();
     }
 
     private static Entity addNotificationFilters(Schema schema) {
