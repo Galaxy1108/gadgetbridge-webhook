@@ -64,6 +64,7 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
 
     protected int HEARTRATE_COLOR;
     protected int HEARTRATE_MIN_COLOR;
+    protected int HEARTRATE_AVERAGE_COLOR;
     protected int HEARTRATE_RESTING_COLOR;
     protected int HEARTRATE_MAX_COLOR;
 
@@ -136,6 +137,7 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
             HEARTRATE_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_heartrate);
         }
         HEARTRATE_MIN_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_heartrate_minimum);
+        HEARTRATE_AVERAGE_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_heartrate);
         HEARTRATE_MAX_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_heartrate_maximum);
         HEARTRATE_RESTING_COLOR = ContextCompat.getColor(requireContext(), R.color.chart_heartrate_resting);
     }
@@ -344,7 +346,7 @@ public class HeartRatePeriodFragment extends AbstractChartFragment<HeartRatePeri
                 getString(R.string.hr_average),
                 getString(R.string.hr_maximum),
         };
-        final int[] colors = {HEARTRATE_MIN_COLOR, HEARTRATE_RESTING_COLOR, HEARTRATE_COLOR, HEARTRATE_MAX_COLOR};
+        final int[] colors = {HEARTRATE_MIN_COLOR, HEARTRATE_RESTING_COLOR, HEARTRATE_AVERAGE_COLOR, HEARTRATE_MAX_COLOR};
         final ChartSpec spec = HeartRateChartData.periodSpec(
                 epochDays, minimum, resting, average, maximum,
                 supportsHeartRateRestingMeasurement(), GBApplication.getPrefs().getBoolean("charts_show_average", true),
