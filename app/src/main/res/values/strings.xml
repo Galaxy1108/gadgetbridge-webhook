@@ -1010,6 +1010,12 @@
     <string name="contact_delete_confirm_title">Delete contact</string>
     <string name="contact_delete_confirm_description">Are you sure you want to delete \"%1$s\"?</string>
     <string name="contact_no_free_slots_description">The device has no free slots for contacts (total slots: %1$s)</string>
+    <string name="contact_add_manually">Add manually</string>
+    <string name="contact_select_from_contacts">Select from contacts</string>
+    <string name="contact_picker_selected_count">%1$d / %2$d selected</string>
+    <string name="contact_picker_open_settings">Open settings</string>
+    <string name="contact_picker_empty">No contacts with phone numbers found</string>
+    <string name="contact_picker_save_failed">Could not save the contacts</string>
     <string name="add_world_clock">Add world clock</string>
     <string name="world_clock_delete_confirm_title">Delete \"%1$s\"</string>
     <string name="world_clock_delete_confirm_description">Are you sure you want to delete the world clock?</string>
