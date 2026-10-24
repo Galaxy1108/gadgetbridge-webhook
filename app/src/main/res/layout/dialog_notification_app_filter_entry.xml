@@ -6,19 +6,16 @@
     android:paddingTop="8dp">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/notification_app_filter_entries_layout"
+        android:id="@+id/notification_app_filter_entry_layout"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/notification_app_filter_entries"
+            android:id="@+id/notification_app_filter_entry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="top|start"
             android:importantForAutofill="no"
-            android:inputType="textMultiLine|textNoSuggestions"
-            android:maxLines="10"
-            android:minLines="4" />
+            android:inputType="text|textNoSuggestions" />
     </com.google.android.material.textfield.TextInputLayout>
 </FrameLayout>

@@ -32,6 +32,7 @@ import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.No
 import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppFilterSyntax
 import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppPrivacyOverride
 import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppRepository
+import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppRules
 import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppSendState
 import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppToggleOverride
 import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationDefaultAction
@@ -158,7 +159,11 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
             true
         }
         filterEntries.setOnPreferenceClickListener {
-            showFilterEntriesDialog()
+            startActivity(
+                Intent(requireContext(), NotificationAppFilterEntriesActivity::class.java)
+                    .putExtra(NotificationAppFilterEntriesActivity.EXTRA_PACKAGE_NAME, packageName)
+                    .putExtra(NotificationAppFilterEntriesActivity.EXTRA_TITLE, preferenceScreen.title)
+            )
             true
         }
         replacements.setOnPreferenceClickListener {
@@ -197,15 +202,6 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
                 it.copy(forwardLocalOnly = newValue as Boolean)
             }
             true
-        }
-        childFragmentManager.setFragmentResultListener(
-            NotificationAppFilterEntriesDialog.REQUEST_KEY,
-            this
-        ) { _, result ->
-            val entries = result.getStringArrayList(NotificationAppFilterEntriesDialog.KEY_ENTRIES).orEmpty()
-            NotificationAppEditor.update(packageName) {
-                it.copy(filter = it.filter.copy(entries = entries))
-            }
         }
     }
 
@@ -397,7 +393,10 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
 
     private fun onFilterSyntaxChange(syntax: NotificationAppFilterSyntax): Boolean {
         val error = if (syntax == NotificationAppFilterSyntax.REGEX) {
-            firstRegexError(requireContext(), config?.filter?.entries.orEmpty())
+            config?.filter?.entries.orEmpty().firstNotNullOfOrNull { entry ->
+                NotificationAppRules.regexError(entry)
+                    ?.let { getString(R.string.notification_apps_invalid_regex_entry, entry, it) }
+            }
         } else {
             null
         }
@@ -411,12 +410,6 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
         }
         NotificationAppEditor.update(packageName, ::rebindStored) { it.copy(filter = it.filter.copy(syntax = syntax)) }
         return true
-    }
-
-    private fun showFilterEntriesDialog() {
-        val current = config ?: return
-        NotificationAppFilterEntriesDialog.newInstance(current.filter.syntax, current.filter.entries)
-            .show(childFragmentManager, NotificationAppFilterEntriesDialog.TAG)
     }
 
     private fun showResetDialog() {

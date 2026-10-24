@@ -3033,13 +3033,14 @@
     <string name="notification_apps_ignore_case">Ignore case</string>
     <string name="notification_apps_filter_entries">Filter words</string>
     <string name="notification_apps_filter_regular_expression_patterns">Filter patterns</string>
-    <string name="notification_apps_filter_words_hint">Enter one word for each line</string>
-    <string name="notification_apps_filter_regular_expression_patterns_hint">Enter one regular expression for each line</string>
+    <string name="notification_apps_filter_word">Word</string>
+    <string name="notification_apps_no_filter_words">No filter words</string>
+    <string name="notification_apps_no_filter_regular_expression_patterns">No filter patterns</string>
     <string name="notification_apps_filter_mode_block">Block if it contains</string>
     <string name="notification_apps_filter_mode_only_send">Only send if it contains</string>
     <string name="notification_apps_filter_match_any">Any entry</string>
     <string name="notification_apps_filter_match_all">All entries</string>
-    <string name="notification_apps_invalid_regex_line">Line %1$d: %2$s</string>
+    <string name="notification_apps_invalid_regex_entry">%1$s: %2$s</string>
     <string name="notification_apps_text_replacements">Replacements</string>
     <string name="notification_apps_edit_text_replacements">Edit replacements</string>
     <string name="notification_apps_overrides">Overrides</string>

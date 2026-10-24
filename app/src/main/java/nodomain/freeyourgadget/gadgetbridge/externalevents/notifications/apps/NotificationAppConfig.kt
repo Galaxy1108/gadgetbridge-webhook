@@ -35,7 +35,8 @@ enum class NotificationAppFilterMatch(@param:StringRes val label: Int) {
 enum class NotificationAppFilterSyntax(
     @param:StringRes val label: Int,
     @param:StringRes val entriesTitle: Int,
-    @param:StringRes val entriesHint: Int,
+    @param:StringRes val entriesEmpty: Int,
+    @param:StringRes val entryHint: Int,
 ) {
     /**
      * A literal "string contains"
@@ -43,7 +44,8 @@ enum class NotificationAppFilterSyntax(
     WORDS(
         R.string.notification_apps_filter_syntax_words,
         R.string.notification_apps_filter_entries,
-        R.string.notification_apps_filter_words_hint,
+        R.string.notification_apps_no_filter_words,
+        R.string.notification_apps_filter_word,
     ),
 
     /**
@@ -52,7 +54,8 @@ enum class NotificationAppFilterSyntax(
     REGEX(
         R.string.notification_apps_filter_syntax_regex,
         R.string.notification_apps_filter_regular_expression_patterns,
-        R.string.notification_apps_filter_regular_expression_patterns_hint,
+        R.string.notification_apps_no_filter_regular_expression_patterns,
+        R.string.notification_apps_regular_expression_pattern,
     ),
 }
 

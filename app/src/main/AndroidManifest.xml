@@ -392,6 +392,11 @@
             android:parentActivityName=".activities.notifications.apps.NotificationAppListActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
+            android:name=".activities.notifications.apps.NotificationAppFilterEntriesActivity"
+            android:label="@string/notification_apps_filter_entries"
+            android:parentActivityName=".activities.notifications.apps.NotificationAppSettingsActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
             android:name=".activities.notifications.apps.NotificationAppReplacementsActivity"
             android:label="@string/notification_apps_text_replacements"
             android:parentActivityName=".activities.notifications.apps.NotificationAppSettingsActivity"
