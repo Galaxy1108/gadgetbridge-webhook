@@ -66,7 +66,6 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
-import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 
 public abstract class AbstractActivityChartFragment<D extends ChartsData> extends AbstractChartFragment<D> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractActivityChartFragment.class);
@@ -124,16 +123,11 @@ public abstract class AbstractActivityChartFragment<D extends ChartsData> extend
 
     @Override
     protected void init() {
-        Prefs prefs = GBApplication.getPrefs();
         TypedValue runningColor = new TypedValue();
         BACKGROUND_COLOR = GBApplication.getBackgroundColor(getContext());
         DESCRIPTION_COLOR = GBApplication.getTextColor(getContext());
         CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(getContext());
-        if (prefs.getBoolean("chart_heartrate_color", true)) {
-            HEARTRATE_COLOR = ContextCompat.getColor(getContext(), R.color.chart_heartrate_alternative);
-        } else {
-            HEARTRATE_COLOR = ContextCompat.getColor(getContext(), R.color.chart_heartrate);
-        }
+        HEARTRATE_COLOR = ContextCompat.getColor(getContext(), GBApplication.getPrefs().getChartsHeartRateColor().getColorRes());
         HEARTRATE_FILL_COLOR = ContextCompat.getColor(getContext(), R.color.chart_heartrate_fill);
 
         getContext().getTheme().resolveAttribute(R.attr.chart_activity, runningColor, true);

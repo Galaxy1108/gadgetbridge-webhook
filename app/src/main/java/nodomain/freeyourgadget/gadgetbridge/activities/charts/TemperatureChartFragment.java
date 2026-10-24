@@ -77,11 +77,7 @@ public class TemperatureChartFragment extends AbstractChartFragment<TemperatureC
 
     }
     private int getRangeDays() {
-        if (GBApplication.getPrefs().getBoolean("charts_range", true)) {
-            return 30;
-        } else {
-            return 7;
-        }
+        return GBApplication.getPrefs().getChartsRange().getDays();
     }
 
     @Override

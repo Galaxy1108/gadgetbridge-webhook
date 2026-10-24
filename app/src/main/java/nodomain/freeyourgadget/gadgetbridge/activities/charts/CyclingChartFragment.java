@@ -38,7 +38,6 @@ import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.TimeSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.CyclingSample;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
-import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 
 public class CyclingChartFragment extends AbstractChartFragment<CyclingChartFragment.CyclingChartsData>{
     private LineChart cyclingHistoryChart;
@@ -49,7 +48,6 @@ public class CyclingChartFragment extends AbstractChartFragment<CyclingChartFrag
     private int LEGEND_TEXT_COLOR;
     private int CHART_LINE_COLOR_DISTANCE;
     private int CHART_LINE_COLOR_SPEED;
-    private final Prefs prefs = GBApplication.getPrefs();
 
     protected static class CyclingChartsData extends DefaultChartsData<LineData> {
         public CyclingChartsData(LineData lineData) {
@@ -68,7 +66,7 @@ public class CyclingChartFragment extends AbstractChartFragment<CyclingChartFrag
         LEGEND_TEXT_COLOR = DESCRIPTION_COLOR = GBApplication.getTextColor(requireContext());
         CHART_TEXT_COLOR = GBApplication.getSecondaryTextColor(requireContext());
 
-        if (prefs.getBoolean("chart_heartrate_color", true)) {
+        if (GBApplication.getPrefs().getChartsHeartRateColor() == ChartsHeartRateColor.RED) {
             CHART_LINE_COLOR_DISTANCE = ContextCompat.getColor(getContext(), R.color.chart_activity_dark);
             CHART_LINE_COLOR_SPEED  = ContextCompat.getColor(getContext(), R.color.chart_heartrate);
         } else {
