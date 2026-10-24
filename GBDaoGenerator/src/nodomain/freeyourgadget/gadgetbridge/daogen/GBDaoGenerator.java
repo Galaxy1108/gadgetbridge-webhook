@@ -1864,6 +1864,7 @@ public class GBDaoGenerator {
         config.addStringProperty("preferLongText").notNull();
         config.addStringProperty("blockIfOutOfNotificationTimes").notNull();
         config.addStringProperty("ignoreLowPriority").notNull();
+        config.addBooleanProperty("forwardLocalOnly").notNull();
 
         return config;
     }

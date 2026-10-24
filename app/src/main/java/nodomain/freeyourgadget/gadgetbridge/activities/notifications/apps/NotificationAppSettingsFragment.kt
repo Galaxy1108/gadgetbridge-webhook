@@ -77,6 +77,7 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
     private lateinit var preferLongText: ListPreference
     private lateinit var blockIfOutOfNotificationTimes: ListPreference
     private lateinit var ignoreLowPriority: ListPreference
+    private lateinit var forwardLocalOnly: SwitchPreferenceCompat
     private lateinit var devicesCategory: PreferenceCategory
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -99,6 +100,7 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
         preferLongText = findPreference(KEY_PREFER_LONG_TEXT)!!
         blockIfOutOfNotificationTimes = findPreference(KEY_BLOCK_IF_OUT_OF_NOTIFICATION_TIMES)!!
         ignoreLowPriority = findPreference(KEY_IGNORE_LOW_PRIORITY)!!
+        forwardLocalOnly = findPreference(KEY_FORWARD_LOCAL_ONLY)!!
         devicesCategory = findPreference(KEY_DEVICES_CATEGORY)!!
 
         // Enabled when the config and the global values are loaded
@@ -189,6 +191,12 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
                     ignoreLowPriority = NotificationAppToggleOverride.valueOf(value)
                 )
             )
+        }
+        forwardLocalOnly.setOnPreferenceChangeListener { _, newValue ->
+            NotificationAppEditor.update(packageName, ::rebindStored) {
+                it.copy(forwardLocalOnly = newValue as Boolean)
+            }
+            true
         }
         childFragmentManager.setFragmentResultListener(
             NotificationAppFilterEntriesDialog.REQUEST_KEY,
@@ -340,6 +348,7 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
         preferLongText.value = overrides.preferLongText.name
         blockIfOutOfNotificationTimes.value = overrides.blockIfOutOfNotificationTimes.name
         ignoreLowPriority.value = overrides.ignoreLowPriority.name
+        forwardLocalOnly.isChecked = config.forwardLocalOnly
 
         requireActivity().invalidateMenu()
     }
@@ -447,6 +456,7 @@ class NotificationAppSettingsFragment : AbstractPreferenceFragment() {
         private const val KEY_PREFER_LONG_TEXT = "notif_app_prefer_long_text"
         private const val KEY_BLOCK_IF_OUT_OF_NOTIFICATION_TIMES = "notif_app_block_if_out_of_notification_times"
         private const val KEY_IGNORE_LOW_PRIORITY = "notif_app_ignore_low_priority"
+        private const val KEY_FORWARD_LOCAL_ONLY = "notif_app_forward_local_only"
         private const val KEY_DEVICES_CATEGORY = "notif_app_devices_category"
     }
 }

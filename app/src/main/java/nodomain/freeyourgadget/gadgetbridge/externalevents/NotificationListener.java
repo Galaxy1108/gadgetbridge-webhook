@@ -307,7 +307,8 @@ public class NotificationListener extends NotificationListenerService {
                 config.getPebbleState(),
                 config.getFilter(),
                 config.getReplacements(),
-                config.getOverrides()
+                config.getOverrides(),
+                config.getForwardLocalOnly()
         ));
     }
 
@@ -426,7 +427,7 @@ public class NotificationListener extends NotificationListenerService {
 
         final boolean hasPicture = notificationHasPicture(sbn.getNotification());
 
-        if (shouldIgnoreNotification(sbn, false, hasPicture, settings)) {
+        if (shouldIgnoreNotification(sbn, false, hasPicture, settings, appConfig)) {
             if (!"com.sec.android.app.clockpackage".equals(sbn.getPackageName())) {  // workaround to allow phone alarm notification
                 LOG.info("Ignoring notification: {}", sbn.getPackageName());          // need to fix
                 return;
@@ -1024,7 +1025,7 @@ public class NotificationListener extends NotificationListenerService {
             GBApplication.deviceService().onSetCallState(callSpec);
         }
 
-        if (shouldIgnoreNotification(sbn, true, false, settings)) return;
+        if (shouldIgnoreNotification(sbn, true, false, settings, appConfig)) return;
 
         // Build list of all currently active notifications
         ArrayList<Integer> activeNotificationsIds = new ArrayList<>();
@@ -1237,7 +1238,8 @@ public class NotificationListener extends NotificationListenerService {
     private boolean shouldIgnoreNotification(StatusBarNotification sbn,
                                              boolean remove,
                                              boolean hasPicture,
-                                             final NotificationSettings settings) {
+                                             final NotificationSettings settings,
+                                             @Nullable final CompiledNotificationAppConfig appConfig) {
         Notification notification = sbn.getNotification();
         String source = sbn.getPackageName();
 
@@ -1245,6 +1247,7 @@ public class NotificationListener extends NotificationListenerService {
         //ignore notifications marked as LocalOnly https://developer.android.com/reference/android/app/Notification.html#FLAG_LOCAL_ONLY
         //some Apps always mark their notifications as read-only
         if (NotificationCompat.getLocalOnly(notification) &&
+                (appConfig == null || !appConfig.getConfig().getForwardLocalOnly()) &&
                 type != NotificationType.WECHAT &&
                 type != NotificationType.TELEGRAM &&
                 type != NotificationType.OUTLOOK &&

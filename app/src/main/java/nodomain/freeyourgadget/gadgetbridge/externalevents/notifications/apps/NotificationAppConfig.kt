@@ -145,6 +145,11 @@ data class NotificationAppConfig(
     val filter: NotificationAppFilter = NotificationAppFilter(),
     val replacements: List<NotificationAppReplacement> = emptyList(),
     val overrides: NotificationAppOverrides = NotificationAppOverrides(),
+
+    /**
+     * True when the notifications that the app marks as local only are also sent.
+     */
+    val forwardLocalOnly: Boolean = false,
 ) {
     val isAllApps: Boolean
         get() = packageName == ALL_APPS

@@ -80,5 +80,8 @@ fun notificationAppChips(context: Context, config: NotificationAppConfig?, insta
             NotificationAppToggleOverride.OFF -> chips.add(context.getString(off))
         }
     }
+    if (config.forwardLocalOnly) {
+        chips.add(context.getString(R.string.notification_apps_chip_forward_local_only))
+    }
     return chips
 }

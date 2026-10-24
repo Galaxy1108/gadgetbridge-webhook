@@ -110,6 +110,13 @@
             android:title="@string/pref_title_notifications_ignore_low_priority"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            android:key="notif_app_forward_local_only"
+            android:persistent="false"
+            android:summary="@string/notification_apps_forward_local_only_summary"
+            android:title="@string/notification_apps_forward_local_only"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

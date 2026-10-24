@@ -3022,6 +3022,9 @@
     <string name="notification_apps_chip_times_off">Notification times: off</string>
     <string name="notification_apps_chip_low_priority_send">Low priority: send</string>
     <string name="notification_apps_chip_low_priority_do_not_send">Low priority: do not send</string>
+    <string name="notification_apps_chip_forward_local_only">Local only: send</string>
+    <string name="notification_apps_forward_local_only">Forward local-only notifications</string>
+    <string name="notification_apps_forward_local_only_summary">Also send the notifications that the app marks to not be forwarded</string>
     <string name="notification_apps_default_value">Default (%1$s)</string>
     <string name="notification_apps_filter_match">Match</string>
     <string name="notification_apps_filter_syntax">Match as</string>

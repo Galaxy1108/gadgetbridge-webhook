@@ -275,6 +275,7 @@ object NotificationAppRepository {
         row.preferLongText = config.overrides.preferLongText.name
         row.blockIfOutOfNotificationTimes = config.overrides.blockIfOutOfNotificationTimes.name
         row.ignoreLowPriority = config.overrides.ignoreLowPriority.name
+        row.forwardLocalOnly = config.forwardLocalOnly
         session.notificationAppConfigEntryDao.insertOrReplace(row)
         val configId = requireNotNull(row.id) {
             "NotificationAppConfigEntry row ID should not be null after inserting it"
@@ -353,5 +354,6 @@ object NotificationAppRepository {
             blockIfOutOfNotificationTimes = enumByName(row.blockIfOutOfNotificationTimes) ?: NotificationAppToggleOverride.DEFAULT,
             ignoreLowPriority = enumByName(row.ignoreLowPriority) ?: NotificationAppToggleOverride.DEFAULT,
         ),
+        forwardLocalOnly = row.forwardLocalOnly,
     )
 }
