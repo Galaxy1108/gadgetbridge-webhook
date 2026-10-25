@@ -3948,7 +3948,7 @@
       "fields": [
         {"num":0,"name":"recording_timestamp","base":"UINT32","type":"DateTime","UOM":"SECONDS"},
         {"num":1,"name":"overall_sleep_score","base":"UINT8"},
-        {"num":2,"name":"rmssd_hrv","base":"UINT32","scale":65536},
+        {"num":2,"name":"rmssd_hrv","base":"SINT32","scale":65536},
         {"num":3,"name":"sleep_start_time","base":"UINT32","type":"LocalDateTime","UOM":"SECONDS"},
         {"num":4,"name":"sleep_start_timezone_offset","base":"SINT16","UOM":"MINUTES"},
         {"num":5,"name":"sleep_end_time","base":"UINT32","type":"LocalDateTime","UOM":"SECONDS"},
