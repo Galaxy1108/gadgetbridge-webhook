@@ -294,8 +294,8 @@ public class GBDaoGenerator {
         addNotificationAppFilterEntry(schema, notificationAppConfigEntry);
         addNotificationAppReplacementEntry(schema, notificationAppConfigEntry);
 
-        addActivitySummary(schema, user, device);
-        addWorkoutUpload(schema);
+        final Entity activitySummary = addActivitySummary(schema, user, device);
+        addWorkoutUpload(schema, activitySummary);
         final Entity workoutTemplate = addWorkoutTemplate(schema, device);
         addWorkoutTemplateStep(schema, workoutTemplate);
         // FIXME: BatteryLevel timestamp is in seconds, maybe migrate it once #6177 is merged
@@ -324,10 +324,14 @@ public class GBDaoGenerator {
         addGenericDurationSample(schema, user, device);
 
         validateSerializableEntities(schema);
+        final DeviceDataTablesGenerator deviceDataTablesGenerator = new DeviceDataTablesGenerator(schema, device);
+        deviceDataTablesGenerator.validate();
 
         deleteOldFiles();
 
         new DaoGenerator().generateAll(schema, OUTPUT_DIR);
+
+        deviceDataTablesGenerator.generate(loadTemplate("gadgetbridge/device-data-tables.ftl"), OUTPUT_DIR);
 
         final long start = System.currentTimeMillis();
 
@@ -1922,7 +1926,7 @@ public class GBDaoGenerator {
         pebbleAppstoreIdEntry.addIndex(indexUnique);
     }
 
-    private static void addActivitySummary(Schema schema, Entity user, Entity device) {
+    private static Entity addActivitySummary(Schema schema, Entity user, Entity device) {
         Entity summary = addEntity(schema, "BaseActivitySummary");
         summary.implementsInterface(ACTIVITY_SUMMARY);
         summary.addIdProperty();
@@ -1950,16 +1954,18 @@ public class GBDaoGenerator {
         summary.addToOne(user, userId);
         summary.addStringProperty("summaryData").codeBeforeGetter(OVERRIDE);
         summary.addByteArrayProperty("rawSummaryData");
+        return summary;
     }
 
-    private static void addWorkoutUpload(Schema schema) {
+    private static void addWorkoutUpload(Schema schema, Entity activitySummary) {
         Entity upload = addEntity(schema, "WorkoutUpload");
         upload.implementsSerializable();
         upload.setJavaDoc(
                 "Tracks the upload of a workout summary to an external service (Endurain, Wanderer).\n"
                 + "Keyed by (summaryId, service). Stores the remote activity id and status so a workout\n"
                 + "is never uploaded twice and later edits can be re-synced.");
-        upload.addLongProperty("summaryId").primaryKey().notNull();
+        final Property summaryId = upload.addLongProperty("summaryId").primaryKey().notNull().getProperty();
+        activitySummary.addToMany(upload, summaryId);
         upload.addIntProperty("service").primaryKey().notNull();
         upload.addStringProperty("remoteActivityId");
         upload.addIntProperty("status").notNull();
@@ -2810,6 +2816,7 @@ public class GBDaoGenerator {
         Entity reading = addEntity(schema, "XiaomiHipeeP1Reading");
         reading.addIdProperty().autoincrement();
         Property deviceId = reading.addLongProperty("deviceId").notNull().getProperty();
+        reading.addToOne(device, deviceId);
         Property recordType = reading.addIntProperty("recordType").notNull().getProperty();
         Property dataNum = reading.addIntProperty("dataNum").notNull().getProperty();
         Property dataCount = reading.addIntProperty("dataCount").notNull().getProperty();

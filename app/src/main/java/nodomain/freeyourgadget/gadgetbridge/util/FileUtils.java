@@ -358,19 +358,44 @@ public class FileUtils {
         }
     }
 
-    public static boolean deleteRecursively(File dir) {
+    /**
+     * Returns the total number of files and directories in a file tree, including the root.
+     */
+    public static int countFilesRecursively(final File file) {
+        if (!file.exists()) {
+            return 0;
+        }
+        int count = 1;
+        final File[] children = file.listFiles();
+        if (children != null) {
+            for (final File child : children) {
+                count += countFilesRecursively(child);
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Deletes a file tree. Calls onFileDeleted after each file or directory is deleted.
+     */
+    public static boolean deleteRecursively(final File dir, @Nullable final Runnable onFileDeleted) {
         if (!dir.exists()) {
             return true;
         }
-        if (dir.isFile()) {
-            return dir.delete();
-        }
-        for (File sub : dir.listFiles()) {
-            if (!deleteRecursively(sub)) {
-                return false;
+        if (dir.isDirectory()) {
+            for (final File sub : dir.listFiles()) {
+                if (!deleteRecursively(sub, onFileDeleted)) {
+                    return false;
+                }
             }
         }
-        return dir.delete();
+        if (!dir.delete()) {
+            return false;
+        }
+        if (onFileDeleted != null) {
+            onFileDeleted.run();
+        }
+        return true;
     }
 
     @Nullable
