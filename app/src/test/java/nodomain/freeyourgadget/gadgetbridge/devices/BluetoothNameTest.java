@@ -94,6 +94,10 @@ public class BluetoothNameTest extends TestBase {
             put("T70(ID-AB01)", DeviceType.T70); // #7070
             put("T70 (ID-AB01)", DeviceType.T70); // #7070
             put("D3(ID-417F)", DeviceType.D3);
+            put("Zone 2 (ID-1361)", DeviceType.HIFUTURE_ZONE2); // #7182
+            put("ZONE 2 (ID-1361)", DeviceType.HIFUTURE_ZONE2); // #7182
+            put("Zone 2(ID-1361)", DeviceType.HIFUTURE_ZONE2); // #7182
+            put("ZONE 2(ID-1361)", DeviceType.HIFUTURE_ZONE2); // #7182
             put("R3Max(ID-FC45)", DeviceType.BLACKVIEW_R3MAX); // matrix
             put("S10", DeviceType.QECNATO_S10);
             put("S52", DeviceType.S52);
