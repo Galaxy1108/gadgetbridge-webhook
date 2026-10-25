@@ -5068,6 +5068,11 @@
     <string name="widget_status_resting">Resting %d</string>
     <!-- Time of the last measurement, e.g. "at 14:05" -->
     <string name="widget_status_at_time">at %s</string>
+    <string name="widget_stress_latest_value">Latest value</string>
+    <plurals name="widget_stress_last_minutes">
+        <item quantity="one">Average of the last %d minute</item>
+        <item quantity="other">Average of the last %d minutes</item>
+    </plurals>
     <!-- Screen reader text, e.g. "Heart rate, 72 beats per minute" -->
     <string name="widget_hr_description">%1$s, %2$d beats per minute</string>
     <string name="widget_hr_description_resting">resting %d</string>
