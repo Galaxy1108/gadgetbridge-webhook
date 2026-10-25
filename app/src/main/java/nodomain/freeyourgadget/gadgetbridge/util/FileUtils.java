@@ -64,12 +64,13 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.FitFile;
 public class FileUtils {
     private static final Logger LOG = LoggerFactory.getLogger(FileUtils.class);
 
-    private static final List<String> KNOWN_PACKAGES = Arrays.asList(
+    public static final List<String> KNOWN_PACKAGES = Arrays.asList(
             "nodomain.freeyourgadget.gadgetbridge",
             "nodomain.freeyourgadget.gadgetbridge.nightly",
             "nodomain.freeyourgadget.gadgetbridge.nightly_nopebble",
             "com.espruino.gadgetbridge.banglejs",
-            "com.espruino.gadgetbridge.banglejs.nightly"
+            "com.espruino.gadgetbridge.banglejs.nightly",
+            "com.espruino.gadgetbridge.banglejs.nightly_nopebble"
     );
 
     /**

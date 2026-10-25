@@ -1611,6 +1611,7 @@
     <string name="dbmanagementactivity_old_activity_db_successfully_deleted">Old activity data deleted.</string>
     <string name="dbmanagementactivity_old_activity_db_deletion_failed">Old Activity database deletion failed.</string>
     <string name="dbmanagementactivity_overwrite">Overwrite</string>
+    <string name="zip_backup_restore_continue">Continue</string>
     <string name="activity_db_management_autoexport_scheduled_yes">AutoExport has (originally) been scheduled for %1$s</string>
     <string name="activity_db_management_autoexport_scheduled_no">AutoExport has not been not scheduled.</string>
     <string name="activity_db_management_autoexport_location">Location could not be understood. Likely an issue of newer Android permission system. Most likely, autoexport is not working now.</string>
@@ -5204,6 +5205,7 @@
     <string name="backup_restore_abort_title">Abort</string>
     <string name="backup_restore_abort_export_confirmation">Abort the export? The partial zip file will be deleted.</string>
     <string name="backup_restore_abort_import_confirmation">Abort the import? This may lead to a corrupted or inconsistent database.</string>
+    <string name="backup_restore_unknown_app_id">This backup was created by an unknown app (%1$s), its data might not be compatible with this version.\n\nImport the backup?</string>
     <string name="backup_restore_restart_title">Restart</string>
     <string name="backup_restore_restart_summary">%1s will now restart.</string>
     <string name="label_distance_trip">Trip: %.1f km</string>
