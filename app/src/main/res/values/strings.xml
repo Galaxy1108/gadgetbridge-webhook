@@ -1698,6 +1698,9 @@
     <string name="discovery_bonding_error">Bonding failed: %1$s</string>
     <string name="discovery_trying_to_connect_to">Trying to connect to: %1$s</string>
     <string name="discovery_enable_bluetooth">Enable Bluetooth to discover devices.</string>
+    <string name="discovery_requirements_permissions_text">Gadgetbridge needs the location and Bluetooth permissions to discover devices.</string>
+    <string name="discovery_requirements_enable_bluetooth">Enable Bluetooth</string>
+    <string name="discovery_requirements_bluetooth_settings">Bluetooth settings</string>
     <string name="discovery_successfully_bonded">Bound to %1$s.</string>
     <string name="discovery_pair_title">Pair with %1$s?</string>
     <string name="discovery_pair_question">Select Pair to pair your devices. If this fails, try again without pairing.</string>
@@ -3050,9 +3053,6 @@
     <string name="prefs_button_triple_press_action_selection_title">Event 3 action</string>
     <string name="prefs_button_variable_actions">Detailed button press settings</string>
     <string name="prefs_button_long_press_action_selection_title">Long press button action</string>
-    <string name="error_no_location_access">Location access must be granted and enabled for scanning to work properly</string>
-    <string name="error_no_bluetooth_scan">Bluetooth scan access must be granted and enabled for scanning to work properly</string>
-    <string name="error_no_bluetooth_connect">Bluetooth connection access must be granted and enabled for scanning to work properly</string>
     <string name="pref_qhybrid_title_widget_draw_circles">Draw widget circles</string>
     <string name="pref_qhybrid_save_raw_activity_files">Save raw activity files</string>
     <string name="hr_widget_last_notification">Last notification</string>
@@ -3074,7 +3074,6 @@
     <string name="about_additional_contributions">Many thanks to all unlisted contributors for contributing code, translations, support, ideas, motivation, bug reports, money… ✊</string>
     <string name="about_links">Links</string>
     <string name="permission_request">%1$s allows you to send messages and other data from Android to your device. To do this it requires permission to access that data and without it, it might not function properly.\n\nYou\'ll now be presented with a few Android dialogs requesting those permissions.\n\nPlease tap \"%2$s\" to continue.</string>
-    <string name="permission_granting_mandatory">All these permissions are required and instability might occur if not granted</string>
     <string name="permission_notification_listener">%1$s needs access to Notifications in order to display them on your watch when your phone\'s screen is off.\n\nPlease tap \"%2$s\" then \"%1$s\" and enable \"Allow Notification Access\", then tap \"Back\" to return to %1$s.</string>
     <string name="permission_notification_policy_access">%1$s needs access to Do Not Disturb settings in order to honor them on your watch when your phone\'s screen is off.\n\nPlease tap \"%2$s\" then \"%1$s\" and enable \"Allow Do Not Disturb\", then tap \"Back\" to return to %1$s.</string>
     <string name="permission_location">%1$s needs access to your location in the background to allow it to stay connected to your watch even when your screen is off.\n\nPlease choose \"%2$s\" in the following screen, then tap \"Back\" to return to %1$s.</string>
