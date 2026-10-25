@@ -292,6 +292,7 @@
             android:label="@string/text_file_viewer" />
         <activity
             android:name=".activities.BackupRestoreProgressActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:label="@string/activity_db_management_backup_restore_label"
             android:parentActivityName=".activities.DataManagementActivity" />
         <activity
