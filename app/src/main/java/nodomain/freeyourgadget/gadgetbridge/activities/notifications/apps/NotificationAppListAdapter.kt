@@ -127,12 +127,11 @@ class NotificationAppListAdapter(
                 group.removeViewAt(group.childCount - 1)
             }
             texts.forEachIndexed { i, chipText ->
-                val chip = group.getChildAt(i) as? Chip ?: Chip(group.context).apply {
-                    isClickable = false
-                    isFocusable = false
-                    setEnsureMinTouchTargetSize(false)
-                    group.addView(this)
-                }
+                val chip = group.getChildAt(i) as? Chip
+                    ?: (LayoutInflater.from(group.context)
+                        .inflate(R.layout.item_notification_app_chip, group, false) as Chip).also {
+                        group.addView(it)
+                    }
                 chip.text = chipText
             }
         }
