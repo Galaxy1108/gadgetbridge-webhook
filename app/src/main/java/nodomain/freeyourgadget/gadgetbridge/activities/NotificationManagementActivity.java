@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.activities;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -50,14 +52,32 @@ public class NotificationManagementActivity extends AbstractSettingsActivityV2 {
         @Override
         protected void onSharedPreferenceChanged(final Preference preference) {
             if (GBPrefs.PING_TONE.equals(preference.getKey())) {
-                try {
-                    final Prefs prefs = GBApplication.getPrefs();
-                    // This fails on some ROMs. The actual implementation falls-back to an internal ping tone
-                    preference.setSummary(RingtoneManager.getRingtone(requireContext(), Uri.parse(prefs.getString(GBPrefs.PING_TONE, DEFAULT_RINGTONE_URI))).getTitle(requireContext()));
-                } catch (final Exception e) {
-                    LOG.error("Failed to find the configured ping ringtone", e);
-                    preference.setSummary("-");
-                }
+                final Prefs prefs = GBApplication.getPrefs();
+                final String uri = prefs.getString(GBPrefs.PING_TONE, DEFAULT_RINGTONE_URI);
+                final Context context = requireContext().getApplicationContext();
+                // Lookup in the background, since this queries the media provider, which can
+                // block for a long time and cause a slowdown.
+                new Thread(() -> {
+                    String title;
+                    try {
+                        // This fails on some ROMs. The actual implementation falls-back to an internal ping tone
+                        title = RingtoneManager.getRingtone(context, Uri.parse(uri)).getTitle(context);
+                    } catch (final Exception e) {
+                        LOG.error("Failed to find the configured ping ringtone", e);
+                        title = "-";
+                    }
+                    final String summary = title;
+                    final Activity activity = getActivity();
+                    if (activity == null) {
+                        return;
+                    }
+                    activity.runOnUiThread(() -> {
+                        // Ignore the result if the ping tone changed during the lookup
+                        if (isAdded() && uri.equals(prefs.getString(GBPrefs.PING_TONE, DEFAULT_RINGTONE_URI))) {
+                            preference.setSummary(summary);
+                        }
+                    });
+                }, "gb-ping-tone-title").start();
             }
         }
 
