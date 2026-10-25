@@ -347,7 +347,7 @@
         {"num":24,"name":"extended_power_save_timeout","base":"ENUM","type":"Bool"},
         {"num":25,"name":"auto_sleep","base":"ENUM","type":"Bool"},
         {"num":27,"name":"satellites","base":"ENUM"},
-        {"num":29,"name":"pool_length_unit","base":"ENUM"},
+        {"num":29,"name":"pool_length_unit","base":"ENUM","type":"DisplayMeasure"},
         {"num":30,"name":"target_mode","base":"ENUM"},
         {"num":31,"name":"target_distance","base":"UINT32","scale":100,"UOM":"METER"},
         {"num":32,"name":"target_speed","base":"UINT16","scale":1000,"UOM":"METER_PER_SECOND"},
@@ -514,7 +514,7 @@
         {"num":43,"name":"swim_stroke","base":"ENUM"},
         {"num":44,"name":"pool_length","base":"UINT16","scale":100,"UOM":"METER"},
         {"num":45,"name":"threshold_power","base":"UINT16","UOM":"WATT"},
-        {"num":46,"name":"pool_length_unit","base":"ENUM"},
+        {"num":46,"name":"pool_length_unit","base":"ENUM","type":"DisplayMeasure"},
         {"num":47,"name":"num_active_lengths","base":"UINT16","UOM":"LENGTHS"},
         {"num":48,"name":"total_work","base":"UINT32","UOM":"JOULE"},
         {"num":49,"name":"avg_altitude","base":"UINT16","scale":5,"offset":500,"UOM":"METER"},
@@ -1003,13 +1003,13 @@
         {"num":5,"name":"capabilities","base":"UINT32Z"},
         {"num":6,"name":"num_valid_steps","base":"UINT16"},
         {"num":8,"name":"wkt_name","base":"STRING"},
-        {"num":9,"name":"duration_type","base":"ENUM"},
+        {"num":9,"name":"duration_type","base":"ENUM","type":"WktStepDuration"},
         {"num":10,"name":"duration_value","base":"UINT32"},
         {"num":11,"name":"sub_sport","base":"ENUM"},
         {"num":12,"name":"num_sessions","base":"UINT16"},
         {"num":13,"name":"transitions","base":"ENUM","type":"Bool"},
         {"num":14,"name":"pool_length","base":"UINT16","scale":100,"UOM":"METER"},
-        {"num":15,"name":"pool_length_unit","base":"ENUM"},
+        {"num":15,"name":"pool_length_unit","base":"ENUM","type":"DisplayMeasure"},
         {"num":17,"name":"wkt_description","base":"STRING"},
         {"num":20,"name":"workout_index","base":"UINT16"},
         {"num":21,"name":"time","base":"UINT32","scale":1000,"UOM":"SECONDS"},
@@ -1046,7 +1046,7 @@
         {"num":27,"name":"exercise_weight_type","base":"UINT16"},
         {"num":30,"name":"swim_drill_type","base":"ENUM","type":"WktSwimDrill"},
         {"num":31,"name":"workout_index","base":"UINT16"},
-        {"num":35,"name":"exercise_load_category","base":"UINT8"},
+        {"num":35,"name":"exercise_load_category","base":"UINT8","type":"ExerciseLoadCategory"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -1923,7 +1923,7 @@
         {"num":2,"name":"num_valid_steps","base":"UINT16"},
         {"num":3,"name":"first_step_index","base":"UINT16"},
         {"num":4,"name":"pool_length","base":"UINT16","scale":100,"UOM":"METER"},
-        {"num":5,"name":"pool_length_unit","base":"ENUM"},
+        {"num":5,"name":"pool_length_unit","base":"ENUM","type":"DisplayMeasure"},
         {"num":254,"name":"message_index","base":"UINT16"}
       ]
     },
@@ -5216,6 +5216,15 @@
       ]
     },
     {
+      "name": "ExerciseLoadCategory",
+      "entries": [
+        {"num":1,"name":"LIGHT"},
+        {"num":2,"name":"MODERATE"},
+        {"num":3,"name":"HEAVY"},
+        {"num":4,"name":"VERY_HEAVY"}
+      ]
+    },
+    {
       "name": "FitBaseUnit",
       "entries": [
         {"num":0,"name":"OTHER"},
@@ -7248,6 +7257,19 @@
         {"num":0,"name":"KICK"},
         {"num":1,"name":"PULL"},
         {"num":2,"name":"DRILL"}
+      ]
+    },
+    {
+      "name": "WktSwimEffort",
+      "entries": [
+        {"num":0,"name":"RECOVERY"},
+        {"num":2,"name":"EASY"},
+        {"num":3,"name":"MODERATE"},
+        {"num":4,"name":"HARD"},
+        {"num":5,"name":"VERY_HARD"},
+        {"num":6,"name":"ALL_OUT"},
+        {"num":8,"name":"ASCENDING"},
+        {"num":9,"name":"DESCENDING"}
       ]
     },
     {
