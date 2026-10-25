@@ -3267,16 +3267,16 @@
       "name": "ECG_SUMMARY",
       "fields": [
         {"num":0,"name":"unknown_0","base":"UINT16"},
-        {"num":1,"name":"categorization","base":"ENUM"},
+        {"num":1,"name":"categorization","base":"ENUM","type":"EcgRhythmClassification"},
         {"num":2,"name":"raw_sample_rate","base":"FLOAT32"},
         {"num":3,"name":"smooth_sample_rate","base":"FLOAT32"},
         {"num":4,"name":"ecg_timestamp","base":"UINT32","type":"DateTime","UOM":"SECONDS"},
         {"num":5,"name":"local_timestamp","base":"UINT32","UOM":"SECONDS"},
-        {"num":6,"name":"unknown_6","base":"ENUM"},
+        {"num":6,"name":"mounting_side","base":"ENUM","type":"Side"},
         {"num":7,"name":"average_heart_rate","base":"FLOAT32","UOM":"BEATS_PER_MINUTE"},
         {"num":10,"name":"unknown_10","base":"STRING"},
         {"num":11,"name":"sample_time","base":"UINT16","UOM":"SECONDS"},
-        {"num":12,"name":"sdrr_hrv","base":"UINT8","UOM":"MILLISECONDS"}
+        {"num":12,"name":"rmssd_hrv","base":"UINT8","UOM":"MILLISECONDS"}
       ]
     },
     {
@@ -4629,6 +4629,13 @@
         {"num":0,"name":"metric"},
         {"num":1,"name":"imperial"},
         {"num":2,"name":"nautical"}
+      ]
+    },
+    {
+      "name": "EcgRhythmClassification",
+      "entries": [
+        {"num":0,"name":"SINUS_NORMAL"},
+        {"num":3,"name":"INCONCLUSIVE_HR_UNDER_50"}
       ]
     },
     {
@@ -6696,6 +6703,13 @@
         {"num":22,"name":"SHRUG_ARM_MID_WHEELCHAIR"},
         {"num":23,"name":"SHRUG_ARM_UP_WHEELCHAIR"},
         {"num":24,"name":"UPRIGHT_ROW"}
+      ]
+    },
+    {
+      "name": "Side",
+      "entries": [
+        {"num":0,"name":"RIGHT"},
+        {"num":1,"name":"LEFT"}
       ]
     },
     {
