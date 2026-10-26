@@ -261,10 +261,7 @@ class DeviceReceiversManager {
                 filter.addAction("nodomain.freeyourgadget.gadgetbridge.MUTE_CALL");
                 ContextCompat.registerReceiver(service, mPhoneCallReceiver, filter, ContextCompat.RECEIVER_EXPORTED);
             }
-            if (mSMSReceiver == null) {
-                mSMSReceiver = new SMSReceiver();
-                ContextCompat.registerReceiver(service, mSMSReceiver, new IntentFilter("android.provider.Telephony.SMS_RECEIVED"), ContextCompat.RECEIVER_EXPORTED);
-            }
+            updateSmsReceiver();
             if (mPebbleReceiver == null) {
                 mPebbleReceiver = new PebbleReceiver();
                 ContextCompat.registerReceiver(service, mPebbleReceiver, new IntentFilter("com.getpebble.action.SEND_NOTIFICATION"), ContextCompat.RECEIVER_EXPORTED);
@@ -368,10 +365,7 @@ class DeviceReceiversManager {
                 service.unregisterReceiver(mPhoneCallReceiver);
                 mPhoneCallReceiver = null;
             }
-            if (mSMSReceiver != null) {
-                service.unregisterReceiver(mSMSReceiver);
-                mSMSReceiver = null;
-            }
+            updateSmsReceiver();
             if (mPebbleReceiver != null) {
                 service.unregisterReceiver(mPebbleReceiver);
                 mPebbleReceiver = null;
@@ -463,9 +457,22 @@ class DeviceReceiversManager {
         }
     }
 
+    private void updateSmsReceiver() {
+        final boolean wanted = mReceiversEnabled && GBApplication.getPrefs().getBoolean(GBPrefs.DEPRECATED_SMS_RECEIVER, false);
+
+        if (wanted && mSMSReceiver == null) {
+            mSMSReceiver = new SMSReceiver();
+            ContextCompat.registerReceiver(service, mSMSReceiver, new IntentFilter("android.provider.Telephony.SMS_RECEIVED"), ContextCompat.RECEIVER_EXPORTED);
+        } else if (!wanted && mSMSReceiver != null) {
+            service.unregisterReceiver(mSMSReceiver);
+            mSMSReceiver = null;
+        }
+    }
+
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
             case GBPrefs.SLEEP_AS_ANDROID_ENABLED, GBPrefs.SLEEP_AS_ANDROID_DEVICE -> updateSleepAsAndroidReceiver();
+            case GBPrefs.DEPRECATED_SMS_RECEIVER -> updateSmsReceiver();
             case GBPrefs.NAVIGATION_APP_COMAPS -> {
                 if (mReceiversEnabled && mCurrentFeatureSet != null && mCurrentFeatureSet.supports(Feature.NAVIGATION)) {
                     boolean enable = sharedPreferences.getBoolean(GBPrefs.NAVIGATION_APP_COMAPS, false);
