@@ -4839,6 +4839,7 @@
     <string name="devicetype_xiaomi_watch_s1" translatable="false">Xiaomi Watch S1</string>
     <string name="devicetype_xiaomi_watch_s3" translatable="false">Xiaomi Watch S3</string>
     <string name="devicetype_xiaomi_watch_s4" translatable="false">Xiaomi Watch S4</string>
+    <string name="devicetype_xiaomi_watch_s5" translatable="false">Xiaomi Watch S5</string>
     <string name="devicetype_xiaomi_watch_5" translatable="false">Xiaomi Watch 5</string>
     <string name="devicetype_xiaomi_watch_s1_active" translatable="false">Xiaomi Watch S1 Active</string>
     <string name="devicetype_xiaomi_watch_s1_pro" translatable="false">Xiaomi Watch S1 Pro</string>
