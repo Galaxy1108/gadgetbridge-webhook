@@ -119,11 +119,6 @@ public class LaxasFitCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
-    public boolean supportsCalendarEvents(@NonNull final GBDevice device) {
-        return true;
-    }
-
-    @Override
     public boolean supportsRealtimeData(@NonNull GBDevice device) {
         return true;
     }

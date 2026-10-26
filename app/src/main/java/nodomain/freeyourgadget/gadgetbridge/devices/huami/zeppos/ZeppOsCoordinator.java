@@ -712,6 +712,11 @@ public abstract class ZeppOsCoordinator extends HuamiCoordinator {
         return hasDisplay();
     }
 
+    @Override
+    public boolean supportsCallControl(@NonNull final GBDevice device) {
+        return supportsPhoneCalls(device) && hasDisplay();
+    }
+
     public boolean supportsMusicUpload(final GBDevice device) {
         return supportsDisplayItem(device, "music") &&
             (supportsBleFileTransfer(device, "music") || supportsWifiFtp(device));

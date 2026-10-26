@@ -298,6 +298,10 @@ class QHybridCoordinator : AbstractBLEDeviceCoordinator() {
 
     override fun supportsCallControl(device: GBDevice): Boolean = true
 
+    override fun supportsMusicInfo(device: GBDevice): Boolean {
+        return isHybridHR(device)
+    }
+
     override fun supportsSpo2(device: GBDevice): Boolean {
         return device.name == "Fossil Gen. 6 Hybrid"
     }

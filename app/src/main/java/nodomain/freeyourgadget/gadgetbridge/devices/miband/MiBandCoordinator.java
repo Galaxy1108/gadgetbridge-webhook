@@ -157,6 +157,11 @@ public class MiBandCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsCalendarEvents(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
         return true;
     }
@@ -243,8 +248,11 @@ public class MiBandCoordinator extends AbstractBLEDeviceCoordinator {
         deviceSpecificSettings.addRootScreen(R.xml.devicesettings_wearlocation);
         deviceSpecificSettings.addRootScreen(R.xml.devicesettings_heartrate_sleep);
         deviceSpecificSettings.addRootScreen(R.xml.devicesettings_miband_vibrationpatterns);
-        deviceSpecificSettings.addRootScreen(R.xml.devicesettings_reserve_alarms_calendar);
         deviceSpecificSettings.addRootScreen(R.xml.devicesettings_fake_timeoffset);
+
+        final List<Integer> calendar = deviceSpecificSettings.addRootScreen(DeviceSpecificSettingsScreen.CALENDAR);
+        calendar.add(R.xml.devicesettings_sync_calendar);
+        calendar.add(R.xml.devicesettings_reserve_alarms_calendar);
 
         final List<Integer> connection = deviceSpecificSettings.addRootScreen(DeviceSpecificSettingsScreen.CONNECTION);
         connection.add(R.xml.devicesettings_lowlatency_fwupdate);

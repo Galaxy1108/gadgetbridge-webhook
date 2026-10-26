@@ -63,6 +63,11 @@ public class CasioGB6900DeviceCoordinator extends CasioDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsMusicInfo(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public SampleProvider<? extends ActivitySample> getSampleProvider(GBDevice device, DaoSession session) {
         return null;
     }

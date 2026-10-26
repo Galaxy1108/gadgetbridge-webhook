@@ -63,11 +63,6 @@ public class AmazfitHelioRingCoordinator extends ZeppOsCoordinator {
     }
 
     @Override
-    public boolean supportsCallControl(@NonNull final GBDevice device) {
-        return false;
-    }
-
-    @Override
     public DeviceKind getDeviceKind(@NonNull GBDevice device) {
         return DeviceKind.RING;
     }
