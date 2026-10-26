@@ -114,6 +114,11 @@ public class LefunDeviceCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public BatteryConfig[] getBatteryConfig(final GBDevice device) {
         return new BatteryConfig[]{
                 new BatteryConfig(

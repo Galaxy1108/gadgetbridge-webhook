@@ -87,4 +87,14 @@ public class MoondropSpaceTravelCoordinator extends AbstractBLClassicDeviceCoord
     public boolean supportsAppNotifications(@NonNull final GBDevice device) {
         return true;
     }
+
+    @Override
+    public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCallControl(@NonNull final GBDevice device) {
+        return true;
+    }
 }

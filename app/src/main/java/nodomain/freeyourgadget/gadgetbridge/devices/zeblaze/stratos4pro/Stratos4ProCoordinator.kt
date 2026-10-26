@@ -124,6 +124,10 @@ class Stratos4ProCoordinator : AbstractBLEDeviceCoordinator() {
 
     override fun supportsAppNotifications(device: GBDevice): Boolean = true
 
+    override fun supportsPhoneCalls(device: GBDevice): Boolean = true
+
+    override fun supportsCallControl(device: GBDevice): Boolean = true
+
     override fun supportsDataFetching(device: GBDevice): Boolean {
         return true
     }

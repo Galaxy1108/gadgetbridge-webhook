@@ -155,6 +155,10 @@ abstract class SonyHeadphonesCoordinator : AbstractBLClassicDeviceCoordinator() 
 
     override fun supportsAppNotifications(device: GBDevice): Boolean = true
 
+    override fun supportsPhoneCalls(device: GBDevice): Boolean = true
+
+    override fun supportsCallControl(device: GBDevice): Boolean = true
+
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(SonyHeadphonesCoordinator::class.java)
 

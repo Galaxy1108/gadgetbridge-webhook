@@ -68,4 +68,9 @@ public class H59Coordinator extends AbstractYawellRingCoordinator {
     public boolean supportsAppNotifications(@NonNull final GBDevice device) {
         return true;
     }
+
+    @Override
+    public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
+        return true;
+    }
 }

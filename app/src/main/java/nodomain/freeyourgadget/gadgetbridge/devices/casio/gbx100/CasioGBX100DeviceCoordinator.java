@@ -134,4 +134,9 @@ public class CasioGBX100DeviceCoordinator extends Casio2C2DDeviceCoordinator {
     public boolean supportsAppNotifications(@NonNull final GBDevice device) {
         return true;
     }
+
+    @Override
+    public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
+        return true;
+    }
 }

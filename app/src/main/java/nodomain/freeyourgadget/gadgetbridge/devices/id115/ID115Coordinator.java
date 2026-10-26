@@ -111,4 +111,9 @@ public class ID115Coordinator extends AbstractBLEDeviceCoordinator {
     public boolean supportsAppNotifications(@NonNull final GBDevice device) {
         return true;
     }
+
+    @Override
+    public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
+        return true;
+    }
 }

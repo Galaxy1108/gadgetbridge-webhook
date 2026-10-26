@@ -1152,6 +1152,21 @@ public interface DeviceCoordinator {
 
     boolean supportsAppNotifications(@NonNull final GBDevice device);
 
+    /**
+     * Returns true if the device supports receiving phone call notifications.
+     */
+    boolean supportsPhoneCalls(@NonNull final GBDevice device);
+
+    /**
+     * Returns true if the device supports controlling calls on the phone (accept/reject/end).
+     */
+    boolean supportsCallControl(@NonNull final GBDevice device);
+
+    /**
+     * Returns true if the device has features that need network access from the phone.
+     */
+    boolean supportsInternetAccess(@NonNull final GBDevice device);
+
     int getOrderPriority();
 
     @NonNull

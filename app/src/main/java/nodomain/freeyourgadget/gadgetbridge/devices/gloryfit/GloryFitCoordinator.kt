@@ -139,6 +139,10 @@ abstract class GloryFitCoordinator : AbstractBLEDeviceCoordinator() {
 
     override fun supportsAppNotifications(device: GBDevice): Boolean = true
 
+    override fun supportsPhoneCalls(device: GBDevice): Boolean = true
+
+    override fun supportsCallControl(device: GBDevice): Boolean = true
+
     override fun supportsFindDevice(device: GBDevice): Boolean {
         return true
     }

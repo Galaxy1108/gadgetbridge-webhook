@@ -748,4 +748,9 @@ public abstract class ZeppOsCoordinator extends HuamiCoordinator {
                 .map(BarcodeFormat::valueOf)
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public boolean supportsInternetAccess(@NonNull final GBDevice device) {
+        return supportsWifiHotspot(device);
+    }
 }

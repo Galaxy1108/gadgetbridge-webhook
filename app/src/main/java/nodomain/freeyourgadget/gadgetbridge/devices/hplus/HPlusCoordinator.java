@@ -84,6 +84,11 @@ public class HPlusCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public boolean supportsDataFetching(@NonNull final GBDevice device) {
         return true;
     }

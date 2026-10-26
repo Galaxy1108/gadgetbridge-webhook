@@ -122,6 +122,10 @@ abstract class AbstractYawellRingCoordinator : AbstractBLEDeviceCoordinator() {
         return false
     }
 
+    override fun supportsPhoneCalls(device: GBDevice): Boolean {
+        return false
+    }
+
     override fun getSleepSessionProvider(device: GBDevice, session: DaoSession): SleepSessionProvider {
         return ColmiSleepSessionProvider(device, session)
     }

@@ -156,6 +156,11 @@ public class MiBandCoordinator extends AbstractBLEDeviceCoordinator {
         return true;
     }
 
+    @Override
+    public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
+        return true;
+    }
+
     /** @noinspection BooleanMethodIsAlwaysInverted*/
     public static boolean hasValidUserInfo() {
         String dummyMacAddress = MiBandService.MAC_ADDRESS_FILTER_1_1A + ":00:00:00";

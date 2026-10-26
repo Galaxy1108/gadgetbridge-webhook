@@ -150,6 +150,11 @@ public class MakibesHR3Coordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsPhoneCalls(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public boolean supportsActivityTracking(@NonNull GBDevice device) {
         return true;
     }
