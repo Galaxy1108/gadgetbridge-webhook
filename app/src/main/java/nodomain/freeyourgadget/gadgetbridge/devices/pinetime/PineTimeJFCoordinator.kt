@@ -99,6 +99,8 @@ class PineTimeJFCoordinator : AbstractBLEDeviceCoordinator() {
         return true
     }
 
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
+
     override fun getDeviceSupportClass(device: GBDevice): Class<out DeviceSupport> {
         return PineTimeJFSupport::class.java
     }

@@ -95,4 +95,6 @@ open class OneMoreSonoFlowCoordinator : AbstractBLClassicDeviceCoordinator() {
     override fun getDeviceKind(device: GBDevice): DeviceCoordinator.DeviceKind {
         return DeviceCoordinator.DeviceKind.HEADPHONES
     }
+
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
 }

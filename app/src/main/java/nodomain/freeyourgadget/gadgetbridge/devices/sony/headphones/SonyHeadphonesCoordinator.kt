@@ -153,6 +153,8 @@ abstract class SonyHeadphonesCoordinator : AbstractBLClassicDeviceCoordinator() 
         return R.drawable.ic_device_sony_overhead
     }
 
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
+
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(SonyHeadphonesCoordinator::class.java)
 

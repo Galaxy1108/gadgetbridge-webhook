@@ -260,6 +260,11 @@ public class BangleJSCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public boolean supportsMusicInfo(@NonNull GBDevice device) {
         return true;
     }

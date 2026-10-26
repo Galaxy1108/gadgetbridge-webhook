@@ -152,4 +152,6 @@ class TeufelMyndCoordinator : AbstractBLClassicDeviceCoordinator() {
             ),
         )
     }
+
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
 }

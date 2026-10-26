@@ -85,4 +85,9 @@ public abstract class AbstractEarFunCoordinator extends AbstractBLClassicDeviceC
 
         return pid;
     }
+
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
 }

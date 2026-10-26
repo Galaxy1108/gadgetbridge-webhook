@@ -568,4 +568,9 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
     public boolean supportsNavigation(@NonNull final GBDevice device) {
         return HuaweiDeviceStateManager.get(device).supportsNavigation();
     }
+
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
 }

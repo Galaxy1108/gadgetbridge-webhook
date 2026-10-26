@@ -70,6 +70,11 @@ public class PixooCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public int getAlarmSlotCount(GBDevice device) {
         return 10;
     }

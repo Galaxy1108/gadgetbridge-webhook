@@ -292,6 +292,8 @@ class QHybridCoordinator : AbstractBLEDeviceCoordinator() {
         return isHybridHR(device)
     }
 
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
+
     override fun supportsSpo2(device: GBDevice): Boolean {
         return device.name == "Fossil Gen. 6 Hybrid"
     }

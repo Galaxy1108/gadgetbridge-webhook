@@ -256,4 +256,6 @@ abstract class AbstractBoseCoordinator : AbstractBLClassicDeviceCoordinator() {
             )
         }
     }
+
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
 }

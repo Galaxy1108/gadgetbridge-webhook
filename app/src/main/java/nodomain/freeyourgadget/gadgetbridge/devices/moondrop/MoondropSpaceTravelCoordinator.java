@@ -82,4 +82,9 @@ public class MoondropSpaceTravelCoordinator extends AbstractBLClassicDeviceCoord
     public DeviceCoordinator.DeviceKind getDeviceKind(@NonNull GBDevice device) {
         return DeviceKind.EARBUDS;
     }
+
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
 }

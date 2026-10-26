@@ -55,4 +55,9 @@ public abstract class RoidmiCoordinator extends AbstractBLClassicDeviceCoordinat
     public DeviceCoordinator.DeviceKind getDeviceKind(@NonNull GBDevice device) {
         return DeviceCoordinator.DeviceKind.UNKNOWN;
     }
+
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
 }

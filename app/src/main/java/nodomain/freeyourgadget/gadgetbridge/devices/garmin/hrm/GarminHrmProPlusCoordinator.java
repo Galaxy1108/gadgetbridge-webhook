@@ -132,4 +132,9 @@ public class GarminHrmProPlusCoordinator extends GarminCoordinator {
 
         return gbDevice;
     }
+
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return false;
+    }
 }

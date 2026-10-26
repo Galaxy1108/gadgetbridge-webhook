@@ -142,4 +142,9 @@ public class WithingsSteelHRDeviceCoordinator extends AbstractBLEDeviceCoordinat
     public DeviceKind getDeviceKind(@NonNull GBDevice device) {
         return DeviceKind.WATCH;
     }
+
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
 }

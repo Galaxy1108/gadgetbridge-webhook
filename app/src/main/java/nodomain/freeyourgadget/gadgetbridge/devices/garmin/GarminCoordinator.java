@@ -346,8 +346,13 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public boolean supportsNavigation(@NonNull final GBDevice device) {
-        return supportsNotifications(device);
+        return supportsAppNotifications(device);
     }
 
     @Override

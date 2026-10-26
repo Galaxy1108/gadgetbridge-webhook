@@ -94,4 +94,9 @@ public class GenericHeadphonesCoordinator extends AbstractDeviceCoordinator {
     public DeviceCoordinator.DeviceKind getDeviceKind(@NonNull GBDevice device) {
         return DeviceKind.HEADPHONES;
     }
+
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
 }

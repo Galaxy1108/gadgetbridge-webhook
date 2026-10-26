@@ -167,6 +167,11 @@ public class WearFitCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public boolean supportsFindDevice(GBDevice device) {
         return true;
     }

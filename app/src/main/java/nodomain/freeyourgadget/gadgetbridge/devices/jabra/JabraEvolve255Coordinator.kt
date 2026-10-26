@@ -354,6 +354,8 @@ open class JabraEvolve255Coordinator : AbstractBLClassicDeviceCoordinator() {
         }
     }
 
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
+
     companion object {
         private val DEVICE_CARD_ACTION_ANC = deviceCardAction {
             id = "jabra_anc"

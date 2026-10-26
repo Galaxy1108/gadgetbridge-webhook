@@ -42,6 +42,8 @@ abstract class AbstractEarCoordinator : AbstractBLClassicDeviceCoordinator() {
         return true
     }
 
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
+
     override fun getDeviceKind(device: GBDevice): DeviceCoordinator.DeviceKind {
         return DeviceCoordinator.DeviceKind.EARBUDS
     }

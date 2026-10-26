@@ -129,4 +129,9 @@ public class CasioGBX100DeviceCoordinator extends Casio2C2DDeviceCoordinator {
     public int getDeviceNameResource() {
         return R.string.devicetype_casiogbx100;
     }
+
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
 }

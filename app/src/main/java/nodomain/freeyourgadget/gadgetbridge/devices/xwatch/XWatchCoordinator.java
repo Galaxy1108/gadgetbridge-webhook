@@ -61,6 +61,11 @@ public class XWatchCoordinator extends AbstractBLEDeviceCoordinator {
         return true;
     }
 
+    @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
+
     @NonNull
     @Override
     public Class<? extends DeviceSupport> getDeviceSupportClass(final GBDevice device) {

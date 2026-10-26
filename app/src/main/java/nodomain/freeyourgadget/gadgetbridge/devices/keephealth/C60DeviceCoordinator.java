@@ -143,6 +143,11 @@ public class C60DeviceCoordinator extends AbstractDeviceCoordinator  {
     }
 
     @Override
+    public boolean supportsAppNotifications(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public boolean supportsFindDevice(GBDevice device) {
         return true;
     }

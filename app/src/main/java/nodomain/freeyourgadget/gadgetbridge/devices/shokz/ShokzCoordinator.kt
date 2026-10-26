@@ -307,4 +307,6 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
             connectedOnly = false,
         )
     }
+
+    override fun supportsAppNotifications(device: GBDevice): Boolean = true
 }

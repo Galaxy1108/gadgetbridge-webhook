@@ -730,7 +730,7 @@ public class YawellRingDeviceSupport extends AbstractBTLESingleDeviceSupport {
     }
 
     private boolean supportsNotifications() {
-        return getCoordinator().supportsNotifications(getDevice());
+        return getCoordinator().supportsAppNotifications(getDevice());
     }
 
     @Override
