@@ -1618,7 +1618,8 @@
     <string name="activity_DB_delete_legacy_button">Delete old DB</string>
     <string name="activity_DB_empty_button">Empty Database</string>
     <string name="activity_db_management_empty_DB">Empty Database</string>
-    <string name="activity_db_management_exportimport_label">Export and Import</string>
+    <string name="activity_db_management_data_label">External Data</string>
+    <string name="activity_db_management_legacy_export_label">Legacy export/import</string>
     <string name="activity_db_management_empty_db_warning">Warning! By pushing this button you will wipe your database and start from scratch.</string>
     <string name="persisting_samples_failed">Error saving samples: %1$s</string>
     <string name="cancel">Cancel</string>
@@ -1635,7 +1636,7 @@
     <string name="status">Status</string>
     <string name="set">Set</string>
     <string name="activity_data_management_directory_content_title">Export/Import directory content</string>
-    <string name="activity_DB_ShowContentButton">Show Export/Import directory content</string>
+    <string name="activity_DB_ShowExternalDataButton">Show external data directory content</string>
     <string name="dbmanagementactivity_export_finished">Deletion finished</string>
     <!-- Strings related to Vibration Activity -->
     <string name="title_activity_vibration">Vibration</string>
