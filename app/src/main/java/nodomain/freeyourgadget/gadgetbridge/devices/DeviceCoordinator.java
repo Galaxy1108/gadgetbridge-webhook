@@ -1167,6 +1167,21 @@ public interface DeviceCoordinator {
      */
     boolean supportsInternetAccess(@NonNull final GBDevice device);
 
+    /**
+     * Returns true if the device can reply to a call with an SMS.
+     */
+    boolean supportsSmsReply(@NonNull final GBDevice device);
+
+    /**
+     * Returns true if the device can change the phone's silent mode / do not disturb.
+     */
+    boolean supportsPhoneSilentMode(@NonNull final GBDevice device);
+
+    /**
+     * Returns true if the device can receive the real-time GPS location of the phone.
+     */
+    boolean supportsGpsSharing(@NonNull final GBDevice device);
+
     int getOrderPriority();
 
     @NonNull

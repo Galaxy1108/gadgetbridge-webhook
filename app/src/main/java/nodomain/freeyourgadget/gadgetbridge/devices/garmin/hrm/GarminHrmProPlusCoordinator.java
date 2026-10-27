@@ -152,4 +152,9 @@ public class GarminHrmProPlusCoordinator extends GarminCoordinator {
     public boolean supportsInternetAccess(@NonNull final GBDevice device) {
         return false;
     }
+
+    @Override
+    public boolean supportsGpsSharing(@NonNull final GBDevice device) {
+        return false;
+    }
 }

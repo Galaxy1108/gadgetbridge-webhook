@@ -583,4 +583,14 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
     public boolean supportsCallControl(@NonNull final GBDevice device) {
         return true;
     }
+
+    @Override
+    public boolean supportsSmsReply(@NonNull final GBDevice device) {
+        return HuaweiDeviceStateManager.get(device).supportsNotificationsReplyActions();
+    }
+
+    @Override
+    public boolean supportsGpsSharing(@NonNull final GBDevice device) {
+        return HuaweiDeviceStateManager.get(device).supportsSendingGps();
+    }
 }

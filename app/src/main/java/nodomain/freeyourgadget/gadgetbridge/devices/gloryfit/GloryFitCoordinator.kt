@@ -143,6 +143,8 @@ abstract class GloryFitCoordinator : AbstractBLEDeviceCoordinator() {
 
     override fun supportsCallControl(device: GBDevice): Boolean = true
 
+    override fun supportsSmsReply(device: GBDevice): Boolean = getCannedRepliesSlotCount(device) > 0
+
     override fun supportsFindDevice(device: GBDevice): Boolean {
         return true
     }

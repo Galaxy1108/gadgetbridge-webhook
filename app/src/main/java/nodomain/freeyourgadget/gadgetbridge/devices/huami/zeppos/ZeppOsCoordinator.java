@@ -758,4 +758,19 @@ public abstract class ZeppOsCoordinator extends HuamiCoordinator {
     public boolean supportsInternetAccess(@NonNull final GBDevice device) {
         return supportsWifiHotspot(device);
     }
+
+    @Override
+    public boolean supportsSmsReply(@NonNull final GBDevice device) {
+        return getCannedRepliesSlotCount(device) > 0;
+    }
+
+    @Override
+    public boolean supportsPhoneSilentMode(@NonNull final GBDevice device) {
+        return hasDisplay();
+    }
+
+    @Override
+    public boolean supportsGpsSharing(@NonNull final GBDevice device) {
+        return hasDisplay() && !hasGps(device);
+    }
 }

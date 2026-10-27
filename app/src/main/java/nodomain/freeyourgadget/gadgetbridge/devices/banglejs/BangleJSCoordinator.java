@@ -280,6 +280,16 @@ public class BangleJSCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsSmsReply(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
+    public boolean supportsGpsSharing(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public boolean supportsMusicInfo(@NonNull GBDevice device) {
         return true;
     }

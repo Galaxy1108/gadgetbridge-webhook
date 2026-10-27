@@ -1304,6 +1304,21 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     }
 
     @Override
+    public boolean supportsSmsReply(@NonNull final GBDevice device) {
+        return false;
+    }
+
+    @Override
+    public boolean supportsPhoneSilentMode(@NonNull final GBDevice device) {
+        return false;
+    }
+
+    @Override
+    public boolean supportsGpsSharing(@NonNull final GBDevice device) {
+        return false;
+    }
+
+    @Override
     public int getOrderPriority() {
         return 0;
     }
