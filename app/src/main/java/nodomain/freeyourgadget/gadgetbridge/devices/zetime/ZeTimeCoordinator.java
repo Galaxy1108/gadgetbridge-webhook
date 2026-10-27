@@ -108,6 +108,11 @@ public class ZeTimeCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
+    public boolean supportsCalendarEvents(@NonNull final GBDevice device) {
+        return true;
+    }
+
+    @Override
     public int getBondingStyle() {
         return BONDING_STYLE_NONE;
     }
