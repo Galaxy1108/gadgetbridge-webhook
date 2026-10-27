@@ -122,8 +122,10 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     protected void applyDefaultPreferences(final DevicePrefs devicePreferences, final SharedPreferences.Editor editor) {
         if (defaultNewSyncProtocol()) {
             // #5021 - Some new devices like Venu X1 misses a lot of files without the new sync protocol
+            // TODO: check presence of GarminCapability.SYNC_2 instead
             editor.putBoolean(DeviceSettingsPreferenceConst.PREF_NEW_SYNC_PROTOCOL, true);
             // new sync protocol without MLR fails to sync large workouts
+            // TODO: check DeviceInformationMessage.protocolVersion >= 150 instead
             editor.putBoolean(GarminPreferences.PREF_GARMIN_MLR, true);
 
             editor.apply();
