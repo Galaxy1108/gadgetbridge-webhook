@@ -23,6 +23,7 @@ import java.util.Locale;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractBLEDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.SampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.SleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
@@ -73,6 +74,12 @@ public class WithingsSteelHRDeviceCoordinator extends AbstractBLEDeviceCoordinat
     @Override
     public SampleProvider<? extends ActivitySample> getSampleProvider(GBDevice device, DaoSession session) {
         return new WithingsSteelHRSampleProvider(device, session);
+    }
+
+    @Override
+    @NonNull
+    public SleepSessionProvider getSleepSessionProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
+        return new WithingsSleepSessionProvider(new WithingsSteelHRSampleProvider(device, session)::getRawActivitySamples);
     }
 
     @Override

@@ -19,6 +19,8 @@ package nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.List;
+
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.Property;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractSampleProvider;
@@ -31,6 +33,21 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 public class WithingsSteelHRSampleProvider extends AbstractSampleProvider<WithingsSteelHRActivitySample> {
     public WithingsSteelHRSampleProvider(GBDevice device, DaoSession session) {
         super(device, session);
+    }
+
+    @Override
+    protected List<WithingsSteelHRActivitySample> getGBActivitySamples(final int timestamp_from, final int timestamp_to) {
+        final List<WithingsSteelHRActivitySample> samples = getRawActivitySamples(timestamp_from, timestamp_to);
+        overlaySleep(new WithingsSleepSessionProvider(this::getRawActivitySamples), samples, timestamp_from, timestamp_to);
+        return samples;
+    }
+
+    /**
+     * The samples as stored, without the sleep sessions overlaid. The sessions are built from
+     * these, so they must not be read through {@link #getGBActivitySamples(int, int)}.
+     */
+    public List<WithingsSteelHRActivitySample> getRawActivitySamples(final int timestamp_from, final int timestamp_to) {
+        return super.getGBActivitySamples(timestamp_from, timestamp_to);
     }
 
     @Override
