@@ -58,28 +58,13 @@ public class WithingsSteelHRSampleProvider extends AbstractSampleProvider<Within
 
     @Override
     public ActivityKind normalizeType(int rawType) {
-        switch (rawType) {
-            case 1:
-                return ActivityKind.LIGHT_SLEEP;
-            case 2:
-                return ActivityKind.DEEP_SLEEP;
-            default:
-                return ActivityKind.fromCode(rawType);
-        }
+        // Samples are stored with the ActivityKind code as their raw kind
+        return ActivityKind.fromCode(rawType);
     }
 
     @Override
     public int toRawActivityKind(ActivityKind activityKind) {
-        switch (activityKind) {
-            case UNKNOWN:
-                return 0;
-            case LIGHT_SLEEP:
-                return 1;
-            case DEEP_SLEEP:
-                return 2;
-            default:
-                return activityKind.getCode();
-        }
+        return activityKind.getCode();
     }
 
     @Override
