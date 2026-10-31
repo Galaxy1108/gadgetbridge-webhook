@@ -31,12 +31,13 @@ import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.text.SimpleDateFormat;
@@ -220,12 +221,7 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         chart.getAxisLeft().setAxisMaximum(2f);
         chart.getXAxis().setAxisMinimum(0f);
         chart.getXAxis().setAxisMaximum(30f);
-        chart.getXAxis().setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(final float value) {
-                return String.format(Locale.getDefault(), "%.0fs", value);
-            }
-        });
+        chart.getXAxis().setValueFormatter((value, axis) -> String.format(Locale.getDefault(), "%.0fs", value));
 
         if (data.selectedSummary != null && !data.waveform.isEmpty()) {
             final List<EcgSample> displayWaveform = smoothWaveformForDisplay(data.selectedSummary, data.waveform);
@@ -237,13 +233,13 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
             for (final EcgSample sample : displayWaveform) {
                 final float seconds = sample.getTimeDeltaMs() / 1000f;
                 final float value = sample.getValue();
-                entries.add(new Entry(seconds, value));
+                entries.add(new Entry<>(seconds, value, null, null));
                 minValue = Math.min(minValue, value);
                 maxValue = Math.max(maxValue, value);
                 maxDelta = Math.max(maxDelta, sample.getTimeDeltaMs());
             }
 
-            final List<ILineDataSet> dataSets = new ArrayList<>(1);
+            final List<ILineDataSet<?>> dataSets = new ArrayList<>(1);
             dataSets.add(createDataSet(entries));
             chart.setData(new LineData(dataSets));
 
@@ -252,7 +248,8 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
                     ? Math.max(maxDelta / 1000f, recordDurationMs / 1000f)
                     : Math.max(maxDelta / 1000f, 1f);
             chart.getXAxis().setAxisMaximum(durationSeconds);
-            chart.getXAxis().setLabelCount(6, true);
+            chart.getXAxis().setLabelCount(6);
+            chart.getXAxis().setForceLabelsEnabled(true);
             chart.getXAxis().setValueFormatter(new SessionXAxisFormatter(data.selectedSummary.getStartTimestamp()));
 
             final YAxis leftAxis = chart.getAxisLeft();
@@ -392,8 +389,8 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
     private LineDataSet createDataSet(final List<Entry> values) {
         final LineDataSet dataSet = new LineDataSet(values, getString(R.string.withings_scanwatch_screen_ecg));
         dataSet.setColor(ecgColor);
-        dataSet.setDrawCircles(false);
-        dataSet.setDrawValues(false);
+        dataSet.setDrawCirclesEnabled(false);
+        dataSet.setDrawValuesEnabled(false);
         dataSet.setLineWidth(1.5f);
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSet.setHighlightEnabled(false);
@@ -638,7 +635,7 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(false);
         chart.setDoubleTapToZoomEnabled(false);
-        chart.setPinchZoom(false);
+        chart.setPinchZoomEnabled(false);
         chart.setScaleEnabled(true);
         chart.setScaleXEnabled(true);
         chart.setScaleYEnabled(false);
@@ -646,26 +643,27 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
 
         final XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
+        xAxis.setDrawGridLinesEnabled(false);
         xAxis.setTextColor(chartTextColor);
         xAxis.setAxisMinimum(0f);
         xAxis.setAxisMaximum(30f);
-        xAxis.setLabelCount(6, true);
+        xAxis.setLabelCount(6);
+        xAxis.setForceLabelsEnabled(true);
         xAxis.setGranularity(1f);
-        xAxis.setDrawLimitLinesBehindData(true);
+        xAxis.setDrawLimitLinesBehindDataEnabled(true);
 
         final YAxis leftAxis = chart.getAxisLeft();
-        leftAxis.setDrawGridLines(false);
+        leftAxis.setDrawGridLinesEnabled(false);
         leftAxis.setTextColor(chartTextColor);
         leftAxis.setAxisMinimum(-2f);
         leftAxis.setAxisMaximum(2f);
-        leftAxis.setDrawLimitLinesBehindData(true);
+        leftAxis.setDrawLimitLinesBehindDataEnabled(true);
 
         final YAxis rightAxis = chart.getAxisRight();
         rightAxis.setEnabled(true);
-        rightAxis.setDrawLabels(false);
-        rightAxis.setDrawGridLines(false);
-        rightAxis.setDrawAxisLine(true);
+        rightAxis.setDrawLabelsEnabled(false);
+        rightAxis.setDrawGridLinesEnabled(false);
+        rightAxis.setDrawAxisLineEnabled(true);
 
         applyEcgGrid(0f, 30f, 2f);
     }
@@ -699,10 +697,9 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
     private com.github.mikephil.charting.components.LimitLine createGridLine(final float value,
                                                                              final int color,
                                                                              final float width) {
-        final com.github.mikephil.charting.components.LimitLine line = new com.github.mikephil.charting.components.LimitLine(value);
+        final com.github.mikephil.charting.components.LimitLine line = new com.github.mikephil.charting.components.LimitLine(value, "");
         line.setLineColor(color);
         line.setLineWidth(width);
-        line.setLabel("");
         return line;
     }
 
@@ -782,7 +779,7 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         chart.invalidate();
     }
 
-    private static class SessionXAxisFormatter extends ValueFormatter {
+    private static class SessionXAxisFormatter implements IAxisValueFormatter {
         private final long startTimestamp;
         private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 
@@ -791,7 +788,7 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         }
 
         @Override
-        public String getFormattedValue(final float value) {
+        public String getFormattedValue(final float value, final AxisBase axis) {
             return timeFormat.format(new Date(startTimestamp + (long) (value * 1000L)));
         }
     }

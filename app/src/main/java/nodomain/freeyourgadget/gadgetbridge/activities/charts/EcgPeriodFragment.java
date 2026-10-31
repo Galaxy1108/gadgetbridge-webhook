@@ -40,10 +40,10 @@ import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.ScatterData;
 import com.github.mikephil.charting.data.ScatterDataSet;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -217,26 +217,23 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
         for (int i = 0; i < data.days.size(); i++) {
             final EcgDayData dayData = data.days.get(i);
             if (dayData.minimumHeartRate > 0 && dayData.maximumHeartRate > 0) {
-                rangeEntries.add(new CandleEntry(i, dayData.maximumHeartRate, dayData.minimumHeartRate, dayData.minimumHeartRate, dayData.maximumHeartRate));
-                averageEntries.add(new Entry(i, dayData.getAverageHeartRate()));
+                rangeEntries.add(new CandleEntry<>(i, dayData.maximumHeartRate, dayData.minimumHeartRate, dayData.minimumHeartRate, dayData.maximumHeartRate, null, null));
+                averageEntries.add(new Entry<>(i, dayData.getAverageHeartRate(), null, null));
             }
         }
 
         final String pattern = totalDays == 7 ? "EEE" : "dd";
         final SimpleDateFormat formatDay = new SimpleDateFormat(pattern, Locale.getDefault());
         final long startTimestamp = getStartTimestamp();
-        chart.getXAxis().setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(final float value) {
-                final int dayIndex = Math.round(value);
-                if (dayIndex < 0 || dayIndex >= totalDays) {
-                    return "";
-                }
-                final Calendar day = Calendar.getInstance();
-                day.setTimeInMillis(startTimestamp);
-                day.add(Calendar.DAY_OF_MONTH, dayIndex);
-                return formatDay.format(day.getTime());
+        chart.getXAxis().setValueFormatter((value, axis) -> {
+            final int dayIndex = Math.round(value);
+            if (dayIndex < 0 || dayIndex >= totalDays) {
+                return "";
             }
+            final Calendar day = Calendar.getInstance();
+            day.setTimeInMillis(startTimestamp);
+            day.add(Calendar.DAY_OF_MONTH, dayIndex);
+            return formatDay.format(day.getTime());
         });
 
         chart.getAxisLeft().setAxisMinimum(40f);
@@ -251,8 +248,8 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
         final CombinedData combinedData = new CombinedData();
         if (!rangeEntries.isEmpty()) {
             final CandleDataSet rangeDataSet = new CandleDataSet(rangeEntries, getString(R.string.withings_scanwatch_screen_ecg));
-            rangeDataSet.setDrawValues(false);
-            rangeDataSet.setDrawIcons(false);
+            rangeDataSet.setDrawValuesEnabled(false);
+            rangeDataSet.setDrawIconsEnabled(false);
             rangeDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
             rangeDataSet.setShadowColor(ecgRangeColor);
             rangeDataSet.setShadowWidth(2f);
@@ -263,7 +260,7 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
             rangeDataSet.setNeutralColor(ecgRangeColor);
             rangeDataSet.setBarSpace(0.15f);
             rangeDataSet.setShowCandleBar(true);
-            combinedData.setData(new CandleData(rangeDataSet));
+            combinedData.setCandleData(new CandleData(rangeDataSet));
         }
 
         if (!averageEntries.isEmpty()) {
@@ -271,9 +268,9 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
             averageDataSet.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
             averageDataSet.setScatterShapeSize(15f);
             averageDataSet.setColor(ecgAverageColor);
-            averageDataSet.setDrawValues(false);
+            averageDataSet.setDrawValuesEnabled(false);
             averageDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-            combinedData.setData(new ScatterData(averageDataSet));
+            combinedData.setScatterData(new ScatterData(averageDataSet));
         }
 
         chart.setData(combinedData);
@@ -282,23 +279,23 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
     private void setupChart() {
         chart.setBackgroundColor(backgroundColor);
         chart.getDescription().setEnabled(false);
-        chart.setDrawOrder(new CombinedChart.DrawOrder[]{
+        chart.setDrawOrder(Arrays.asList(
                 CombinedChart.DrawOrder.CANDLE,
                 CombinedChart.DrawOrder.SCATTER
-        });
+        ));
 
         if (totalDays <= 7) {
             chart.setTouchEnabled(false);
-            chart.setPinchZoom(false);
+            chart.setPinchZoomEnabled(false);
         }
         chart.setDoubleTapToZoomEnabled(false);
 
         final XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawLabels(true);
-        xAxis.setDrawGridLines(false);
+        xAxis.setDrawLabelsEnabled(true);
+        xAxis.setDrawGridLinesEnabled(false);
         xAxis.setEnabled(true);
-        xAxis.setDrawLimitLinesBehindData(true);
+        xAxis.setDrawLimitLinesBehindDataEnabled(true);
         xAxis.setTextColor(chartTextColor);
         xAxis.setGranularity(1f);
         xAxis.setGranularityEnabled(true);
@@ -306,10 +303,10 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
         xAxis.setAxisMaximum(totalDays - 0.5f);
 
         final YAxis leftAxis = chart.getAxisLeft();
-        leftAxis.setDrawGridLines(true);
+        leftAxis.setDrawGridLinesEnabled(true);
         leftAxis.setAxisMaximum(120f);
         leftAxis.setAxisMinimum(40f);
-        leftAxis.setDrawTopYLabelEntry(true);
+        leftAxis.setDrawTopYLabelEntryEnabled(true);
         leftAxis.setTextColor(chartTextColor);
         leftAxis.setEnabled(true);
         leftAxis.setGranularity(10f);
@@ -317,9 +314,9 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
 
         final YAxis rightAxis = chart.getAxisRight();
         rightAxis.setEnabled(true);
-        rightAxis.setDrawLabels(false);
-        rightAxis.setDrawGridLines(false);
-        rightAxis.setDrawAxisLine(true);
+        rightAxis.setDrawLabelsEnabled(false);
+        rightAxis.setDrawGridLinesEnabled(false);
+        rightAxis.setDrawAxisLineEnabled(true);
     }
 
     @Override
@@ -327,17 +324,17 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
         final List<LegendEntry> legendEntries = new ArrayList<>(2);
 
         final LegendEntry rangeEntry = new LegendEntry();
-        rangeEntry.label = getString(R.string.withings_scanwatch_screen_ecg);
-        rangeEntry.formColor = ecgRangeColor;
+        rangeEntry.setLabel(getString(R.string.withings_scanwatch_screen_ecg));
+        rangeEntry.setFormColor(ecgRangeColor);
         legendEntries.add(rangeEntry);
 
         final LegendEntry averageEntry = new LegendEntry();
-        averageEntry.label = getString(R.string.hr_average);
-        averageEntry.formColor = ecgAverageColor;
-        averageEntry.form = Legend.LegendForm.CIRCLE;
+        averageEntry.setLabel(getString(R.string.hr_average));
+        averageEntry.setFormColor(ecgAverageColor);
+        averageEntry.setForm(Legend.LegendForm.CIRCLE);
         legendEntries.add(averageEntry);
 
-        chart.getLegend().setCustom(legendEntries);
+        chart.getLegend().setEntries(legendEntries);
         chart.getLegend().setTextColor(legendTextColor);
         chart.getLegend().setWordWrapEnabled(true);
     }
