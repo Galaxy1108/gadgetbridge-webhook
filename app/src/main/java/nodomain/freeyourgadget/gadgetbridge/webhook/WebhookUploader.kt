@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.net.ssl.SSLContext
 import javax.net.ssl.X509TrustManager
 
@@ -55,6 +56,15 @@ import javax.net.ssl.X509TrustManager
 object WebhookUploader {
 
     private val LOG: Logger = LoggerFactory.getLogger(WebhookUploader::class.java)
+
+    /** Guards against overlapping workers (periodic + immediate + manual + retries). */
+    private val running = AtomicBoolean(false)
+
+    /** Attempts per HTTP request before a chunk is reported as failed. */
+    private const val HTTP_ATTEMPTS = 3
+
+    /** Delays between those attempts: short, so a flaky tunnel recovers within the run. */
+    private val HTTP_RETRY_DELAYS_MS = longArrayOf(2_000, 5_000)
 
     data class Result(
         val success: Boolean,
@@ -162,6 +172,21 @@ object WebhookUploader {
         // code is the gate. A token is only sent when configured (old AstrBot-route URLs).
         val token = WebhookConfig.getToken()
 
+        // WorkManager can have several workers alive at once (periodic + sync-triggered
+        // + manual + retries). Let only one of them talk to the server: concurrent
+        // runs multiply the load on a slow tunnel and upload the same window twice.
+        if (!running.compareAndSet(false, true)) {
+            LOG.info("Webhook upload already in progress, skipping this run")
+            return Result(true, "Upload already in progress")
+        }
+        return try {
+            uploadRange(serverUrl, token, maxRangeSeconds)
+        } finally {
+            running.set(false)
+        }
+    }
+
+    private fun uploadRange(serverUrl: String, token: String, maxRangeSeconds: Long): Result {
         val nowSeconds = System.currentTimeMillis() / 1000
         var anyFailure = false
         var anyPending = false
@@ -366,6 +391,11 @@ object WebhookUploader {
         body.put("samples", samplesJson)
 
         val extended = if (pendingOnly) JSONObject() else readExtended(db, gbDevice, from, to, enabledTypes)
+        if (!pendingOnly) {
+            // Huawei/Honor keep SpO2 inside the activity samples and HRV vendor-specific:
+            // no raw table in EXTENDED_TABLES covers them, the coordinator providers do.
+            addProviderMetrics(extended, gbDevice, db, from, to, enabledTypes)
+        }
         if (extended.length() > 0) {
             body.put("extended", extended)
         }
@@ -394,7 +424,33 @@ object WebhookUploader {
         // Use our own client with long timeouts: Cloudflare edges are often slow
         // (multi-second TLS handshakes), and the default 10s OkHttp timeout would
         // fail even though the endpoint is reachable.
-        val response = postJson(serverUrl, headers, request.body.toString())
+        var outcome = postJson(serverUrl, headers, request.body.toString())
+        var attempt = 1
+        // A slow tunnel drops requests intermittently; retry the same chunk a couple
+        // of times before reporting failure, instead of waiting for the next worker.
+        while (outcome.transient &&
+            outcome.json?.optString("status") != "ok" &&
+            attempt < HTTP_ATTEMPTS
+        ) {
+            val delayMs = HTTP_RETRY_DELAYS_MS.getOrElse(attempt - 1) { HTTP_RETRY_DELAYS_MS.last() }
+            LOG.info(
+                "Retrying upload for {} in {}ms (attempt {}/{}, reason: {})",
+                gbDevice.name,
+                delayMs,
+                attempt + 1,
+                HTTP_ATTEMPTS,
+                outcome.error,
+            )
+            try {
+                Thread.sleep(delayMs)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                break
+            }
+            attempt++
+            outcome = postJson(serverUrl, headers, request.body.toString())
+        }
+        val response = outcome.json
 
         if (response != null && response.optString("status") == "ok") {
             WebhookConfig.setCursor(address, request.to)
@@ -431,6 +487,7 @@ object WebhookUploader {
         }
 
         val serverMessage = response?.optString("message")?.takeIf { it.isNotBlank() }
+            ?: outcome.error
             ?: "no response from server"
         LOG.warn("Webhook rejected for {}: {}", gbDevice.name, serverMessage)
         return Result(false, "Server: $serverMessage")
@@ -596,6 +653,92 @@ object WebhookUploader {
         return result
     }
 
+    /**
+     * Adds metrics that Gadgetbridge exposes through device-coordinator providers
+     * rather than through a dedicated sample table.
+     *
+     * Vendors store some values in their own activity samples (Huawei keeps SpO2 in
+     * HuaweiActivitySample) or in vendor-specific tables, so a fixed table list in
+     * [EXTENDED_TABLES] silently misses them. Asking the coordinator keeps this
+     * generic: every device uses the same code path, and providers that have nothing
+     * to return simply contribute no rows.
+     *
+     * Rows already emitted from a raw table are skipped by timestamp, so devices that
+     * have both (a dedicated table and a provider over it) do not upload duplicates.
+     */
+    private fun addProviderMetrics(
+        target: JSONObject,
+        gbDevice: GBDevice,
+        db: DBHandler,
+        from: Long,
+        to: Long,
+        enabledTypes: Set<String>,
+    ) {
+        val coordinator = gbDevice.deviceCoordinator
+        val msFrom = from * 1000L
+        val msTo = to * 1000L
+        val seenTimestamps = mutableMapOf<String, MutableSet<Long>>()
+
+        fun addRow(category: String, timestampMillis: Long, fields: JSONObject) {
+            val seconds = timestampMillis / 1000L
+            val seen = seenTimestamps.getOrPut(category) {
+                val existing = mutableSetOf<Long>()
+                target.optJSONArray(category)?.let { rows ->
+                    for (i in 0 until rows.length()) {
+                        rows.optJSONObject(i)?.let { existing.add(it.optLong("timestamp", -1L)) }
+                    }
+                }
+                existing
+            }
+            if (!seen.add(seconds)) {
+                return
+            }
+            fields.put("timestamp", seconds)
+            val rows = target.optJSONArray(category) ?: JSONArray()
+            rows.put(fields)
+            target.put(category, rows)
+        }
+
+        if (WebhookConfig.TYPE_SPO2 in enabledTypes) {
+            try {
+                val provider = coordinator.getSpo2SampleProvider(gbDevice, db.daoSession)
+                provider?.getAllSamples(msFrom, msTo)?.forEach { sample ->
+                    val value = sample.spo2
+                    if (value in 1..100) {
+                        addRow(
+                            WebhookConfig.TYPE_SPO2,
+                            sample.timestamp,
+                            JSONObject().apply {
+                                put("spo2", value)
+                                put("type", sample.type?.name ?: "UNKNOWN")
+                            },
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                LOG.warn("Failed to read SpO2 samples for {}: {}", gbDevice.name, e.message)
+            }
+        }
+
+        if (WebhookConfig.TYPE_HRV in enabledTypes) {
+            try {
+                val provider = coordinator.getHrvValueSampleProvider(gbDevice, db.daoSession)
+                provider?.getAllSamples(msFrom, msTo)?.forEach { sample ->
+                    val value = sample.value
+                    if (value > 0) {
+                        addRow(
+                            WebhookConfig.TYPE_HRV,
+                            sample.timestamp,
+                            JSONObject().apply { put("hrv_ms", value) },
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                LOG.warn("Failed to read HRV samples for {}: {}", gbDevice.name, e.message)
+            }
+        }
+    }
+
     private fun cursorToJson(cursor: Cursor, table: ExtTable): JSONObject {
         val row = JSONObject()
         val columns = cursor.columnNames
@@ -680,11 +823,18 @@ object WebhookUploader {
             .build()
     }
 
-    /**
-     * POSTs JSON and parses the response. Returns null on any network failure,
-     * storing the raw error text for diagnostics (shown on the settings screen).
-     */
-    private fun postJson(serverUrl: String, headers: Map<String, String>, body: String): JSONObject? {
+    /** Outcome of a single HTTP attempt; [code] is 0 when the request never completed. */
+    private data class HttpOutcome(
+        val code: Int,
+        val json: JSONObject?,
+        val error: String? = null,
+    ) {
+        /** Connection problems, throttling and server hiccups are worth one more try. */
+        val transient: Boolean
+            get() = code == 0 || code == 408 || code == 429 || code >= 500
+    }
+
+    private fun postJson(serverUrl: String, headers: Map<String, String>, body: String): HttpOutcome {
         return try {
             val builder = Request.Builder().url(serverUrl).post(body.toRequestBody(jsonMediaType))
             for ((key, value) in headers) {
@@ -697,10 +847,10 @@ object WebhookUploader {
                     val error = "HTTP ${response.code} with empty body"
                     LOG.warn("Empty response from {}: {}", serverUrl, error)
                     WebhookConfig.setLastError(error)
-                    return null
+                    return HttpOutcome(response.code, null, error)
                 }
                 try {
-                    JSONObject(text)
+                    HttpOutcome(response.code, JSONObject(text))
                 } catch (e: org.json.JSONException) {
                     // Response was not JSON (e.g. a Cloudflare error page). Surface the
                     // status code and a snippet so the real cause is visible.
@@ -708,14 +858,14 @@ object WebhookUploader {
                     val error = "HTTP ${response.code}: $snippet"
                     LOG.warn("Non-JSON response from {}: {}", serverUrl, error)
                     WebhookConfig.setLastError(error)
-                    null
+                    HttpOutcome(response.code, null, error)
                 }
             }
         } catch (e: Exception) {
             val reason = e.message ?: e.toString()
             LOG.warn("Webhook request to {} failed: {}", serverUrl, reason)
             WebhookConfig.setLastError(reason)
-            null
+            HttpOutcome(0, null, reason)
         }
     }
 }
