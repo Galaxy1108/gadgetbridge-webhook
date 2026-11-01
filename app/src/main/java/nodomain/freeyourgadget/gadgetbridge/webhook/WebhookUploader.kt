@@ -128,19 +128,20 @@ object WebhookUploader {
         val now = System.currentTimeMillis() / 1000
         var maxDays = 0L
         try {
-            GBApplication.acquireDB().use { db ->
-                for (gbDevice in DeviceHelper.getInstance().availableDevices) {
-                    if (!gbDevice.type.isSupported) {
-                        continue
-                    }
-                    var from = WebhookConfig.getCursor(gbDevice.address)
-                    if (from <= 0) {
-                        from = now - WebhookConfig.INITIAL_BACKFILL_SECONDS
-                    }
-                    val days = (now - from) / 86400
-                    if (days > maxDays) {
-                        maxDays = days
-                    }
+            // Only the per-device upload cursors are read here — no database access,
+            // so no DB lock must be acquired (a write lock here used to block or fail
+            // while a device sync was holding the database).
+            for (gbDevice in DeviceHelper.getInstance().availableDevices) {
+                if (!gbDevice.type.isSupported) {
+                    continue
+                }
+                var from = WebhookConfig.getCursor(gbDevice.address)
+                if (from <= 0) {
+                    from = now - WebhookConfig.INITIAL_BACKFILL_SECONDS
+                }
+                val days = (now - from) / 86400
+                if (days > maxDays) {
+                    maxDays = days
                 }
             }
         } catch (e: Exception) {
@@ -168,19 +169,66 @@ object WebhookUploader {
         var lastMessage = ""
 
         try {
-            GBApplication.acquireDB().use { db ->
-                for (gbDevice in DeviceHelper.getInstance().availableDevices) {
-                    if (!gbDevice.type.isSupported) {
-                        continue
+            for (gbDevice in DeviceHelper.getInstance().availableDevices) {
+                if (!gbDevice.type.isSupported) {
+                    continue
+                }
+                // Upload in bounded chunks instead of one huge JSON body: a 7-day
+                // backfill is well over a megabyte and tends to die behind CDNs and
+                // mobile networks. Each chunk advances the cursor on its own, so an
+                // interrupted run resumes where it stopped.
+                val address = gbDevice.address
+                val storedCursor = WebhookConfig.getCursor(address)
+                var scanFrom = if (storedCursor > 0) {
+                    maxOf(0L, storedCursor - WebhookConfig.REPLAY_OVERLAP_SECONDS)
+                } else {
+                    nowSeconds - WebhookConfig.INITIAL_BACKFILL_SECONDS
+                }
+                // Keep re-scanning at least the replay window: Huawei bands write
+                // sleep/steps backdated (a night of sleep only lands in the DB after
+                // the morning sync), so a small overlap would lose that data.
+                scanFrom = minOf(scanFrom, nowSeconds - WebhookConfig.REPLAY_OVERLAP_SECONDS)
+                val requestedEnd = if (maxRangeSeconds >= Long.MAX_VALUE / 4) {
+                    nowSeconds
+                } else {
+                    minOf(nowSeconds, scanFrom + maxRangeSeconds)
+                }
+
+                var chunks = 0
+                while (scanFrom < requestedEnd && chunks < WebhookConfig.MAX_CHUNKS_PER_RUN) {
+                    val scanTo = minOf(requestedEnd, scanFrom + WebhookConfig.UPLOAD_CHUNK_SECONDS)
+                    // Collect the samples inside a short read-lock window, then release
+                    // the lock before talking to the network. Keeping the lock while the
+                    // HTTP request runs made device syncs fail ("Failed to acquire
+                    // database lock") and stalled them for the whole upload.
+                    val chunkFrom = scanFrom
+                    val request = GBApplication.acquireDbReadOnly().use { db ->
+                        buildRequest(gbDevice, db, chunkFrom, scanTo)
                     }
-                    val result = uploadDevice(gbDevice, db, serverUrl, token, nowSeconds, maxRangeSeconds)
-                    totalSamples += result.uploadedSamples
-                    if (result.pendingBind) {
-                        anyPending = true
-                    } else if (!result.success) {
-                        anyFailure = true
-                        lastMessage = result.message
+                    when (request) {
+                        is Prepared.Skip -> LOG.info(request.message)
+                        is Prepared.Post -> {
+                            val result = sendRequest(gbDevice, request, serverUrl, token)
+                            totalSamples += result.uploadedSamples
+                            if (result.pendingBind) {
+                                anyPending = true
+                                break
+                            }
+                            if (!result.success) {
+                                anyFailure = true
+                                lastMessage = result.message
+                                break
+                            }
+                        }
                     }
+                    scanFrom = scanTo
+                    chunks++
+                }
+                if (chunks >= WebhookConfig.MAX_CHUNKS_PER_RUN && scanFrom < requestedEnd) {
+                    LOG.info(
+                        "Chunk cap reached for {}; remaining history continues next run",
+                        gbDevice.name,
+                    )
                 }
             }
         } catch (e: Exception) {
@@ -206,40 +254,34 @@ object WebhookUploader {
         return Result(!anyFailure, message, totalSamples)
     }
 
-    private fun uploadDevice(
+    /** What to do for one device, decided while the database read lock is held. */
+    private sealed class Prepared {
+        class Skip(val message: String) : Prepared()
+
+        class Post(
+            val address: String,
+            val to: Long,
+            val sampleCount: Int,
+            val extendedCount: Int,
+            val body: JSONObject,
+        ) : Prepared()
+    }
+
+    private fun buildRequest(
         gbDevice: GBDevice,
         db: DBHandler,
-        serverUrl: String,
-        token: String,
-        nowSeconds: Long,
-        maxRangeSeconds: Long,
-    ): Result {
+        from: Long,
+        to: Long,
+    ): Prepared {
         val address = gbDevice.address
         val coordinator = gbDevice.deviceCoordinator
         val provider = coordinator.getSampleProvider(gbDevice, db.daoSession)
         if (provider == null) {
-            return Result(true, "No sample provider for ${gbDevice.name}")
+            return Prepared.Skip("No sample provider for ${gbDevice.name}")
         }
-
-        var from = WebhookConfig.getCursor(address)
-        if (from <= 0) {
-            from = nowSeconds - WebhookConfig.INITIAL_BACKFILL_SECONDS
+        if (from >= to) {
+            return Prepared.Skip("Nothing new for ${gbDevice.name}")
         }
-        // Re-scan window: at least the last 24h, but if the cursor is old (the
-        // band and phone were disconnected for a while, so the band only synced
-        // its locally stored history when reconnected), scan back by the cursor
-        // age — capped at 7 days, the typical on-device storage period.
-        // The server upserts idempotently, so re-uploading is harmless.
-        val cursorAge = nowSeconds - from
-        val lookbackSeconds = minOf(
-            WebhookConfig.INITIAL_BACKFILL_SECONDS,
-            maxOf(24 * 60 * 60L, cursorAge),
-        )
-        from = minOf(from, nowSeconds - lookbackSeconds)
-        if (from >= nowSeconds) {
-            return Result(true, "Nothing new for ${gbDevice.name}")
-        }
-        val to = minOf(nowSeconds, from + maxRangeSeconds)
 
         val enabledTypes = WebhookConfig.getEnabledDataTypes()
 
@@ -328,6 +370,22 @@ object WebhookUploader {
             body.put("extended", extended)
         }
 
+        return Prepared.Post(
+            address = address,
+            to = to,
+            sampleCount = samplesJson.length(),
+            extendedCount = extended.length(),
+            body = body,
+        )
+    }
+
+    private fun sendRequest(
+        gbDevice: GBDevice,
+        request: Prepared.Post,
+        serverUrl: String,
+        token: String,
+    ): Result {
+        val address = request.address
         val headers = mutableMapOf("Content-Type" to "application/json")
         if (token.isNotEmpty()) {
             headers["Authorization"] = "Bearer $token"
@@ -336,19 +394,19 @@ object WebhookUploader {
         // Use our own client with long timeouts: Cloudflare edges are often slow
         // (multi-second TLS handshakes), and the default 10s OkHttp timeout would
         // fail even though the endpoint is reachable.
-        val response = postJson(serverUrl, headers, body.toString())
+        val response = postJson(serverUrl, headers, request.body.toString())
 
         if (response != null && response.optString("status") == "ok") {
-            WebhookConfig.setCursor(address, to)
+            WebhookConfig.setCursor(address, request.to)
             WebhookConfig.setPendingBind(address, false)
             LOG.info(
                 "Uploaded {} samples + {} extended categories for {} ({})",
-                samplesJson.length(),
-                extended.length(),
+                request.sampleCount,
+                request.extendedCount,
                 gbDevice.name,
                 address
             )
-            return Result(true, "OK", samplesJson.length())
+            return Result(true, "OK", request.sampleCount)
         }
 
         // Device not bound yet: server rejected the data, phone enters "waiting for

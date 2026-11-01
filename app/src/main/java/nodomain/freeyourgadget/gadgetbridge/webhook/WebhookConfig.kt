@@ -123,8 +123,20 @@ object WebhookConfig {
      *  Bands keep several days of data on the device, so backfill a week. */
     const val INITIAL_BACKFILL_SECONDS = 7 * 24 * 60 * 60L
 
-    /** Safety cap for a single upload request, in seconds (one week). */
+    /** Safety cap for a single upload run, in seconds (one week). */
     const val MAX_RANGE_SECONDS = 7 * 24 * 60 * 60L
+
+    /** One HTTP request covers at most this much data. A whole week in one JSON body
+     *  is over a megabyte and tends to fail behind CDNs / mobile networks. */
+    const val UPLOAD_CHUNK_SECONDS = 12 * 60 * 60L
+
+    /** How far before the cursor to re-scan. Huawei bands write sleep/steps backdated
+     *  (a night of sleep only lands in the DB after the morning sync), so a small
+     *  overlap would silently drop that data. The server upserts, so it is safe. */
+    const val REPLAY_OVERLAP_SECONDS = 24 * 60 * 60L
+
+    /** Safety cap on chunks per device per run (64 * 12h = 32 days of history). */
+    const val MAX_CHUNKS_PER_RUN = 64
 
     /** Per-device upload cursor key: last successfully uploaded timestamp (epoch seconds). */
     fun cursorKey(address: String): String = "webhook_cursor_$address"
