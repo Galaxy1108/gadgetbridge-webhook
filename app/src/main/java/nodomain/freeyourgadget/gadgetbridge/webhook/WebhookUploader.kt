@@ -729,7 +729,9 @@ object WebhookUploader {
                         addRow(
                             WebhookConfig.TYPE_HRV,
                             sample.timestamp,
-                            JSONObject().apply { put("hrv_ms", value) },
+                            // "hrv" (ms) is the key the server-side formatter expects;
+                            // raw RR intervals from other vendors come as "rr_millis".
+                            JSONObject().apply { put("hrv", value) },
                         )
                     }
                 }
