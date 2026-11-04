@@ -1537,8 +1537,8 @@
     <string name="birthdays">Aniversarios</string>
     <string name="pref_dnd_follow_phone_title">Seguir o axuste Non molestar do teléfono</string>
     <string name="pref_dnd_follow_phone_summary">Cando se cambia o estado de Non molestar no teléfono, tamén se cambia automaticamente no dispositivo</string>
-    <string name="prefs_hrv_monitoring_title">Seguimento de HRV</string>
-    <string name="prefs_hrv_monitoring_description">Medir automaticamente a variabilidade do pulso durante todo o día</string>
+    <string name="prefs_hrv_monitoring_title">Seguimento da VFC</string>
+    <string name="prefs_hrv_monitoring_description">Medir automaticamente a variabilidade da frecuencia cardíaca durante todo o día</string>
     <string name="pref_music_management_title">Xestión da música</string>
     <string name="pref_music_management_summary">Xestionar a música no teléfono</string>
     <string name="music_delete_confirm_description">Tes certeza de querer eliminar \"%1$s\"?</string>
@@ -1925,4 +1925,31 @@
         <item quantity="other">%d ficheiros xa descargados</item>
     </plurals>
     <string name="prefs_title_battery_allow_bypass_mode">Permitir obviar o modo de batería</string>
+    <string name="busy_task_fetch_hrv_data">Obtendo datos da VFC</string>
+    <string name="hrv_status">Estado da VFC</string>
+    <string name="hrv">VFC</string>
+    <string name="hrv_status_day_avg">Media no día</string>
+    <string name="hrv_status_day_avg_legend">Media no día (ms)</string>
+    <string name="hrv_status_seven_days_avg">Media en 7-días</string>
+    <string name="hrv_status_seven_days_avg_legend">Media en 7-días (ms)</string>
+    <string name="hrv_status_seven_days_avg_status">Estado</string>
+    <string name="hrv_status_balanced">Equilibrada</string>
+    <string name="hrv_status_unbalanced">Desequilibrada</string>
+    <string name="hrv_status_low">Baixa</string>
+    <string name="hrv_status_poor">Pobre</string>
+    <string name="hrv_status_last_night">Última noite</string>
+    <string name="hrv_status_trend">Tendencia da VFC</string>
+    <string name="hrv_status_last_night_legend">Última noite (ms)</string>
+    <string name="hrv_status_last_night_highest_5">Media máx en 5-min na última noite</string>
+    <string name="hrv_status_nightly_avg">Media durmindo</string>
+    <string name="hrv_status_nightly_avg_legend">Media durmindo (ms)</string>
+    <string name="hrv_status_highest_nightly_avg">Media nocturna máis alta</string>
+    <string name="hrv_status_seven_days_avg_long">media en 7-días</string>
+    <string name="hrv_status_unit">%1$d ms</string>
+    <string name="hrv_status_baseline">%1$d – %2$d ms</string>
+    <string name="hrv_status_baseline_label">Liña base</string>
+    <string name="hrv_status_daily_range_legend">Rango diario</string>
+    <string name="hrv_sdrr">VFC SDRR</string>
+    <string name="hrv_rmssd">VFC RMSSD</string>
+    <string name="pref_header_hrv_status">Estado VFC</string>
 </resources>
