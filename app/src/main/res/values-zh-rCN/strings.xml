@@ -5997,4 +5997,5 @@
     <string name="ninebot_search_title">搜索滑板车</string>
     <string name="ninebot_search_summary">每三秒寻找滑板车，一找到就解锁它。使用更多手机电量。</string>
     <string name="appmanager_everything_up_to_date_message">均为最新</string>
+    <string name="loyalty_cards_sync_on_change_summary">自动同步卡片更改到手表</string>
 </resources>
