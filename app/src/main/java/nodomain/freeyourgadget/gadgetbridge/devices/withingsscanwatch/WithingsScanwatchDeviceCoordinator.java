@@ -221,8 +221,8 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
 
     @NonNull
     @Override
-    public Class<? extends DeviceSupport> getDeviceSupportClass(final GBDevice device) {
-        return WithingsScanwatchDeviceSupport.class;
+    public DeviceSupport createDeviceSupport(final GBDevice device) {
+        return new WithingsScanwatchDeviceSupport();
     }
 
     @Override

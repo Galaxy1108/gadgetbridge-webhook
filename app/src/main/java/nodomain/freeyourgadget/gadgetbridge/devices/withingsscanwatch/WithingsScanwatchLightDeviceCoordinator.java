@@ -60,7 +60,7 @@ public class WithingsScanwatchLightDeviceCoordinator extends WithingsScanwatchDe
 
     @NonNull
     @Override
-    public Class<? extends DeviceSupport> getDeviceSupportClass(final GBDevice device) {
-        return WithingsScanwatchLightDeviceSupport.class;
+    public DeviceSupport createDeviceSupport(final GBDevice device) {
+        return new WithingsScanwatchLightDeviceSupport();
     }
 }
