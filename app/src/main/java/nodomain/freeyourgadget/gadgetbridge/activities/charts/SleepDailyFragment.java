@@ -69,16 +69,14 @@ import nodomain.freeyourgadget.gadgetbridge.activities.workouts.StatTileGridUtil
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutValueFormatter;
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.entries.ActivitySummarySimpleEntry;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
-import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentSleepchartBinding;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.TimeSampleProvider;
-import nodomain.freeyourgadget.gadgetbridge.entities.WithingsBreathingDisturbanceSample;
-import nodomain.freeyourgadget.gadgetbridge.entities.WithingsBreathingDisturbanceSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.RespiratoryRateSample;
+import nodomain.freeyourgadget.gadgetbridge.model.SleepBreathingSample;
 import nodomain.freeyourgadget.gadgetbridge.model.SleepScoreSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
 import nodomain.freeyourgadget.gadgetbridge.model.TemperatureSample;
@@ -172,33 +170,22 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
             return null;
         }
 
-        final long deviceId;
-        try {
-            deviceId = DBHelper.getDevice(device, db.getDaoSession()).getId();
-        } catch (final Exception e) {
-            LOG.warn("Failed to resolve device for breathing-quality assessment", e);
+        final TimeSampleProvider<? extends SleepBreathingSample> provider =
+                device.getDeviceCoordinator().getSleepBreathingSampleProvider(device, db.getDaoSession());
+        if (provider == null) {
             return null;
         }
 
         final long tsStart = sleepSessions.get(0).getStartTime();
         final long tsEnd = sleepSessions.get(sleepSessions.size() - 1).getEndTime();
-        final List<WithingsBreathingDisturbanceSample> samples = db.getDaoSession()
-                .getWithingsBreathingDisturbanceSampleDao()
-                .queryBuilder()
-                .where(
-                        WithingsBreathingDisturbanceSampleDao.Properties.DeviceId.eq(deviceId),
-                        WithingsBreathingDisturbanceSampleDao.Properties.Timestamp.ge(tsStart),
-                        WithingsBreathingDisturbanceSampleDao.Properties.Timestamp.le(tsEnd)
-                )
-                .orderAsc(WithingsBreathingDisturbanceSampleDao.Properties.Timestamp)
-                .list();
+        final List<? extends SleepBreathingSample> samples = provider.getAllSamples(tsStart, tsEnd);
         if (samples.isEmpty()) {
             return null;
         }
 
         double weightedProbability = 0;
         long totalDurationMs = 0;
-        for (final WithingsBreathingDisturbanceSample sample : samples) {
+        for (final SleepBreathingSample sample : samples) {
             final int probability = sample.getBreathingEventProbability();
             if (probability < 0 || probability > 127) {
                 continue;

@@ -34,12 +34,14 @@ import nodomain.freeyourgadget.gadgetbridge.devices.GenericSpo2SampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.SampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.SleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.TimeSampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr.WithingsBreathingDisturbanceSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr.WithingsSleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.model.RespiratoryRateSample;
+import nodomain.freeyourgadget.gadgetbridge.model.SleepBreathingSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.ServiceDeviceSupport;
@@ -121,6 +123,11 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
     @Override
     public boolean supportsSleepBreathingQuality(@NonNull final GBDevice device) {
         return supportsRespiratoryScan(device);
+    }
+
+    @Override
+    public TimeSampleProvider<? extends SleepBreathingSample> getSleepBreathingSampleProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
+        return new WithingsBreathingDisturbanceSampleProvider(device, session);
     }
 
     @Override
