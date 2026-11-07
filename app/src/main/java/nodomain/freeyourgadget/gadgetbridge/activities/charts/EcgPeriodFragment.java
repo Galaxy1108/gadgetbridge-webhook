@@ -123,7 +123,7 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
 
     @Override
     public String getTitle() {
-        return getString(R.string.withings_scanwatch_screen_ecg);
+        return getString(R.string.pref_screen_ecg);
     }
 
     private long getStartTimestamp() {
@@ -248,7 +248,7 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
 
         final CombinedData combinedData = new CombinedData();
         if (!rangeEntries.isEmpty()) {
-            final CandleDataSet rangeDataSet = new CandleDataSet(rangeEntries, getString(R.string.withings_scanwatch_screen_ecg));
+            final CandleDataSet rangeDataSet = new CandleDataSet(rangeEntries, getString(R.string.pref_screen_ecg));
             rangeDataSet.setDrawValuesEnabled(false);
             rangeDataSet.setDrawIconsEnabled(false);
             rangeDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -325,7 +325,7 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
         final List<LegendEntry> legendEntries = new ArrayList<>(2);
 
         final LegendEntry rangeEntry = new LegendEntry();
-        rangeEntry.setLabel(getString(R.string.withings_scanwatch_screen_ecg));
+        rangeEntry.setLabel(getString(R.string.pref_screen_ecg));
         rangeEntry.setFormColor(ecgRangeColor);
         legendEntries.add(rangeEntry);
 

@@ -4849,19 +4849,6 @@
     <string name="withings_bt_calibration_next">Next</string>
     <string name="withings_scanwatch_pref_screens_title">Watch screens</string>
     <string name="withings_scanwatch_pref_screens_summary">Choose which screens appear on the watch and drag to reorder them</string>
-    <string name="withings_scanwatch_screen_date">Date</string>
-    <string name="withings_scanwatch_screen_sleep">Sleep</string>
-    <string name="withings_scanwatch_screen_ecg">ECG</string>
-    <string name="withings_scanwatch_screen_elevation">Elevation</string>
-    <string name="withings_scanwatch_screen_heart_rate">Heart rate</string>
-    <string name="withings_scanwatch_screen_spo2">SpO2 / Blood oxygen</string>
-    <string name="withings_scanwatch_screen_calories">Calories</string>
-    <string name="withings_scanwatch_screen_settings">Settings</string>
-    <string name="withings_scanwatch_screen_workouts">Workouts</string>
-    <string name="withings_scanwatch_screen_distance">Distance</string>
-    <string name="withings_scanwatch_screen_steps">Steps</string>
-    <string name="withings_scanwatch_screen_breathe">Breathe</string>
-    <string name="withings_scanwatch_screen_clock">Clock</string>
 
     <!-- SpO2/respiratory/AFib health feature settings -->
     <string name="withings_scanwatch_pref_ecg_enable_title">Enable ECG</string>
@@ -4878,7 +4865,6 @@ Measures every 30 minutes during sleep.
 The result is the average of all the measurements.
 Repeated low oxygen saturation levels during sleep could be a sign of pulmonary issues.</string>
     <string name="withings_scanwatch_pref_respiratory_scan_title">Respiratory Scan</string>
-    <string name="withings_scanwatch_pref_respiratory_scan_off">Off</string>
     <string name="withings_scanwatch_pref_respiratory_scan_automatic">Automatic (scans some nights, minimal battery impact)</string>
     <string name="withings_scanwatch_pref_respiratory_scan_always">Always (scans every night, higher battery usage)</string>
     <string name="withings_scanwatch_pref_afib_day_title">AFib Detection (Daytime)</string>
@@ -4913,7 +4899,6 @@ Repeated low oxygen saturation levels during sleep could be a sign of pulmonary 
     <string name="withings_scanwatch_shortcut_workout_selection">Workout selection</string>
     <string name="withings_scanwatch_shortcut_timer">Timer</string>
     <string name="withings_scanwatch_pref_hr_alert_title">High/low resting heart rate alerts</string>
-    <string name="withings_scanwatch_pref_hr_alert_off">Off</string>
     <string name="withings_scanwatch_pref_hr_alert_automatic">Automatic (recommended)</string>
     <string name="withings_scanwatch_pref_hr_alert_custom">Custom threshold</string>
     <string name="withings_scanwatch_pref_hr_alert_low_title">Low heart rate threshold</string>

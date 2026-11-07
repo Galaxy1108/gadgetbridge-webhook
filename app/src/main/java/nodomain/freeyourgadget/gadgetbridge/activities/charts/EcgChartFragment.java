@@ -388,7 +388,7 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
     }
 
     private LineDataSet createDataSet(final List<Entry> values) {
-        final LineDataSet dataSet = new LineDataSet(values, getString(R.string.withings_scanwatch_screen_ecg));
+        final LineDataSet dataSet = new LineDataSet(values, getString(R.string.pref_screen_ecg));
         dataSet.setColor(ecgColor);
         dataSet.setDrawCirclesEnabled(false);
         dataSet.setDrawValuesEnabled(false);
@@ -773,7 +773,7 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
 
     @Override
     public String getTitle() {
-        return getString(R.string.withings_scanwatch_screen_ecg);
+        return getString(R.string.pref_screen_ecg);
     }
 
     @Override

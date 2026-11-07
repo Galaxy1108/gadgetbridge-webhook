@@ -2067,19 +2067,19 @@
 
     <!-- Withings ScanWatch screen list (drag-to-reorder) -->
     <string-array name="pref_withings_scanwatch_screens">
-        <item>@string/withings_scanwatch_screen_date</item>
-        <item>@string/withings_scanwatch_screen_sleep</item>
-        <item>@string/withings_scanwatch_screen_ecg</item>
-        <item>@string/withings_scanwatch_screen_elevation</item>
-        <item>@string/withings_scanwatch_screen_heart_rate</item>
-        <item>@string/withings_scanwatch_screen_spo2</item>
-        <item>@string/withings_scanwatch_screen_calories</item>
-        <item>@string/withings_scanwatch_screen_settings</item>
-        <item>@string/withings_scanwatch_screen_workouts</item>
-        <item>@string/withings_scanwatch_screen_distance</item>
-        <item>@string/withings_scanwatch_screen_steps</item>
-        <item>@string/withings_scanwatch_screen_breathe</item>
-        <item>@string/withings_scanwatch_screen_clock</item>
+        <item>@string/watchface_widget_type_date</item>
+        <item>@string/menuitem_sleep</item>
+        <item>@string/pref_screen_ecg</item>
+        <item>@string/Elevation</item>
+        <item>@string/heart_rate</item>
+        <item>@string/menuitem_spo2</item>
+        <item>@string/calories</item>
+        <item>@string/menuitem_settings</item>
+        <item>@string/bottom_nav_workouts</item>
+        <item>@string/distance</item>
+        <item>@string/watchface_widget_type_steps</item>
+        <item>@string/menuitem_breathing</item>
+        <item>@string/clock</item>
     </string-array>
 
     <string-array name="pref_withings_scanwatch_screens_values">
@@ -2146,7 +2146,7 @@
     </string-array>
 
     <string-array name="pref_withings_scanwatch_respiratory_scan_entries">
-        <item>@string/withings_scanwatch_pref_respiratory_scan_off</item>
+        <item>@string/off</item>
         <item>@string/withings_scanwatch_pref_respiratory_scan_automatic</item>
         <item>@string/withings_scanwatch_pref_respiratory_scan_always</item>
     </string-array>
@@ -2166,7 +2166,7 @@
     </string-array>
 
     <string-array name="pref_withings_scanwatch_hr_alert_mode_entries">
-        <item>@string/withings_scanwatch_pref_hr_alert_off</item>
+        <item>@string/off</item>
         <item>@string/withings_scanwatch_pref_hr_alert_automatic</item>
         <item>@string/withings_scanwatch_pref_hr_alert_custom</item>
     </string-array>
