@@ -17,11 +17,8 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.message.incoming;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.widget.Toast;
-
-import androidx.core.content.res.ResourcesCompat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +37,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.comm
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.message.WithingsMessage;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.message.WithingsMessageType;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
+import nodomain.freeyourgadget.gadgetbridge.util.NotificationUtils;
 
 public class NotificationRequestHandler implements IncomingMessageHandler {
     private static final Logger logger = LoggerFactory.getLogger(NotificationRequestHandler.class);
@@ -99,55 +97,33 @@ public class NotificationRequestHandler implements IncomingMessageHandler {
                 packageName = notificationSpec.getSourceAppId();
             }
 
-            String iconPackageName = packageName;
-            if (notificationSpec != null && notificationSpec.getIconPackageId() != null) {
-                iconPackageName = notificationSpec.getIconPackageId();
-            }
+            logger.info("Resolving icon for sourceAppId='{}', packageName='{}'", sourceAppId, packageName);
 
-            logger.info("Resolving icon for sourceAppId='{}', packageName='{}', iconPackageName='{}'", sourceAppId, packageName, iconPackageName);
-
+            final Context context = support.getContext();
+            imageData = new byte[0];
             try {
                 Drawable icon = null;
-                if (notificationSpec != null && notificationSpec.getIconId() != 0) {
-                    try {
-                        Context sourcePackageContext = support.getContext().createPackageContext(iconPackageName, 0);
-                        icon = ResourcesCompat.getDrawable(sourcePackageContext.getResources(), notificationSpec.getIconId(), null);
-                        logger.info("Loaded specific iconId={} from package {}", notificationSpec.getIconId(), iconPackageName);
-                    } catch (Exception ex) {
-                        logger.warn("Failed to load specific iconId={} from package {}, falling back to app icon", notificationSpec.getIconId(), iconPackageName);
-                    }
+                if (notificationSpec != null) {
+                    icon = NotificationUtils.getNotificationIcon(context, notificationSpec);
+                } else if (packageName != null) {
+                    icon = NotificationUtils.getAppIcon(context, packageName);
                 }
                 if (icon == null) {
-                    logger.info("Loading default application icon for package {}", packageName);
-                    PackageManager pm = support.getContext().getPackageManager();
-                    icon = pm.getApplicationIcon(packageName);
+                    logger.info("No icon found for {}, falling back to Gadgetbridge icon", packageName);
+                    icon = NotificationUtils.getAppIcon(context, context.getPackageName());
                 }
 
                 imageData = IconHelper.getIconBytesFromDrawable(icon, width, height);
                 appIconCache.put(cacheKey, imageData);
-                logger.info("Successfully rendered icon for package {} (size {}x{})", packageName, width, height);
-            } catch (PackageManager.NameNotFoundException e) {
-                logger.error("Error while updating notification icons for package " + packageName, e);
+                logger.info("Rendered icon for package {} (size {}x{})", packageName, width, height);
+            } catch (final Exception e) {
+                logger.error("Failed to get icon for package {}, falling back to Gadgetbridge icon", packageName, e);
                 try {
-                    // Fallback to Gadgetbridge icon if package not found
-                    logger.info("Falling back to Gadgetbridge icon");
-                    PackageManager pm = support.getContext().getPackageManager();
-                    Drawable icon = pm.getApplicationIcon(support.getContext().getPackageName());
+                    final Drawable icon = NotificationUtils.getAppIcon(context, context.getPackageName());
                     imageData = IconHelper.getIconBytesFromDrawable(icon, width, height);
                     appIconCache.put(cacheKey, imageData);
-                } catch (Exception ex) {
-                    imageData = new byte[0];
-                }
-            } catch (Exception e) {
-                logger.error("Unexpected error getting icon for " + packageName, e);
-                try {
-                    logger.info("Unexpected error, falling back to Gadgetbridge icon for {}", packageName);
-                    PackageManager pm = support.getContext().getPackageManager();
-                    Drawable icon = pm.getApplicationIcon(support.getContext().getPackageName());
-                    imageData = IconHelper.getIconBytesFromDrawable(icon, width, height);
-                    appIconCache.put(cacheKey, imageData);
-                } catch (Exception ex) {
-                    imageData = new byte[0];
+                } catch (final Exception ex) {
+                    logger.error("Failed to render Gadgetbridge icon", ex);
                 }
             }
         }
