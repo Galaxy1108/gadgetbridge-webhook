@@ -40,7 +40,6 @@
         android:entryValues="@array/pref_withings_scanwatch_shortcut_values"
         android:key="withings_scanwatch_shortcut_action"
         android:persistent="true"
-        android:summary="@string/withings_scanwatch_pref_shortcut_summary"
         android:title="@string/withings_scanwatch_pref_shortcut_title" />
 
     <SwitchPreferenceCompat

@@ -2119,16 +2119,16 @@
          ECG (1) and SpO2 (2) require the user to have accepted the health terms & conditions
          in the Withings app before they can be activated via BLE - see ShortcutAction. -->
     <string-array name="pref_withings_scanwatch_shortcut_entries">
-        <item>@string/withings_scanwatch_shortcut_none</item>
+        <item>@string/none</item>
         <item>@string/withings_scanwatch_shortcut_ecg</item>
         <item>@string/withings_scanwatch_shortcut_spo2</item>
         <item>@string/withings_scanwatch_shortcut_workout_start</item>
         <item>@string/withings_scanwatch_shortcut_workout_selection</item>
-        <item>@string/withings_scanwatch_shortcut_breathe</item>
-        <item>@string/withings_scanwatch_shortcut_stopwatch</item>
+        <item>@string/menuitem_breathing</item>
+        <item>@string/qhybrid_button_function_stopwatch</item>
         <item>@string/withings_scanwatch_shortcut_timer</item>
-        <item>@string/withings_scanwatch_shortcut_dnd</item>
-        <item>@string/withings_scanwatch_shortcut_quicklook</item>
+        <item>@string/mi2_prefs_do_not_disturb</item>
+        <item>@string/withings_scanwatch_pref_quicklook_title</item>
     </string-array>
     <!-- Values are the string representations of the action bytes (0-9).
          10 = FINDMYPHONE and 11 = FLASHLIGHT are intentionally omitted (unsupported). -->
