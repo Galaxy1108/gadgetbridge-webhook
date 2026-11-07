@@ -52,6 +52,8 @@ import com.jaredrummler.android.colorpicker.MaterialColorPickerDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +61,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 import nodomain.freeyourgadget.gadgetbridge.BuildConfig;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
@@ -79,9 +83,10 @@ import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs;
 import nodomain.freeyourgadget.gadgetbridge.util.NotificationUtils;
-import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.SubtitleListPreference;
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository;
 
+@AndroidEntryPoint
 public class SettingsActivity extends AbstractSettingsActivityV2 implements ActivityCompat.OnRequestPermissionsResultCallback {
     public static final String PREF_LANGUAGE = "language";
     public static final String PREF_UNIT_WEIGHT = "unit_weight";
@@ -138,8 +143,12 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
         }
     }
 
+    @AndroidEntryPoint
     public static class SettingsFragment extends AbstractPreferenceFragment {
         private static final Logger LOG = LoggerFactory.getLogger(SettingsActivity.class);
+
+        @Inject
+        UIResourcesRepository uiResources;
 
         /** Must stay in sync with GBApplication#getAccentColorOverlay(boolean) and the ThemeOverlay.App.Accent.* styles. */
         private static final String[] ACCENT_COLOR_KEYS = {
@@ -168,13 +177,13 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 0xFF5252E0, 0xFF8A3FE6, 0xFFD02866, 0xFFFFFFFF,
         };
 
-        private static int[] accentColorSwatches() {
-            return GBApplication.isDarkThemeEnabled() ? ACCENT_COLOR_SWATCHES_DARK : ACCENT_COLOR_SWATCHES_LIGHT;
+        private int[] accentColorSwatches() {
+            return uiResources.isDarkThemeEnabled() ? ACCENT_COLOR_SWATCHES_DARK : ACCENT_COLOR_SWATCHES_LIGHT;
         }
 
         /** White needs a dark backdrop to read against, so it's only offered while using the dark theme. */
-        private static boolean isAccentColorAvailable(final String key) {
-            return !"white".equals(key) || GBApplication.isDarkThemeEnabled();
+        private boolean isAccentColorAvailable(final String key) {
+            return !"white".equals(key) || uiResources.isDarkThemeEnabled();
         }
 
         @Override
@@ -197,7 +206,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             setInputTypeFor("location_latitude", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL);
             setInputTypeFor("location_longitude", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED  | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
-            Prefs prefs = GBApplication.getPrefs();
             Preference pref = findPreference("pref_category_activity_personal");
             if (pref != null) {
                 pref.setOnPreferenceClickListener(preference -> {
@@ -543,7 +551,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             final SwitchPreferenceCompat contrastingSurfaces = findPreference(GBApplication.PREF_CONTRASTING_SURFACES);
 
             if (amoled_black != null) {
-                String selectedTheme = prefs.getString("pref_key_theme", requireContext().getString(R.string.pref_theme_value_system));
+                String selectedTheme = uiResources.getSelectedTheme();
                 if (selectedTheme.equals("light"))
                     amoled_black.setEnabled(false);
                 else
@@ -558,7 +566,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             }
 
             if (accentColor != null) {
-                accentColor.setEnabled(!GBApplication.areDynamicColorsEnabled());
+                accentColor.setEnabled(!uiResources.areDynamicColorsEnabled());
                 updateAccentColorSummary(accentColor);
                 accentColor.setOnPreferenceClickListener(preference -> {
                     showAccentColorPicker(accentColor);
@@ -567,11 +575,9 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             }
 
             if (contrastingSurfaces != null) {
-                contrastingSurfaces.setChecked(GBApplication.areContrastingSurfacesEnabled(GBApplication.isDarkThemeEnabled()));
+                contrastingSurfaces.setChecked(uiResources.areContrastingSurfacesEnabled(uiResources.isDarkThemeEnabled()));
                 contrastingSurfaces.setOnPreferenceChangeListener((preference, newVal) -> {
-                    GBApplication.getPrefs().getPreferences().edit()
-                            .putBoolean(GBApplication.PREF_CONTRASTING_SURFACES, (Boolean) newVal)
-                            .apply();
+                    uiResources.setContrastingSurfacesEnabled((Boolean) newVal);
                     sendThemeChangeIntent();
                     return true;
                 });
@@ -590,10 +596,8 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                         }
                         if (accentColor != null) {
                             accentColor.setEnabled(!val.equals(requireContext().getString(R.string.pref_theme_value_dynamic)));
-                            if (val.equals("light") && "white".equals(GBApplication.getPrefs().getString(GBApplication.PREF_ACCENT_COLOR, GBApplication.PREF_ACCENT_COLOR_DEFAULT))) {
-                                GBApplication.getPrefs().getPreferences().edit()
-                                        .putString(GBApplication.PREF_ACCENT_COLOR, GBApplication.PREF_ACCENT_COLOR_DEFAULT)
-                                        .apply();
+                            if (val.equals("light") && "white".equals(uiResources.getAccentColor())) {
+                                uiResources.setAccentColor(GBApplication.PREF_ACCENT_COLOR_DEFAULT);
                             }
                             updateAccentColorSummary(accentColor);
                         }
@@ -738,9 +742,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             for (int i = 0; i < swatches.length; i++) {
                 swatches[i] = swatchList.get(i);
             }
-            final int currentIndex = Math.max(0, keys.indexOf(
-                    GBApplication.getPrefs().getString(GBApplication.PREF_ACCENT_COLOR, GBApplication.PREF_ACCENT_COLOR_DEFAULT)
-            ));
+            final int currentIndex = Math.max(0, keys.indexOf(uiResources.getAccentColor()));
             final ColorPickerDialog.Builder builder = ColorPickerDialog.newBuilder();
             builder.setDialogTitle(R.string.pref_title_accent_color);
             builder.setColor(swatches[currentIndex]);
@@ -764,9 +766,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                     if (index == -1) {
                         return;
                     }
-                    GBApplication.getPrefs().getPreferences().edit()
-                            .putString(GBApplication.PREF_ACCENT_COLOR, keys.get(index))
-                            .apply();
+                    uiResources.setAccentColor(keys.get(index));
                     updateAccentColorSummary(accentColor);
                     sendThemeChangeIntent();
                 }
@@ -784,7 +784,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 accentColor.setSummary(R.string.pref_accent_color_dynamic_disabled_summary);
                 return;
             }
-            final String selected = GBApplication.getPrefs().getString(GBApplication.PREF_ACCENT_COLOR, GBApplication.PREF_ACCENT_COLOR_DEFAULT);
+            final String selected = uiResources.getAccentColor();
             final int index = Arrays.asList(ACCENT_COLOR_KEYS).indexOf(selected);
             accentColor.setSummary(getString(ACCENT_COLOR_NAME_RES[index == -1 ? 0 : index]));
         }
