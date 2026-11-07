@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 
 import java.util.regex.Pattern;
 
+import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport;
@@ -29,6 +30,11 @@ public class WithingsScanwatchLightDeviceCoordinator extends WithingsScanwatchDe
     @Override
     public Pattern getSupportedDeviceName() {
         return Pattern.compile("(?i)^ScanWatch Light.*");
+    }
+
+    @Override
+    public int getDeviceNameResource() {
+        return R.string.devicetype_withings_scanwatch_light;
     }
 
     @Override
