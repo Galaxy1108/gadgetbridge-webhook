@@ -52,7 +52,6 @@ import java.util.Locale;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
-import nodomain.freeyourgadget.gadgetbridge.database.repository.EcgRepository;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
@@ -142,7 +141,9 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
     protected EcgPeriodData refreshInBackground(final ChartsHost chartsHost, final DBHandler db, final GBDevice device) {
         final long periodStart = getStartTimestamp();
         final long periodEnd = ((long) getTSEnd() * 1000L) + 999L;
-        final List<EcgRecord> summaries = EcgRepository.getSessions(db, device, periodStart, periodEnd);
+        final List<EcgRecord> summaries = device.getDeviceCoordinator()
+                .getEcgDataProvider(device, db.getDaoSession())
+                .getSessions(periodStart, periodEnd);
 
         final List<EcgDayData> days = new ArrayList<>(totalDays);
         final long[] dayBoundaries = new long[totalDays + 1];

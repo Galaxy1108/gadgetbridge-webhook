@@ -31,6 +31,7 @@ import de.greenrobot.dao.query.QueryBuilder;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
+import nodomain.freeyourgadget.gadgetbridge.devices.EcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgDataSample;
@@ -41,15 +42,20 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
 
-public class EcgRepository {
+public class EcgRepository implements EcgDataProvider {
     private static final Logger LOG = LoggerFactory.getLogger(EcgRepository.class);
 
+    private final GBDevice gbDevice;
+    private final DaoSession daoSession;
+
+    public EcgRepository(final GBDevice gbDevice, final DaoSession daoSession) {
+        this.gbDevice = gbDevice;
+        this.daoSession = daoSession;
+    }
+
     @NonNull
-    public static List<EcgRecord> getSessions(final DBHandler db,
-                                              final GBDevice gbDevice,
-                                              final long startTimestamp,
-                                              final long endTimestamp) {
-        final DaoSession daoSession = db.getDaoSession();
+    @Override
+    public List<EcgRecord> getSessions(final long startTimestamp, final long endTimestamp) {
         final Device dbDevice = DBHelper.findDevice(gbDevice, daoSession);
         if (dbDevice == null) {
             return Collections.emptyList();
@@ -74,12 +80,13 @@ public class EcgRepository {
     }
 
     @NonNull
-    public static List<EcgSample> getSamples(final DBHandler db, final EcgRecord record) {
+    @Override
+    public List<EcgSample> getSamples(@Nullable final EcgRecord record) {
         if (record == null || record.getSessionId() == null) {
             return Collections.emptyList();
         }
 
-        final List<HuaweiEcgDataSample> samples = db.getDaoSession().getHuaweiEcgDataSampleDao()
+        final List<HuaweiEcgDataSample> samples = daoSession.getHuaweiEcgDataSampleDao()
                 .queryBuilder()
                 .where(HuaweiEcgDataSampleDao.Properties.EcgId.eq(record.getSessionId()))
                 .orderAsc(HuaweiEcgDataSampleDao.Properties.TimeDelta)

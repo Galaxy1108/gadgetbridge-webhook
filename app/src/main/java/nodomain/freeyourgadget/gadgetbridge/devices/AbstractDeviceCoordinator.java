@@ -74,6 +74,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.cards.QuickControl;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary;
 import nodomain.freeyourgadget.gadgetbridge.entities.CyclingSample;
+import nodomain.freeyourgadget.gadgetbridge.database.repository.EcgRepository;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
 import nodomain.freeyourgadget.gadgetbridge.entities.DeviceAttributes;
@@ -868,6 +869,7 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
             supportsWeightMeasurement(device) ||
             supportsPointAltitudeMeasurement(device) ||
             supportsHydration(device) ||
+            supportsEcgMeasurement(device) ||
             supportsActiveCalories(device) ||
             supportsCyclingData(device) ||
             supportsRespiratoryRate(device) ||
@@ -896,6 +898,17 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     @Override
     public boolean supportsGlucoseMeasurement(@NonNull final GBDevice device) {
         return false;
+    }
+
+    @Override
+    public boolean supportsEcgMeasurement(@NonNull final GBDevice device) {
+        return false;
+    }
+
+    @NonNull
+    @Override
+    public EcgDataProvider getEcgDataProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
+        return new EcgRepository(device, session);
     }
 
     @Override

@@ -53,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
-import nodomain.freeyourgadget.gadgetbridge.database.repository.EcgRepository;
+import nodomain.freeyourgadget.gadgetbridge.devices.EcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgInterpretation;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
@@ -167,20 +167,21 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
                                       final long startTimestamp,
                                       final long endTimestamp,
                                       final Long selectedSessionTimestamp) {
-        final List<EcgRecord> summaries = EcgRepository.getSessions(db, device, startTimestamp, endTimestamp);
+        final EcgDataProvider provider = device.getDeviceCoordinator().getEcgDataProvider(device, db.getDaoSession());
+        final List<EcgRecord> summaries = provider.getSessions(startTimestamp, endTimestamp);
 
         EcgRecord selectedSummary = null;
         List<EcgSample> waveform = Collections.emptyList();
 
         if (selectedSessionTimestamp != null) {
             selectedSummary = findSummaryByTimestamp(summaries, selectedSessionTimestamp);
-            waveform = EcgRepository.getSamples(db, selectedSummary);
+            waveform = provider.getSamples(selectedSummary);
         }
 
         if (selectedSummary == null) {
             for (int i = summaries.size() - 1; i >= 0; i--) {
                 final EcgRecord candidate = summaries.get(i);
-                final List<EcgSample> candidateWaveform = EcgRepository.getSamples(db, candidate);
+                final List<EcgSample> candidateWaveform = provider.getSamples(candidate);
                 selectedSummary = candidate;
                 waveform = candidateWaveform;
                 if (!candidateWaveform.isEmpty()) {
