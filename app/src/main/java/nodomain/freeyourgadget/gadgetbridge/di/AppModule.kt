@@ -13,6 +13,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.DeviceManager
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceService
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceService
 import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs
+import nodomain.freeyourgadget.gadgetbridge.util.preferences.SharedPreferencesDataSource
 import javax.inject.Singleton
 
 /**
@@ -34,6 +35,15 @@ object AppModule {
     @DefaultPrefs
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context)
+
+    /**
+     * The data source for the app's default [SharedPreferences], for repositories that own default preference keys.
+     */
+    @Provides
+    @Singleton
+    @DefaultPrefs
+    fun provideDefaultPrefsDataSource(@DefaultPrefs sharedPreferences: SharedPreferences): SharedPreferencesDataSource =
+        SharedPreferencesDataSource(sharedPreferences)
 
     @Provides
     @Singleton
