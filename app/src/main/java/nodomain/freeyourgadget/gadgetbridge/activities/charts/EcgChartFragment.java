@@ -403,6 +403,11 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
             return waveform;
         }
 
+        if (!"withings".equals(summary.getSourceApp())) {
+            // other vendors are already smoothed
+            return waveform;
+        }
+
         final float[] values = prepareWaveformValues(summary, waveform);
         final float[] medianFiltered = applyMedianFilter(values, DISPLAY_MEDIAN_WINDOW);
         final float[] centered = subtractBaseline(medianFiltered, DISPLAY_BASELINE_WINDOW);
