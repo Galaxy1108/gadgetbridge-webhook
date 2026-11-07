@@ -873,7 +873,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
             }
             if (score >= 31) {
                 return new SleepBreathingQualityAssessment(
-                        score, R.string.fair, R.string.sleep_breathing_quality_fair_description, R.color.hrv_status_unbalanced);
+                        score, R.string.sleep_score_fair, R.string.sleep_breathing_quality_fair_description, R.color.hrv_status_unbalanced);
             }
             return new SleepBreathingQualityAssessment(
                     score,

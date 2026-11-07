@@ -2146,7 +2146,6 @@
     <string name="low">Low</string>
     <string name="medium_amount">Medium</string>
     <string name="optimal">Optimal</string>
-    <string name="fair">Fair</string>
     <string name="sleep_breathing_quality_title">Sleep breathing quality</string>
     <string name="sleep_breathing_quality_estimated_value">%1$s (%2$d/100 estimated)</string>
     <string name="sleep_breathing_quality_range_content_description">Estimated breathing quality: %1$d out of 100</string>
@@ -2154,7 +2153,7 @@
     <string name="sleep_breathing_quality_fair_description">Your breathing quality is fair, but there is some room for improvement in your sleeping habits.</string>
     <string name="sleep_breathing_quality_needs_improvement">Needs Improvement</string>
     <string name="sleep_breathing_quality_needs_improvement_description">Your breathing quality needs improvement. Consider reviewing your sleeping habits to support more restful sleep.</string>
-    <string name="sleep_breathing_quality_disclaimer">This local estimate is derived from breathing-event probabilities reported by the device and is not equivalent to the manufacturer\'s assessment. It is not intended to diagnose or screen for sleep disorders.</string>
+    <string name="sleep_breathing_quality_disclaimer">This local estimate is derived from breathing-event probabilities reported by the device and may differ from any assessment provided by the manufacturer. It is not intended to diagnose or screen for sleep disorders.</string>
     <string name="high">High</string>
     <string name="very_high">Very High</string>
     <string name="training_daily_load">Daily Load</string>
