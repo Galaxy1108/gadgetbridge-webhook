@@ -990,7 +990,7 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
 
     @Override
     public boolean supportsSleepBreathingQuality(@NonNull final GBDevice device) {
-        return supportsSleepRespiratoryRate(device);
+        return false;
     }
 
     @Override
