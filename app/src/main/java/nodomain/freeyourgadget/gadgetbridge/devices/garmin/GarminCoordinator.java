@@ -434,6 +434,11 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
         return getPrefs(device).getBoolean(GarminPreferences.PREF_GARMIN_HYDRATION_SUPPORTED, false);
     }
 
+    @Override
+    public boolean supportsEcgMeasurement(@NonNull final GBDevice device) {
+        return getPrefs(device).getBoolean(GarminPreferences.PREF_GARMIN_ECG_SUPPORTED, false);
+    }
+
     public boolean supportsAgpsUpdates(final GBDevice device) {
         return !getPrefs(device).getString(GarminPreferences.PREF_AGPS_KNOWN_URLS, "").isEmpty();
     }
