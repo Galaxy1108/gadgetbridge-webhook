@@ -5998,4 +5998,23 @@
     <string name="ninebot_search_summary">每三秒寻找滑板车，一找到就解锁它。使用更多手机电量。</string>
     <string name="appmanager_everything_up_to_date_message">均为最新</string>
     <string name="loyalty_cards_sync_on_change_summary">自动同步卡片更改到手表</string>
+    <string name="metric_garmin_training_status">训练状态</string>
+    <string name="training_status_productive">富有成效</string>
+    <string name="training_status_maintaining">维持状态</string>
+    <string name="training_status_recovery">恢复</string>
+    <string name="training_status_strained">疲惫</string>
+    <string name="training_status_detraining">反锻炼</string>
+    <string name="training_status_paused">已暂停</string>
+    <string name="training_status_no_status">无状态</string>
+    <string name="training_status_unproductive">效果不佳</string>
+    <string name="training_status_overreaching">用力过猛</string>
+    <string name="training_status_peaking">巅峰</string>
+    <string name="training_status_unknown">未知 (%d)</string>
+    <string name="training_status_range">%1$s – %2$s</string>
+    <string name="training_status_today">今天</string>
+    <string name="training_status_last_7_days">过去 7 天：%1$s</string>
+    <string name="training_status_load">负荷</string>
+    <string name="training_status_breakdown">崩溃</string>
+    <string name="training_status_history">历史</string>
+    <string name="training_status_share">%1$d%% · %2$s</string>
 </resources>
