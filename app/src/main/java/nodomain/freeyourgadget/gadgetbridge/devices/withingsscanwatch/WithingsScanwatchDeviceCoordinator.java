@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import de.greenrobot.dao.query.QueryBuilder;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
-import nodomain.freeyourgadget.gadgetbridge.activities.charts.DeviceChartsProvider;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractBLEDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.GenericRespiratoryRateSampleProvider;
@@ -105,6 +104,7 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
         return true;
     }
 
+    @Override
     public boolean supportsEcgMeasurement(@NonNull final GBDevice device) {
         return true;
     }
@@ -192,11 +192,6 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
     @Override
     public boolean supportsHeartRateMeasurement(GBDevice device) {
         return true;
-    }
-
-    @Override
-    public DeviceChartsProvider getChartsProvider() {
-        return new WithingsScanwatchChartsProvider();
     }
 
     @Override

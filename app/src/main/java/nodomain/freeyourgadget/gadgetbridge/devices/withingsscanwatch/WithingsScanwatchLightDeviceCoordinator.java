@@ -20,8 +20,6 @@ import androidx.annotation.NonNull;
 
 import java.util.regex.Pattern;
 
-import nodomain.freeyourgadget.gadgetbridge.activities.charts.DefaultChartsProvider;
-import nodomain.freeyourgadget.gadgetbridge.activities.charts.DeviceChartsProvider;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport;
@@ -46,11 +44,6 @@ public class WithingsScanwatchLightDeviceCoordinator extends WithingsScanwatchDe
     @Override
     public boolean supportsRespiratoryScan(@NonNull final GBDevice device) {
         return false;
-    }
-
-    @Override
-    public DeviceChartsProvider getChartsProvider() {
-        return DefaultChartsProvider.INSTANCE;
     }
 
     @Override
