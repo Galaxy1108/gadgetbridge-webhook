@@ -61,10 +61,11 @@ public class SleepBreathingQualityRangeView extends View {
         final float top = dp(12);
         final float bottom = top + dp(10);
         final float width = Math.max(0, right - left);
+        final float halfGap = dp(1);
 
-        drawBand(canvas, left, left + width * 0.30f, top, bottom, R.color.hrv_status_low);
-        drawBand(canvas, left + width * 0.30f, left + width * 0.60f, top, bottom, R.color.hrv_status_unbalanced);
-        drawBand(canvas, left + width * 0.60f, right, top, bottom, R.color.hrv_status_balanced);
+        drawBand(canvas, left, left + width * 0.30f - halfGap, top, bottom, R.color.hrv_status_low);
+        drawBand(canvas, left + width * 0.30f + halfGap, left + width * 0.60f - halfGap, top, bottom, R.color.hrv_status_unbalanced);
+        drawBand(canvas, left + width * 0.60f + halfGap, right, top, bottom, R.color.hrv_status_balanced);
 
         final float pointerX = Math.max(left + dp(4), Math.min(right - dp(4), left + width * score / 100f));
         paint.setColor(resolveTextColor());
@@ -80,7 +81,8 @@ public class SleepBreathingQualityRangeView extends View {
     private void drawBand(final Canvas canvas, final float left, final float right,
                           final float top, final float bottom, final int colorRes) {
         paint.setColor(ContextCompat.getColor(getContext(), colorRes));
-        canvas.drawRect(left, top, right, bottom, paint);
+        final float radius = dp(5);
+        canvas.drawRoundRect(left, top, right, bottom, radius, radius, paint);
     }
 
     private int resolveTextColor() {

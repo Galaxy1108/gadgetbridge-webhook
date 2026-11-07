@@ -94,84 +94,91 @@
             android:id="@+id/sleep_breathing_quality_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
             android:layout_marginBottom="25dp"
-            android:background="?attr/colorSurface"
-            android:elevation="1dp"
             android:orientation="vertical"
-            android:padding="16dp"
             android:visibility="gone">
 
-            <TextView
-                android:id="@+id/sleep_breathing_quality_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/withings_sleep_breathing_quality_title"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="?attr/textColorPrimary" />
-
-            <TextView
-                android:id="@+id/sleep_breathing_quality_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="?attr/textColorPrimary"
-                android:textSize="24sp" />
-
-            <nodomain.freeyourgadget.gadgetbridge.activities.charts.sleep.SleepBreathingQualityRangeView
-                android:id="@+id/sleep_breathing_quality_range"
-                android:layout_width="match_parent"
-                android:layout_height="34dp"
-                android:layout_marginTop="12dp" />
-
-            <LinearLayout
+            <nodomain.freeyourgadget.gadgetbridge.activities.workouts.SectionHeaderView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                app:sectionTitle="@string/withings_sleep_breathing_quality_title" />
 
-                <TextView
-                    android:layout_width="0dp"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sleep_breathing_quality_tile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="start"
-                    android:text="@string/withings_sleep_breathing_quality_needs_improvement"
-                    android:textColor="?attr/textColorSecondary"
-                    android:textSize="11sp" />
+                    android:orientation="vertical"
+                    android:padding="14dp">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/fair"
-                    android:textColor="?attr/textColorSecondary"
-                    android:textSize="11sp" />
+                    <TextView
+                        android:id="@+id/sleep_breathing_quality_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="20sp" />
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end"
-                    android:text="@string/optimal"
-                    android:textColor="?attr/textColorSecondary"
-                    android:textSize="11sp" />
-            </LinearLayout>
+                    <nodomain.freeyourgadget.gadgetbridge.activities.charts.sleep.SleepBreathingQualityRangeView
+                        android:id="@+id/sleep_breathing_quality_range"
+                        android:layout_width="match_parent"
+                        android:layout_height="34dp"
+                        android:layout_marginTop="8dp" />
 
-            <TextView
-                android:id="@+id/sleep_breathing_quality_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="?attr/textColorPrimary" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/sleep_breathing_quality_disclaimer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:textColor="?attr/textColorSecondary"
-                android:textSize="12sp" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="@string/withings_sleep_breathing_quality_needs_improvement"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="@string/fair"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="4"
+                            android:gravity="center"
+                            android:text="@string/optimal"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/sleep_breathing_quality_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:textColor="?attr/textColorPrimary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/sleep_breathing_quality_disclaimer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
     </LinearLayout>
