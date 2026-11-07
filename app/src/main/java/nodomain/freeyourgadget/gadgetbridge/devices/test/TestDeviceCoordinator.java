@@ -65,6 +65,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestHrvValueSam
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestPaiSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestRespiratoryRateSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestSampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestSleepBreathingSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestSleepScoreSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestSolarChargeSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.samples.TestSpo2SampleProvider;
@@ -96,6 +97,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.HrvValueSample;
 import nodomain.freeyourgadget.gadgetbridge.model.MetricSample;
 import nodomain.freeyourgadget.gadgetbridge.model.PaiSample;
 import nodomain.freeyourgadget.gadgetbridge.model.RespiratoryRateSample;
+import nodomain.freeyourgadget.gadgetbridge.model.SleepBreathingSample;
 import nodomain.freeyourgadget.gadgetbridge.model.SleepScoreSample;
 import nodomain.freeyourgadget.gadgetbridge.model.SolarChargeSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
@@ -636,6 +638,16 @@ public class TestDeviceCoordinator extends AbstractDeviceCoordinator {
     @Override
     public boolean supportsDayRespiratoryRate(@NonNull GBDevice device) {
         return supports(device, TestFeature.DAY_RESPIRATORY_RATE);
+    }
+
+    @Override
+    public boolean supportsSleepBreathingQuality(@NonNull final GBDevice device) {
+        return supports(device, TestFeature.SLEEP_BREATHING_QUALITY);
+    }
+
+    @Override
+    public TimeSampleProvider<? extends SleepBreathingSample> getSleepBreathingSampleProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
+        return supportsSleepBreathingQuality(device) ? new TestSleepBreathingSampleProvider() : super.getSleepBreathingSampleProvider(device, session);
     }
 
     @Override
