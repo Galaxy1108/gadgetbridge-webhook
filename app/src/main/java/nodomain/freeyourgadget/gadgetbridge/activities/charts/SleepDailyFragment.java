@@ -433,13 +433,13 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
             binding.sleepBreathingQualityCard.setVisibility(View.VISIBLE);
             StatTileGridUtilKt.applyStatTileStyle(binding.sleepBreathingQualityTile, null);
             binding.sleepBreathingQualityValue.setText(getString(
-                    R.string.withings_sleep_breathing_quality_estimated_value,
+                    R.string.sleep_breathing_quality_estimated_value,
                     getString(breathingQualityAssessment.titleRes),
                     breathingQualityAssessment.score));
             binding.sleepBreathingQualityValue.setTextColor(ContextCompat.getColor(requireContext(), breathingQualityAssessment.colorRes));
             binding.sleepBreathingQualityDescription.setText(breathingQualityAssessment.descriptionRes);
             binding.sleepBreathingQualityRange.setScore(breathingQualityAssessment.score);
-            binding.sleepBreathingQualityDisclaimer.setText(R.string.withings_sleep_breathing_quality_disclaimer);
+            binding.sleepBreathingQualityDisclaimer.setText(R.string.sleep_breathing_quality_disclaimer);
         }
 
         updateStagesChart(mcd);
@@ -869,16 +869,16 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
                     (int) Math.round(100d * (1d - averageProbability / MAX_EVENT_PROBABILITY))));
             if (score >= 61) {
                 return new SleepBreathingQualityAssessment(
-                        score, R.string.optimal, R.string.withings_sleep_breathing_quality_optimal_description, R.color.hrv_status_balanced);
+                        score, R.string.optimal, R.string.sleep_breathing_quality_optimal_description, R.color.hrv_status_balanced);
             }
             if (score >= 31) {
                 return new SleepBreathingQualityAssessment(
-                        score, R.string.fair, R.string.withings_sleep_breathing_quality_fair_description, R.color.hrv_status_unbalanced);
+                        score, R.string.fair, R.string.sleep_breathing_quality_fair_description, R.color.hrv_status_unbalanced);
             }
             return new SleepBreathingQualityAssessment(
                     score,
-                    R.string.withings_sleep_breathing_quality_needs_improvement,
-                    R.string.withings_sleep_breathing_quality_needs_improvement_description,
+                    R.string.sleep_breathing_quality_needs_improvement,
+                    R.string.sleep_breathing_quality_needs_improvement_description,
                     R.color.hrv_status_low);
         }
 

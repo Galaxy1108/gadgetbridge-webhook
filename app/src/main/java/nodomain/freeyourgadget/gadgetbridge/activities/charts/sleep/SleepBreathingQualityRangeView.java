@@ -42,7 +42,7 @@ public class SleepBreathingQualityRangeView extends View {
     public void setScore(final int score) {
         this.score = Math.max(0, Math.min(100, score));
         setContentDescription(getContext().getString(
-                R.string.withings_sleep_breathing_quality_range_content_description, this.score));
+                R.string.sleep_breathing_quality_range_content_description, this.score));
         invalidate();
     }
 

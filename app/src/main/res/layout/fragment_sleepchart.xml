@@ -101,7 +101,7 @@
             <nodomain.freeyourgadget.gadgetbridge.activities.workouts.SectionHeaderView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:sectionTitle="@string/withings_sleep_breathing_quality_title" />
+                app:sectionTitle="@string/sleep_breathing_quality_title" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/sleep_breathing_quality_tile"
@@ -139,7 +139,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
                             android:gravity="center"
-                            android:text="@string/withings_sleep_breathing_quality_needs_improvement"
+                            android:text="@string/sleep_breathing_quality_needs_improvement"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:textSize="12sp" />
 
