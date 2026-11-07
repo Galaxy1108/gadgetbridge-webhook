@@ -2125,7 +2125,7 @@
         <item>@string/withings_scanwatch_shortcut_workout_start</item>
         <item>@string/withings_scanwatch_shortcut_workout_selection</item>
         <item>@string/menuitem_breathing</item>
-        <item>@string/qhybrid_button_function_stopwatch</item>
+        <item>@string/hr_appname_stopwatch</item>
         <item>@string/withings_scanwatch_shortcut_timer</item>
         <item>@string/mi2_prefs_do_not_disturb</item>
         <item>@string/withings_scanwatch_pref_quicklook_title</item>
