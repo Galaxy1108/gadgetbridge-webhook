@@ -3904,4 +3904,5 @@
     <string name="pref_title_navigation_update_rate">Sürekli mod güncelleme aralığı (milisaniye)</string>
     <string name="navigation_destination_reached">Hedefe ulaşıldı</string>
     <string name="navigation_eta">Varış: %1$s</string>
+    <string name="navigation_distance_left">%1$s kaldı</string>
 </resources>
