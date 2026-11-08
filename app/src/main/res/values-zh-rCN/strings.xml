@@ -6017,4 +6017,17 @@
     <string name="training_status_breakdown">崩溃</string>
     <string name="training_status_history">历史</string>
     <string name="training_status_share">%1$d%% · %2$s</string>
+    <string name="permission_notifications_aloud_summary">大声朗读通知</string>
+    <string name="permission_gps_sharing_summary">正发送手机位置到设备</string>
+    <string name="permission_calls_summary">转发手机通话到设备</string>
+    <string name="permissions_section_recommended">推荐</string>
+    <string name="permissions_section_optional">可选</string>
+    <string name="permissions_section_granted">已授予</string>
+    <string name="permissions_grant_recommended">建议授予</string>
+    <string name="permissions_section_needed_for">%1$s 需要</string>
+    <string name="permissions_hint">未授予一些建议的权限</string>
+    <string name="permissions_hint_grant">授予</string>
+    <plurals name="permission_hint_missing">
+        <item quantity="other">未授予权限：%1$s</item>
+    </plurals>
 </resources>
