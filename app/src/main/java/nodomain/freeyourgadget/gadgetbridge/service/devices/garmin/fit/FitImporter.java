@@ -41,7 +41,7 @@ import java.util.TreeMap;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
-import nodomain.freeyourgadget.gadgetbridge.database.repository.EcgRepository;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiEcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.BaseActivitySummaryProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.BatteryLevelProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminBodyEnergySampleProvider;
@@ -95,7 +95,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityTrack;
-import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgSummarySample;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
 import nodomain.freeyourgadget.gadgetbridge.model.FitActivityTrackProvider;
 import nodomain.freeyourgadget.gadgetbridge.model.MetricSample;
@@ -671,7 +671,7 @@ public class FitImporter {
 
         final long start = startSeconds * 1000L;
         final Float averageHeartRate = ecgSummary.getAverageHeartRate();
-        final EcgRecord record = new EcgRecord(
+        final HuaweiEcgSummarySample record = new HuaweiEcgSummarySample(
             null,
             DBHelper.getDevice(gbDevice, session).getId(),
             DBHelper.getUser(session).getId(),
@@ -680,11 +680,11 @@ public class FitImporter {
             "garmin",
             averageHeartRate != null ? Math.round(averageHeartRate) : 0,
             ecgSummary.getCategorization() == EcgRhythmClassification.SINUS_NORMAL ? 0 : -1,
-            0
+            0L
         );
 
         LOG.debug("Persisting ECG at {} with {} samples", start, waveform.size());
-        EcgRepository.upsertSession(session, record, waveform);
+        HuaweiEcgDataProvider.upsertSession(session, record, waveform);
 
         GBApplication.getDeviceSpecificSharedPrefs(gbDevice.getAddress()).edit()
             .putBoolean(GarminPreferences.PREF_GARMIN_ECG_SUPPORTED, true)

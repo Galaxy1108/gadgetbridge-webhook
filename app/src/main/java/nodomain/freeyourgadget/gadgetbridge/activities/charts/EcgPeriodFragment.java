@@ -52,6 +52,7 @@ import java.util.Locale;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
+import nodomain.freeyourgadget.gadgetbridge.devices.EcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
@@ -141,9 +142,15 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
     protected EcgPeriodData refreshInBackground(final ChartsHost chartsHost, final DBHandler db, final GBDevice device) {
         final long periodStart = getStartTimestamp();
         final long periodEnd = ((long) getTSEnd() * 1000L) + 999L;
-        final List<EcgRecord> summaries = device.getDeviceCoordinator()
-                .getEcgDataProvider(device, db.getDaoSession())
-                .getSessions(periodStart, periodEnd);
+        final EcgDataProvider provider = device.getDeviceCoordinator().getEcgDataProvider(device, db.getDaoSession());
+        final List<EcgRecord> summaries = new ArrayList<>();
+        if (provider != null) {
+            for (final EcgRecord record : provider.getRecords()) {
+                if (record.getStartTimestamp() >= periodStart && record.getStartTimestamp() <= periodEnd) {
+                    summaries.add(record);
+                }
+            }
+        }
 
         final List<EcgDayData> days = new ArrayList<>(totalDays);
         final long[] dayBoundaries = new long[totalDays + 1];
@@ -170,8 +177,8 @@ public class EcgPeriodFragment extends AbstractChartFragment<EcgPeriodFragment.E
             final EcgDayData dayData = days.get(index);
             dayData.measurementCount++;
 
-            final int averageHeartRate = summary.getAverageHeartRate();
-            if (averageHeartRate > 0) {
+            final Integer averageHeartRate = summary.getAverageHeartRate();
+            if (averageHeartRate != null) {
                 dayData.validMeasurementCount++;
                 dayData.totalHeartRate += averageHeartRate;
                 dayData.minimumHeartRate = dayData.minimumHeartRate == DATA_INVALID ? averageHeartRate : Math.min(dayData.minimumHeartRate, averageHeartRate);

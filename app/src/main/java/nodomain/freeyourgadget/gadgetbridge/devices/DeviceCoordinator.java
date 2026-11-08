@@ -454,9 +454,9 @@ public interface DeviceCoordinator {
     boolean supportsEcgMeasurement(@NonNull final GBDevice device);
 
     /**
-     * Returns the ECG data provider for the device.
+     * Returns the ECG data provider for the device, or null if the device does not provide ECG data.
      */
-    @NonNull
+    @Nullable
     EcgDataProvider getEcgDataProvider(@NonNull final GBDevice device, @NonNull final DaoSession session);
 
     /**

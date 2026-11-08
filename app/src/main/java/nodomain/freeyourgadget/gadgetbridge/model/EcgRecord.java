@@ -16,47 +16,44 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+
+/**
+ * An ECG measurement, with timestamps in milliseconds.
+ */
 public class EcgRecord {
-    private final Long sessionId;
-    private final long deviceId;
-    private final long userId;
+    private final long id;
     private final long startTimestamp;
     private final long endTimestamp;
-    private final String sourceApp;
-    private final int averageHeartRate;
-    private final long deviceHintCode;
-    private final long userSymptoms;
+    private final float sampleRateHz;
+    @Nullable
+    private final Integer averageHeartRate;
+    private final long classificationCode;
+    @StringRes
+    private final int classification;
 
-    public EcgRecord(final Long sessionId,
-                     final long deviceId,
-                     final long userId,
+    public EcgRecord(final long id,
                      final long startTimestamp,
                      final long endTimestamp,
-                     final String sourceApp,
-                     final int averageHeartRate,
-                     final long deviceHintCode,
-                     final long userSymptoms) {
-        this.sessionId = sessionId;
-        this.deviceId = deviceId;
-        this.userId = userId;
+                     final float sampleRateHz,
+                     @Nullable final Integer averageHeartRate,
+                     final long classificationCode,
+                     @StringRes final int classification) {
+        this.id = id;
         this.startTimestamp = startTimestamp;
         this.endTimestamp = endTimestamp;
-        this.sourceApp = sourceApp;
+        this.sampleRateHz = sampleRateHz;
         this.averageHeartRate = averageHeartRate;
-        this.deviceHintCode = deviceHintCode;
-        this.userSymptoms = userSymptoms;
+        this.classificationCode = classificationCode;
+        this.classification = classification;
     }
 
-    public Long getSessionId() {
-        return sessionId;
-    }
-
-    public long getDeviceId() {
-        return deviceId;
-    }
-
-    public long getUserId() {
-        return userId;
+    /**
+     * The key of the record, in the database of its provider.
+     */
+    public long getId() {
+        return id;
     }
 
     public long getStartTimestamp() {
@@ -67,19 +64,27 @@ public class EcgRecord {
         return endTimestamp;
     }
 
-    public String getSourceApp() {
-        return sourceApp;
+    public float getSampleRateHz() {
+        return sampleRateHz;
     }
 
-    public int getAverageHeartRate() {
+    @Nullable
+    public Integer getAverageHeartRate() {
         return averageHeartRate;
     }
 
-    public long getDeviceHintCode() {
-        return deviceHintCode;
+    /**
+     * The classification code that the device reported.
+     */
+    public long getClassificationCode() {
+        return classificationCode;
     }
 
-    public long getUserSymptoms() {
-        return userSymptoms;
+    /**
+     * The label of the classification code, or 0 if the meaning of the code is unknown.
+     */
+    @StringRes
+    public int getClassification() {
+        return classification;
     }
 }

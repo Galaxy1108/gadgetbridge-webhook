@@ -17,7 +17,6 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.charts;
 
 import android.os.Bundle;
-import android.graphics.Color;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -27,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.Chart;
@@ -42,7 +42,6 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -58,20 +57,9 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
-import nodomain.freeyourgadget.gadgetbridge.util.WithingsEcgWaveformUtil;
 
 public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.EcgChartData> {
-    private static final int DATA_INVALID = -1;
-    private static final int DISPLAY_MEDIAN_WINDOW = 15;
-    private static final int DISPLAY_AVERAGE_WINDOW = 7;
-    private static final int DISPLAY_BASELINE_WINDOW = 151;
-    private static final int DISPLAY_OUTLIER_WINDOW = 15;
-    private static final float DISPLAY_TARGET_AMPLITUDE = 0.95f;
-    private static final float DISPLAY_MAX_AMPLITUDE = 1.25f;
     private static final float DISPLAY_Y_AXIS_HALF_RANGE = 1.5f;
-    private static final int DISPLAY_RESAMPLE_MS = 20;
-    private static final int WATCH_STYLE_RESAMPLE_MS = 24;
-    private static final int WATCH_STYLE_AVERAGE_WINDOW = 5;
     private static final float ECG_MAJOR_X_GRID_SECONDS = 0.2f;
     private static final float ECG_MINOR_X_GRID_SECONDS = 0.04f;
     private static final float ECG_MAJOR_Y_GRID = 0.5f;
@@ -91,12 +79,10 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
     private TextView durationView;
     private TextView measurementCountView;
     private TextView resultView;
-    private TextView smoothingModeToggleView;
     private ScrollView scrollView;
     private LinearLayout sessionsContainer;
     private LinearLayout sessionsList;
     private Long selectedSessionStartTimestamp;
-    private final boolean watchStyleDisplayEnabled = true;
 
     @Override
     protected void init() {
@@ -126,18 +112,10 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         durationView = rootView.findViewById(R.id.ecg_duration);
         measurementCountView = rootView.findViewById(R.id.ecg_measurement_count);
         resultView = rootView.findViewById(R.id.ecg_result);
-        smoothingModeToggleView = rootView.findViewById(R.id.ecg_smoothing_mode_toggle);
         sessionsContainer = rootView.findViewById(R.id.ecgSessions);
         sessionsList = rootView.findViewById(R.id.ecgSessionsList);
 
         sessionsContainer.setVisibility(View.GONE);
-        smoothingModeToggleView.setVisibility(View.GONE);
-        // smoothingModeToggleView.setOnClickListener(v -> {
-        //     watchStyleDisplayEnabled = !watchStyleDisplayEnabled;
-        //     updateSmoothingModeLabel();
-        //     refresh();
-        // });
-        // updateSmoothingModeLabel();
         setupLineChart();
         setupChartTouchHandling();
         refresh();
@@ -164,20 +142,32 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
                                       final long endTimestamp,
                                       final Long selectedSessionTimestamp) {
         final EcgDataProvider provider = device.getDeviceCoordinator().getEcgDataProvider(device, db.getDaoSession());
-        final List<EcgRecord> summaries = provider.getSessions(startTimestamp, endTimestamp);
+        if (provider == null) {
+            return new EcgChartData(Collections.emptyList(), null, Collections.emptyList());
+        }
+
+        final List<EcgRecord> summaries = new ArrayList<>();
+        for (final EcgRecord record : provider.getRecords()) {
+            if (record.getStartTimestamp() >= startTimestamp && record.getStartTimestamp() <= endTimestamp) {
+                summaries.add(record);
+            }
+        }
+        Collections.reverse(summaries);
 
         EcgRecord selectedSummary = null;
         List<EcgSample> waveform = Collections.emptyList();
 
         if (selectedSessionTimestamp != null) {
             selectedSummary = findSummaryByTimestamp(summaries, selectedSessionTimestamp);
-            waveform = provider.getSamples(selectedSummary);
+            if (selectedSummary != null) {
+                waveform = provider.getDisplaySamples(selectedSummary);
+            }
         }
 
         if (selectedSummary == null) {
             for (int i = summaries.size() - 1; i >= 0; i--) {
                 final EcgRecord candidate = summaries.get(i);
-                final List<EcgSample> candidateWaveform = provider.getSamples(candidate);
+                final List<EcgSample> candidateWaveform = provider.getDisplaySamples(candidate);
                 selectedSummary = candidate;
                 waveform = candidateWaveform;
                 if (!candidateWaveform.isEmpty()) {
@@ -203,9 +193,8 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         averageHeartRateView.setText(formatAverageHeartRate(data.selectedSummary, emptyValue));
         durationView.setText(formatDuration(data.selectedSummary, emptyValue));
         measurementCountView.setText(String.valueOf(data.summaries.size()));
-        resultView.setText(formatDeviceHint(data.selectedSummary, emptyValue));
+        resultView.setText(formatClassification(data.selectedSummary, emptyValue));
         dateView.setText(new SimpleDateFormat("E, MMM dd", Locale.getDefault()).format(new Date((long) getTSEnd() * 1000L)));
-        updateSmoothingModeLabel();
 
         chart.setData(null);
         chart.clear();
@@ -216,8 +205,8 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         chart.getXAxis().setValueFormatter((value, axis) -> String.format(Locale.getDefault(), "%.0fs", value));
 
         if (data.selectedSummary != null && !data.waveform.isEmpty()) {
-            final List<EcgSample> displayWaveform = smoothWaveformForDisplay(data.selectedSummary, data.waveform);
-            final ArrayList<Entry> entries = new ArrayList<>(displayWaveform.size());
+            final List<EcgSample> displayWaveform = data.waveform;
+            final ArrayList<Entry<?>> entries = new ArrayList<>(displayWaveform.size());
             float minValue = Float.MAX_VALUE;
             float maxValue = -Float.MAX_VALUE;
             int maxDelta = 0;
@@ -263,23 +252,18 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
                 final boolean isSelected = data.selectedSummary != null
                         && data.selectedSummary.getStartTimestamp() == summary.getStartTimestamp();
 
-                timeText.setText(formatDeviceHint(summary, emptyValue));
+                timeText.setText(formatClassification(summary, emptyValue));
                 valueText.setText(formatSessionStartTime(summary));
                 row.setActivated(isSelected);
                 row.setBackgroundColor(isSelected ? selectedSessionBackgroundColor : backgroundColor);
                 timeText.setTextColor(isSelected ? selectedSessionTextColor : chartTextColor);
                 valueText.setTextColor(isSelected ? selectedSessionTextColor : averageHeartRateView.getCurrentTextColor());
 
-                if (summary.getSessionId() != null) {
-                    clickableRow.setOnClickListener(v -> {
-                        selectedSessionStartTimestamp = summary.getStartTimestamp();
-                        scrollToTop();
-                        refresh();
-                    });
-                } else {
-                    clickableRow.setAlpha(0.6f);
-                    clickableRow.setClickable(false);
-                }
+                clickableRow.setOnClickListener(v -> {
+                    selectedSessionStartTimestamp = summary.getStartTimestamp();
+                    scrollToTop();
+                    refresh();
+                });
 
                 sessionsList.addView(row);
             }
@@ -296,7 +280,7 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
     }
 
     private String formatAverageHeartRate(final EcgRecord summary, final String emptyValue) {
-        if (summary == null || summary.getAverageHeartRate() <= 0) {
+        if (summary == null || summary.getAverageHeartRate() == null) {
             return emptyValue;
         }
         return getString(R.string.bpm_value_unit, summary.getAverageHeartRate());
@@ -309,21 +293,19 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         return DateTimeUtils.formatDurationHoursMinutes(summary.getEndTimestamp() - summary.getStartTimestamp(), TimeUnit.MILLISECONDS);
     }
 
-    private String formatDeviceHint(final EcgRecord summary, final String emptyValue) {
+    private String formatClassification(final EcgRecord summary, final String emptyValue) {
         if (summary == null) {
             return emptyValue;
         }
 
-        if (summary.getDeviceHintCode() == 0) {
-            return getString(R.string.normal);
-        } else if (summary.getDeviceHintCode() > 0) {
-            return getString(R.string.irregular);
+        if (summary.getClassification() != 0) {
+            return getString(summary.getClassification());
         }
-        return emptyValue;
+        return getString(R.string.training_status_unknown, summary.getClassificationCode());
     }
 
-    private LineDataSet createDataSet(final List<Entry> values) {
-        final LineDataSet dataSet = new LineDataSet(values, getString(R.string.pref_screen_ecg));
+    private LineDataSet<?> createDataSet(final List<Entry<?>> values) {
+        final LineDataSet<?> dataSet = new LineDataSet<>(values, getString(R.string.pref_screen_ecg));
         dataSet.setColor(ecgColor);
         dataSet.setDrawCirclesEnabled(false);
         dataSet.setDrawValuesEnabled(false);
@@ -331,244 +313,6 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSet.setHighlightEnabled(false);
         return dataSet;
-    }
-
-    private List<EcgSample> smoothWaveformForDisplay(final EcgRecord summary, final List<EcgSample> waveform) {
-        if (waveform.size() < 5) {
-            return waveform;
-        }
-
-        if (!"withings".equals(summary.getSourceApp())) {
-            // other vendors are already smoothed
-            return waveform;
-        }
-
-        final float[] values = prepareWaveformValues(summary, waveform);
-        final float[] medianFiltered = applyMedianFilter(values, DISPLAY_MEDIAN_WINDOW);
-        final float[] centered = subtractBaseline(medianFiltered, DISPLAY_BASELINE_WINDOW);
-        final float[] despiked = suppressOutliers(centered, DISPLAY_OUTLIER_WINDOW);
-        final float[] smoothed = applyMovingAverage(despiked, DISPLAY_AVERAGE_WINDOW);
-        final float[] normalized = normalizeForDisplay(smoothed);
-
-        final List<EcgSample> displayWaveform = new ArrayList<>(normalized.length);
-        for (int i = 0; i < normalized.length; i++) {
-            final int timeDeltaMs = getMappedTimeDeltaMs(waveform, normalized.length, i);
-            displayWaveform.add(new EcgSample(timeDeltaMs, normalized[i]));
-        }
-
-        final List<EcgSample> resampled = resampleWaveformForDisplay(
-                displayWaveform,
-                watchStyleDisplayEnabled ? WATCH_STYLE_RESAMPLE_MS : DISPLAY_RESAMPLE_MS
-        );
-
-        if (!watchStyleDisplayEnabled || resampled.size() < 5) {
-            return resampled;
-        }
-
-        final float[] watchValues = new float[resampled.size()];
-        for (int i = 0; i < resampled.size(); i++) {
-            watchValues[i] = resampled.get(i).getValue();
-        }
-        final float[] watchSmoothed = applyMovingAverage(watchValues, WATCH_STYLE_AVERAGE_WINDOW);
-
-        final List<EcgSample> watchStyleWaveform = new ArrayList<>(resampled.size());
-        for (int i = 0; i < resampled.size(); i++) {
-            watchStyleWaveform.add(new EcgSample(resampled.get(i).getTimeDeltaMs(), watchSmoothed[i]));
-        }
-        return watchStyleWaveform;
-    }
-
-    private int getMappedTimeDeltaMs(final List<EcgSample> waveform, final int outputSize, final int index) {
-        if (waveform.isEmpty()) {
-            return index;
-        }
-        if (outputSize <= 1 || waveform.size() == 1) {
-            return waveform.get(0).getTimeDeltaMs();
-        }
-        if (outputSize == waveform.size()) {
-            return waveform.get(index).getTimeDeltaMs();
-        }
-
-        final float position = index * (waveform.size() - 1f) / (outputSize - 1f);
-        final int mappedIndex = Math.min(waveform.size() - 1, Math.max(0, Math.round(position)));
-        return waveform.get(mappedIndex).getTimeDeltaMs();
-    }
-
-    private float[] prepareWaveformValues(final EcgRecord summary, final List<EcgSample> waveform) {
-        final float[] values = new float[waveform.size()];
-        for (int i = 0; i < waveform.size(); i++) {
-            values[i] = waveform.get(i).getValue();
-        }
-
-        if (summary != null && "withings".equals(summary.getSourceApp())) {
-            return WithingsEcgWaveformUtil.decodeStoredValuesIfNeeded(values);
-        }
-        return values;
-    }
-
-    private float[] softenBaselineForWatchStyle(final float[] values) {
-        if (values.length < 5) {
-            return values;
-        }
-
-        final float[] absValues = new float[values.length];
-        for (int i = 0; i < values.length; i++) {
-            absValues[i] = Math.abs(values[i]);
-        }
-        Arrays.sort(absValues);
-
-        final float baselineThreshold = Math.max(0.03f, absValues[Math.min(absValues.length - 1, (int) (absValues.length * 0.65f))]);
-        final float[] shaped = new float[values.length];
-
-        for (int i = 0; i < values.length; i++) {
-            final float value = values[i];
-            final float abs = Math.abs(value);
-            if (abs <= baselineThreshold) {
-                shaped[i] = value * 0.35f;
-            } else {
-                final float excess = abs - baselineThreshold;
-                final float preserved = baselineThreshold * 0.35f + (excess * 0.95f);
-                shaped[i] = Math.signum(value) * preserved;
-            }
-        }
-
-        return shaped;
-    }
-
-    private void updateSmoothingModeLabel() {
-        if (smoothingModeToggleView != null) {
-            smoothingModeToggleView.setText(watchStyleDisplayEnabled
-                    ? R.string.ecg_smoothing_mode_watch_style
-                    : R.string.ecg_smoothing_mode_precise);
-        }
-    }
-
-    private List<EcgSample> resampleWaveformForDisplay(final List<EcgSample> waveform, final int bucketMs) {
-        if (waveform.size() < 3 || bucketMs <= 1) {
-            return waveform;
-        }
-
-        final List<EcgSample> resampled = new ArrayList<>();
-        int bucketStart = waveform.get(0).getTimeDeltaMs();
-        int lastTime = bucketStart;
-        float sum = 0f;
-        int count = 0;
-
-        for (final EcgSample sample : waveform) {
-            final int time = sample.getTimeDeltaMs();
-            if (time - bucketStart >= bucketMs && count > 0) {
-                final int midpoint = bucketStart + ((lastTime - bucketStart) / 2);
-                resampled.add(new EcgSample(midpoint, sum / count));
-                bucketStart = time;
-                sum = 0f;
-                count = 0;
-            }
-
-            sum += sample.getValue();
-            count++;
-            lastTime = time;
-        }
-
-        if (count > 0) {
-            final int midpoint = bucketStart + ((lastTime - bucketStart) / 2);
-            resampled.add(new EcgSample(midpoint, sum / count));
-        }
-
-        return resampled.size() >= 3 ? resampled : waveform;
-    }
-
-    private float[] applyMedianFilter(final float[] values, final int windowSize) {
-        final float[] filtered = new float[values.length];
-        final int halfWindow = windowSize / 2;
-
-        for (int i = 0; i < values.length; i++) {
-            final int start = Math.max(0, i - halfWindow);
-            final int end = Math.min(values.length - 1, i + halfWindow);
-            final float[] window = new float[end - start + 1];
-            for (int j = start; j <= end; j++) {
-                window[j - start] = values[j];
-            }
-            java.util.Arrays.sort(window);
-            filtered[i] = window[window.length / 2];
-        }
-
-        return filtered;
-    }
-
-    private float[] applyMovingAverage(final float[] values, final int windowSize) {
-        final float[] filtered = new float[values.length];
-        final int halfWindow = windowSize / 2;
-
-        for (int i = 0; i < values.length; i++) {
-            final int start = Math.max(0, i - halfWindow);
-            final int end = Math.min(values.length - 1, i + halfWindow);
-            float sum = 0f;
-            for (int j = start; j <= end; j++) {
-                sum += values[j];
-            }
-            filtered[i] = sum / (end - start + 1);
-        }
-
-        return filtered;
-    }
-
-    private float[] subtractBaseline(final float[] values, final int windowSize) {
-        final float[] baseline = applyMovingAverage(values, windowSize);
-        final float[] flattened = new float[values.length];
-
-        for (int i = 0; i < values.length; i++) {
-            flattened[i] = values[i] - baseline[i];
-        }
-
-        return flattened;
-    }
-
-    private float[] suppressOutliers(final float[] values, final int windowSize) {
-        final float[] filtered = new float[values.length];
-        final int halfWindow = windowSize / 2;
-
-        for (int i = 0; i < values.length; i++) {
-            final int start = Math.max(0, i - halfWindow);
-            final int end = Math.min(values.length - 1, i + halfWindow);
-            final float[] window = new float[end - start + 1];
-            for (int j = start; j <= end; j++) {
-                window[j - start] = values[j];
-            }
-            Arrays.sort(window);
-
-            final float median = window[window.length / 2];
-            final float[] deviations = new float[window.length];
-            for (int j = 0; j < window.length; j++) {
-                deviations[j] = Math.abs(window[j] - median);
-            }
-            Arrays.sort(deviations);
-            final float mad = deviations[deviations.length / 2];
-            final float threshold = Math.max(2.5f, mad * 3f);
-
-            filtered[i] = Math.abs(values[i] - median) > threshold ? median : values[i];
-        }
-
-        return filtered;
-    }
-
-    private float[] normalizeForDisplay(final float[] values) {
-        final float[] absValues = new float[values.length];
-        for (int i = 0; i < values.length; i++) {
-            absValues[i] = Math.abs(values[i]);
-        }
-        Arrays.sort(absValues);
-
-        final int percentileIndex = Math.min(absValues.length - 1, Math.max(0, (int) (absValues.length * 0.95f)));
-        final float referenceAmplitude = Math.max(1f, absValues[percentileIndex]);
-        final float scale = DISPLAY_TARGET_AMPLITUDE / referenceAmplitude;
-
-        final float[] normalized = new float[values.length];
-        for (int i = 0; i < values.length; i++) {
-            final float scaled = values[i] * scale;
-            normalized[i] = (float) (DISPLAY_MAX_AMPLITUDE * Math.tanh(scaled / DISPLAY_MAX_AMPLITUDE));
-        }
-
-        return normalized;
     }
 
     private void setupLineChart() {
@@ -694,8 +438,9 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
             this.startTimestamp = startTimestamp;
         }
 
+        @NonNull
         @Override
-        public String getFormattedValue(final float value, final AxisBase axis) {
+        public String getFormattedValue(final float value, @NonNull final AxisBase axis) {
             return timeFormat.format(new Date(startTimestamp + (long) (value * 1000L)));
         }
     }

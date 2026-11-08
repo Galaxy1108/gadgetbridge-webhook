@@ -29,21 +29,6 @@
                 android:layout_weight="2" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/ecg_smoothing_mode_toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="12sp" />
-
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

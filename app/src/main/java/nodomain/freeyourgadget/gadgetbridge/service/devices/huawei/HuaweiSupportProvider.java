@@ -60,7 +60,6 @@ import nodomain.freeyourgadget.gadgetbridge.activities.SettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
-import nodomain.freeyourgadget.gadgetbridge.database.repository.EcgRepository;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEvent;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventAppInfo;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventCameraRemote;
@@ -71,6 +70,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.HuaweiStressSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCompatTemperatureSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiEcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiState;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator.HuaweiDeviceType;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
@@ -111,7 +111,7 @@ import nodomain.freeyourgadget.gadgetbridge.entities.User;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceApp;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityPoint;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
-import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgSummarySample;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityTrack;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityUser;
@@ -1690,7 +1690,7 @@ public class HuaweiSupportProvider {
                 int sleepStart2 = (int) (sleepStatsSampleProvider.getLastSleepFetchTimestamp() / 1000L);
                 sleepStart = Math.max(sleepStart, sleepStart2);
 
-                ecgStart = (int) (EcgRepository.getLatestEndTimestamp(gbDevice) / 1000);
+                ecgStart = (int) (new HuaweiEcgDataProvider(gbDevice, db.getDaoSession()).getLatestEndTimestamp() / 1000);
 
             } catch (Exception e) {
                 LOG.warn("Exception for getting start times, using 01/01/2000 - 00:00:00.");
@@ -2077,8 +2077,8 @@ public class HuaweiSupportProvider {
             Long userId = DBHelper.getUser(db.getDaoSession()).getId();
             Long deviceId = DBHelper.getDevice(gbDevice, db.getDaoSession()).getId();
 
-            final EcgRecord summarySample = new EcgRecord(
-                    EcgRepository.findSessionId(db.getDaoSession(), userId, deviceId, data.getStartTime()),
+            final HuaweiEcgSummarySample summarySample = new HuaweiEcgSummarySample(
+                    null,
                     deviceId,
                     userId,
                     data.getStartTime(),
@@ -2089,15 +2089,12 @@ public class HuaweiSupportProvider {
                     data.getUserSymptoms()
             );
 
-            int sampleRate = (int) (data.getEcgData().size() / ((data.getEndTime() - data.getStartTime()) / 1000));
-            int delta = 0;
-            List<EcgSample> res = new ArrayList<>();
-            for (Float d : data.getEcgData()) {
-                EcgSample dataSample = new EcgSample(delta, d);
-                res.add(dataSample);
-                delta += sampleRate;
+            final List<EcgSample> res = new ArrayList<>(data.getEcgData().size());
+            for (int i = 0; i < data.getEcgData().size(); i++) {
+                res.add(new EcgSample(i, data.getEcgData().get(i)));
             }
-            EcgRepository.upsertSession(db.getDaoSession(), summarySample, res);
+            LOG.debug("Storing ECG at {} with {} samples", data.getStartTime(), res.size());
+            HuaweiEcgDataProvider.upsertSession(db.getDaoSession(), summarySample, res);
 
         } catch (Exception e) {
             LOG.error("Failed to add ECG data to database", e);

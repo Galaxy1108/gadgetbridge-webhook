@@ -19,6 +19,7 @@ package nodomain.freeyourgadget.gadgetbridge.devices.withingsscanwatch;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.SleepSessionProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.TimeSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr.WithingsBreathingDisturbanceSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr.WithingsSleepSessionProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.EcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
@@ -109,6 +111,12 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
     @Override
     public boolean supportsEcgMeasurement(@NonNull final GBDevice device) {
         return true;
+    }
+
+    @Nullable
+    @Override
+    public EcgDataProvider getEcgDataProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
+        return new WithingsEcgDataProvider(device, session);
     }
 
     public boolean supportsRespiratoryScan(@NonNull final GBDevice device) {

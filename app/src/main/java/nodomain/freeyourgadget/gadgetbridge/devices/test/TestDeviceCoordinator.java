@@ -504,7 +504,7 @@ public class TestDeviceCoordinator extends AbstractDeviceCoordinator {
         return supports(device, TestFeature.ECG_MEASUREMENT);
     }
 
-    @NonNull
+    @Nullable
     @Override
     public EcgDataProvider getEcgDataProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
         return supportsEcgMeasurement(device) ? new TestEcgDataProvider() : super.getEcgDataProvider(device, session);

@@ -1,26 +1,44 @@
 package nodomain.freeyourgadget.gadgetbridge.devices;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
 
 /**
- * The ECG sessions of a device, and their waveforms.
+ * The ECG records of a device, and their waveforms.
  */
 public interface EcgDataProvider {
     /**
-     * Returns the sessions that start in the given range of millisecond timestamps, sorted by timestamp.
+     * Returns all the records, newest first.
      */
     @NonNull
-    List<EcgRecord> getSessions(long startTimestamp, long endTimestamp);
+    List<EcgRecord> getRecords();
 
     /**
-     * Returns a session's waveform, ordered by time.
+     * Returns the values of a record as the device sent them, at the sample rate of the record.
      */
     @NonNull
-    List<EcgSample> getSamples(@Nullable EcgRecord record);
+    float[] getSamples(@NonNull EcgRecord record);
+
+    /**
+     * Returns the waveform of a record to display.
+     */
+    @NonNull
+    default List<EcgSample> getDisplaySamples(@NonNull final EcgRecord record) {
+        if (record.getSampleRateHz() <= 0) {
+            return Collections.emptyList();
+        }
+
+        final float[] values = getSamples(record);
+        final List<EcgSample> samples = new ArrayList<>(values.length);
+        for (int i = 0; i < values.length; i++) {
+            samples.add(new EcgSample(Math.round(i * 1000f / record.getSampleRateHz()), values[i]));
+        }
+        return samples;
+    }
 }

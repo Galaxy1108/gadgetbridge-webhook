@@ -1246,9 +1246,7 @@
     <string name="getting_heart_rate">Measuring</string>
     <string name="heart_rate_result">Measurement results</string>
     <string name="ecg_device_hint">Device hint</string>
-    <string name="ecg_smoothing_mode_watch_style">Watch-style smoothing</string>
-    <string name="ecg_smoothing_mode_precise">Detailed smoothing</string>
-    <string name="irregular">Irregular</string>
+    <string name="ecg_classification_sinus_rhythm">Sinus rhythm</string>
     <string name="movement_intensity">Movement intensity</string>
     <string name="battery">Battery</string>
     <string name="no_limit">No limit</string>
