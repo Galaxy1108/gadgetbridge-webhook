@@ -226,7 +226,7 @@ open class DefaultChartsProvider : DeviceChartsProvider {
             "calories" -> CaloriesCollectionFragment.newInstance(allowSwipe)
             "hydration" -> HydrationCollectionFragment.newInstance(allowSwipe)
             "respiratoryrate" -> RespiratoryRateCollectionFragment.newInstance(allowSwipe)
-            "ecg" -> EcgCollectionFragment.newInstance(allowSwipe)
+            "ecg" -> EcgListFragment()
             else -> UnknownFragment()
         }
     }
