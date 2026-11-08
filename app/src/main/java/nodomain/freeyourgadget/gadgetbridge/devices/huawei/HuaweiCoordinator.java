@@ -374,6 +374,11 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
         );
     }
 
+    @Override
+    public boolean supportsEcgMeasurement(@NonNull final GBDevice device) {
+        return HuaweiDeviceStateManager.get(device).supportsECG();
+    }
+
     @Nullable
     @Override
     public EcgDataProvider getEcgDataProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
