@@ -72,7 +72,18 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingHorizontal="16dp"
-            android:text="@string/ecg_not_for_diagnosis"
+            android:text="@string/ecg_disclaimer_title"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/ecg_disclaimer"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="12sp" />
     </LinearLayout>
