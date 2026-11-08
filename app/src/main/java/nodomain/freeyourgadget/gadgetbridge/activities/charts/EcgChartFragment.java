@@ -55,11 +55,9 @@ import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.devices.EcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
-import nodomain.freeyourgadget.gadgetbridge.model.EcgInterpretation;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils;
-import nodomain.freeyourgadget.gadgetbridge.util.EcgInterpretationUtil;
 import nodomain.freeyourgadget.gadgetbridge.util.WithingsEcgWaveformUtil;
 
 public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.EcgChartData> {
@@ -93,7 +91,6 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
     private TextView durationView;
     private TextView measurementCountView;
     private TextView resultView;
-    private TextView interpretationView;
     private TextView smoothingModeToggleView;
     private ScrollView scrollView;
     private LinearLayout sessionsContainer;
@@ -129,7 +126,6 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         durationView = rootView.findViewById(R.id.ecg_duration);
         measurementCountView = rootView.findViewById(R.id.ecg_measurement_count);
         resultView = rootView.findViewById(R.id.ecg_result);
-        interpretationView = rootView.findViewById(R.id.ecg_gadgetbridge_interpretation);
         smoothingModeToggleView = rootView.findViewById(R.id.ecg_smoothing_mode_toggle);
         sessionsContainer = rootView.findViewById(R.id.ecgSessions);
         sessionsList = rootView.findViewById(R.id.ecgSessionsList);
@@ -194,11 +190,7 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
             selectedSummary = summaries.get(summaries.size() - 1);
         }
 
-        final EcgInterpretation interpretation = selectedSummary != null
-                ? EcgInterpretationUtil.interpret(selectedSummary, waveform)
-                : null;
-
-        return new EcgChartData(summaries, selectedSummary, waveform, interpretation);
+        return new EcgChartData(summaries, selectedSummary, waveform);
     }
 
     @Override
@@ -212,7 +204,6 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         durationView.setText(formatDuration(data.selectedSummary, emptyValue));
         measurementCountView.setText(String.valueOf(data.summaries.size()));
         resultView.setText(formatDeviceHint(data.selectedSummary, emptyValue));
-        interpretationView.setText(formatGadgetbridgeInterpretation(data.interpretation, emptyValue));
         dateView.setText(new SimpleDateFormat("E, MMM dd", Locale.getDefault()).format(new Date((long) getTSEnd() * 1000L)));
         updateSmoothingModeLabel();
 
@@ -323,67 +314,12 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
             return emptyValue;
         }
 
-        switch (EcgInterpretationUtil.toDeviceHint(summary.getDeviceHintCode())) {
-            case NORMAL:
-                return getString(R.string.normal);
-            case IRREGULAR:
-                return getString(R.string.irregular);
-            default:
-                return emptyValue;
+        if (summary.getDeviceHintCode() == 0) {
+            return getString(R.string.normal);
+        } else if (summary.getDeviceHintCode() > 0) {
+            return getString(R.string.irregular);
         }
-    }
-
-    private String formatGadgetbridgeInterpretation(final EcgInterpretation interpretation, final String emptyValue) {
-        if (interpretation == null) {
-            return emptyValue;
-        }
-
-        final String rhythm = formatRhythm(interpretation.getRhythm());
-        final String quality = formatSignalQuality(interpretation.getSignalQuality());
-
-        String combined = null;
-        if (rhythm == null && quality == null) {
-            combined = emptyValue;
-        } else if (rhythm == null) {
-            combined = quality;
-        } else if (quality == null) {
-            combined = rhythm;
-        } else {
-            combined = getString(R.string.ecg_interpretation_combined, rhythm, quality);
-        }
-
-        if (interpretation.getPeakCount() > 0) {
-            return combined + " (" + interpretation.getPeakCount() + " peaks)";
-        }
-        return combined;
-    }
-
-    private String formatRhythm(final EcgInterpretation.Rhythm rhythm) {
-        if (rhythm == null) {
-            return null;
-        }
-        switch (rhythm) {
-            case REGULAR:
-                return getString(R.string.ecg_rhythm_regular);
-            case IRREGULAR:
-                return getString(R.string.ecg_rhythm_irregular);
-            default:
-                return getString(R.string.ecg_interpretation_inconclusive);
-        }
-    }
-
-    private String formatSignalQuality(final EcgInterpretation.SignalQuality signalQuality) {
-        if (signalQuality == null) {
-            return null;
-        }
-        switch (signalQuality) {
-            case GOOD:
-                return getString(R.string.ecg_signal_quality_good);
-            case NOISY:
-                return getString(R.string.ecg_signal_quality_noisy);
-            default:
-                return getString(R.string.ecg_interpretation_inconclusive);
-        }
+        return emptyValue;
     }
 
     private LineDataSet createDataSet(final List<Entry> values) {
@@ -768,16 +704,13 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
         private final List<EcgRecord> summaries;
         private final EcgRecord selectedSummary;
         private final List<EcgSample> waveform;
-        private final EcgInterpretation interpretation;
 
         protected EcgChartData(final List<EcgRecord> summaries,
                                final EcgRecord selectedSummary,
-                               final List<EcgSample> waveform,
-                               final EcgInterpretation interpretation) {
+                               final List<EcgSample> waveform) {
             this.summaries = summaries;
             this.selectedSummary = selectedSummary;
             this.waveform = waveform;
-            this.interpretation = interpretation;
         }
     }
 }
