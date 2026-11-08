@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.datastructures.ShortcutAction;
 
@@ -43,6 +44,40 @@ public class WithingsScanwatchDeviceCoordinatorTest {
     }
 
     @Test
+    public void scanwatch2AndFirstGenerationAreDiscoveredSeparately() {
+        final WithingsScanwatchDeviceCoordinator[] coordinators = {
+                new WithingsScanwatchDeviceCoordinator(),
+                new WithingsScanwatch2DeviceCoordinator(),
+                new WithingsScanwatchLightDeviceCoordinator()
+        };
+
+        // First generation, seen as "ScanWatch 5D" in #3595. A suffix starting with 2 must stay first generation
+        assertOnlySupportedBy(coordinators, "ScanWatch", WithingsScanwatchDeviceCoordinator.class);
+        assertOnlySupportedBy(coordinators, "ScanWatch CA", WithingsScanwatchDeviceCoordinator.class);
+        assertOnlySupportedBy(coordinators, "ScanWatch 5D", WithingsScanwatchDeviceCoordinator.class);
+        assertOnlySupportedBy(coordinators, "ScanWatch 25", WithingsScanwatchDeviceCoordinator.class);
+        assertOnlySupportedBy(coordinators, "ScanWatch 2A", WithingsScanwatchDeviceCoordinator.class);
+        // A ScanWatch Nova was seen as "ScanWatch 2 52" in #3595; the ScanWatch 2 is assumed to match
+        assertOnlySupportedBy(coordinators, "ScanWatch 2 52", WithingsScanwatch2DeviceCoordinator.class);
+        assertOnlySupportedBy(coordinators, "scanwatch 2 52", WithingsScanwatch2DeviceCoordinator.class);
+        assertOnlySupportedBy(coordinators, "ScanWatch 2", WithingsScanwatch2DeviceCoordinator.class);
+        assertOnlySupportedBy(coordinators, "ScanWatch Light", WithingsScanwatchLightDeviceCoordinator.class);
+    }
+
+    @Test
+    public void scanwatch2HasTheFirstGenerationHealthFeatures() {
+        final WithingsScanwatch2DeviceCoordinator coordinator = new WithingsScanwatch2DeviceCoordinator();
+
+        assertEquals(R.string.devicetype_withings_scanwatch_2, coordinator.getDeviceNameResource());
+        assertTrue(coordinator.supportsEcgMeasurement(null));
+        assertTrue(coordinator.supportsSpo2(null));
+        assertTrue(coordinator.supportsRespiratoryScan(null));
+        assertTrue(coordinator.supportsSleepBreathingQuality(null));
+        // Respiratory rate stays off until a ScanWatch 2 log shows real values
+        assertFalse(coordinator.supportsRespiratoryRate(null));
+    }
+
+    @Test
     public void lightDoesNotAdvertiseUnavailableHealthSensors() {
         final WithingsScanwatchLightDeviceCoordinator coordinator = new WithingsScanwatchLightDeviceCoordinator();
 
@@ -56,9 +91,10 @@ public class WithingsScanwatchDeviceCoordinatorTest {
     }
 
     @Test
-    public void bothModelsReceiveCallsAndAppNotifications() {
+    public void allModelsReceiveCallsAndAppNotifications() {
         for (final WithingsScanwatchDeviceCoordinator coordinator : new WithingsScanwatchDeviceCoordinator[]{
-                new WithingsScanwatchDeviceCoordinator(), new WithingsScanwatchLightDeviceCoordinator()}) {
+                new WithingsScanwatchDeviceCoordinator(), new WithingsScanwatch2DeviceCoordinator(),
+                new WithingsScanwatchLightDeviceCoordinator()}) {
             assertTrue(coordinator.supportsPhoneCalls(null));
             assertTrue(coordinator.supportsAppNotifications(null));
         }
@@ -86,6 +122,16 @@ public class WithingsScanwatchDeviceCoordinatorTest {
                 WithingsScanwatchLightSettingsCustomizer.normaliseLightShortcut(Byte.toString(ShortcutAction.ACTION_SPO2_MEAS)));
         assertEquals(Byte.toString(ShortcutAction.ACTION_WORKOUT_START),
                 WithingsScanwatchLightSettingsCustomizer.normaliseLightShortcut(Byte.toString(ShortcutAction.ACTION_WORKOUT_START)));
+    }
+
+    private static void assertOnlySupportedBy(final WithingsScanwatchDeviceCoordinator[] coordinators,
+                                              final String name,
+                                              final Class<?> expected) {
+        final GBDeviceCandidate candidate = candidate(name);
+        for (final WithingsScanwatchDeviceCoordinator coordinator : coordinators) {
+            assertEquals(name + " / " + coordinator.getClass().getSimpleName(),
+                    coordinator.getClass() == expected, coordinator.supports(candidate));
+        }
     }
 
     private static GBDeviceCandidate candidate(final String name) {

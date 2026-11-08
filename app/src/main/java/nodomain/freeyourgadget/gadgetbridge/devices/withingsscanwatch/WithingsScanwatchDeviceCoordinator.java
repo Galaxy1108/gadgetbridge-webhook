@@ -60,7 +60,7 @@ public class WithingsScanwatchDeviceCoordinator extends AbstractBLEDeviceCoordin
 
     @Override
     public Pattern getSupportedDeviceName() {
-        return Pattern.compile("(?i)^ScanWatch(?! Light).*");
+        return Pattern.compile("(?i)^ScanWatch(?! Light| 2(\\s|$)).*");
     }
 
     @Override

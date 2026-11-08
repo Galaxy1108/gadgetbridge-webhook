@@ -32,6 +32,7 @@ import java.util.List;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity;
+import nodomain.freeyourgadget.gadgetbridge.devices.withingsscanwatch.WithingsScanwatchDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.WithingsBaseDeviceSupport;
@@ -71,8 +72,7 @@ public class WithingsCalibrationActivity extends AbstractGBActivity {
         List<GBDevice> devices = GBApplication.app().getDeviceManager().getSelectedDevices();
         for(GBDevice device : devices){
             if (device.getType() == DeviceType.WITHINGS_STEEL_HR
-                    || device.getType() == DeviceType.WITHINGS_SCANWATCH
-                    || device.getType() == DeviceType.WITHINGS_SCANWATCH_LIGHT) {
+                    || device.getDeviceCoordinator() instanceof WithingsScanwatchDeviceCoordinator) {
                 this.device = device;
                 break;
             }
