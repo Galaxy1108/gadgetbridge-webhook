@@ -192,6 +192,8 @@ public class GBDaoGenerator {
         addWithingsSteelHRActivitySample(schema, user, device);
         addWithingsScanwatchActivitySample(schema, user, device);
         addWithingsBreathingDisturbanceSample(schema, user, device);
+        final Entity withingsEcgSummary = addWithingsEcgSummarySample(schema, user, device);
+        addWithingsEcgDataSample(schema, withingsEcgSummary);
         addGenericBloodPressureSample(schema, user, device);
         addHybridHRActivitySample(schema, user, device);
         sampleProvidersToGenerate.add(addHybridHRSpo2Sample(schema, user, device));
@@ -2304,6 +2306,29 @@ public class GBDaoGenerator {
         addHeartRateProperties(activitySample);
         activitySample.addIntProperty(SAMPLE_RAW_INTENSITY).notNull().codeBeforeGetterAndSetter(OVERRIDE);
         return activitySample;
+    }
+
+    private static Entity addWithingsEcgSummarySample(final Schema schema, final Entity user, final Entity device) {
+        final Entity ecgSummary = addEntity(schema, "WithingsEcgSummarySample");
+        ecgSummary.addLongProperty("ecgId").primaryKey().autoincrement();
+        final Property deviceId = ecgSummary.addLongProperty("deviceId").notNull().getProperty();
+        ecgSummary.addToOne(device, deviceId);
+        final Property userId = ecgSummary.addLongProperty("userId").notNull().getProperty();
+        ecgSummary.addToOne(user, userId);
+        ecgSummary.addLongProperty("startTimestamp").notNull().index();
+        ecgSummary.addLongProperty("endTimestamp").notNull();
+        ecgSummary.addIntProperty("averageHeartRate").notNull();
+        ecgSummary.addLongProperty("classification").notNull();
+        return ecgSummary;
+    }
+
+    private static Entity addWithingsEcgDataSample(final Schema schema, final Entity summaryEntity) {
+        final Entity ecgDataSample = addEntity(schema, "WithingsEcgDataSample");
+        final Property ecgId = ecgDataSample.addLongProperty("ecgId").primaryKey().notNull().getProperty();
+        ecgDataSample.addToOne(summaryEntity, ecgId);
+        ecgDataSample.addIntProperty("timeDelta").notNull().primaryKey();
+        ecgDataSample.addFloatProperty("value").notNull();
+        return ecgDataSample;
     }
 
     private static Entity addWithingsBreathingDisturbanceSample(Schema schema, Entity user, Entity device) {

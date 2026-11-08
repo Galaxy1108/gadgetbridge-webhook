@@ -1,22 +1,30 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.withingsscanwatch;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import nodomain.freeyourgadget.gadgetbridge.R;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiEcgDataProvider;
+import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
+import nodomain.freeyourgadget.gadgetbridge.devices.EcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
+import nodomain.freeyourgadget.gadgetbridge.entities.Device;
+import nodomain.freeyourgadget.gadgetbridge.entities.WithingsEcgDataSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.WithingsEcgDataSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.WithingsEcgSummarySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.WithingsEcgSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.conversation.WithingsEcgHandler;
 import nodomain.freeyourgadget.gadgetbridge.util.WithingsEcgWaveformUtil;
 
 @SuppressWarnings("SameParameterValue")
-public class WithingsEcgDataProvider extends HuaweiEcgDataProvider {
+public class WithingsEcgDataProvider implements EcgDataProvider {
     private static final int DISPLAY_MEDIAN_WINDOW = 15;
     private static final int DISPLAY_AVERAGE_WINDOW = 7;
     private static final int DISPLAY_BASELINE_WINDOW = 151;
@@ -26,23 +34,74 @@ public class WithingsEcgDataProvider extends HuaweiEcgDataProvider {
     private static final int WATCH_STYLE_RESAMPLE_MS = 24;
     private static final int WATCH_STYLE_AVERAGE_WINDOW = 5;
 
+    private final GBDevice device;
+    private final DaoSession session;
+
     public WithingsEcgDataProvider(final GBDevice device, final DaoSession session) {
-        super(device, session);
+        this.device = device;
+        this.session = session;
     }
 
-    @StringRes
+    @NonNull
     @Override
-    protected int getClassification(final long classificationCode) {
-        if (classificationCode == 0) {
-            return R.string.ecg_classification_sinus_rhythm;
+    public List<EcgRecord> getRecords() {
+        final Device dbDevice = DBHelper.findDevice(device, session);
+        if (dbDevice == null) {
+            return Collections.emptyList();
         }
-        return 0;
+
+        final List<WithingsEcgSummarySample> summaries = session.getWithingsEcgSummarySampleDao()
+            .queryBuilder()
+            .where(WithingsEcgSummarySampleDao.Properties.DeviceId.eq(dbDevice.getId()))
+            .orderDesc(WithingsEcgSummarySampleDao.Properties.StartTimestamp)
+            .build()
+            .list();
+
+        final List<EcgRecord> records = new ArrayList<>(summaries.size());
+        for (final WithingsEcgSummarySample summary : summaries) {
+            records.add(new EcgRecord(
+                Objects.requireNonNull(summary.getEcgId()),
+                summary.getStartTimestamp(),
+                summary.getEndTimestamp(),
+                WithingsEcgHandler.ECG_SAMPLE_RATE_HZ,
+                summary.getAverageHeartRate() > 0 ? summary.getAverageHeartRate() : null,
+                summary.getClassification(),
+                summary.getClassification() == 0 ? R.string.ecg_classification_sinus_rhythm : 0,
+                Collections.emptyList()
+            ));
+        }
+        return records;
+    }
+
+    @NonNull
+    @Override
+    public float[] getSamples(@NonNull final EcgRecord record) {
+        final List<WithingsEcgDataSample> samples = getDataSamples(record);
+        final float[] values = new float[samples.size()];
+        for (int i = 0; i < samples.size(); i++) {
+            values[i] = samples.get(i).getValue();
+        }
+        return values;
     }
 
     @NonNull
     @Override
     public List<EcgSample> getDisplaySamples(@NonNull final EcgRecord record) {
-        return smoothWaveformForDisplay(super.getDisplaySamples(record));
+        final List<WithingsEcgDataSample> samples = getDataSamples(record);
+        final List<EcgSample> waveform = new ArrayList<>(samples.size());
+        for (final WithingsEcgDataSample sample : samples) {
+            waveform.add(new EcgSample(sample.getTimeDelta(), sample.getValue()));
+        }
+        return smoothWaveformForDisplay(waveform);
+    }
+
+    private List<WithingsEcgDataSample> getDataSamples(final EcgRecord record) {
+        return session.getWithingsEcgDataSampleDao()
+            .queryBuilder()
+            .where(WithingsEcgDataSampleDao.Properties.EcgId.eq(record.getId()))
+            .orderAsc(WithingsEcgDataSampleDao.Properties.TimeDelta)
+            .build()
+            .list();
     }
 
     private static List<EcgSample> smoothWaveformForDisplay(final List<EcgSample> waveform) {

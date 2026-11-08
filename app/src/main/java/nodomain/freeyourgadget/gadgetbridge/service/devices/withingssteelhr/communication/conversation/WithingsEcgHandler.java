@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.conversation;
 
+import androidx.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +29,13 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiEcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
-import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgSummarySample;
-import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
+import nodomain.freeyourgadget.gadgetbridge.entities.Device;
+import nodomain.freeyourgadget.gadgetbridge.entities.WithingsEcgDataSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.WithingsEcgDataSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.WithingsEcgSummarySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.WithingsEcgSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.WithingsBaseDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.datastructures.EndOfTransmission;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.withingssteelhr.communication.datastructures.RawWithingsStructure;
@@ -55,8 +60,7 @@ public class WithingsEcgHandler implements ResponseHandler {
     private static final int ECG_AVERAGE_HR_TYPE = 0x000b;
     private static final int ECG_RESULT_TYPE = 0x0082;
     private static final int ECG_WAVEFORM_SIGNAL_TYPE = 0x0001;
-    private static final int ECG_SAMPLE_RATE_HZ = 300;
-    private static final String APP_VERSION_PLACEHOLDER = "withings";
+    public static final int ECG_SAMPLE_RATE_HZ = 300;
 
     private static final int MAX_DISCOVERY_PAGES = 10;
     private static final int MAX_SPO2_FALLBACK_RETRIES = 3;
@@ -370,10 +374,12 @@ public class WithingsEcgHandler implements ResponseHandler {
             return false;
         }
 
-        try (DBHandler db = GBApplication.acquireDB()) {
-            final Long userId = DBHelper.getUser(db.getDaoSession()).getId();
-            final Long deviceId = DBHelper.getDevice(device, db.getDaoSession()).getId();
-            return HuaweiEcgDataProvider.hasCompleteSession(db.getDaoSession(), userId, deviceId, startTimestampMs);
+        try (DBHandler db = GBApplication.acquireDbReadOnly()) {
+            final Device dbDevice = DBHelper.findDevice(device, db.getDaoSession());
+            final WithingsEcgSummarySample summary = findSummary(db.getDaoSession(), dbDevice.getId(), startTimestampMs);
+            return summary != null && db.getDaoSession().getWithingsEcgDataSampleDao().queryBuilder()
+                .where(WithingsEcgDataSampleDao.Properties.EcgId.eq(summary.getEcgId()))
+                .count() > 0;
         } catch (final Exception e) {
             logger.warn("Failed checking whether Withings ECG ts={} already exists", startTimestampMs, e);
             return false;
@@ -607,33 +613,51 @@ public class WithingsEcgHandler implements ResponseHandler {
                                   final long arrhythmiaType,
                                   final List<Float> samples) {
         try (DBHandler db = GBApplication.acquireDB()) {
-            final Long userId = DBHelper.getUser(db.getDaoSession()).getId();
-            final Long deviceId = DBHelper.getDevice(device, db.getDaoSession()).getId();
-
-            final HuaweiEcgSummarySample summary = new HuaweiEcgSummarySample(
-                    null,
-                    deviceId,
-                    userId,
-                    start,
-                    end,
-                    APP_VERSION_PLACEHOLDER,
-                    Math.max(avgHr, 0),
-                    arrhythmiaType,
-                    0L
+            final DaoSession session = db.getDaoSession();
+            final long deviceId = DBHelper.getDevice(device, session).getId();
+            final WithingsEcgSummarySample existing = findSummary(session, deviceId, start);
+            final WithingsEcgSummarySample summary = new WithingsEcgSummarySample(
+                existing != null ? existing.getEcgId() : null,
+                deviceId,
+                DBHelper.getUser(session).getId(),
+                start,
+                end,
+                Math.max(avgHr, 0),
+                arrhythmiaType
             );
 
-            final List<EcgSample> waveformSamples = new ArrayList<>(samples.size());
-            for (int i = 0; i < samples.size(); i++) {
-                final Float sample = samples.get(i);
-                final int delta = (int) Math.round((i * 1000d) / ECG_SAMPLE_RATE_HZ);
-                waveformSamples.add(new EcgSample(delta, sample));
-            }
-            HuaweiEcgDataProvider.upsertSession(db.getDaoSession(), summary, waveformSamples);
+            session.runInTx(() -> {
+                session.getWithingsEcgSummarySampleDao().insertOrReplace(summary);
+
+                session.getWithingsEcgDataSampleDao().queryBuilder()
+                    .where(WithingsEcgDataSampleDao.Properties.EcgId.eq(summary.getEcgId()))
+                    .buildDelete()
+                    .executeDeleteWithoutDetachingEntities();
+
+                final List<WithingsEcgDataSample> waveformSamples = new ArrayList<>(samples.size());
+                for (int i = 0; i < samples.size(); i++) {
+                    final int delta = (int) Math.round((i * 1000d) / ECG_SAMPLE_RATE_HZ);
+                    waveformSamples.add(new WithingsEcgDataSample(summary.getEcgId(), delta, samples.get(i)));
+                }
+                session.getWithingsEcgDataSampleDao().insertInTx(waveformSamples);
+            });
             logger.info("Stored Withings ECG ts={} samples={}", start, samples.size());
             return true;
         } catch (final Exception e) {
             logger.error("Failed storing Withings ECG data for ts={}", start, e);
             return false;
         }
+    }
+
+    @Nullable
+    private static WithingsEcgSummarySample findSummary(final DaoSession session, final long deviceId, final long start) {
+        final List<WithingsEcgSummarySample> summaries = session.getWithingsEcgSummarySampleDao().queryBuilder()
+            .where(
+                WithingsEcgSummarySampleDao.Properties.DeviceId.eq(deviceId),
+                WithingsEcgSummarySampleDao.Properties.StartTimestamp.eq(start)
+            )
+            .build()
+            .list();
+        return summaries.isEmpty() ? null : summaries.get(0);
     }
 }

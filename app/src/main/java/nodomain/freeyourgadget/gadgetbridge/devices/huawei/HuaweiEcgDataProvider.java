@@ -2,7 +2,6 @@ package nodomain.freeyourgadget.gadgetbridge.devices.huawei;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,7 +58,7 @@ public class HuaweiEcgDataProvider implements EcgDataProvider {
                 durationMs > 0 ? sampleCount * 1000f / durationMs : 0,
                 summary.getAverageHeartRate() > 0 ? summary.getAverageHeartRate() : null,
                 summary.getArrhythmiaType(),
-                getClassification(summary.getArrhythmiaType()),
+                0,
                 Collections.emptyList()
             ));
         }
@@ -83,14 +82,6 @@ public class HuaweiEcgDataProvider implements EcgDataProvider {
         return values;
     }
 
-    /**
-     * Returns the label of a classification code, or 0 if the meaning of the code is unknown.
-     */
-    @StringRes
-    protected int getClassification(final long classificationCode) {
-        return 0;
-    }
-
     public long getLatestEndTimestamp() {
         final Device dbDevice = DBHelper.findDevice(device, session);
         if (dbDevice == null) {
@@ -108,16 +99,6 @@ public class HuaweiEcgDataProvider implements EcgDataProvider {
             return 0;
         }
         return samples.get(0).getEndTimestamp();
-    }
-
-    public static boolean hasCompleteSession(final DaoSession daoSession,
-                                             final long userId,
-                                             final long deviceId,
-                                             final long startTimestamp) {
-        final Long sessionId = findSessionId(daoSession, userId, deviceId, startTimestamp);
-        return sessionId != null && daoSession.getHuaweiEcgDataSampleDao().queryBuilder()
-            .where(HuaweiEcgDataSampleDao.Properties.EcgId.eq(sessionId))
-            .count() > 0;
     }
 
     /**
@@ -152,10 +133,10 @@ public class HuaweiEcgDataProvider implements EcgDataProvider {
     }
 
     @Nullable
-    public static Long findSessionId(final DaoSession daoSession,
-                                     final long userId,
-                                     final long deviceId,
-                                     final long startTimestamp) {
+    private static Long findSessionId(final DaoSession daoSession,
+                                      final long userId,
+                                      final long deviceId,
+                                      final long startTimestamp) {
         final List<HuaweiEcgSummarySample> existing = daoSession.getHuaweiEcgSummarySampleDao().queryBuilder()
             .where(
                 HuaweiEcgSummarySampleDao.Properties.UserId.eq(userId),
