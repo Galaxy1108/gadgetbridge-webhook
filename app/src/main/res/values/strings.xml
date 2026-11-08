@@ -1325,7 +1325,6 @@
     <string name="sleep_colored_stats_light_avg">Light AVG</string>
     <string name="sleep_colored_stats_rem_avg">REM AVG</string>
     <string name="sleep_colored_stats_awake_avg">Awake AVG</string>
-    <string name="sleep_total_value">Total sleep: %s</string>
     <string name="sleep_avg">Sleep AVG</string>
     <string name="lowest">Lowest</string>
     <string name="highest">Highest</string>
@@ -2367,6 +2366,8 @@
     <string name="devicetype_garmin_fenix_9_pro_solar" translatable="false">Garmin Fenix 9 Pro Solar</string>
     <string name="devicetype_garmin_quatix_6" translatable="false">Garmin Quatix 6</string>
     <string name="devicetype_garmin_quatix_6x" translatable="false">Garmin Quatix 6X</string>
+    <string name="devicetype_garmin_quatix_7" translatable="false">Garmin Quatix 7</string>
+    <string name="devicetype_garmin_quatix_7x" translatable="false">Garmin Quatix 7X</string>
     <string name="devicetype_garmin_quatix_8" translatable="false">Garmin Quatix 8</string>
     <string name="devicetype_garmin_tactix_7" translatable="false">Garmin Tactix 7</string>
     <string name="devicetype_garmin_tactix_8" translatable="false">Garmin Tactix 8</string>
@@ -2749,6 +2750,7 @@
     <string name="devicetype_garmin_hrm_200" translatable="false">Garmin HRM 200</string>
     <string name="devicetype_garmin_hrm_600" translatable="false">Garmin HRM 600</string>
     <string name="devicetype_coospo_h9z" translatable="false">Coospo H9Z</string>
+    <string name="devicetype_coospo_h808s" translatable="false">Coospo H808S</string>
     <string name="devicetype_solarflow">SolarFlow</string>
     <string name="devicetype_braun_bpw4500" translatable="false">Braun iCheck 7 BPW4500</string>
     <string name="devicetype_ls2_4x">LS2-4X</string>
@@ -2779,6 +2781,25 @@
     <string name="metric_garmin_running_lactate_threshold_power">Running Lactate Threshold Power</string>
     <string name="metric_garmin_training_readiness">Training Readiness</string>
     <string name="metric_garmin_dive_readiness">Dive Readiness</string>
+    <string name="metric_garmin_training_status">Training Status</string>
+    <string name="training_status_productive">Productive</string>
+    <string name="training_status_maintaining">Maintaining</string>
+    <string name="training_status_recovery">Recovery</string>
+    <string name="training_status_strained">Strained</string>
+    <string name="training_status_detraining">Detraining</string>
+    <string name="training_status_paused">Paused</string>
+    <string name="training_status_no_status">No Status</string>
+    <string name="training_status_unproductive">Unproductive</string>
+    <string name="training_status_overreaching">Overreaching</string>
+    <string name="training_status_peaking">Peaking</string>
+    <string name="training_status_unknown">Unknown (%d)</string>
+    <string name="training_status_range">%1$s – %2$s</string>
+    <string name="training_status_today">today</string>
+    <string name="training_status_last_7_days">Last 7 days: %1$s</string>
+    <string name="training_status_load">Load</string>
+    <string name="training_status_breakdown">Breakdown</string>
+    <string name="training_status_history">History</string>
+    <string name="training_status_share">%1$d%% · %2$s</string>
     <string name="training_readiness_zone_prime">Prime</string>
     <string name="training_readiness_zone_prime_desc">Best possible</string>
     <string name="training_readiness_zone_high">High</string>
@@ -4775,6 +4796,7 @@
     <string name="loyalty_cards_sync_summary">Tap to sync the cards to the watch</string>
     <string name="loyalty_cards_sync_watch_request_title">Sync automatically</string>
     <string name="loyalty_cards_sync_watch_request_summary">Allow the watch to sync the latest cards automatically</string>
+    <string name="loyalty_cards_sync_on_change_summary">Automatically sync card changes to the watch</string>
     <string name="loyalty_cards_sync_options">Sync Options</string>
     <string name="loyalty_cards_sync">Sync</string>
     <string name="loyalty_cards_catima">Catima</string>

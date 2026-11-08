@@ -142,6 +142,7 @@
     <uses-permission android:name="android.permission.health.WRITE_EXERCISE_ROUTE" />
     <uses-permission android:name="android.permission.health.WRITE_RESPIRATORY_RATE" />
     <uses-permission android:name="android.permission.health.WRITE_RESTING_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.WRITE_BASAL_METABOLIC_RATE" />
     <uses-permission android:name="android.permission.health.WRITE_BLOOD_GLUCOSE" />
     <uses-permission android:name="android.permission.health.WRITE_BLOOD_PRESSURE" />
     <uses-permission android:name="android.permission.health.WRITE_HYDRATION" />
@@ -171,6 +172,7 @@
     <application
         android:name=".GBApplication"
         android:allowBackup="false"
+        android:enableOnBackInvokedCallback="true"
         android:supportsRtl="true"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
@@ -178,7 +180,8 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:requestLegacyExternalStorage="true"
-        android:theme="@style/GadgetbridgeTheme">
+        android:theme="@style/GadgetbridgeTheme"
+        tools:targetApi="33">
         <activity
             android:name=".activities.ControlCenterv2"
             android:configChanges="keyboard|keyboardHidden|navigation"
@@ -1339,7 +1342,8 @@
                 <!-- Where a service's login sends the browser back; the host names the service -->
                 <data
                     android:scheme="${appAuthRedirectScheme}"
-                    android:pathPrefix="/oauth/callback" />
+                    android:pathPrefix="/oauth/callback"
+                    tools:ignore="AppLinkUrlError" />
             </intent-filter>
         </activity>
 
@@ -1373,8 +1377,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_1"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1384,8 +1387,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_2"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1395,8 +1397,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_3"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1406,8 +1407,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_4"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1417,8 +1417,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_5"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1428,8 +1427,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_6"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1439,8 +1437,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_7"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1450,8 +1447,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_8"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1461,8 +1457,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_9"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1472,8 +1467,7 @@
             android:exported="true"
             android:icon="@drawable/ic_devices_other"
             android:label="@string/qs_tile_label_10"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            tools:targetApi="24">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -1484,16 +1478,14 @@
             android:name=".activities.quicksettings.QuickSettingsTilesActivity"
             android:exported="false"
             android:label="@string/qs_tile_activity_title"
-            android:theme="@style/Theme.AppCompat.Light.Dialog"
-            tools:targetApi="24" />
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
 
         <!-- Settings screen for Quick Settings tiles and Device Controls. -->
         <activity
             android:name=".activities.quicksettings.QuickSettingsPreferencesActivity"
             android:exported="true"
             android:label="@string/pref_header_quick_settings"
-            android:parentActivityName=".activities.SettingsActivity"
-            tools:targetApi="24">
+            android:parentActivityName=".activities.SettingsActivity">
             <!-- Handle long-press on any of the QS tiles -->
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />

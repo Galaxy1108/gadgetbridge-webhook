@@ -329,6 +329,7 @@ public interface DeviceCoordinator {
     boolean supportsTrainingLoadChronic(@NonNull final GBDevice device);
     boolean supportsRacePrediction(@NonNull final GBDevice device);
     boolean supportsTrainingReadiness(@NonNull final GBDevice device);
+    boolean supportsTrainingStatus(@NonNull final GBDevice device);
     boolean supportsGlucoseMeasurement(@NonNull final GBDevice device);
 
     /**
@@ -1296,6 +1297,8 @@ public interface DeviceCoordinator {
     HeartRateZonesSpec getHeartRateZonesSpec(@NonNull final GBDevice device);
 
     Set<BarcodeFormat> getSupportedBarcodeFormats(@NonNull final GBDevice device);
+
+    boolean supportsLoyaltyCards(@NonNull final GBDevice device);
 
     /**
      * Whether the device can request a sync of loyalty cards.

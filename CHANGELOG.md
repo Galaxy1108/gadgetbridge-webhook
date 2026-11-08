@@ -2,7 +2,27 @@
 
 <!-- For contributors: do not modify this file - the project maintainers will update it as needed -->
 
-#### Next version (WIP)
+#### Next release (WIP)
+
+* Initial support for Coospo H808S
+* Add automatic sync of loyalty cards
+* Casio GBD-200: Migrate old paired devices to new implementation
+* Charts: Show sleep period chart total last, below a divider
+* Coospo: Expose live heart rate
+* Dashboard: Center axis labels under their bars
+* Dashboard: Fix tiles reshuffling on long press
+* Dashboard: Improve support for large font sizes
+* Dashboard: Show awake sleep in the day widget
+* Dashboard: Use HRV weekly average chart color for the line
+* Dashboard: Use the sleep chart theme colors in widgets
+* Enable predictive back gesture
+* Garmin: Fix regression in web request URL encoding
+* Garmin: Generate turns from points in GPX track
+* Health Connect: Fix skin temperature deltas relative to the baseline
+* Mi Band 6: Improve workout details parsing
+* Update minSdk to 24 (Android 7 / Nougat)
+
+#### 2026.11.0
 
 * Initial support for Anker Soundcore Motion+, R50i NC, V20i
 * Initial support for Bettdow FB051 (MoYoung / Da Fit)
@@ -25,6 +45,7 @@
 * Experimental support for Anker Soundcore Space One
 * Experimental support for Concept2 PM5
 * Experimental support for Coros Pace 3
+* Experimental support for Garmin Quatix 7 / 7X
 * Experimental support for Segway Ninebot F2 Pro KickScooter
 * Experimental support for 15 Anker Soundcore devices
 * Refresh design for alarms list and details

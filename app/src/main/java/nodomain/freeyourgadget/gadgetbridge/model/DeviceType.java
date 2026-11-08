@@ -52,6 +52,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.cmfwatchpro.CmfWatchPro2Coor
 import nodomain.freeyourgadget.gadgetbridge.devices.cmfwatchpro.CmfWatchPro3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.cmfwatchpro.CmfWatchProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.coospo.CoospoH6Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.coospo.CoospoH808SCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.coospo.CoospoH9ZCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.coospo.CoospoHW807Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.coospo.CoospoHW9Coordinator;
@@ -234,6 +235,8 @@ import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.lily.GarminLi
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.lily.GarminLilyCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix6Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix6XCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix7Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix7XCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.quatix.GarminQuatix8Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.swim.GarminSwim2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.garmin.watches.tactix.GarminTactix7Coordinator;
@@ -994,6 +997,8 @@ public enum DeviceType {
     GARMIN_FORERUNNER_970(GarminForerunner970Coordinator::new),
     GARMIN_QUATIX_6(GarminQuatix6Coordinator::new),
     GARMIN_QUATIX_6X(GarminQuatix6XCoordinator::new),
+    GARMIN_QUATIX_7(GarminQuatix7Coordinator::new),
+    GARMIN_QUATIX_7X(GarminQuatix7XCoordinator::new),
     GARMIN_QUATIX_8(GarminQuatix8Coordinator::new),
     GARMIN_TACTIX_7(GarminTactix7Coordinator::new),
     GARMIN_TACTIX_8(GarminTactix8Coordinator::new),
@@ -1322,6 +1327,7 @@ public enum DeviceType {
     COOSPO_HW9(CoospoHW9Coordinator::new),
     COOSPO_HW807(CoospoHW807Coordinator::new),
     COOSPO_H9Z(CoospoH9ZCoordinator::new),
+    COOSPO_H808S(CoospoH808SCoordinator::new),
     KEEPHEALTH_C60(C60DeviceCoordinator::new),
     GENERIC_WEIGHT_SCALE(GenericWeightScaleCoordinator::new),
     SOLARFLOW(SolarFlowDeviceCoordinator::new),
