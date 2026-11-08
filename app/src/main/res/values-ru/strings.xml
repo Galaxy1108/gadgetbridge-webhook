@@ -4909,4 +4909,7 @@
         <item quantity="other">активностей</item>
     </plurals>
     <string name="pref_endurain_replace_on_track_change_summary">Чтобы изменить маршрут загруженной тренировки, нужно удалить ее и загрузить заново, чтобы у нее появился новый адрес. Тренировки, которые вы редактировали в Endurain, остануться без изменений.</string>
+    <string name="activity_db_management_data_label">Внешние данные</string>
+    <string name="activity_DB_ShowExternalDataButton">Показать содержимое каталога внешних данных</string>
+    <string name="activity_db_management_legacy_export_label">Экспорт/импорт устаревших данных</string>
 </resources>
