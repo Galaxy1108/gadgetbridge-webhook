@@ -112,7 +112,7 @@ public class GBDaoGenerator {
             outputDir.mkdirs();
         }
 
-        final Schema schema = new Schema(161, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(162, MAIN_PACKAGE + ".entities");
 
         final List<Entity> sampleProvidersToGenerate = new LinkedList<>();
         final List<Entity> batterySampleProvidersToGenerate = new LinkedList<>();
@@ -215,6 +215,8 @@ public class GBDaoGenerator {
         sampleProvidersToGenerate.add(addGarminIntensityMinutesSample(schema, user, device));
         sampleProvidersToGenerate.add(addGarminNapSample(schema, user, device));
         sampleProvidersToGenerate.add(addGarminSleepRestlessMomentsSample(schema, user, device));
+        final Entity garminEcgSummary = addGarminEcgSummarySample(schema, user, device);
+        addGarminEcgDataSample(schema, garminEcgSummary);
         addPendingFile(schema, user, device);
         sampleProvidersToGenerate.add(addWena3EnergySample(schema, user, device));
         sampleProvidersToGenerate.add(addWena3BehaviorSample(schema, user, device));
@@ -1293,6 +1295,32 @@ public class GBDaoGenerator {
         addCommonTimeSampleProperties("AbstractHrvValueSample", hrvValueSample, user, device);
         hrvValueSample.addIntProperty("value").notNull().codeBeforeGetter(OVERRIDE);
         return hrvValueSample;
+    }
+
+    private static Entity addGarminEcgSummarySample(final Schema schema, final Entity user, final Entity device) {
+        final Entity ecgSummary = addEntity(schema, "GarminEcgSummarySample");
+        ecgSummary.addLongProperty("ecgId").primaryKey().autoincrement();
+        final Property deviceId = ecgSummary.addLongProperty("deviceId").notNull().getProperty();
+        ecgSummary.addToOne(device, deviceId);
+        final Property userId = ecgSummary.addLongProperty("userId").notNull().getProperty();
+        ecgSummary.addToOne(user, userId);
+        ecgSummary.addLongProperty("startTimestamp").notNull().index();
+        ecgSummary.addLongProperty("endTimestamp").notNull();
+        ecgSummary.addFloatProperty("sampleRate").notNull();
+        ecgSummary.addIntProperty("averageHeartRate");
+        ecgSummary.addIntProperty("categorization");
+        ecgSummary.addIntProperty("rmssdHrv");
+        ecgSummary.addIntProperty("mountingSide");
+        return ecgSummary;
+    }
+
+    private static Entity addGarminEcgDataSample(final Schema schema, final Entity summaryEntity) {
+        final Entity ecgDataSample = addEntity(schema, "GarminEcgDataSample");
+        final Property ecgId = ecgDataSample.addLongProperty("ecgId").primaryKey().notNull().getProperty();
+        ecgDataSample.addToOne(summaryEntity, ecgId);
+        ecgDataSample.addIntProperty("sampleIndex").notNull().primaryKey();
+        ecgDataSample.addFloatProperty("value").notNull();
+        return ecgDataSample;
     }
 
     private static Entity addGarminRespiratoryRateSample(Schema schema, Entity user, Entity device) {

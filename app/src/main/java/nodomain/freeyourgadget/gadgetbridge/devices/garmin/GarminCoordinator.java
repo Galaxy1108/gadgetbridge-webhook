@@ -46,7 +46,6 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.Device
 import nodomain.freeyourgadget.gadgetbridge.capabilities.loyaltycards.BarcodeFormat;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractBLEDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.EcgDataProvider;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiEcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminBodyEnergySampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminSolarChargeSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminHeartRateRestingSampleProvider;
@@ -444,7 +443,7 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     @Nullable
     @Override
     public EcgDataProvider getEcgDataProvider(@NonNull final GBDevice device, @NonNull final DaoSession session) {
-        return new HuaweiEcgDataProvider(device, session);
+        return new GarminEcgDataProvider(device, session);
     }
 
     public boolean supportsAgpsUpdates(final GBDevice device) {

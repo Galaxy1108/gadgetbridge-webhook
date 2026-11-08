@@ -41,7 +41,6 @@ import java.util.TreeMap;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiEcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.BaseActivitySummaryProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.BatteryLevelProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.GarminBodyEnergySampleProvider;
@@ -71,6 +70,10 @@ import nodomain.freeyourgadget.gadgetbridge.entities.BatteryLevel;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminBodyEnergySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.GarminEcgDataSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.GarminEcgDataSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.GarminEcgSummarySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.GarminEcgSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminSolarChargeSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminEventSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.GarminHeartRateRestingSample;
@@ -95,15 +98,13 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityTrack;
-import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiEcgSummarySample;
-import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
 import nodomain.freeyourgadget.gadgetbridge.model.FitActivityTrackProvider;
 import nodomain.freeyourgadget.gadgetbridge.model.MetricSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
 import nodomain.freeyourgadget.gadgetbridge.model.TrainingStatus;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.FileType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.GarminUtils;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.EcgRhythmClassification;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.Side;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.HrvStatus;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.enums.SleepLevel;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.exception.FitParseException;
@@ -150,6 +151,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
 public class FitImporter {
     private static final Logger LOG = LoggerFactory.getLogger(FitImporter.class);
+    private static final int ECG_SUMMARY_CATEGORIZATION_FIELD = 1;
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.ROOT);
 
     private final Context context;
@@ -664,27 +666,48 @@ public class FitImporter {
             return;
         }
 
-        final List<EcgSample> waveform = new ArrayList<>(ecgSmoothSamples.size());
-        for (int i = 0; i < ecgSmoothSamples.size(); i++) {
-            waveform.add(new EcgSample(Math.round(i * 1000f / sampleRate), ecgSmoothSamples.get(i)));
-        }
-
+        final long deviceId = DBHelper.getDevice(gbDevice, session).getId();
         final long start = startSeconds * 1000L;
         final Float averageHeartRate = ecgSummary.getAverageHeartRate();
-        final HuaweiEcgSummarySample record = new HuaweiEcgSummarySample(
-            null,
-            DBHelper.getDevice(gbDevice, session).getId(),
+        final Object categorization = ecgSummary.getRawFieldByNumber(ECG_SUMMARY_CATEGORIZATION_FIELD);
+        final Side mountingSide = ecgSummary.getMountingSide();
+
+        final List<GarminEcgSummarySample> existing = session.getGarminEcgSummarySampleDao().queryBuilder()
+            .where(
+                GarminEcgSummarySampleDao.Properties.DeviceId.eq(deviceId),
+                GarminEcgSummarySampleDao.Properties.StartTimestamp.eq(start)
+            )
+            .build()
+            .list();
+
+        final GarminEcgSummarySample summary = new GarminEcgSummarySample(
+            existing.isEmpty() ? null : existing.get(0).getEcgId(),
+            deviceId,
             DBHelper.getUser(session).getId(),
             start,
             start + Math.round(ecgSmoothSamples.size() * 1000f / sampleRate),
-            "garmin",
-            averageHeartRate != null ? Math.round(averageHeartRate) : 0,
-            ecgSummary.getCategorization() == EcgRhythmClassification.SINUS_NORMAL ? 0 : -1,
-            0L
+            sampleRate,
+            averageHeartRate != null ? Math.round(averageHeartRate) : null,
+            categorization instanceof Number number ? number.intValue() : null,
+            ecgSummary.getRmssdHrv(),
+            mountingSide != null ? mountingSide.num : null
         );
 
-        LOG.debug("Persisting ECG at {} with {} samples", start, waveform.size());
-        HuaweiEcgDataProvider.upsertSession(session, record, waveform);
+        LOG.debug("Persisting ECG at {} with {} samples", start, ecgSmoothSamples.size());
+        session.runInTx(() -> {
+            session.getGarminEcgSummarySampleDao().insertOrReplace(summary);
+
+            session.getGarminEcgDataSampleDao().queryBuilder()
+                .where(GarminEcgDataSampleDao.Properties.EcgId.eq(summary.getEcgId()))
+                .buildDelete()
+                .executeDeleteWithoutDetachingEntities();
+
+            final List<GarminEcgDataSample> samples = new ArrayList<>(ecgSmoothSamples.size());
+            for (int i = 0; i < ecgSmoothSamples.size(); i++) {
+                samples.add(new GarminEcgDataSample(summary.getEcgId(), i, ecgSmoothSamples.get(i)));
+            }
+            session.getGarminEcgDataSampleDao().insertInTx(samples);
+        });
 
         GBApplication.getDeviceSpecificSharedPrefs(gbDevice.getAddress()).edit()
             .putBoolean(GarminPreferences.PREF_GARMIN_ECG_SUPPORTED, true)

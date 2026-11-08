@@ -59,7 +59,8 @@ public class HuaweiEcgDataProvider implements EcgDataProvider {
                 durationMs > 0 ? sampleCount * 1000f / durationMs : 0,
                 summary.getAverageHeartRate() > 0 ? summary.getAverageHeartRate() : null,
                 summary.getArrhythmiaType(),
-                getClassification(summary.getArrhythmiaType())
+                getClassification(summary.getArrhythmiaType()),
+                Collections.emptyList()
             ));
         }
         return records;

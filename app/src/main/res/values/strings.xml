@@ -1247,6 +1247,8 @@
     <string name="heart_rate_result">Measurement results</string>
     <string name="ecg_device_hint">Device hint</string>
     <string name="ecg_classification_sinus_rhythm">Sinus rhythm</string>
+    <string name="ecg_classification_inconclusive_hr_under_50">Inconclusive: heart rate under 50</string>
+    <string name="ecg_wrist">Wrist</string>
     <string name="movement_intensity">Movement intensity</string>
     <string name="battery">Battery</string>
     <string name="no_limit">No limit</string>

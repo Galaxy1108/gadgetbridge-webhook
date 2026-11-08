@@ -300,6 +300,8 @@ public class EcgChartFragment extends AbstractChartFragment<EcgChartFragment.Ecg
 
         if (summary.getClassification() != 0) {
             return getString(summary.getClassification());
+        } else if (summary.getClassificationCode() == null) {
+            return getString(R.string.unknown);
         }
         return getString(R.string.training_status_unknown, summary.getClassificationCode());
     }

@@ -3,6 +3,7 @@ package nodomain.freeyourgadget.gadgetbridge.devices.test.samples;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -10,6 +11,7 @@ import java.util.Random;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.EcgDataProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.test.TestDeviceRand;
+import nodomain.freeyourgadget.gadgetbridge.model.EcgExtra;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 
 public class TestEcgDataProvider implements EcgDataProvider {
@@ -52,8 +54,11 @@ public class TestEcgDataProvider implements EcgDataProvider {
                 ts + DURATION_SECONDS * 1000L,
                 SAMPLE_RATE_HZ,
                 TestDeviceRand.randInt(ts + 1, 50, 90),
-                sinusRhythm ? 0 : 1,
-                sinusRhythm ? R.string.ecg_classification_sinus_rhythm : 0
+                sinusRhythm ? 0L : 1L,
+                sinusRhythm ? R.string.ecg_classification_sinus_rhythm : 0,
+                Collections.singletonList(
+                    new EcgExtra(R.string.hrv, R.string.hrv_status_unit, TestDeviceRand.randInt(ts + 3, 20, 80))
+                )
             ));
         }
 

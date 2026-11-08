@@ -16,8 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.model;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+
+import java.util.List;
 
 /**
  * An ECG measurement, with timestamps in milliseconds.
@@ -29,17 +32,21 @@ public class EcgRecord {
     private final float sampleRateHz;
     @Nullable
     private final Integer averageHeartRate;
-    private final long classificationCode;
+    @Nullable
+    private final Long classificationCode;
     @StringRes
     private final int classification;
+    @NonNull
+    private final List<EcgExtra> extras;
 
     public EcgRecord(final long id,
                      final long startTimestamp,
                      final long endTimestamp,
                      final float sampleRateHz,
                      @Nullable final Integer averageHeartRate,
-                     final long classificationCode,
-                     @StringRes final int classification) {
+                     @Nullable final Long classificationCode,
+                     @StringRes final int classification,
+                     @NonNull final List<EcgExtra> extras) {
         this.id = id;
         this.startTimestamp = startTimestamp;
         this.endTimestamp = endTimestamp;
@@ -47,6 +54,7 @@ public class EcgRecord {
         this.averageHeartRate = averageHeartRate;
         this.classificationCode = classificationCode;
         this.classification = classification;
+        this.extras = extras;
     }
 
     /**
@@ -74,9 +82,10 @@ public class EcgRecord {
     }
 
     /**
-     * The classification code that the device reported.
+     * The classification code that the device reported, or null if the device reported no known code.
      */
-    public long getClassificationCode() {
+    @Nullable
+    public Long getClassificationCode() {
         return classificationCode;
     }
 
@@ -86,5 +95,10 @@ public class EcgRecord {
     @StringRes
     public int getClassification() {
         return classification;
+    }
+
+    @NonNull
+    public List<EcgExtra> getExtras() {
+        return extras;
     }
 }
