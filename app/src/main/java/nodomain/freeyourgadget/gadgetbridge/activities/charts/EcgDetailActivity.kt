@@ -3,10 +3,12 @@ package nodomain.freeyourgadget.gadgetbridge.activities.charts
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.charts.LineChart
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +22,10 @@ import nodomain.freeyourgadget.gadgetbridge.activities.workouts.addStatTileGrid
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample
+import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
+import nodomain.freeyourgadget.gadgetbridge.util.EcgExportHelper
+import nodomain.freeyourgadget.gadgetbridge.util.GB
 import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getDevice
 import org.slf4j.LoggerFactory
 import java.util.Calendar
@@ -31,6 +36,7 @@ import kotlin.math.abs
 class EcgDetailActivity : AbstractGBActivity() {
     private lateinit var device: GBDevice
     private lateinit var waveformChart: EcgWaveformChart
+    private var record: EcgRecord? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,13 +62,30 @@ class EcgDetailActivity : AbstractGBActivity() {
                 finish()
                 return@launch
             }
+            record = loaded.first
             render(loaded.first, loaded.second)
+            invalidateOptionsMenu()
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_ecg_detail, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.ecg_detail_share).isVisible = record != null
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         android.R.id.home -> {
             finish()
+            true
+        }
+
+        R.id.ecg_detail_share -> {
+            record?.let(::shareCsv)
             true
         }
 
@@ -73,6 +96,28 @@ class EcgDetailActivity : AbstractGBActivity() {
         val provider = device.deviceCoordinator.getEcgDataProvider(device, db.daoSession) ?: return null
         val record = provider.records.firstOrNull { it.id == recordId } ?: return null
         record to provider.getDisplaySamples(record)
+    }
+
+    private fun shareCsv(record: EcgRecord) {
+        lifecycleScope.launch {
+            try {
+                val file = withContext(Dispatchers.IO) {
+                    val samples = GBApplication.acquireDbReadOnly().use { db ->
+                        device.deviceCoordinator.getEcgDataProvider(device, db.daoSession)?.getSamples(record)
+                    } ?: FloatArray(0)
+                    EcgExportHelper.writeCsv(this@EcgDetailActivity, device, record, samples)
+                }
+                AndroidUtils.shareFile(this@EcgDetailActivity, file, "text/csv")
+            } catch (e: Exception) {
+                GB.toast(
+                    this@EcgDetailActivity,
+                    getString(R.string.activity_error_share_failed),
+                    Toast.LENGTH_LONG,
+                    GB.ERROR,
+                    e
+                )
+            }
+        }
     }
 
     private fun render(record: EcgRecord, waveform: List<EcgSample>) {
