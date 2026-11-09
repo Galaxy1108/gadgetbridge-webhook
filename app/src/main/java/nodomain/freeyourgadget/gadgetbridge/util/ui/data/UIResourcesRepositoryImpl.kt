@@ -10,9 +10,13 @@ import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR_DEFAULT
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_CONTRASTING_SURFACES
@@ -30,6 +34,22 @@ class UIResourcesRepositoryImpl @Inject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : UIResourcesRepository {
     private var themeChanges: Job? = null
+
+    override val themeSettings: StateFlow<ThemeSettings> = dataSource.changedKeys()
+        .filter { it == null || it in THEME_SETTINGS_KEYS }
+        .map { readThemeSettings() }
+        .stateIn(applicationScope, SharingStarted.Eagerly, readThemeSettings())
+
+    private fun readThemeSettings() = ThemeSettings(
+        theme = getSelectedTheme(),
+        amoledBlack = isAmoledBlackEnabled(),
+        accentColor = getAccentColor(),
+        contrastingSurfaces = if (dataSource.contains(PREF_CONTRASTING_SURFACES)) {
+            dataSource.getBoolean(PREF_CONTRASTING_SURFACES, false)
+        } else {
+            null
+        },
+    )
 
     override fun getSelectedTheme(): AppTheme = AppTheme.fromValue(dataSource.getString(PREF_THEME, null))
 
@@ -175,5 +195,7 @@ class UIResourcesRepositoryImpl @Inject constructor(
     private companion object {
         const val PREF_THEME = "pref_key_theme"
         const val PREF_AMOLED_BLACK = "pref_key_theme_amoled_black"
+
+        val THEME_SETTINGS_KEYS = setOf(PREF_THEME, PREF_AMOLED_BLACK, PREF_ACCENT_COLOR, PREF_CONTRASTING_SURFACES)
     }
 }

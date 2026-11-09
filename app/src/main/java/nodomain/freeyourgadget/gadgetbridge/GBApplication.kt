@@ -50,6 +50,9 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHandler
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper
 import nodomain.freeyourgadget.gadgetbridge.database.PeriodicDbExporter
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import nodomain.freeyourgadget.gadgetbridge.di.ApplicationScope
 import nodomain.freeyourgadget.gadgetbridge.di.DefaultPrefs
 import nodomain.freeyourgadget.gadgetbridge.externalevents.BluetoothStateChangeReceiver
 import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppRepository
@@ -123,6 +126,10 @@ open class GBApplication : Application() {
 
     @Inject
     lateinit var uiResources: UIResourcesRepository
+
+    @Inject
+    @ApplicationScope
+    lateinit var applicationScope: CoroutineScope
 
     private val lifecycleObserver = AppLifecycleObserver()
 
@@ -326,6 +333,8 @@ open class GBApplication : Application() {
     override fun onTerminate() {
         ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleObserver)
         uiResources.unregister()
+        // Stops the work of the application's singletons, e.g. the flows that listen to the preferences
+        applicationScope.cancel()
         launcherWidgetUpdateTriggers.unregister()
         deviceManagerInstance.shutdown()
         databaseManager.closeDatabase()

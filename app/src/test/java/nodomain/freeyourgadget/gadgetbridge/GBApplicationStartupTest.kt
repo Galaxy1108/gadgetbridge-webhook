@@ -133,8 +133,8 @@ class GBApplicationStartupTest : TestBase() {
     @Test
     fun onTerminateLeavesNoPreferenceListenersBehind() {
         val prefs = app.defaultSharedPreferences
-        // The theme listener and the launcher widget triggers
-        assertEquals(2, prefsListenerCount(prefs))
+        // The night mode updates, the theme settings flow and the launcher widget triggers
+        assertEquals(3, prefsListenerCount(prefs))
 
         app.onTerminate()
         assertEquals(0, prefsListenerCount(prefs))

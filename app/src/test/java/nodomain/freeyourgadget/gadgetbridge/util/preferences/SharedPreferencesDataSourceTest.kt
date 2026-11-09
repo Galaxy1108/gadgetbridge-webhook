@@ -52,8 +52,10 @@ class SharedPreferencesDataSourceTest : TestBase() {
 
     @Test
     fun editWritesToTheFile() {
+        assertFalse(dataSource.contains("key"))
         dataSource.edit(commit = true) { putString("key", "value") }
         assertEquals("value", sharedPreferences.getString("key", null))
+        assertTrue(dataSource.contains("key"))
 
         dataSource.edit { remove("key") }
         assertFalse(sharedPreferences.contains("key"))

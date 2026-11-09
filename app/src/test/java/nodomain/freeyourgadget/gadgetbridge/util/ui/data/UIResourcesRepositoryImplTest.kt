@@ -71,6 +71,57 @@ class UIResourcesRepositoryImplTest {
         sharedPreferences.edit(commit = true) { putString(GBApplication.PREF_ACCENT_COLOR, accentColor) }
     }
 
+    private fun newRepository() = UIResourcesRepositoryImpl(
+        context,
+        SharedPreferencesDataSource(sharedPreferences),
+        uiModeManager,
+        applicationScope,
+    )
+
+    @Test
+    fun themeSettingsStartFromTheStoredSettings() {
+        assertEquals(
+            ThemeSettings(AppTheme.SYSTEM, amoledBlack = false, accentColor = "red", contrastingSurfaces = null),
+            repository.themeSettings.value,
+        )
+
+        storeTheme(dark)
+        storeAmoledBlack(true)
+        storeAccentColor("teal")
+        sharedPreferences.edit(commit = true) { putBoolean(GBApplication.PREF_CONTRASTING_SURFACES, false) }
+
+        assertEquals(
+            ThemeSettings(AppTheme.DARK, amoledBlack = true, accentColor = "teal", contrastingSurfaces = false),
+            newRepository().themeSettings.value,
+        )
+    }
+
+    @Test
+    fun themeSettingsFollowEachThemeKey() {
+        storeTheme(dark)
+        assertEquals(AppTheme.DARK, repository.themeSettings.value.theme)
+
+        storeAmoledBlack(true)
+        assertTrue(repository.themeSettings.value.amoledBlack)
+
+        repository.setAccentColor("teal")
+        assertEquals("teal", repository.themeSettings.value.accentColor)
+
+        repository.setContrastingSurfacesEnabled(true)
+        assertEquals(true, repository.themeSettings.value.contrastingSurfaces)
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun themeSettingsFollowClearingThePreferences() {
+        storeTheme(dark)
+        assertEquals(AppTheme.DARK, repository.themeSettings.value.theme)
+
+        sharedPreferences.edit(commit = true) { clear() }
+
+        assertEquals(AppTheme.SYSTEM, repository.themeSettings.value.theme)
+    }
+
     @Test
     fun defaults() {
         assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())

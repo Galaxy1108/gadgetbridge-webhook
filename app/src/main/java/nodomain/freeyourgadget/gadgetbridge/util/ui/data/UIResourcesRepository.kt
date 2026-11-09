@@ -3,12 +3,19 @@ package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 import android.content.Context
 import androidx.annotation.MainThread
 import androidx.annotation.StyleRes
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * The user's UI preferences (theme, accent color, contrasting surfaces) and the theme, theme overlays and theme
  * dependent colors resolved from them.
  */
 interface UIResourcesRepository {
+    /**
+     * The current theme settings. Activities compare it with the settings they were themed with, to know when they
+     * have to be recreated.
+     */
+    val themeSettings: StateFlow<ThemeSettings>
+
     /**
      * The selected theme. Defaults to following the system.
      */

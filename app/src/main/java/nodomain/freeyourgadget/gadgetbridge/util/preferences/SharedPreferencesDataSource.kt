@@ -22,6 +22,8 @@ class SharedPreferencesDataSource(private val preferences: SharedPreferences) {
 
     fun getBoolean(key: String, defaultValue: Boolean): Boolean = prefs.getBoolean(key, defaultValue)
 
+    fun contains(key: String): Boolean = preferences.contains(key)
+
     /**
      * Applies the changes made by [action], asynchronously unless [commit] is true.
      */
