@@ -6030,4 +6030,6 @@
     <plurals name="permission_hint_missing">
         <item quantity="other">未授予权限：%1$s</item>
     </plurals>
+    <string name="voice_service_not_found">语音服务未找到，检查语音服务包和类</string>
+    <string name="voice_service_zepp_os_info">设好语音服务后，打开手表上的语音助手录制最长 14 秒的音频并将其发给那个应用而不是在手机上播放它。应用可用文本回复，文本会显示在手表上。</string>
 </resources>
