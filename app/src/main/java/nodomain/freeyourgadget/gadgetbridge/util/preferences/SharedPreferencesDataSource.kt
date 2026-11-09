@@ -2,6 +2,11 @@ package nodomain.freeyourgadget.gadgetbridge.util.preferences
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.callbackFlow
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs
 
 /**
@@ -25,13 +30,12 @@ class SharedPreferencesDataSource(private val preferences: SharedPreferences) {
     }
 
     /**
-     * The file only keeps a weak reference to [listener], so the caller must hold on to it.
+     * The keys that change while the flow is collected. A null key means that the file was cleared, which is only
+     * reported on Android 11 and later.
      */
-    fun registerChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
+    fun changedKeys(): Flow<String?> = callbackFlow {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> trySend(key) }
         preferences.registerOnSharedPreferenceChangeListener(listener)
-    }
-
-    fun unregisterChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
-        preferences.unregisterOnSharedPreferenceChangeListener(listener)
-    }
+        awaitClose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.buffer(Channel.UNLIMITED)
 }

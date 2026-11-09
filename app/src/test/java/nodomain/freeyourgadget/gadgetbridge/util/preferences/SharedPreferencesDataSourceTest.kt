@@ -3,6 +3,10 @@ package nodomain.freeyourgadget.gadgetbridge.util.preferences
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import nodomain.freeyourgadget.gadgetbridge.test.TestBase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -10,6 +14,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.robolectric.annotation.Config
 
 class SharedPreferencesDataSourceTest : TestBase() {
     private lateinit var sharedPreferences: SharedPreferences
@@ -55,15 +60,32 @@ class SharedPreferencesDataSourceTest : TestBase() {
     }
 
     @Test
-    fun onlyRegisteredListenersAreNotified() {
+    fun changedKeysOnlyEmitsWhileCollected() {
         val changedKeys = mutableListOf<String?>()
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> changedKeys.add(key) }
+        dataSource.edit(commit = true) { putString("before", "0") }
 
-        dataSource.registerChangeListener(listener)
+        val collection = dataSource.changedKeys()
+            .onEach { changedKeys.add(it) }
+            .launchIn(CoroutineScope(Dispatchers.Main.immediate))
         dataSource.edit(commit = true) { putString("first", "1") }
-        dataSource.unregisterChangeListener(listener)
-        dataSource.edit(commit = true) { putString("second", "2") }
+        dataSource.edit { putString("second", "2") }
+        collection.cancel()
+        dataSource.edit(commit = true) { putString("third", "3") }
 
-        assertEquals(listOf<String?>("first"), changedKeys)
+        assertEquals(listOf<String?>("first", "second"), changedKeys)
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun changedKeysEmitsNullWhenTheFileIsCleared() {
+        val changedKeys = mutableListOf<String?>()
+        val collection = dataSource.changedKeys()
+            .onEach { changedKeys.add(it) }
+            .launchIn(CoroutineScope(Dispatchers.Main.immediate))
+
+        dataSource.edit(commit = true) { clear() }
+        collection.cancel()
+
+        assertEquals(listOf<String?>(null), changedKeys)
     }
 }

@@ -5,12 +5,16 @@ import android.app.UiModeManager
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.SharedPreferencesDataSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +32,7 @@ class UIResourcesRepositoryImplTest {
     private lateinit var context: Context
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var uiModeManager: UiModeManager
+    private lateinit var applicationScope: CoroutineScope
     private lateinit var repository: UIResourcesRepositoryImpl
 
     private val light get() = context.getString(R.string.pref_theme_value_light)
@@ -41,7 +46,18 @@ class UIResourcesRepositoryImplTest {
         sharedPreferences = context.getSharedPreferences("ui_resources_test", Context.MODE_PRIVATE)
         sharedPreferences.edit(commit = true) { clear() }
         uiModeManager = mock(UiModeManager::class.java)
-        repository = UIResourcesRepositoryImpl(context, SharedPreferencesDataSource(sharedPreferences), uiModeManager)
+        applicationScope = CoroutineScope(Dispatchers.Main.immediate)
+        repository = UIResourcesRepositoryImpl(
+            context,
+            SharedPreferencesDataSource(sharedPreferences),
+            uiModeManager,
+            applicationScope,
+        )
+    }
+
+    @After
+    fun tearDown() {
+        applicationScope.cancel()
     }
 
     private fun storeTheme(theme: String) {
@@ -204,6 +220,30 @@ class UIResourcesRepositoryImplTest {
         repository.unregister()
         storeTheme(light)
         verify(uiModeManager, never()).setApplicationNightMode(UiModeManager.MODE_NIGHT_NO)
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun clearingThePreferencesUpdatesTheNightMode() {
+        repository.register()
+
+        sharedPreferences.edit(commit = true) { clear() }
+
+        verify(uiModeManager).setApplicationNightMode(UiModeManager.MODE_NIGHT_AUTO)
+        repository.unregister()
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun registerCanBeCalledAgainAfterUnregister() {
+        repository.register()
+        repository.unregister()
+        repository.register()
+
+        storeTheme(dark)
+
+        verify(uiModeManager).setApplicationNightMode(UiModeManager.MODE_NIGHT_YES)
+        repository.unregister()
     }
 
     @Test

@@ -2,17 +2,22 @@ package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
 import android.app.UiModeManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Build
 import android.util.TypedValue
 import androidx.annotation.StyleRes
 import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR_DEFAULT
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_CONTRASTING_SURFACES
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.di.ApplicationScope
 import nodomain.freeyourgadget.gadgetbridge.di.DefaultPrefs
 import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.SharedPreferencesDataSource
@@ -22,12 +27,9 @@ class UIResourcesRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     @DefaultPrefs private val dataSource: SharedPreferencesDataSource,
     private val uiModeManager: UiModeManager?,
+    @ApplicationScope private val applicationScope: CoroutineScope,
 ) : UIResourcesRepository {
-    private val themeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == PREF_THEME) {
-            updateApplicationNightMode()
-        }
-    }
+    private var themeChanges: Job? = null
 
     private val systemTheme: String
         get() = context.getString(R.string.pref_theme_value_system)
@@ -160,11 +162,16 @@ class UIResourcesRepositoryImpl @Inject constructor(
     }
 
     override fun register() {
-        dataSource.registerChangeListener(themeListener)
+        if (themeChanges?.isActive == true) return
+        themeChanges = dataSource.changedKeys()
+            .filter { it == PREF_THEME || it == null }
+            .onEach { updateApplicationNightMode() }
+            .launchIn(applicationScope)
     }
 
     override fun unregister() {
-        dataSource.unregisterChangeListener(themeListener)
+        themeChanges?.cancel()
+        themeChanges = null
     }
 
     private companion object {

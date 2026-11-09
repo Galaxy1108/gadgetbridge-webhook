@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
 import android.content.Context
+import androidx.annotation.MainThread
 import androidx.annotation.StyleRes
 
 /**
@@ -60,12 +61,15 @@ interface UIResourcesRepository {
     fun getWindowBackgroundColor(context: Context): Int
 
     /**
-     * Starts updating the application night mode whenever the selected theme changes.
+     * Starts updating the application night mode whenever the selected theme changes. Does nothing if already
+     * registered.
      */
+    @MainThread
     fun register()
 
     /**
      * Stops updating the application night mode. Does nothing if not registered.
      */
+    @MainThread
     fun unregister()
 }
