@@ -1,7 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
 /**
- * The themes that the user can select.
+ * The themes that the user can select, in the order that they are offered.
  *
  * @property value the stored preference value, which must match `R.array.pref_theme_values`
  */

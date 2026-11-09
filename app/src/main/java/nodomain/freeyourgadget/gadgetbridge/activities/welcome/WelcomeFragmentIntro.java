@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
@@ -33,22 +34,15 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-
-import javax.inject.Inject;
+import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme;
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository;
 
 @AndroidEntryPoint
 public class WelcomeFragmentIntro extends Fragment {
     private static final Logger LOG = LoggerFactory.getLogger(WelcomeFragmentIntro.class);
-
-    @Inject
-    UIResourcesRepository uiResources;
 
     @Nullable
     @Override
@@ -56,15 +50,16 @@ public class WelcomeFragmentIntro extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
 
         final View view = inflater.inflate(R.layout.fragment_welcome_intro, container, false);
-        final String[] themes = getResources().getStringArray(R.array.pref_theme_values);
-        final String currentTheme = uiResources.getSelectedTheme().getValue();
-        final int currentThemeIndex = Arrays.asList(themes).indexOf(currentTheme);
+        final WelcomeIntroViewModel viewModel = new ViewModelProvider(this).get(WelcomeIntroViewModel.class);
+        final WelcomeIntroUiState uiState = viewModel.getUiState().getValue();
+        final List<ThemeOption> themes = uiState.getThemes();
 
         final MaterialAutoCompleteTextView themeMenu = view.findViewById(R.id.app_theme_dropdown_menu);
         themeMenu.setSaveEnabled(false);  // https://github.com/material-components/material-components-android/issues/1464#issuecomment-1258051448
-        themeMenu.setText(getResources().getStringArray(R.array.pref_theme_options)[currentThemeIndex], false);
+        themeMenu.setSimpleItems(themes.stream().map(theme -> getString(theme.getLabelRes())).toArray(String[]::new));
+        themeMenu.setText(getString(uiState.getSelectedTheme().getLabelRes()), false);
         themeMenu.setOnItemClickListener((adapterView, view1, i, l) -> {
-            uiResources.setSelectedTheme(AppTheme.fromValue(themes[i]));
+            viewModel.onThemeSelected(themes.get(i));
             final Handler handler = new Handler();
             handler.postDelayed(() -> {
                 // Delay recreation of the Activity to give the dropdown some time to settle.

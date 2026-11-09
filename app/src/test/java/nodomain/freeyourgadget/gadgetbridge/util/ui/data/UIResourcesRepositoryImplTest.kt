@@ -114,6 +114,11 @@ class UIResourcesRepositoryImplTest {
     }
 
     @Test
+    fun allThemesAreAvailable() {
+        assertEquals(AppTheme.entries, repository.getAvailableThemes())
+    }
+
+    @Test
     fun unknownStoredThemeFollowsTheSystem() {
         storeTheme("unknown")
         assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())

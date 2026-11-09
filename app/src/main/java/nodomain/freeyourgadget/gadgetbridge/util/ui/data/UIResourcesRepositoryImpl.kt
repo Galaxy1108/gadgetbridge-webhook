@@ -37,6 +37,8 @@ class UIResourcesRepositoryImpl @Inject constructor(
         dataSource.edit { putString(PREF_THEME, theme.value) }
     }
 
+    override fun getAvailableThemes(): List<AppTheme> = AppTheme.entries
+
     override fun isAmoledBlackEnabled(): Boolean = dataSource.getBoolean(PREF_AMOLED_BLACK, false)
 
     override fun getAccentColor(): String =

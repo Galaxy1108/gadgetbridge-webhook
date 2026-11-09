@@ -16,6 +16,11 @@ interface UIResourcesRepository {
 
     fun setSelectedTheme(theme: AppTheme)
 
+    /**
+     * The themes that the user can select, in the order that they are offered.
+     */
+    fun getAvailableThemes(): List<AppTheme>
+
     fun isAmoledBlackEnabled(): Boolean
 
     /**
