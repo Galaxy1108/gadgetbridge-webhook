@@ -179,42 +179,6 @@ class UIResourcesRepositoryImplTest {
     }
 
     @Test
-    fun accentColorOverlayFallsBackToRed() {
-        assertEquals(R.style.ThemeOverlay_App_Accent_Red_Light, repository.getAccentColorOverlay(false))
-
-        storeAccentColor("teal")
-        assertEquals(R.style.ThemeOverlay_App_Accent_Teal_Dark, repository.getAccentColorOverlay(true))
-        assertEquals(R.style.ThemeOverlay_App_Accent_Teal_Light, repository.getAccentColorOverlay(false))
-
-        storeAccentColor("white")
-        assertEquals(R.style.ThemeOverlay_App_Accent_White_Dark, repository.getAccentColorOverlay(true))
-
-        storeAccentColor("unknown")
-        assertEquals(R.style.ThemeOverlay_App_Accent_Red_Dark, repository.getAccentColorOverlay(true))
-
-        storeAccentColor("")
-        assertEquals(R.style.ThemeOverlay_App_Accent_Red_Light, repository.getAccentColorOverlay(false))
-    }
-
-    @Test
-    fun contrastingSurfacesOverlay() {
-        storeTheme(dark)
-        assertEquals(R.style.ThemeOverlay_App_ContrastingSurfaces_Light, repository.getContrastingSurfacesOverlay(false))
-        assertEquals(R.style.ThemeOverlay_App_ContrastingSurfaces_Dark, repository.getContrastingSurfacesOverlay(true))
-
-        storeAmoledBlack(true)
-        assertEquals(R.style.ThemeOverlay_App_ContrastingSurfaces_Light, repository.getContrastingSurfacesOverlay(false))
-        assertEquals(R.style.ThemeOverlay_App_ContrastingSurfaces_Black, repository.getContrastingSurfacesOverlay(true))
-
-        storeTheme(dynamic)
-        assertEquals(R.style.ThemeOverlay_App_ContrastingSurfaces_Dynamic, repository.getContrastingSurfacesOverlay(false))
-        assertEquals(R.style.ThemeOverlay_App_ContrastingSurfaces_Dynamic_Black, repository.getContrastingSurfacesOverlay(true))
-
-        storeAmoledBlack(false)
-        assertEquals(R.style.ThemeOverlay_App_ContrastingSurfaces_Dynamic, repository.getContrastingSurfacesOverlay(true))
-    }
-
-    @Test
     fun dynamicColorsFollowTheSelectedTheme() {
         assertFalse(repository.areDynamicColorsEnabled())
 

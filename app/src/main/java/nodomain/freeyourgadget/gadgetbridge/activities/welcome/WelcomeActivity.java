@@ -37,7 +37,6 @@ public class WelcomeActivity extends AbstractGBActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        AbstractGBActivity.init(this, AbstractGBActivity.NO_ACTIONBAR);
         super.onCreate(savedInstanceState);
         final ActivityWelcomeBinding binding = ActivityWelcomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

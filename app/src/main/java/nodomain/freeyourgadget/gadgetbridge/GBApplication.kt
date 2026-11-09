@@ -37,7 +37,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
 import android.view.WindowManager
-import androidx.annotation.StyleRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -434,7 +433,6 @@ open class GBApplication : Application() {
 
         const val ACTION_QUIT = "nodomain.freeyourgadget.gadgetbridge.gbapplication.action.quit"
         const val ACTION_LANGUAGE_CHANGE = "nodomain.freeyourgadget.gadgetbridge.gbapplication.action.language_change"
-        const val ACTION_THEME_CHANGE = "nodomain.freeyourgadget.gadgetbridge.gbapplication.action.theme_change"
         const val ACTION_NEW_DATA = "nodomain.freeyourgadget.gadgetbridge.action.new_data"
         const val ACTION_APP_IS_IN_FOREGROUND = "nodomain.freeyourgadget.gadgetbridge.action.app_foreground"
         const val ACTION_APP_IS_IN_BACKGROUND = "nodomain.freeyourgadget.gadgetbridge.action.app_background"
@@ -653,30 +651,7 @@ open class GBApplication : Application() {
 
         @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
         @JvmStatic
-        fun isAmoledBlackEnabled(): Boolean = app().uiResources.isAmoledBlackEnabled()
-
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
-        @JvmStatic
         fun areDynamicColorsEnabled(): Boolean = app().uiResources.areDynamicColorsEnabled()
-
-        /**
-         * @see UIResourcesRepository.getAccentColorOverlay
-         */
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
-        @JvmStatic
-        @StyleRes
-        fun getAccentColorOverlay(dark: Boolean): Int = app().uiResources.getAccentColorOverlay(dark)
-
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
-        @JvmStatic
-        fun areContrastingSurfacesEnabled(dark: Boolean): Boolean =
-            app().uiResources.areContrastingSurfacesEnabled(dark)
-
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
-        @JvmStatic
-        @StyleRes
-        fun getContrastingSurfacesOverlay(dark: Boolean): Int =
-            app().uiResources.getContrastingSurfacesOverlay(dark)
 
         @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
         @JvmStatic

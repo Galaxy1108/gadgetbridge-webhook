@@ -2,12 +2,11 @@ package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
 import android.content.Context
 import androidx.annotation.MainThread
-import androidx.annotation.StyleRes
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * The user's UI preferences (theme, accent color, contrasting surfaces) and the theme, theme overlays and theme
- * dependent colors resolved from them.
+ * The user's UI preferences (theme, accent color, contrasting surfaces) and the theme dependent colors resolved from
+ * them.
  */
 interface UIResourcesRepository {
     /**
@@ -44,6 +43,10 @@ interface UIResourcesRepository {
 
     fun setContrastingSurfacesEnabled(enabled: Boolean)
 
+    /**
+     * Whether the selected theme comes out dark under the application configuration. Activities use
+     * [ThemeSettings.isDark] with their own configuration instead.
+     */
     fun isDarkThemeEnabled(): Boolean
 
     fun areDynamicColorsEnabled(): Boolean
@@ -52,17 +55,6 @@ interface UIResourcesRepository {
      * Ensures the splash screen follows the theme preference, if manually set to light or dark.
      */
     fun updateApplicationNightMode()
-
-    /**
-     * The ThemeOverlay for the user's chosen accent color preset (Settings > User interface).
-     * Not meaningful when [areDynamicColorsEnabled] is true - callers should skip
-     * applying it in that case, since Dynamic Color already ties these colors to the wallpaper.
-     */
-    @StyleRes
-    fun getAccentColorOverlay(dark: Boolean): Int
-
-    @StyleRes
-    fun getContrastingSurfacesOverlay(dark: Boolean): Int
 
     fun getTextColor(context: Context): Int
 

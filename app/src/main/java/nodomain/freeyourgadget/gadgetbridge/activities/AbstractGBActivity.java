@@ -23,13 +23,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -63,9 +61,6 @@ public abstract class AbstractGBActivity extends AppCompatActivity implements GB
                 case GBApplication.ACTION_LANGUAGE_CHANGE:
                     setLanguage(GBApplication.getLanguage(), true);
                     break;
-                case GBApplication.ACTION_THEME_CHANGE:
-                    recreate();
-                    break;
                 case GBApplication.ACTION_QUIT:
                     finish();
                     break;
@@ -85,67 +80,13 @@ public abstract class AbstractGBActivity extends AppCompatActivity implements GB
         init(activity, NONE);
     }
 
-    @StyleRes
-    public static int getThemeResource(final int flags, final boolean dark) {
-        if (GBApplication.areDynamicColorsEnabled()) {
-            if (dark) {
-                if ((flags & NO_ACTIONBAR) != 0) {
-                    if (GBApplication.isAmoledBlackEnabled())
-                        return R.style.GadgetbridgeThemeDynamicDarkAmoled_NoActionBar;
-                    else
-                        return R.style.GadgetbridgeThemeDynamicDark_NoActionBar;
-                } else {
-                    if (GBApplication.isAmoledBlackEnabled())
-                        return R.style.GadgetbridgeThemeDynamicDarkAmoled;
-                    else
-                        return R.style.GadgetbridgeThemeDynamicDark;
-                }
-            } else {
-                if ((flags & NO_ACTIONBAR) != 0) {
-                    return R.style.GadgetbridgeThemeDynamicLight_NoActionBar;
-                } else {
-                    return R.style.GadgetbridgeThemeDynamicLight;
-                }
-            }
-        } else if (dark) {
-            if ((flags & NO_ACTIONBAR) != 0) {
-                if (GBApplication.isAmoledBlackEnabled())
-                    return R.style.GadgetbridgeThemeBlack_NoActionBar;
-                else
-                    return R.style.GadgetbridgeThemeDark_NoActionBar;
-            } else {
-                if (GBApplication.isAmoledBlackEnabled())
-                    return R.style.GadgetbridgeThemeBlack;
-                else
-                    return R.style.GadgetbridgeThemeDark;
-            }
-        } else {
-            if ((flags & NO_ACTIONBAR) != 0) {
-                return R.style.GadgetbridgeTheme_NoActionBar;
-            } else {
-                return R.style.GadgetbridgeTheme;
-            }
-        }
-    }
-
-    public static void applyThemeOverlays(final Resources.Theme theme, final boolean dark) {
-        // Dynamic Color already ties tab/button/chip colors to the wallpaper palette, so the
-        // user's chosen accent preset only applies to the static Light/Dark themes.
-        if (!GBApplication.areDynamicColorsEnabled()) {
-            theme.applyStyle(GBApplication.getAccentColorOverlay(dark), true);
-        }
-        if (GBApplication.areContrastingSurfacesEnabled(dark)) {
-            theme.applyStyle(GBApplication.getContrastingSurfacesOverlay(dark), true);
-        }
-    }
-
+    /**
+     * Applies the theme and the language. Call it in {@code onCreate}, before {@code super.onCreate}.
+     *
+     * @param activity an {@link Activity}
+     */
     public static void init(GBActivity activity, int flags) {
-        final boolean dark = GBApplication.isDarkThemeEnabled();
-        activity.setTheme(getThemeResource(flags, dark));
-        if (activity instanceof Activity) {
-            applyThemeOverlays(((Activity) activity).getTheme(), dark);
-        }
-
+        ActivityTheme.apply((Activity) activity, (flags & NO_ACTIONBAR) != 0);
         activity.setLanguage(GBApplication.getLanguage(), false);
     }
 
@@ -154,7 +95,6 @@ public abstract class AbstractGBActivity extends AppCompatActivity implements GB
         IntentFilter filterLocal = new IntentFilter();
         filterLocal.addAction(GBApplication.ACTION_QUIT);
         filterLocal.addAction(GBApplication.ACTION_LANGUAGE_CHANGE);
-        filterLocal.addAction(GBApplication.ACTION_THEME_CHANGE);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filterLocal);
 
         init(this);

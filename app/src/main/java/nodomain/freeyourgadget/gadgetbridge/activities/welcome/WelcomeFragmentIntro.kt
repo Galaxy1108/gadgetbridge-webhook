@@ -16,19 +16,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.activities.welcome
 
-import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import dagger.hilt.android.AndroidEntryPoint
-import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 
 @AndroidEntryPoint
@@ -46,17 +41,7 @@ class WelcomeFragmentIntro : Fragment() {
         themeMenu.setText(getString(uiState.selectedTheme.labelRes), false)
         themeMenu.setOnItemClickListener { _, _, position, _ ->
             viewModel.onThemeSelected(themes[position])
-            // Delay recreation of the Activity to give the dropdown some time to settle.
-            // If we recreate it immediately, the theme popup will reopen, which is not what the user expects.
-            Handler(Looper.getMainLooper()).postDelayed({
-                LocalBroadcastManager.getInstance(GBApplication.getContext())
-                    .sendBroadcast(Intent(GBApplication.ACTION_THEME_CHANGE))
-            }, THEME_CHANGE_DELAY_MILLIS)
         }
         return view
-    }
-
-    private companion object {
-        const val THEME_CHANGE_DELAY_MILLIS = 500L
     }
 }

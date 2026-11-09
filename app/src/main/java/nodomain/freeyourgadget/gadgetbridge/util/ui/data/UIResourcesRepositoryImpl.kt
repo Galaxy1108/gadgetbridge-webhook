@@ -2,10 +2,8 @@ package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
 import android.app.UiModeManager
 import android.content.Context
-import android.content.res.Configuration
 import android.os.Build
 import android.util.TypedValue
-import androidx.annotation.StyleRes
 import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -69,23 +67,13 @@ class UIResourcesRepositoryImpl @Inject constructor(
     }
 
     override fun areContrastingSurfacesEnabled(dark: Boolean): Boolean =
-        dataSource.getBoolean(PREF_CONTRASTING_SURFACES, dark)
+        readThemeSettings().areContrastingSurfacesEnabled(dark)
 
     override fun setContrastingSurfacesEnabled(enabled: Boolean) {
         dataSource.edit { putBoolean(PREF_CONTRASTING_SURFACES, enabled) }
     }
 
-    override fun isDarkThemeEnabled(): Boolean {
-        val selectedTheme = getSelectedTheme()
-
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-            (selectedTheme == AppTheme.SYSTEM || selectedTheme == AppTheme.DYNAMIC)
-        ) {
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        } else {
-            selectedTheme == AppTheme.DARK
-        }
-    }
+    override fun isDarkThemeEnabled(): Boolean = readThemeSettings().isDark(context.resources.configuration)
 
     override fun updateApplicationNightMode() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
@@ -108,43 +96,6 @@ class UIResourcesRepositoryImpl @Inject constructor(
      */
     private fun isDynamicColorActive(): Boolean {
         return DynamicColors.isDynamicColorAvailable() && areDynamicColorsEnabled()
-    }
-
-    @StyleRes
-    override fun getAccentColorOverlay(dark: Boolean): Int {
-        return when (getAccentColor()) {
-            "coral" -> if (dark) R.style.ThemeOverlay_App_Accent_Coral_Dark else R.style.ThemeOverlay_App_Accent_Coral_Light
-            "orange" -> if (dark) R.style.ThemeOverlay_App_Accent_Orange_Dark else R.style.ThemeOverlay_App_Accent_Orange_Light
-            "amber" -> if (dark) R.style.ThemeOverlay_App_Accent_Amber_Dark else R.style.ThemeOverlay_App_Accent_Amber_Light
-            "lime" -> if (dark) R.style.ThemeOverlay_App_Accent_Lime_Dark else R.style.ThemeOverlay_App_Accent_Lime_Light
-            "green" -> if (dark) R.style.ThemeOverlay_App_Accent_Green_Dark else R.style.ThemeOverlay_App_Accent_Green_Light
-            "teal" -> if (dark) R.style.ThemeOverlay_App_Accent_Teal_Dark else R.style.ThemeOverlay_App_Accent_Teal_Light
-            "cyan" -> if (dark) R.style.ThemeOverlay_App_Accent_Cyan_Dark else R.style.ThemeOverlay_App_Accent_Cyan_Light
-            "blue" -> if (dark) R.style.ThemeOverlay_App_Accent_Blue_Dark else R.style.ThemeOverlay_App_Accent_Blue_Light
-            "indigo" -> if (dark) R.style.ThemeOverlay_App_Accent_Indigo_Dark else R.style.ThemeOverlay_App_Accent_Indigo_Light
-            "violet" -> if (dark) R.style.ThemeOverlay_App_Accent_Violet_Dark else R.style.ThemeOverlay_App_Accent_Violet_Light
-            "pink" -> if (dark) R.style.ThemeOverlay_App_Accent_Pink_Dark else R.style.ThemeOverlay_App_Accent_Pink_Light
-            "white" -> if (dark) R.style.ThemeOverlay_App_Accent_White_Dark else R.style.ThemeOverlay_App_Accent_White_Light
-            else -> if (dark) R.style.ThemeOverlay_App_Accent_Red_Dark else R.style.ThemeOverlay_App_Accent_Red_Light
-        }
-    }
-
-    @StyleRes
-    override fun getContrastingSurfacesOverlay(dark: Boolean): Int {
-        if (areDynamicColorsEnabled()) {
-            if (dark && isAmoledBlackEnabled()) {
-                return R.style.ThemeOverlay_App_ContrastingSurfaces_Dynamic_Black
-            }
-            return R.style.ThemeOverlay_App_ContrastingSurfaces_Dynamic
-        }
-        if (!dark) {
-            return R.style.ThemeOverlay_App_ContrastingSurfaces_Light
-        }
-        return if (isAmoledBlackEnabled()) {
-            R.style.ThemeOverlay_App_ContrastingSurfaces_Black
-        } else {
-            R.style.ThemeOverlay_App_ContrastingSurfaces_Dark
-        }
     }
 
     override fun getTextColor(context: Context): Int {

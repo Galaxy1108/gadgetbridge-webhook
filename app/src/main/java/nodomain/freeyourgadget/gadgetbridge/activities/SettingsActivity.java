@@ -36,7 +36,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -151,7 +150,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
         @Inject
         UIResourcesRepository uiResources;
 
-        /** Must stay in sync with GBApplication#getAccentColorOverlay(boolean) and the ThemeOverlay.App.Accent.* styles. */
+        /** Must stay in sync with ThemeStyles#accentColorOverlay and the ThemeOverlay.App.Accent.* styles. */
         private static final String[] ACCENT_COLOR_KEYS = {
                 "red", "coral", "orange", "amber", "lime", "green",
                 "teal", "cyan", "blue", "indigo", "violet", "pink", "white",
@@ -298,21 +297,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                                 GB.ERROR,
                                 ex);
                     }
-                    return true;
-                });
-            }
-
-            pref = findPreference("display_add_device_fab");
-            if (pref != null) {
-                pref.setOnPreferenceChangeListener((preference, newValue) -> {
-                    sendThemeChangeIntent();
-                    return true;
-                });
-            }
-            pref = findPreference("display_bottom_navigation_bar");
-            if (pref != null) {
-                pref.setOnPreferenceChangeListener((preference, newVal) -> {
-                    sendThemeChangeIntent();
                     return true;
                 });
             }
@@ -556,13 +540,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                     amoled_black.setEnabled(false);
                 else
                     amoled_black.setEnabled(true);
-                amoled_black.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                    @Override
-                    public boolean onPreferenceChange(Preference preference, Object newVal) {
-                        sendThemeChangeIntent();
-                        return true;
-                    }
-                });
             }
 
             if (accentColor != null) {
@@ -578,7 +555,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 contrastingSurfaces.setChecked(uiResources.areContrastingSurfacesEnabled(uiResources.isDarkThemeEnabled()));
                 contrastingSurfaces.setOnPreferenceChangeListener((preference, newVal) -> {
                     uiResources.setContrastingSurfacesEnabled((Boolean) newVal);
-                    sendThemeChangeIntent();
                     return true;
                 });
             }
@@ -588,6 +564,18 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newVal) {
                         final AppTheme val = AppTheme.fromValue(newVal.toString());
+                        // Warn user if dynamic colors are not available, and only apply the theme once they confirm.
+                        // Storing it now would recreate the activity and dismiss the warning.
+                        if (val == AppTheme.DYNAMIC && !DynamicColors.isDynamicColorAvailable()) {
+                            new MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle(R.string.warning)
+                                    .setMessage(R.string.pref_theme_dynamic_colors_not_available_warning)
+                                    .setIcon(R.drawable.ic_warning)
+                                    .setPositiveButton(R.string.ok, (dialog, whichButton) ->
+                                            uiResources.setSelectedTheme(AppTheme.DYNAMIC))
+                                    .show();
+                            return false;
+                        }
                         if (amoled_black != null) {
                             if (val == AppTheme.LIGHT)
                                 amoled_black.setEnabled(false);
@@ -600,19 +588,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                                 uiResources.setAccentColor(GBApplication.PREF_ACCENT_COLOR_DEFAULT);
                             }
                             updateAccentColorSummary(accentColor);
-                        }
-                        // Warn user if dynamic colors are not available
-                        if (val == AppTheme.DYNAMIC && !DynamicColors.isDynamicColorAvailable()) {
-                            new MaterialAlertDialogBuilder(requireContext())
-                                    .setTitle(R.string.warning)
-                                    .setMessage(R.string.pref_theme_dynamic_colors_not_available_warning)
-                                    .setIcon(R.drawable.ic_warning)
-                                    .setPositiveButton(R.string.ok, (dialog, whichButton) -> {
-                                        sendThemeChangeIntent();
-                                    })
-                                    .show();
-                        } else {
-                            sendThemeChangeIntent();
                         }
                         return true;
                     }
@@ -719,15 +694,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                     .apply();
         }
 
-        /**
-         * Signal running activities that the theme has changed
-         */
-        private void sendThemeChangeIntent() {
-            Intent intent = new Intent();
-            intent.setAction(GBApplication.ACTION_THEME_CHANGE);
-            LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(intent);
-        }
-
         private void showAccentColorPicker(final Preference accentColor) {
             final int[] allSwatches = accentColorSwatches();
             final List<String> keys = new ArrayList<>();
@@ -768,7 +734,6 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                     }
                     uiResources.setAccentColor(keys.get(index));
                     updateAccentColorSummary(accentColor);
-                    sendThemeChangeIntent();
                 }
 
                 @Override
