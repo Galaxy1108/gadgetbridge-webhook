@@ -14,61 +14,49 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.activities.welcome;
+package nodomain.freeyourgadget.gadgetbridge.activities.welcome
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import com.google.android.material.textfield.MaterialAutoCompleteTextView;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
-import dagger.hilt.android.AndroidEntryPoint;
-import nodomain.freeyourgadget.gadgetbridge.GBApplication;
-import nodomain.freeyourgadget.gadgetbridge.R;
+import android.content.Intent
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import dagger.hilt.android.AndroidEntryPoint
+import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import nodomain.freeyourgadget.gadgetbridge.R
 
 @AndroidEntryPoint
-public class WelcomeFragmentIntro extends Fragment {
-    private static final Logger LOG = LoggerFactory.getLogger(WelcomeFragmentIntro.class);
+class WelcomeFragmentIntro : Fragment() {
+    private val viewModel: WelcomeIntroViewModel by viewModels()
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_welcome_intro, container, false)
+        val uiState = viewModel.uiState.value
+        val themes = uiState.themes
 
-        final View view = inflater.inflate(R.layout.fragment_welcome_intro, container, false);
-        final WelcomeIntroViewModel viewModel = new ViewModelProvider(this).get(WelcomeIntroViewModel.class);
-        final WelcomeIntroUiState uiState = viewModel.getUiState().getValue();
-        final List<ThemeOption> themes = uiState.getThemes();
+        val themeMenu = view.findViewById<MaterialAutoCompleteTextView>(R.id.app_theme_dropdown_menu)
+        themeMenu.isSaveEnabled = false // https://github.com/material-components/material-components-android/issues/1464#issuecomment-1258051448
+        themeMenu.setSimpleItems(themes.map { getString(it.labelRes) }.toTypedArray())
+        themeMenu.setText(getString(uiState.selectedTheme.labelRes), false)
+        themeMenu.setOnItemClickListener { _, _, position, _ ->
+            viewModel.onThemeSelected(themes[position])
+            // Delay recreation of the Activity to give the dropdown some time to settle.
+            // If we recreate it immediately, the theme popup will reopen, which is not what the user expects.
+            Handler(Looper.getMainLooper()).postDelayed({
+                LocalBroadcastManager.getInstance(GBApplication.getContext())
+                    .sendBroadcast(Intent(GBApplication.ACTION_THEME_CHANGE))
+            }, THEME_CHANGE_DELAY_MILLIS)
+        }
+        return view
+    }
 
-        final MaterialAutoCompleteTextView themeMenu = view.findViewById(R.id.app_theme_dropdown_menu);
-        themeMenu.setSaveEnabled(false);  // https://github.com/material-components/material-components-android/issues/1464#issuecomment-1258051448
-        themeMenu.setSimpleItems(themes.stream().map(theme -> getString(theme.getLabelRes())).toArray(String[]::new));
-        themeMenu.setText(getString(uiState.getSelectedTheme().getLabelRes()), false);
-        themeMenu.setOnItemClickListener((adapterView, view1, i, l) -> {
-            viewModel.onThemeSelected(themes.get(i));
-            final Handler handler = new Handler();
-            handler.postDelayed(() -> {
-                // Delay recreation of the Activity to give the dropdown some time to settle.
-                // If we recreate it immediately, the theme popup will reopen, which is not what the user expects.
-                final Intent intent = new Intent();
-                intent.setAction(GBApplication.ACTION_THEME_CHANGE);
-                LocalBroadcastManager.getInstance(GBApplication.getContext()).sendBroadcast(intent);
-            }, 500);
-        });
-        return view;
+    private companion object {
+        const val THEME_CHANGE_DELAY_MILLIS = 500L
     }
 }
