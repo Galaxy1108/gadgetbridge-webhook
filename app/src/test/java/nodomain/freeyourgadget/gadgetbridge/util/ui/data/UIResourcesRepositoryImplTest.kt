@@ -37,7 +37,6 @@ class UIResourcesRepositoryImplTest {
 
     private val light get() = context.getString(R.string.pref_theme_value_light)
     private val dark get() = context.getString(R.string.pref_theme_value_dark)
-    private val system get() = context.getString(R.string.pref_theme_value_system)
     private val dynamic get() = context.getString(R.string.pref_theme_value_dynamic)
 
     @Before
@@ -74,7 +73,7 @@ class UIResourcesRepositoryImplTest {
 
     @Test
     fun defaults() {
-        assertEquals(system, repository.getSelectedTheme())
+        assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())
         assertFalse(repository.isAmoledBlackEnabled())
         assertEquals(GBApplication.PREF_ACCENT_COLOR_DEFAULT, repository.getAccentColor())
         // Contrasting surfaces default to on for the dark theme only
@@ -84,7 +83,7 @@ class UIResourcesRepositoryImplTest {
 
     @Test
     fun settersWriteTheirKeys() {
-        repository.setSelectedTheme(dark)
+        repository.setSelectedTheme(AppTheme.DARK)
         repository.setAccentColor("teal")
         repository.setContrastingSurfacesEnabled(false)
 
@@ -92,7 +91,7 @@ class UIResourcesRepositoryImplTest {
         assertEquals("teal", sharedPreferences.getString(GBApplication.PREF_ACCENT_COLOR, null))
         assertFalse(sharedPreferences.getBoolean(GBApplication.PREF_CONTRASTING_SURFACES, true))
 
-        assertEquals(dark, repository.getSelectedTheme())
+        assertEquals(AppTheme.DARK, repository.getSelectedTheme())
         assertEquals("teal", repository.getAccentColor())
         assertFalse(repository.areContrastingSurfacesEnabled(true))
     }
@@ -104,6 +103,23 @@ class UIResourcesRepositoryImplTest {
 
         assertTrue(repository.isAmoledBlackEnabled())
         assertTrue(repository.areContrastingSurfacesEnabled(false))
+    }
+
+    @Test
+    fun themeValuesMatchThePreferenceEntries() {
+        assertEquals(
+            context.resources.getStringArray(R.array.pref_theme_values).toList(),
+            AppTheme.entries.map { it.value },
+        )
+    }
+
+    @Test
+    fun unknownStoredThemeFollowsTheSystem() {
+        storeTheme("unknown")
+        assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())
+
+        storeTheme("")
+        assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())
     }
 
     @Test

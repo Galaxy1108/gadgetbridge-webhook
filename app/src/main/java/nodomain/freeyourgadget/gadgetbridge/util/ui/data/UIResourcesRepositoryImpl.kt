@@ -31,13 +31,10 @@ class UIResourcesRepositoryImpl @Inject constructor(
 ) : UIResourcesRepository {
     private var themeChanges: Job? = null
 
-    private val systemTheme: String
-        get() = context.getString(R.string.pref_theme_value_system)
+    override fun getSelectedTheme(): AppTheme = AppTheme.fromValue(dataSource.getString(PREF_THEME, null))
 
-    override fun getSelectedTheme(): String = dataSource.getString(PREF_THEME, systemTheme) ?: systemTheme
-
-    override fun setSelectedTheme(theme: String) {
-        dataSource.edit { putString(PREF_THEME, theme) }
+    override fun setSelectedTheme(theme: AppTheme) {
+        dataSource.edit { putString(PREF_THEME, theme.value) }
     }
 
     override fun isAmoledBlackEnabled(): Boolean = dataSource.getBoolean(PREF_AMOLED_BLACK, false)
@@ -60,12 +57,11 @@ class UIResourcesRepositoryImpl @Inject constructor(
         val selectedTheme = getSelectedTheme()
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-            (selectedTheme == context.getString(R.string.pref_theme_value_system) ||
-                selectedTheme == context.getString(R.string.pref_theme_value_dynamic))
+            (selectedTheme == AppTheme.SYSTEM || selectedTheme == AppTheme.DYNAMIC)
         ) {
             (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         } else {
-            selectedTheme == context.getString(R.string.pref_theme_value_dark)
+            selectedTheme == AppTheme.DARK
         }
     }
 
@@ -74,15 +70,15 @@ class UIResourcesRepositoryImpl @Inject constructor(
             return
         }
         val nightMode = when (getSelectedTheme()) {
-            context.getString(R.string.pref_theme_value_light) -> UiModeManager.MODE_NIGHT_NO
-            context.getString(R.string.pref_theme_value_dark) -> UiModeManager.MODE_NIGHT_YES
-            else -> UiModeManager.MODE_NIGHT_AUTO
+            AppTheme.LIGHT -> UiModeManager.MODE_NIGHT_NO
+            AppTheme.DARK -> UiModeManager.MODE_NIGHT_YES
+            AppTheme.SYSTEM, AppTheme.DYNAMIC -> UiModeManager.MODE_NIGHT_AUTO
         }
         uiModeManager?.setApplicationNightMode(nightMode)
     }
 
     override fun areDynamicColorsEnabled(): Boolean {
-        return getSelectedTheme() == context.getString(R.string.pref_theme_value_dynamic)
+        return getSelectedTheme() == AppTheme.DYNAMIC
     }
 
     /**

@@ -84,6 +84,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs;
 import nodomain.freeyourgadget.gadgetbridge.util.NotificationUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.SubtitleListPreference;
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme;
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository;
 
 @AndroidEntryPoint
@@ -551,8 +552,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             final SwitchPreferenceCompat contrastingSurfaces = findPreference(GBApplication.PREF_CONTRASTING_SURFACES);
 
             if (amoled_black != null) {
-                String selectedTheme = uiResources.getSelectedTheme();
-                if (selectedTheme.equals("light"))
+                if (uiResources.getSelectedTheme() == AppTheme.LIGHT)
                     amoled_black.setEnabled(false);
                 else
                     amoled_black.setEnabled(true);
@@ -587,22 +587,22 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 theme.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newVal) {
-                        final String val = newVal.toString();
+                        final AppTheme val = AppTheme.fromValue(newVal.toString());
                         if (amoled_black != null) {
-                            if (val.equals("light"))
+                            if (val == AppTheme.LIGHT)
                                 amoled_black.setEnabled(false);
                             else
                                 amoled_black.setEnabled(true);
                         }
                         if (accentColor != null) {
-                            accentColor.setEnabled(!val.equals(requireContext().getString(R.string.pref_theme_value_dynamic)));
-                            if (val.equals("light") && "white".equals(uiResources.getAccentColor())) {
+                            accentColor.setEnabled(val != AppTheme.DYNAMIC);
+                            if (val == AppTheme.LIGHT && "white".equals(uiResources.getAccentColor())) {
                                 uiResources.setAccentColor(GBApplication.PREF_ACCENT_COLOR_DEFAULT);
                             }
                             updateAccentColorSummary(accentColor);
                         }
                         // Warn user if dynamic colors are not available
-                        if (val.equals(requireContext().getString(R.string.pref_theme_value_dynamic)) && !DynamicColors.isDynamicColorAvailable()) {
+                        if (val == AppTheme.DYNAMIC && !DynamicColors.isDynamicColorAvailable()) {
                             new MaterialAlertDialogBuilder(requireContext())
                                     .setTitle(R.string.warning)
                                     .setMessage(R.string.pref_theme_dynamic_colors_not_available_warning)

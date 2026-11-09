@@ -40,6 +40,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme;
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository;
 
 @AndroidEntryPoint
@@ -56,14 +57,14 @@ public class WelcomeFragmentIntro extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_welcome_intro, container, false);
         final String[] themes = getResources().getStringArray(R.array.pref_theme_values);
-        final String currentTheme = uiResources.getSelectedTheme();
+        final String currentTheme = uiResources.getSelectedTheme().getValue();
         final int currentThemeIndex = Arrays.asList(themes).indexOf(currentTheme);
 
         final MaterialAutoCompleteTextView themeMenu = view.findViewById(R.id.app_theme_dropdown_menu);
         themeMenu.setSaveEnabled(false);  // https://github.com/material-components/material-components-android/issues/1464#issuecomment-1258051448
         themeMenu.setText(getResources().getStringArray(R.array.pref_theme_options)[currentThemeIndex], false);
         themeMenu.setOnItemClickListener((adapterView, view1, i, l) -> {
-            uiResources.setSelectedTheme(themes[i]);
+            uiResources.setSelectedTheme(AppTheme.fromValue(themes[i]));
             final Handler handler = new Handler();
             handler.postDelayed(() -> {
                 // Delay recreation of the Activity to give the dropdown some time to settle.

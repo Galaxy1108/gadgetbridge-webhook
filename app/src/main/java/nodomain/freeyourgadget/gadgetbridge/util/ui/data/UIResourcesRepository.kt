@@ -10,11 +10,11 @@ import androidx.annotation.StyleRes
  */
 interface UIResourcesRepository {
     /**
-     * The selected theme, one of the `pref_theme_value_*` strings. Defaults to following the system.
+     * The selected theme. Defaults to following the system.
      */
-    fun getSelectedTheme(): String
+    fun getSelectedTheme(): AppTheme
 
-    fun setSelectedTheme(theme: String)
+    fun setSelectedTheme(theme: AppTheme)
 
     fun isAmoledBlackEnabled(): Boolean
 
