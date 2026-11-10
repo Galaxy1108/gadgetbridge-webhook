@@ -3,8 +3,6 @@ package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 import android.app.UiModeManager
 import android.content.Context
 import android.os.Build
-import android.util.TypedValue
-import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -18,10 +16,8 @@ import kotlinx.coroutines.flow.stateIn
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR_DEFAULT
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_CONTRASTING_SURFACES
-import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.di.ApplicationScope
 import nodomain.freeyourgadget.gadgetbridge.di.DefaultPrefs
-import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.SharedPreferencesDataSource
 import javax.inject.Inject
 
@@ -89,45 +85,6 @@ class ThemeRepositoryImpl @Inject constructor(
 
     override fun areDynamicColorsEnabled(): Boolean {
         return getSelectedTheme() == AppTheme.DYNAMIC
-    }
-
-    /**
-     * Whether the Dynamic Color theme is both selected and supported by the system.
-     */
-    private fun isDynamicColorActive(): Boolean {
-        return DynamicColors.isDynamicColorAvailable() && areDynamicColorsEnabled()
-    }
-
-    override fun getTextColor(context: Context): Int {
-        return if (isDynamicColorActive()) {
-            AndroidUtils.getDynamicColor(context, com.google.android.material.R.attr.colorOnSurface)
-        } else if (isDarkThemeEnabled()) {
-            context.resources.getColor(R.color.primarytext_dark)
-        } else {
-            context.resources.getColor(R.color.primarytext_light)
-        }
-    }
-
-    override fun getSecondaryTextColor(context: Context): Int {
-        return if (isDynamicColorActive()) {
-            AndroidUtils.getDynamicColor(context, com.google.android.material.R.attr.colorOnSurfaceVariant)
-        } else if (isDarkThemeEnabled()) {
-            context.resources.getColor(R.color.on_surface_variant_dark)
-        } else {
-            context.resources.getColor(R.color.on_surface_variant_light)
-        }
-    }
-
-    override fun getBackgroundColor(context: Context): Int {
-        val typedValue = TypedValue()
-        context.theme.resolveAttribute(android.R.attr.background, typedValue, true)
-        return typedValue.data
-    }
-
-    override fun getWindowBackgroundColor(context: Context): Int {
-        val typedValue = TypedValue()
-        context.theme.resolveAttribute(android.R.attr.windowBackground, typedValue, true)
-        return typedValue.data
     }
 
     override fun register() {

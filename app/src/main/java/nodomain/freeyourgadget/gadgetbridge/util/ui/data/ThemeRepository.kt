@@ -1,12 +1,10 @@
 package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
-import android.content.Context
 import androidx.annotation.MainThread
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * The user's theme settings (theme, AMOLED black, accent color, contrasting surfaces) and the theme dependent colors
- * resolved from them.
+ * The user's theme settings (theme, AMOLED black, accent color, contrasting surfaces).
  */
 interface ThemeRepository {
     /**
@@ -55,14 +53,6 @@ interface ThemeRepository {
      * Ensures the splash screen follows the theme preference, if manually set to light or dark.
      */
     fun updateApplicationNightMode()
-
-    fun getTextColor(context: Context): Int
-
-    fun getSecondaryTextColor(context: Context): Int
-
-    fun getBackgroundColor(context: Context): Int
-
-    fun getWindowBackgroundColor(context: Context): Int
 
     /**
      * Starts updating the application night mode whenever the selected theme changes. Does nothing if already

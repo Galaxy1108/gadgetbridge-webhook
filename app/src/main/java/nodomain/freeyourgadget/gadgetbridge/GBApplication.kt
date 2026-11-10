@@ -645,30 +645,6 @@ open class GBApplication : Application() {
             return idSenderLookup
         }
 
-        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
-        @JvmStatic
-        fun isDarkThemeEnabled(): Boolean = app().themeRepository.isDarkThemeEnabled()
-
-        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
-        @JvmStatic
-        fun areDynamicColorsEnabled(): Boolean = app().themeRepository.areDynamicColorsEnabled()
-
-        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
-        @JvmStatic
-        fun getTextColor(context: Context): Int = app().themeRepository.getTextColor(context)
-
-        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
-        @JvmStatic
-        fun getSecondaryTextColor(context: Context): Int = app().themeRepository.getSecondaryTextColor(context)
-
-        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
-        @JvmStatic
-        fun getBackgroundColor(context: Context): Int = app().themeRepository.getBackgroundColor(context)
-
-        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
-        @JvmStatic
-        fun getWindowBackgroundColor(context: Context): Int = app().themeRepository.getWindowBackgroundColor(context)
-
         @JvmStatic
         fun hasDirectInternetAccess(): Boolean {
             return PermissionsUtils.checkPermission(getContext(), Manifest.permission.INTERNET)
