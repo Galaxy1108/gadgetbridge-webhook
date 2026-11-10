@@ -6,8 +6,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import nodomain.freeyourgadget.gadgetbridge.activities.debug.data.DatabaseDebugRepository
 import nodomain.freeyourgadget.gadgetbridge.activities.debug.data.DatabaseDebugRepositoryImpl
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepositoryImpl
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeRepository
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeRepositoryImpl
 import javax.inject.Singleton
 
 @Module
@@ -18,5 +18,5 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindUIResourcesRepository(impl: UIResourcesRepositoryImpl): UIResourcesRepository
+    abstract fun bindThemeRepository(impl: ThemeRepositoryImpl): ThemeRepository
 }

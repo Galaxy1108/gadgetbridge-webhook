@@ -28,12 +28,12 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [24], application = Application::class)
-class UIResourcesRepositoryImplTest {
+class ThemeRepositoryImplTest {
     private lateinit var context: Context
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var uiModeManager: UiModeManager
     private lateinit var applicationScope: CoroutineScope
-    private lateinit var repository: UIResourcesRepositoryImpl
+    private lateinit var repository: ThemeRepositoryImpl
 
     private val light get() = context.getString(R.string.pref_theme_value_light)
     private val dark get() = context.getString(R.string.pref_theme_value_dark)
@@ -42,11 +42,11 @@ class UIResourcesRepositoryImplTest {
     @Before
     fun setUp() {
         context = RuntimeEnvironment.getApplication()
-        sharedPreferences = context.getSharedPreferences("ui_resources_test", Context.MODE_PRIVATE)
+        sharedPreferences = context.getSharedPreferences("theme_repository_test", Context.MODE_PRIVATE)
         sharedPreferences.edit(commit = true) { clear() }
         uiModeManager = mock(UiModeManager::class.java)
         applicationScope = CoroutineScope(Dispatchers.Main.immediate)
-        repository = UIResourcesRepositoryImpl(
+        repository = ThemeRepositoryImpl(
             context,
             SharedPreferencesDataSource(sharedPreferences),
             uiModeManager,
@@ -71,7 +71,7 @@ class UIResourcesRepositoryImplTest {
         sharedPreferences.edit(commit = true) { putString(GBApplication.PREF_ACCENT_COLOR, accentColor) }
     }
 
-    private fun newRepository() = UIResourcesRepositoryImpl(
+    private fun newRepository() = ThemeRepositoryImpl(
         context,
         SharedPreferencesDataSource(sharedPreferences),
         uiModeManager,

@@ -76,7 +76,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.backup.PeriodicZipExporter
 import nodomain.freeyourgadget.gadgetbridge.util.healthconnect.HealthConnectPermissionManager
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.ScopedPrefsProvider
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeRepository
 import nodomain.freeyourgadget.gadgetbridge.widgets.launcher.LauncherWidgetUpdateTriggers
 import org.slf4j.LoggerFactory
 import java.util.Locale
@@ -124,7 +124,7 @@ open class GBApplication : Application() {
     lateinit var weatherRepository: WeatherRepository
 
     @Inject
-    lateinit var uiResources: UIResourcesRepository
+    lateinit var themeRepository: ThemeRepository
 
     @Inject
     @ApplicationScope
@@ -216,8 +216,8 @@ open class GBApplication : Application() {
         }
 
         migratePrefsIfNeeded()
-        uiResources.updateApplicationNightMode()
-        uiResources.register()
+        themeRepository.updateApplicationNightMode()
+        themeRepository.register()
 
         setupExceptionHandler(gbPrefs.getBoolean("crash_notification", isDebug()))
 
@@ -331,7 +331,7 @@ open class GBApplication : Application() {
      */
     override fun onTerminate() {
         ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleObserver)
-        uiResources.unregister()
+        themeRepository.unregister()
         // Stops the work of the application's singletons, e.g. the flows that listen to the preferences
         applicationScope.cancel()
         launcherWidgetUpdateTriggers.unregister()
@@ -645,29 +645,29 @@ open class GBApplication : Application() {
             return idSenderLookup
         }
 
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
+        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
         @JvmStatic
-        fun isDarkThemeEnabled(): Boolean = app().uiResources.isDarkThemeEnabled()
+        fun isDarkThemeEnabled(): Boolean = app().themeRepository.isDarkThemeEnabled()
 
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
+        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
         @JvmStatic
-        fun areDynamicColorsEnabled(): Boolean = app().uiResources.areDynamicColorsEnabled()
+        fun areDynamicColorsEnabled(): Boolean = app().themeRepository.areDynamicColorsEnabled()
 
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
+        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
         @JvmStatic
-        fun getTextColor(context: Context): Int = app().uiResources.getTextColor(context)
+        fun getTextColor(context: Context): Int = app().themeRepository.getTextColor(context)
 
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
+        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
         @JvmStatic
-        fun getSecondaryTextColor(context: Context): Int = app().uiResources.getSecondaryTextColor(context)
+        fun getSecondaryTextColor(context: Context): Int = app().themeRepository.getSecondaryTextColor(context)
 
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
+        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
         @JvmStatic
-        fun getBackgroundColor(context: Context): Int = app().uiResources.getBackgroundColor(context)
+        fun getBackgroundColor(context: Context): Int = app().themeRepository.getBackgroundColor(context)
 
-        @Deprecated("Use Hilt DI to inject UIResourcesRepository instead.")
+        @Deprecated("Use Hilt DI to inject ThemeRepository instead.")
         @JvmStatic
-        fun getWindowBackgroundColor(context: Context): Int = app().uiResources.getWindowBackgroundColor(context)
+        fun getWindowBackgroundColor(context: Context): Int = app().themeRepository.getWindowBackgroundColor(context)
 
         @JvmStatic
         fun hasDirectInternetAccess(): Boolean {

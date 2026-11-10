@@ -84,7 +84,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs;
 import nodomain.freeyourgadget.gadgetbridge.util.NotificationUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.SubtitleListPreference;
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme;
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository;
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeRepository;
 
 @AndroidEntryPoint
 public class SettingsActivity extends AbstractSettingsActivityV2 implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -148,7 +148,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
         private static final Logger LOG = LoggerFactory.getLogger(SettingsActivity.class);
 
         @Inject
-        UIResourcesRepository uiResources;
+        ThemeRepository themeRepository;
 
         /** Must stay in sync with ThemeStyles#accentColorOverlay and the ThemeOverlay.App.Accent.* styles. */
         private static final String[] ACCENT_COLOR_KEYS = {
@@ -178,12 +178,12 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
         };
 
         private int[] accentColorSwatches() {
-            return uiResources.isDarkThemeEnabled() ? ACCENT_COLOR_SWATCHES_DARK : ACCENT_COLOR_SWATCHES_LIGHT;
+            return themeRepository.isDarkThemeEnabled() ? ACCENT_COLOR_SWATCHES_DARK : ACCENT_COLOR_SWATCHES_LIGHT;
         }
 
         /** White needs a dark backdrop to read against, so it's only offered while using the dark theme. */
         private boolean isAccentColorAvailable(final String key) {
-            return !"white".equals(key) || uiResources.isDarkThemeEnabled();
+            return !"white".equals(key) || themeRepository.isDarkThemeEnabled();
         }
 
         @Override
@@ -536,14 +536,14 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             final SwitchPreferenceCompat contrastingSurfaces = findPreference(GBApplication.PREF_CONTRASTING_SURFACES);
 
             if (amoled_black != null) {
-                if (uiResources.getSelectedTheme() == AppTheme.LIGHT)
+                if (themeRepository.getSelectedTheme() == AppTheme.LIGHT)
                     amoled_black.setEnabled(false);
                 else
                     amoled_black.setEnabled(true);
             }
 
             if (accentColor != null) {
-                accentColor.setEnabled(!uiResources.areDynamicColorsEnabled());
+                accentColor.setEnabled(!themeRepository.areDynamicColorsEnabled());
                 updateAccentColorSummary(accentColor);
                 accentColor.setOnPreferenceClickListener(preference -> {
                     showAccentColorPicker(accentColor);
@@ -552,9 +552,9 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             }
 
             if (contrastingSurfaces != null) {
-                contrastingSurfaces.setChecked(uiResources.areContrastingSurfacesEnabled(uiResources.isDarkThemeEnabled()));
+                contrastingSurfaces.setChecked(themeRepository.areContrastingSurfacesEnabled(themeRepository.isDarkThemeEnabled()));
                 contrastingSurfaces.setOnPreferenceChangeListener((preference, newVal) -> {
-                    uiResources.setContrastingSurfacesEnabled((Boolean) newVal);
+                    themeRepository.setContrastingSurfacesEnabled((Boolean) newVal);
                     return true;
                 });
             }
@@ -572,7 +572,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                                     .setMessage(R.string.pref_theme_dynamic_colors_not_available_warning)
                                     .setIcon(R.drawable.ic_warning)
                                     .setPositiveButton(R.string.ok, (dialog, whichButton) ->
-                                            uiResources.setSelectedTheme(AppTheme.DYNAMIC))
+                                            themeRepository.setSelectedTheme(AppTheme.DYNAMIC))
                                     .show();
                             return false;
                         }
@@ -584,8 +584,8 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                         }
                         if (accentColor != null) {
                             accentColor.setEnabled(val != AppTheme.DYNAMIC);
-                            if (val == AppTheme.LIGHT && "white".equals(uiResources.getAccentColor())) {
-                                uiResources.setAccentColor(GBApplication.PREF_ACCENT_COLOR_DEFAULT);
+                            if (val == AppTheme.LIGHT && "white".equals(themeRepository.getAccentColor())) {
+                                themeRepository.setAccentColor(GBApplication.PREF_ACCENT_COLOR_DEFAULT);
                             }
                             updateAccentColorSummary(accentColor);
                         }
@@ -708,7 +708,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             for (int i = 0; i < swatches.length; i++) {
                 swatches[i] = swatchList.get(i);
             }
-            final int currentIndex = Math.max(0, keys.indexOf(uiResources.getAccentColor()));
+            final int currentIndex = Math.max(0, keys.indexOf(themeRepository.getAccentColor()));
             final ColorPickerDialog.Builder builder = ColorPickerDialog.newBuilder();
             builder.setDialogTitle(R.string.pref_title_accent_color);
             builder.setColor(swatches[currentIndex]);
@@ -732,7 +732,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                     if (index == -1) {
                         return;
                     }
-                    uiResources.setAccentColor(keys.get(index));
+                    themeRepository.setAccentColor(keys.get(index));
                     updateAccentColorSummary(accentColor);
                 }
 
@@ -749,7 +749,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 accentColor.setSummary(R.string.pref_accent_color_dynamic_disabled_summary);
                 return;
             }
-            final String selected = uiResources.getAccentColor();
+            final String selected = themeRepository.getAccentColor();
             final int index = Arrays.asList(ACCENT_COLOR_KEYS).indexOf(selected);
             accentColor.setSummary(getString(ACCENT_COLOR_NAME_RES[index == -1 ? 0 : index]));
         }

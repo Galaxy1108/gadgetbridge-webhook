@@ -25,12 +25,12 @@ import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.SharedPreferencesDataSource
 import javax.inject.Inject
 
-class UIResourcesRepositoryImpl @Inject constructor(
+class ThemeRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     @DefaultPrefs private val dataSource: SharedPreferencesDataSource,
     private val uiModeManager: UiModeManager?,
     @ApplicationScope private val applicationScope: CoroutineScope,
-) : UIResourcesRepository {
+) : ThemeRepository {
     private var themeChanges: Job? = null
 
     override val themeSettings: StateFlow<ThemeSettings> = dataSource.changedKeys()

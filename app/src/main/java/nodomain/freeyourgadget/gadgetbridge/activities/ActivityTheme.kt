@@ -5,7 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.StateFlow
 import nodomain.freeyourgadget.gadgetbridge.util.ui.applyOverlays
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeSettings
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesEntryPoint
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeEntryPoint
 import nodomain.freeyourgadget.gadgetbridge.util.ui.themeStyle
 
 /**
@@ -20,7 +20,7 @@ object ActivityTheme {
      */
     @JvmStatic
     fun apply(activity: Activity, noActionBar: Boolean) {
-        apply(activity, noActionBar, UIResourcesEntryPoint.uiResourcesRepository(activity).themeSettings)
+        apply(activity, noActionBar, ThemeEntryPoint.themeRepository(activity).themeSettings)
     }
 
     internal fun apply(activity: Activity, noActionBar: Boolean, themeSettings: StateFlow<ThemeSettings>) {

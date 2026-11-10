@@ -23,7 +23,7 @@ import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.LauncherWidgetClickActivity
 import nodomain.freeyourgadget.gadgetbridge.activities.dashboard.applyCardStyle
 import nodomain.freeyourgadget.gadgetbridge.util.ui.applyOverlays
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesEntryPoint
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeEntryPoint
 import nodomain.freeyourgadget.gadgetbridge.util.ui.themeStyle
 import nodomain.freeyourgadget.gadgetbridge.widgets.GBWidget
 import nodomain.freeyourgadget.gadgetbridge.widgets.WidgetConfig
@@ -67,7 +67,7 @@ object LauncherWidgetRenderer {
      * The application context with the app theme, in the dark or light version from [KEY_THEME] in [config].
      */
     private fun themedContext(context: Context, config: WidgetConfig): Context {
-        val themeSettings = UIResourcesEntryPoint.uiResourcesRepository(context).themeSettings.value
+        val themeSettings = ThemeEntryPoint.themeRepository(context).themeSettings.value
         val dark = when (config.prefs.getString(KEY_THEME, THEME_APP)) {
             THEME_SYSTEM -> (Resources.getSystem().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
                 Configuration.UI_MODE_NIGHT_YES

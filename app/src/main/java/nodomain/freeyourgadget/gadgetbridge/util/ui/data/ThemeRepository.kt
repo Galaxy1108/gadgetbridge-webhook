@@ -5,10 +5,10 @@ import androidx.annotation.MainThread
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * The user's UI preferences (theme, accent color, contrasting surfaces) and the theme dependent colors resolved from
- * them.
+ * The user's theme settings (theme, AMOLED black, accent color, contrasting surfaces) and the theme dependent colors
+ * resolved from them.
  */
-interface UIResourcesRepository {
+interface ThemeRepository {
     /**
      * The current theme settings. Activities compare it with the settings they were themed with, to know when they
      * have to be recreated.

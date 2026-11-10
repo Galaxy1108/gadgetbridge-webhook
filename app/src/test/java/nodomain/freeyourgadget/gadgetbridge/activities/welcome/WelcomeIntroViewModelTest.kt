@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.runTest
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.test.MainDispatcherRule
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeRepository
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -33,7 +33,7 @@ class WelcomeIntroViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val repository = mock(UIResourcesRepository::class.java)
+    private val repository = mock(ThemeRepository::class.java)
 
     @Before
     fun setUp() {

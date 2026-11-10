@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme
-import nodomain.freeyourgadget.gadgetbridge.util.ui.data.UIResourcesRepository
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeRepository
 import javax.inject.Inject
 
 data class ThemeOption(
@@ -28,7 +28,7 @@ data class WelcomeIntroUiState(
 
 @HiltViewModel
 class WelcomeIntroViewModel @Inject constructor(
-    private val repository: UIResourcesRepository,
+    private val repository: ThemeRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(initialState())
     val uiState: StateFlow<WelcomeIntroUiState> = _uiState.asStateFlow()

@@ -78,7 +78,7 @@ class WidgetPreviewRenderTest : TestBase() {
     }
 
     private fun themedContext(dark: Boolean): Context {
-        val themeSettings = app.uiResources.themeSettings.value
+        val themeSettings = app.themeRepository.themeSettings.value
         val themed = ContextThemeWrapper(app, themeSettings.themeStyle(dark, noActionBar = false))
         val configuration = Configuration(app.resources.configuration)
         configuration.uiMode = (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
