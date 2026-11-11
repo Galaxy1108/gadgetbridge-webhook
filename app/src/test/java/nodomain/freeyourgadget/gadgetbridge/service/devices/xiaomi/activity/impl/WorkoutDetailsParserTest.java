@@ -17,8 +17,10 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.activity.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -1149,6 +1151,7 @@ public class WorkoutDetailsParserTest {
             // distance 0x0F = 15 dm
             assertEquals(bitmap, 1.5f, records.get(0).speedMps, 0.0001f);
             assertEquals(bitmap, Integer.valueOf(77), records.get(0).stepLengthCm);
+            assertEquals(bitmap, Integer.valueOf(1), records.get(0).calories);
         }
     }
 
@@ -1171,6 +1174,59 @@ public class WorkoutDetailsParserTest {
         assertNotNull(track);
         assertEquals(820, track.getAllPoints().get(0).getStepLength());
         assertEquals(630, track.getAllPoints().get(1).getStepLength());
+        assertTrue(track.getSplits().isEmpty());
+    }
+
+    private static final String KILOMETRE_BITMAP = "FF CF F8 BF FF";
+    private static final String[] KILOMETRE_RECORDS = {
+            "13 9A 00 0A 52 00 00 00 00 00 93 F6 01",  // 1 kcal, 10 dm
+            "23 9A 80 14 52 00 00 00 00 00 93 F6 01",  // 2 kcal, 20 dm, kilometre reached
+            "13 9A 00 1E 52 00 00 00 00 00 93 F6 01",  // 1 kcal, 30 dm
+    };
+
+    /// Each kilometre flag closes a split, and the records after the last flag form one more.
+    @Test
+    public void testRunWalkV5KilometreSplits() {
+        final byte[] bytes = buildRunWalkBytes(5, KILOMETRE_BITMAP, 1794414418, 3, KILOMETRE_RECORDS);
+        final XiaomiActivityFileId fileId = makeFileId(SUBTYPE_OUTDOOR_WALKING_V2, 5);
+
+        final List<WorkoutDetailRecord> records = WorkoutDetailsParser.parseBytes(fileId, bytes);
+        assertNotNull(records);
+        assertEquals(Integer.valueOf(2), records.get(1).calories);
+        assertEquals(Integer.valueOf(3), records.get(1).steps);
+        assertTrue(records.get(1).kilometreReached);
+        assertFalse(records.get(0).kilometreReached);
+
+        final ActivityTrack track = new WorkoutDetailsParser().getActivityTrack(fileId, bytes);
+        assertNotNull(track);
+        assertKilometreSplits(track);
+    }
+
+    @Test
+    public void testMergeOntoTrackAddsKilometreSplits() {
+        final byte[] bytes = buildRunWalkBytes(5, KILOMETRE_BITMAP, 1794414418, 3, KILOMETRE_RECORDS);
+        final ActivityTrack track = new ActivityTrack();
+        track.addTrackPoint(new ActivityPoint(new Date(1794414418 * 1000L)));
+
+        WorkoutDetailsParser.mergeOntoTrack(track, makeFileId(SUBTYPE_OUTDOOR_WALKING_V2, 5), bytes);
+
+        assertKilometreSplits(track);
+    }
+
+    private static void assertKilometreSplits(final ActivityTrack track) {
+        assertEquals(2, track.getSplits().size());
+        final ActivityTrack.SplitInfo first = track.getSplits().get(0);
+        assertEquals(1794414418L, first.startTimeSec);
+        assertEquals(Long.valueOf(1794414420L), first.endTimeSec);
+        assertEquals(2.0, first.totalTimerTimeSec, 0.0001);
+        assertEquals(2.0, first.totalElapsedTimeSec, 0.0001);
+        assertEquals(3.0, first.totalDistanceMeters, 0.0001);
+        assertEquals(1.5, first.avgSpeedMps, 0.0001);
+        assertEquals(Long.valueOf(3), first.totalCalories);
+        final ActivityTrack.SplitInfo second = track.getSplits().get(1);
+        assertEquals(1794414420L, second.startTimeSec);
+        assertEquals(3.0, second.totalDistanceMeters, 0.0001);
+        assertEquals(Long.valueOf(1), second.totalCalories);
     }
 
     /// 35 cm is the band's floor, written for whole runs where it has no estimate.

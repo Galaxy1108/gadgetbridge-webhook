@@ -49,6 +49,7 @@ public class WorkoutDetailsParser extends XiaomiActivityParser {
     private static final int[] RUN_WALK_GROUP_BYTES = {1, 1, 1, 1, 1, 4, 1, 1, 2, 2, 2, 2, 2};
     private static final int RUN_WALK_GROUP_STEPS = 0;
     private static final int RUN_WALK_GROUP_HR = 1;
+    private static final int RUN_WALK_GROUP_KILOMETRE = 2;
     private static final int RUN_WALK_GROUP_DISTANCE = 3;
     private static final int RUN_WALK_GROUP_STEP_LENGTH = 4;
     /** Lowest step length the band writes, in cm. No capture goes below it, and some runs hold it
@@ -86,6 +87,10 @@ public class WorkoutDetailsParser extends XiaomiActivityParser {
         public Integer distanceDm;
         /** Step length in cm, for layouts that record it. */
         public Integer stepLengthCm;
+        /** Active calories of this record's second, in kcal, for layouts that record it. */
+        public Integer calories;
+        /** True on the record where the distance reaches 1 km, 2 km, ... */
+        public boolean kilometreReached;
         /** Pace in s/km as the band displays it, 0 while stopped. Shapes {@link #speedMps}
          *  in {@link #setSpeedFromDistance}. */
         public Integer paceSecPerKm;
@@ -141,7 +146,61 @@ public class WorkoutDetailsParser extends XiaomiActivityParser {
             // No GPS location for non-GPS activities — map will not render, charts still work
             track.addTrackPoint(builder.build());
         }
+        addKilometreSplits(track, records);
         return track;
+    }
+
+    /**
+     * Adds one {@link ActivityTrack.SplitInfo} per kilometre to {@code track}, ending on each
+     * record flagged {@link WorkoutDetailRecord#kilometreReached}, plus one for the distance
+     * after the last flag. Each split carries the distance and calories its records sum to, its
+     * elapsed time, and its timer time (one second per record, so pauses are excluded). No-op
+     * when no record is flagged.
+     */
+    private static void addKilometreSplits(final ActivityTrack track, final List<WorkoutDetailRecord> records) {
+        boolean anyFlag = false;
+        for (final WorkoutDetailRecord r : records) {
+            anyFlag |= r.kilometreReached;
+        }
+        if (!anyFlag) {
+            return;
+        }
+        int first = 0;
+        for (int i = 0; i < records.size(); i++) {
+            if (records.get(i).kilometreReached || i == records.size() - 1) {
+                track.addSplit(kilometreSplit(records, first, i));
+                first = i + 1;
+            }
+        }
+    }
+
+    private static ActivityTrack.SplitInfo kilometreSplit(final List<WorkoutDetailRecord> records,
+                                                          final int first, final int last) {
+        long distanceDm = 0;
+        long calories = 0;
+        boolean hasDistance = false;
+        boolean hasCalories = false;
+        for (int i = first; i <= last; i++) {
+            final WorkoutDetailRecord r = records.get(i);
+            if (r.distanceDm != null) {
+                distanceDm += r.distanceDm;
+                hasDistance = true;
+            }
+            if (r.calories != null) {
+                calories += r.calories;
+                hasCalories = true;
+            }
+        }
+        final long start = records.get(first).ts;
+        final long end = records.get(last).ts + 1L;
+        final double timer = last - first + 1;
+        final Double distance = hasDistance ? distanceDm / 10.0 : null;
+        return new ActivityTrack.SplitInfo(start, end, null,
+                (double) (end - start), timer,
+                distance, distance != null ? distance / timer : null, null,
+                null, null,
+                hasCalories ? calories : null,
+                null, null, null, null, null);
     }
 
     private static void applyMetrics(final ActivityPoint.Builder builder,
@@ -193,6 +252,7 @@ public class WorkoutDetailsParser extends XiaomiActivityParser {
             if (r == null) continue;
             applyMetricsToPoint(p, version, r);
         }
+        addKilometreSplits(track, records);
         if (byTs.isEmpty()) return;
         for (final WorkoutDetailRecord r : byTs.values()) {
             final ActivityPoint.Builder builder = new ActivityPoint.Builder(new Date(r.ts * 1000L));
@@ -276,9 +336,11 @@ public class WorkoutDetailsParser extends XiaomiActivityParser {
      *   offset 13-16: int32 segment distance, metres
      *
      * One record per second. Groups read, see {@link #RUN_WALK_GROUP_BYTES} for the sizes:
-     *   0: steps in the low nibble. On two checked runs the high nibble sums to the summary
-     *      calories and group 2 bit 7 is set where the distance reaches 1 km, 2 km, ...
+     *   0: active calories (kcal) in the high nibble, steps in the low nibble. Over a workout the
+     *      calories sum to the summary active calories, or within 1 kcal of it, on 29 of 34
+     *      captures; 5 from early 2025 read 6% to 28% high.
      *   1: HR (bpm)
+     *   2: bit 7 set on the record where the distance reaches 1 km, 2 km, ... (0-15 m past it)
      *   3: distance covered in that second (uint8, dm). Summed over a segment it equals the
      *      segment distance in the header on every capture.
      *   4: step length (uint8, cm), the band's estimate: its mean over a workout is 0.65 to 1.2
@@ -352,10 +414,14 @@ public class WorkoutDetailsParser extends XiaomiActivityParser {
                     }
                     switch (group) {
                         case RUN_WALK_GROUP_STEPS:
+                            r.calories = groups.get(0, 4);
                             r.steps = groups.get(4, 4);
                             break;
                         case RUN_WALK_GROUP_HR:
                             r.hr = groups.get(0, 8);
+                            break;
+                        case RUN_WALK_GROUP_KILOMETRE:
+                            r.kilometreReached = groups.get(0, 1) == 1;
                             break;
                         case RUN_WALK_GROUP_DISTANCE:
                             r.distanceDm = groups.get(0, 8);
