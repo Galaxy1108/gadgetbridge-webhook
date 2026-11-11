@@ -1129,6 +1129,7 @@ public class WorkoutDetailsParserTest {
         assertEquals(4.1f, records.get(0).speedMps, 0.0001f);
         assertEquals(4.1f, records.get(1).speedMps, 0.0001f);
         assertNull(records.get(0).steps);
+        assertNull(records.get(0).stepLengthCm);
     }
 
     /// 13-byte walk records, two bitmaps that differ only in which values of a group are valid.
@@ -1147,7 +1148,45 @@ public class WorkoutDetailsParserTest {
             assertEquals(bitmap, Integer.valueOf(122), records.get(0).cadence);
             // distance 0x0F = 15 dm
             assertEquals(bitmap, 1.5f, records.get(0).speedMps, 0.0001f);
+            assertEquals(bitmap, Integer.valueOf(77), records.get(0).stepLengthCm);
         }
+    }
+
+    /// Interval run: one second of a work bout (147 spm) and one of a recovery jog (117 spm), from
+    /// a captured run. Step length reaches the track point in mm.
+    @Test
+    public void testRunWalkV5StepLength() {
+        final byte[] bytes = buildRunWalkBytes(5, "FF CF F8 BF FF", 1794414418, 2,
+                "03 9A 00 51 52 00 00 00 00 00 93 F6 01",
+                "02 87 00 00 3F 00 00 00 00 00 75 87 02");
+        final XiaomiActivityFileId fileId = makeFileId(SUBTYPE_OUTDOOR_WALKING_V2, 5);
+
+        final List<WorkoutDetailRecord> records = WorkoutDetailsParser.parseBytes(fileId, bytes);
+
+        assertNotNull(records);
+        assertEquals(Integer.valueOf(82), records.get(0).stepLengthCm);
+        assertEquals(Integer.valueOf(63), records.get(1).stepLengthCm);
+
+        final ActivityTrack track = new WorkoutDetailsParser().getActivityTrack(fileId, bytes);
+        assertNotNull(track);
+        assertEquals(820, track.getAllPoints().get(0).getStepLength());
+        assertEquals(630, track.getAllPoints().get(1).getStepLength());
+    }
+
+    /// 35 cm is the band's floor, written for whole runs where it has no estimate.
+    @Test
+    public void testRunWalkV5StepLengthFloorIsNoValue() {
+        final byte[] bytes = buildRunWalkBytes(5, "FF CF B8 BF FF", 1749583000, 1,
+                "03 9A 00 1C 23 00 00 00 00 00 99 B4 01");
+        final XiaomiActivityFileId fileId = makeFileId(SUBTYPE_OUTDOOR_WALKING_V2, 5);
+
+        final List<WorkoutDetailRecord> records = WorkoutDetailsParser.parseBytes(fileId, bytes);
+
+        assertNotNull(records);
+        assertNull(records.get(0).stepLengthCm);
+        final ActivityTrack track = new WorkoutDetailsParser().getActivityTrack(fileId, bytes);
+        assertNotNull(track);
+        assertEquals(-1, track.getAllPoints().get(0).getStepLength());
     }
 
     /// The distance and cadence nibbles of this bitmap are B: present, with the first value bit
@@ -1210,6 +1249,7 @@ public class WorkoutDetailsParserTest {
         assertEquals(155, records.get(0).hr);
         assertEquals(Integer.valueOf(170), records.get(0).cadence);
         assertEquals(0.8f, records.get(0).speedMps, 0.0001f);
+        assertEquals(Integer.valueOf(98), records.get(0).stepLengthCm);
     }
 
     /// v8 adds four 2-byte groups. The walking, outdoor running and outdoor walking bitmaps all
@@ -1233,6 +1273,7 @@ public class WorkoutDetailsParserTest {
             assertEquals(bitmap, 103, records.get(1).hr);
             assertEquals(bitmap, Integer.valueOf(3), records.get(1).steps);
             assertEquals(bitmap, Integer.valueOf(123), records.get(1).cadence);
+            assertEquals(bitmap, Integer.valueOf(77), records.get(1).stepLengthCm);
             // pace 624 s/km, scaled so the two records cover their 15 + 16 dm
             assertEquals(bitmap, 1.5599f, records.get(1).speedMps, 0.0001f);
             assertEquals(bitmap, 1767527043, records.get(1).ts);
