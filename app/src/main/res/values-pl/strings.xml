@@ -6163,4 +6163,5 @@
     <string name="magic_touch_head_init_title">Inicjalizacja głowicy masującej</string>
     <string name="magic_touch_unplug_charger">Odłącz ładowarkę, aby sterować masażerem</string>
     <string name="magic_touch_turn_on_first">Najpierw włącz masażer</string>
+    <string name="devicetype_wearfit_x9_ultra">Wearfit X9 Ultra</string>
 </resources>
