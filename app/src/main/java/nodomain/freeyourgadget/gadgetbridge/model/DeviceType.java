@@ -633,6 +633,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.vibratissimo.VibratissimoCoo
 import nodomain.freeyourgadget.gadgetbridge.devices.victron.VictronSmartShuntCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.waspos.WaspOSCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.wearfit.WearFitCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.wearfit.devices.WearfitX9UltraCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.withingssteelhr.WithingsSteelHRDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.magic_touch.MagicTouchJj02Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.watches.MiBand10Coordinator;
@@ -1273,6 +1274,7 @@ public enum DeviceType {
     FEMOMETER_VINCA2(FemometerVinca2DeviceCoordinator::new),
     PIXOO(PixooCoordinator::new),
     WEARFIT_HK8_PRO(WearFitCoordinator::new),
+    WEARFIT_X9_ULTRA(WearfitX9UltraCoordinator::new),
     HAMA_FIT6900(HamaFit6900DeviceCoordinator::new),
     XPLORA_XMOVE(XploraXmoveDeviceCoordinator::new),
     YAWELL_R05(YawellR05Coordinator::new),
