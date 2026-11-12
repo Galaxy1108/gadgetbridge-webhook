@@ -25,8 +25,6 @@ interface ThemeRepository {
      */
     fun getAvailableThemes(): List<AppTheme>
 
-    fun isAmoledBlackEnabled(): Boolean
-
     /**
      * The key of the selected accent color preset, e.g. "red".
      */
@@ -40,12 +38,6 @@ interface ThemeRepository {
     fun areContrastingSurfacesEnabled(dark: Boolean): Boolean
 
     fun setContrastingSurfacesEnabled(enabled: Boolean)
-
-    /**
-     * Whether the selected theme comes out dark under the application configuration. Activities use
-     * [ThemeSettings.isDark] with their own configuration instead.
-     */
-    fun isDarkThemeEnabled(): Boolean
 
     fun areDynamicColorsEnabled(): Boolean
 

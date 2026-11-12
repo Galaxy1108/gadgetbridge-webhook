@@ -47,7 +47,6 @@ class ThemeRepositoryImplTest {
         uiModeManager = mock(UiModeManager::class.java)
         applicationScope = CoroutineScope(Dispatchers.Main.immediate)
         repository = ThemeRepositoryImpl(
-            context,
             SharedPreferencesDataSource(sharedPreferences),
             uiModeManager,
             applicationScope,
@@ -72,7 +71,6 @@ class ThemeRepositoryImplTest {
     }
 
     private fun newRepository() = ThemeRepositoryImpl(
-        context,
         SharedPreferencesDataSource(sharedPreferences),
         uiModeManager,
         applicationScope,
@@ -125,7 +123,7 @@ class ThemeRepositoryImplTest {
     @Test
     fun defaults() {
         assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())
-        assertFalse(repository.isAmoledBlackEnabled())
+        assertFalse(repository.themeSettings.value.amoledBlack)
         assertEquals(GBApplication.PREF_ACCENT_COLOR_DEFAULT, repository.getAccentColor())
         // Contrasting surfaces default to on for the dark theme only
         assertTrue(repository.areContrastingSurfacesEnabled(true))
@@ -152,7 +150,7 @@ class ThemeRepositoryImplTest {
         storeAmoledBlack(true)
         sharedPreferences.edit(commit = true) { putBoolean(GBApplication.PREF_CONTRASTING_SURFACES, true) }
 
-        assertTrue(repository.isAmoledBlackEnabled())
+        assertTrue(newRepository().themeSettings.value.amoledBlack)
         assertTrue(repository.areContrastingSurfacesEnabled(false))
     }
 
@@ -184,38 +182,6 @@ class ThemeRepositoryImplTest {
 
         storeTheme(dynamic)
         assertTrue(repository.areDynamicColorsEnabled())
-    }
-
-    @Test
-    fun darkThemeBeforeAndroid10OnlyFollowsTheSelection() {
-        assertFalse(repository.isDarkThemeEnabled())
-
-        storeTheme(dark)
-        assertTrue(repository.isDarkThemeEnabled())
-
-        storeTheme(light)
-        assertFalse(repository.isDarkThemeEnabled())
-    }
-
-    @Test
-    @Config(sdk = [35], qualifiers = "night")
-    fun systemAndDynamicThemesFollowTheSystemNightMode() {
-        assertTrue(repository.isDarkThemeEnabled())
-
-        storeTheme(dynamic)
-        assertTrue(repository.isDarkThemeEnabled())
-
-        storeTheme(light)
-        assertFalse(repository.isDarkThemeEnabled())
-    }
-
-    @Test
-    @Config(sdk = [35], qualifiers = "notnight")
-    fun systemThemeIsLightInSystemDayMode() {
-        assertFalse(repository.isDarkThemeEnabled())
-
-        storeTheme(dark)
-        assertTrue(repository.isDarkThemeEnabled())
     }
 
     @Test

@@ -177,13 +177,18 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 0xFF5252E0, 0xFF8A3FE6, 0xFFD02866, 0xFFFFFFFF,
         };
 
+        /** Whether this screen is themed dark, under this activity's own configuration. */
+        private boolean isDark() {
+            return themeRepository.getThemeSettings().getValue().isDark(getResources().getConfiguration());
+        }
+
         private int[] accentColorSwatches() {
-            return themeRepository.isDarkThemeEnabled() ? ACCENT_COLOR_SWATCHES_DARK : ACCENT_COLOR_SWATCHES_LIGHT;
+            return isDark() ? ACCENT_COLOR_SWATCHES_DARK : ACCENT_COLOR_SWATCHES_LIGHT;
         }
 
         /** White needs a dark backdrop to read against, so it's only offered while using the dark theme. */
         private boolean isAccentColorAvailable(final String key) {
-            return !"white".equals(key) || themeRepository.isDarkThemeEnabled();
+            return !"white".equals(key) || isDark();
         }
 
         @Override
@@ -552,7 +557,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
             }
 
             if (contrastingSurfaces != null) {
-                contrastingSurfaces.setChecked(themeRepository.areContrastingSurfacesEnabled(themeRepository.isDarkThemeEnabled()));
+                contrastingSurfaces.setChecked(themeRepository.areContrastingSurfacesEnabled(isDark()));
                 contrastingSurfaces.setOnPreferenceChangeListener((preference, newVal) -> {
                     themeRepository.setContrastingSurfacesEnabled((Boolean) newVal);
                     return true;

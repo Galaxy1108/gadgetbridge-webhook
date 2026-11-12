@@ -1,9 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
 import android.app.UiModeManager
-import android.content.Context
 import android.os.Build
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +20,6 @@ import nodomain.freeyourgadget.gadgetbridge.util.preferences.SharedPreferencesDa
 import javax.inject.Inject
 
 class ThemeRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
     @DefaultPrefs private val dataSource: SharedPreferencesDataSource,
     private val uiModeManager: UiModeManager?,
     @ApplicationScope private val applicationScope: CoroutineScope,
@@ -36,7 +33,7 @@ class ThemeRepositoryImpl @Inject constructor(
 
     private fun readThemeSettings() = ThemeSettings(
         theme = getSelectedTheme(),
-        amoledBlack = isAmoledBlackEnabled(),
+        amoledBlack = dataSource.getBoolean(PREF_AMOLED_BLACK, false),
         accentColor = getAccentColor(),
         contrastingSurfaces = if (dataSource.contains(PREF_CONTRASTING_SURFACES)) {
             dataSource.getBoolean(PREF_CONTRASTING_SURFACES, false)
@@ -53,8 +50,6 @@ class ThemeRepositoryImpl @Inject constructor(
 
     override fun getAvailableThemes(): List<AppTheme> = AppTheme.entries
 
-    override fun isAmoledBlackEnabled(): Boolean = dataSource.getBoolean(PREF_AMOLED_BLACK, false)
-
     override fun getAccentColor(): String =
         dataSource.getString(PREF_ACCENT_COLOR, PREF_ACCENT_COLOR_DEFAULT) ?: PREF_ACCENT_COLOR_DEFAULT
 
@@ -68,8 +63,6 @@ class ThemeRepositoryImpl @Inject constructor(
     override fun setContrastingSurfacesEnabled(enabled: Boolean) {
         dataSource.edit { putBoolean(PREF_CONTRASTING_SURFACES, enabled) }
     }
-
-    override fun isDarkThemeEnabled(): Boolean = readThemeSettings().isDark(context.resources.configuration)
 
     override fun updateApplicationNightMode() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
