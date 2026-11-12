@@ -2169,7 +2169,7 @@
     <string name="text_receiver_activity_title">Envoyer un message texte à l\'appareil</string>
     <string name="updatefirmwareoperation_failed_low_mtu">Le MTU actuel pour %1$d est trop faible, merci de spécifier un MTU élevé dans les réglages de l\'appareil, puis déconnecter/reconnecter l\'appareil.</string>
     <string name="prefs_wena3_receive_calls_title">Réglages pour les appels entrants</string>
-    <string name="prefs_wena3_button_action_name_start_timer">Démarrer le chronomètre</string>
+    <string name="prefs_wena3_button_action_name_start_timer">Démarrer le minuteur</string>
     <string name="prefs_wena3_menu_icon_hint">L\'icône des réglages est toujours affichée en dernière</string>
     <string name="prefs_wena3_notification_vibration_repetition_3">3 fois</string>
     <string name="prefs_wena3_button_action_name_qrio_lock">Verrouillage Qrio</string>
@@ -3174,9 +3174,9 @@
     <string name="first_start_get_started_add_first_device_button">Ajouter le premier appareil</string>
     <string name="first_start_get_started_restore_button">Restaurer la sauvegarde</string>
     <string name="first_start_open_source_text">Gadgetbridge est une application open source. Elle est développée par la communauté, pour la communauté.\n\nToute personne est invitée à contribuer via le code, la documentation, les tests et les dons.\n\nGadgetbridge ne contient aucune publicité ni aucun suivi. Il conserve vos données localement sur votre appareil Android, donc il est 100% respectueux de la vie privée.\n\nVisitez notre site web pour plus d’informations, de documentation et des liens vers nos canaux de communication.</string>
-    <string name="first_start_permissions_title">Permissions</string>
+    <string name="first_start_permissions_title">Autorisations</string>
     <string name="first_start_permissions_desc">Gadgetbridge a besoin de beaucoup de permissions pour exécuter toutes ses fonctions. Passez en revue les permissions et leurs objectifs ci-dessous.</string>
-    <string name="first_start_permissions_request_all_button">Demander toutes les permissions</string>
+    <string name="first_start_permissions_request_all_button">Demander toutes les autorisations</string>
     <string name="first_start_permissions_request_button">Demande</string>
     <string name="first_start_get_started_go_to_app_button">Aller à l’application</string>
     <string name="first_start_welcome_title">Bienvenue</string>
@@ -3800,7 +3800,7 @@
     <string name="movementRhythm">Rythme</string>
     <string name="internet_helper_pref_allowed_connections">Connections autorisées</string>
     <string name="rebble_appstore_download_failed">Le téléchargement a échoué : %1$s</string>
-    <string name="internet_helper_banglejs_permission_missing_title">Permission manquante</string>
+    <string name="internet_helper_banglejs_permission_missing_title">Autorisation manquante</string>
     <string name="pref_header_sync">Synchronisation</string>
     <string name="pref_header_dashboard">Tableau de bord</string>
     <string name="map_theme_indigo">Indigo</string>
@@ -5162,7 +5162,7 @@
     <string name="ninebot_unlock_summary">Déverrouiller le scooter maintenant</string>
     <string name="ninebot_auto_unlock_title">Déverrouiller lors de la connexion</string>
     <string name="ninebot_auto_unlock_summary">Déverrouiller le scooter dès qu’il se connecte à ce téléphone</string>
-    <string name="ninebot_lock_state_title">État verrouillage</string>
+    <string name="ninebot_lock_state_title">État de verrouillage</string>
     <string name="ninebot_lock_state_locked">Verrouillé</string>
     <string name="ninebot_lock_state_unlocked">Déverrouillé</string>
     <string name="ninebot_kers_weak">Faible</string>
@@ -5179,7 +5179,7 @@
     <string name="ninebot_mode_dynamic">Dynamique</string>
     <string name="ninebot_mode_sport">Sport</string>
     <string name="ninebot_search_title">Recherche du scooter</string>
-    <string name="mi_hipee_p1_position"></string>
+    <string name="mi_hipee_p1_position"/>
     <string name="widgets_deleted">Widget supprimé</string>
     <string name="dashboard_notice_new_design_title">Le tableau de bord a un nouveau design</string>
     <string name="dashboard_notice_new_design_text">Les widgets peuvent désormais avoir différentes tailles et différents styles. Vous pouvez modifier le tableau de bord pour ajouter, déplacer et redimensionner des widgets.</string>
@@ -5193,4 +5193,36 @@
         <item quantity="many">%d variantes</item>
         <item quantity="other">%d variantes</item>
     </plurals>
+    <string name="casio_location_indicator_imported">%1$d points de passage importés</string>
+    <string name="casio_location_indicator_import_gpx">Importer GPX</string>
+    <string name="casio_location_indicator_export_gpx">Exporter GPX</string>
+    <string name="pref_casio_mode_carousel_stopwatch">Chronomètre</string>
+    <string name="pref_casio_mode_carousel_world_time">Heure dans le monde</string>
+    <string name="pref_casio_pressure_graph_title">Graphique de pression</string>
+    <string name="training_status_range">%1$s – %2$s</string>
+    <string name="training_status_today">aujourd\'hui</string>
+    <string name="training_status_last_7_days">7 derniers jours : %1$s</string>
+    <string name="training_status_history">Historique</string>
+    <string name="training_status_share">%1$d%% · %2$s</string>
+    <string name="menuitem_altitude">Altitude</string>
+    <string name="altitude_value_format">%1$d m</string>
+    <string name="soundcore_equalizer_command_compact">Compact</string>
+    <string name="ninebot_kers_title">Récupération d\'énergie</string>
+    <string name="ninebot_search_summary">Recherche le scooter toutes les 3 secondes et le déverrouille dès qu\'il est trouvé. Utilise plus de batterie du téléphone.</string>
+    <string name="permission_notifications_aloud_summary">Lire les notifications à haute voix</string>
+    <string name="permission_gps_sharing_summary">Envoyer la position du smartphone au gadget</string>
+    <string name="permissions_section_recommended">Recommandé</string>
+    <string name="permissions_section_optional">Optionnel</string>
+    <string name="permissions_section_granted">Accordé</string>
+    <string name="permissions_grant_recommended">Autorisation accordée</string>
+    <string name="permissions_section_needed_for">Nécessaire pour %1$s</string>
+    <string name="permissions_hint">Certaines autorisations recommandées ne sont pas accordées</string>
+    <string name="permissions_hint_grant">Accorder</string>
+    <plurals name="permission_hint_missing">
+        <item quantity="one">Autorisation non accordée : %1$s</item>
+        <item quantity="many">Autorisations non accordées : %1$s</item>
+        <item quantity="other">Autorisations non accordées : %1$s</item>
+    </plurals>
+    <string name="appmanager_everything_up_to_date_message">Tout est à jour</string>
+    <string name="permission_calls_summary">Transmettre les appels aux gadgets</string>
 </resources>
