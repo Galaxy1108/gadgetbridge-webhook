@@ -450,6 +450,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportBSC100MaxCo
 import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportBSC200Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportBSC200SCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportBSC300Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportBSC300TCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportBSC500Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportBiNaviAirCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.igpsport.IGPSportBiNaviCoordinator;
@@ -1353,6 +1354,7 @@ public enum DeviceType {
     IGPSPORT_BSC200(IGPSportBSC200Coordinator::new),
     IGPSPORT_BSC200S(IGPSportBSC200SCoordinator::new),
     IGPSPORT_BSC300(IGPSportBSC300Coordinator::new),
+    IGPSPORT_BSC300T(IGPSportBSC300TCoordinator::new),
     IGPSPORT_BSC500(IGPSportBSC500Coordinator::new),
     IGPSPORT_IGS630(IGPSportiGS630Coordinator::new),
     IGPSPORT_IGS630S(IGPSportiGS630SCoordinator::new),
