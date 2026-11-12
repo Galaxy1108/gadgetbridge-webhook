@@ -1,13 +1,14 @@
 package nodomain.freeyourgadget.gadgetbridge.util.ui
 
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AccentColor
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeSettings
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ThemeStylesTest {
-    private fun settings(theme: AppTheme = AppTheme.SYSTEM, amoledBlack: Boolean = false, accentColor: String = "red") =
+    private fun settings(theme: AppTheme = AppTheme.SYSTEM, amoledBlack: Boolean = false, accentColor: AccentColor = AccentColor.RED) =
         ThemeSettings(theme, amoledBlack, accentColor, contrastingSurfaces = null)
 
     @Test
@@ -44,13 +45,16 @@ class ThemeStylesTest {
     }
 
     @Test
-    fun accentColorOverlayFallsBackToRed() {
+    fun accentColorOverlay() {
         assertEquals(R.style.ThemeOverlay_App_Accent_Red_Light, settings().accentColorOverlay(false))
-        assertEquals(R.style.ThemeOverlay_App_Accent_Teal_Dark, settings(accentColor = "teal").accentColorOverlay(true))
-        assertEquals(R.style.ThemeOverlay_App_Accent_Teal_Light, settings(accentColor = "teal").accentColorOverlay(false))
-        assertEquals(R.style.ThemeOverlay_App_Accent_White_Dark, settings(accentColor = "white").accentColorOverlay(true))
-        assertEquals(R.style.ThemeOverlay_App_Accent_Red_Dark, settings(accentColor = "unknown").accentColorOverlay(true))
-        assertEquals(R.style.ThemeOverlay_App_Accent_Red_Light, settings(accentColor = "").accentColorOverlay(false))
+        assertEquals(R.style.ThemeOverlay_App_Accent_Red_Dark, settings().accentColorOverlay(true))
+        val teal = settings(accentColor = AccentColor.TEAL)
+        assertEquals(R.style.ThemeOverlay_App_Accent_Teal_Dark, teal.accentColorOverlay(true))
+        assertEquals(R.style.ThemeOverlay_App_Accent_Teal_Light, teal.accentColorOverlay(false))
+        assertEquals(
+            R.style.ThemeOverlay_App_Accent_White_Dark,
+            settings(accentColor = AccentColor.WHITE).accentColorOverlay(true),
+        )
     }
 
     @Test

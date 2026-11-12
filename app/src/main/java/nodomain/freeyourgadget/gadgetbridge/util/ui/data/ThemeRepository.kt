@@ -26,11 +26,11 @@ interface ThemeRepository {
     fun getAvailableThemes(): List<AppTheme>
 
     /**
-     * The key of the selected accent color preset, e.g. "red".
+     * The selected accent color preset. Defaults to [AccentColor.DEFAULT].
      */
-    fun getAccentColor(): String
+    fun getAccentColor(): AccentColor
 
-    fun setAccentColor(accentColor: String)
+    fun setAccentColor(accentColor: AccentColor)
 
     /**
      * Whether contrasting surfaces are enabled. Unless set by the user, they are enabled for the dark theme only.

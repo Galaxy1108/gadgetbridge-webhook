@@ -79,7 +79,7 @@ class ThemeRepositoryImplTest {
     @Test
     fun themeSettingsStartFromTheStoredSettings() {
         assertEquals(
-            ThemeSettings(AppTheme.SYSTEM, amoledBlack = false, accentColor = "red", contrastingSurfaces = null),
+            ThemeSettings(AppTheme.SYSTEM, amoledBlack = false, AccentColor.RED, contrastingSurfaces = null),
             repository.themeSettings.value,
         )
 
@@ -89,7 +89,7 @@ class ThemeRepositoryImplTest {
         sharedPreferences.edit(commit = true) { putBoolean(GBApplication.PREF_CONTRASTING_SURFACES, false) }
 
         assertEquals(
-            ThemeSettings(AppTheme.DARK, amoledBlack = true, accentColor = "teal", contrastingSurfaces = false),
+            ThemeSettings(AppTheme.DARK, amoledBlack = true, AccentColor.TEAL, contrastingSurfaces = false),
             newRepository().themeSettings.value,
         )
     }
@@ -102,8 +102,8 @@ class ThemeRepositoryImplTest {
         storeAmoledBlack(true)
         assertTrue(repository.themeSettings.value.amoledBlack)
 
-        repository.setAccentColor("teal")
-        assertEquals("teal", repository.themeSettings.value.accentColor)
+        repository.setAccentColor(AccentColor.TEAL)
+        assertEquals(AccentColor.TEAL, repository.themeSettings.value.accentColor)
 
         repository.setContrastingSurfacesEnabled(true)
         assertEquals(true, repository.themeSettings.value.contrastingSurfaces)
@@ -124,7 +124,7 @@ class ThemeRepositoryImplTest {
     fun defaults() {
         assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())
         assertFalse(repository.themeSettings.value.amoledBlack)
-        assertEquals(GBApplication.PREF_ACCENT_COLOR_DEFAULT, repository.getAccentColor())
+        assertEquals(AccentColor.DEFAULT, repository.getAccentColor())
         // Contrasting surfaces default to on for the dark theme only
         assertTrue(repository.areContrastingSurfacesEnabled(true))
         assertFalse(repository.areContrastingSurfacesEnabled(false))
@@ -133,7 +133,7 @@ class ThemeRepositoryImplTest {
     @Test
     fun settersWriteTheirKeys() {
         repository.setSelectedTheme(AppTheme.DARK)
-        repository.setAccentColor("teal")
+        repository.setAccentColor(AccentColor.TEAL)
         repository.setContrastingSurfacesEnabled(false)
 
         assertEquals(dark, sharedPreferences.getString("pref_key_theme", null))
@@ -141,7 +141,7 @@ class ThemeRepositoryImplTest {
         assertFalse(sharedPreferences.getBoolean(GBApplication.PREF_CONTRASTING_SURFACES, true))
 
         assertEquals(AppTheme.DARK, repository.getSelectedTheme())
-        assertEquals("teal", repository.getAccentColor())
+        assertEquals(AccentColor.TEAL, repository.getAccentColor())
         assertFalse(repository.areContrastingSurfacesEnabled(true))
     }
 
@@ -152,6 +152,12 @@ class ThemeRepositoryImplTest {
 
         assertTrue(newRepository().themeSettings.value.amoledBlack)
         assertTrue(repository.areContrastingSurfacesEnabled(false))
+    }
+
+    @Test
+    fun unknownStoredAccentColorFallsBackToTheDefault() {
+        storeAccentColor("unknown")
+        assertEquals(AccentColor.DEFAULT, repository.getAccentColor())
     }
 
     @Test

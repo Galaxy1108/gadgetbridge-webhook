@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.flow.MutableStateFlow
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AccentColor
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeSettings
 import org.junit.Assert.assertEquals
@@ -86,7 +87,7 @@ class ActivityThemeTest {
         idle()
         assertEquals(0, activity.recreations)
 
-        themeSettings.value = LIGHT.copy(accentColor = "teal")
+        themeSettings.value = LIGHT.copy(accentColor = AccentColor.TEAL)
         idle()
 
         assertEquals(1, activity.recreations)
@@ -102,7 +103,7 @@ class ActivityThemeTest {
     }
 
     private companion object {
-        val LIGHT = ThemeSettings(AppTheme.LIGHT, amoledBlack = false, accentColor = "red", contrastingSurfaces = null)
+        val LIGHT = ThemeSettings(AppTheme.LIGHT, amoledBlack = false, AccentColor.RED, contrastingSurfaces = null)
 
         // The activities are created by reflection, so they can only reach these through static fields
         val themeSettings = MutableStateFlow(LIGHT)

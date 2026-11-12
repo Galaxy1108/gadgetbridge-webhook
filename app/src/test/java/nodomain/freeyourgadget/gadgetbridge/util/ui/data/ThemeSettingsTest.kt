@@ -13,7 +13,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [24], application = Application::class)
 class ThemeSettingsTest {
     private fun settings(theme: AppTheme, contrastingSurfaces: Boolean? = null) =
-        ThemeSettings(theme, amoledBlack = false, accentColor = "red", contrastingSurfaces = contrastingSurfaces)
+        ThemeSettings(theme, amoledBlack = false, AccentColor.RED, contrastingSurfaces = contrastingSurfaces)
 
     private fun configuration(night: Boolean) = Configuration().apply {
         uiMode = if (night) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO

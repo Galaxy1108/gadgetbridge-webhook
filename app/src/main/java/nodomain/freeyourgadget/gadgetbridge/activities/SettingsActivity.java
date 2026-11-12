@@ -83,6 +83,8 @@ import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs;
 import nodomain.freeyourgadget.gadgetbridge.util.NotificationUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.SubtitleListPreference;
+import nodomain.freeyourgadget.gadgetbridge.util.ui.AccentColors;
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AccentColor;
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme;
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeRepository;
 
@@ -150,45 +152,9 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
         @Inject
         ThemeRepository themeRepository;
 
-        /** Must stay in sync with ThemeStyles#accentColorOverlay and the ThemeOverlay.App.Accent.* styles. */
-        private static final String[] ACCENT_COLOR_KEYS = {
-                "red", "coral", "orange", "amber", "lime", "green",
-                "teal", "cyan", "blue", "indigo", "violet", "pink", "white",
-        };
-        private static final int[] ACCENT_COLOR_NAME_RES = {
-                R.string.accent_color_red, R.string.accent_color_coral, R.string.accent_color_orange,
-                R.string.accent_color_amber, R.string.accent_color_lime, R.string.accent_color_green,
-                R.string.accent_color_teal, R.string.accent_color_cyan, R.string.accent_color_blue,
-                R.string.accent_color_indigo, R.string.accent_color_violet, R.string.accent_color_pink,
-                R.string.accent_color_white,
-        };
-        /** The tab_pill value of each accent's Dark overlay - matches what dark theme users get. */
-        private static final int[] ACCENT_COLOR_SWATCHES_DARK = {
-                0xFFE02F00, 0xFFFF5A47, 0xFFF27C1A,
-                0xFFF5B800, 0xFFA8E02F, 0xFF2FD07A,
-                0xFF1DE9D0, 0xFF22C2F0, 0xFF2A6FE0,
-                0xFF5252E0, 0xFF8A3FE6, 0xFFD02866, 0xFFFFFFFF,
-        };
-        /** The tab_pill value of each accent's Light overlay - matches what light theme users get. */
-        private static final int[] ACCENT_COLOR_SWATCHES_LIGHT = {
-                0xFFE02F00, 0xFFD63A25, 0xFFC25400,
-                0xFF9A6F00, 0xFF4F7A00, 0xFF0F7A40,
-                0xFF00786E, 0xFF006E94, 0xFF2A6FE0,
-                0xFF5252E0, 0xFF8A3FE6, 0xFFD02866, 0xFFFFFFFF,
-        };
-
         /** Whether this screen is themed dark, under this activity's own configuration. */
         private boolean isDark() {
             return themeRepository.getThemeSettings().getValue().isDark(getResources().getConfiguration());
-        }
-
-        private int[] accentColorSwatches() {
-            return isDark() ? ACCENT_COLOR_SWATCHES_DARK : ACCENT_COLOR_SWATCHES_LIGHT;
-        }
-
-        /** White needs a dark backdrop to read against, so it's only offered while using the dark theme. */
-        private boolean isAccentColorAvailable(final String key) {
-            return !"white".equals(key) || isDark();
         }
 
         @Override
@@ -589,8 +555,8 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                         }
                         if (accentColor != null) {
                             accentColor.setEnabled(val != AppTheme.DYNAMIC);
-                            if (val == AppTheme.LIGHT && "white".equals(themeRepository.getAccentColor())) {
-                                themeRepository.setAccentColor(GBApplication.PREF_ACCENT_COLOR_DEFAULT);
+                            if (val == AppTheme.LIGHT && !themeRepository.getAccentColor().isAvailable(false)) {
+                                themeRepository.setAccentColor(AccentColor.DEFAULT);
                             }
                             updateAccentColorSummary(accentColor);
                         }
@@ -700,20 +666,18 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
         }
 
         private void showAccentColorPicker(final Preference accentColor) {
-            final int[] allSwatches = accentColorSwatches();
-            final List<String> keys = new ArrayList<>();
-            final List<Integer> swatchList = new ArrayList<>();
-            for (int i = 0; i < ACCENT_COLOR_KEYS.length; i++) {
-                if (isAccentColorAvailable(ACCENT_COLOR_KEYS[i])) {
-                    keys.add(ACCENT_COLOR_KEYS[i]);
-                    swatchList.add(allSwatches[i]);
+            final boolean dark = isDark();
+            final List<AccentColor> available = new ArrayList<>();
+            for (final AccentColor color : AccentColor.getEntries()) {
+                if (color.isAvailable(dark)) {
+                    available.add(color);
                 }
             }
-            final int[] swatches = new int[swatchList.size()];
+            final int[] swatches = new int[available.size()];
             for (int i = 0; i < swatches.length; i++) {
-                swatches[i] = swatchList.get(i);
+                swatches[i] = AccentColors.swatch(available.get(i), dark);
             }
-            final int currentIndex = Math.max(0, keys.indexOf(themeRepository.getAccentColor()));
+            final int currentIndex = Math.max(0, available.indexOf(themeRepository.getAccentColor()));
             final ColorPickerDialog.Builder builder = ColorPickerDialog.newBuilder();
             builder.setDialogTitle(R.string.pref_title_accent_color);
             builder.setColor(swatches[currentIndex]);
@@ -737,7 +701,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                     if (index == -1) {
                         return;
                     }
-                    themeRepository.setAccentColor(keys.get(index));
+                    themeRepository.setAccentColor(available.get(index));
                     updateAccentColorSummary(accentColor);
                 }
 
@@ -754,9 +718,7 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 accentColor.setSummary(R.string.pref_accent_color_dynamic_disabled_summary);
                 return;
             }
-            final String selected = themeRepository.getAccentColor();
-            final int index = Arrays.asList(ACCENT_COLOR_KEYS).indexOf(selected);
-            accentColor.setSummary(getString(ACCENT_COLOR_NAME_RES[index == -1 ? 0 : index]));
+            accentColor.setSummary(AccentColors.nameRes(themeRepository.getAccentColor()));
         }
     }
 }

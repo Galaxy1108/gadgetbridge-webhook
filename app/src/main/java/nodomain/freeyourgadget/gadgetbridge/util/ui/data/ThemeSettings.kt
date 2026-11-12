@@ -12,7 +12,7 @@ import android.os.Build
 data class ThemeSettings(
     val theme: AppTheme,
     val amoledBlack: Boolean,
-    val accentColor: String,
+    val accentColor: AccentColor,
     val contrastingSurfaces: Boolean?,
 ) {
     /**

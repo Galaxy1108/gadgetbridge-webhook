@@ -5,6 +5,7 @@ package nodomain.freeyourgadget.gadgetbridge.util.ui
 import android.content.res.Resources
 import androidx.annotation.StyleRes
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AccentColor
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeSettings
 
 /**
@@ -47,23 +48,23 @@ fun ThemeSettings.applyOverlays(theme: Resources.Theme, dark: Boolean) {
 }
 
 /**
- * The overlay for the accent color preset (Settings > User interface). Unknown presets fall back to red.
+ * The overlay for the accent color preset (Settings > User interface).
  */
 @StyleRes
 internal fun ThemeSettings.accentColorOverlay(dark: Boolean): Int = when (accentColor) {
-    "coral" -> if (dark) R.style.ThemeOverlay_App_Accent_Coral_Dark else R.style.ThemeOverlay_App_Accent_Coral_Light
-    "orange" -> if (dark) R.style.ThemeOverlay_App_Accent_Orange_Dark else R.style.ThemeOverlay_App_Accent_Orange_Light
-    "amber" -> if (dark) R.style.ThemeOverlay_App_Accent_Amber_Dark else R.style.ThemeOverlay_App_Accent_Amber_Light
-    "lime" -> if (dark) R.style.ThemeOverlay_App_Accent_Lime_Dark else R.style.ThemeOverlay_App_Accent_Lime_Light
-    "green" -> if (dark) R.style.ThemeOverlay_App_Accent_Green_Dark else R.style.ThemeOverlay_App_Accent_Green_Light
-    "teal" -> if (dark) R.style.ThemeOverlay_App_Accent_Teal_Dark else R.style.ThemeOverlay_App_Accent_Teal_Light
-    "cyan" -> if (dark) R.style.ThemeOverlay_App_Accent_Cyan_Dark else R.style.ThemeOverlay_App_Accent_Cyan_Light
-    "blue" -> if (dark) R.style.ThemeOverlay_App_Accent_Blue_Dark else R.style.ThemeOverlay_App_Accent_Blue_Light
-    "indigo" -> if (dark) R.style.ThemeOverlay_App_Accent_Indigo_Dark else R.style.ThemeOverlay_App_Accent_Indigo_Light
-    "violet" -> if (dark) R.style.ThemeOverlay_App_Accent_Violet_Dark else R.style.ThemeOverlay_App_Accent_Violet_Light
-    "pink" -> if (dark) R.style.ThemeOverlay_App_Accent_Pink_Dark else R.style.ThemeOverlay_App_Accent_Pink_Light
-    "white" -> if (dark) R.style.ThemeOverlay_App_Accent_White_Dark else R.style.ThemeOverlay_App_Accent_White_Light
-    else -> if (dark) R.style.ThemeOverlay_App_Accent_Red_Dark else R.style.ThemeOverlay_App_Accent_Red_Light
+    AccentColor.RED -> if (dark) R.style.ThemeOverlay_App_Accent_Red_Dark else R.style.ThemeOverlay_App_Accent_Red_Light
+    AccentColor.CORAL -> if (dark) R.style.ThemeOverlay_App_Accent_Coral_Dark else R.style.ThemeOverlay_App_Accent_Coral_Light
+    AccentColor.ORANGE -> if (dark) R.style.ThemeOverlay_App_Accent_Orange_Dark else R.style.ThemeOverlay_App_Accent_Orange_Light
+    AccentColor.AMBER -> if (dark) R.style.ThemeOverlay_App_Accent_Amber_Dark else R.style.ThemeOverlay_App_Accent_Amber_Light
+    AccentColor.LIME -> if (dark) R.style.ThemeOverlay_App_Accent_Lime_Dark else R.style.ThemeOverlay_App_Accent_Lime_Light
+    AccentColor.GREEN -> if (dark) R.style.ThemeOverlay_App_Accent_Green_Dark else R.style.ThemeOverlay_App_Accent_Green_Light
+    AccentColor.TEAL -> if (dark) R.style.ThemeOverlay_App_Accent_Teal_Dark else R.style.ThemeOverlay_App_Accent_Teal_Light
+    AccentColor.CYAN -> if (dark) R.style.ThemeOverlay_App_Accent_Cyan_Dark else R.style.ThemeOverlay_App_Accent_Cyan_Light
+    AccentColor.BLUE -> if (dark) R.style.ThemeOverlay_App_Accent_Blue_Dark else R.style.ThemeOverlay_App_Accent_Blue_Light
+    AccentColor.INDIGO -> if (dark) R.style.ThemeOverlay_App_Accent_Indigo_Dark else R.style.ThemeOverlay_App_Accent_Indigo_Light
+    AccentColor.VIOLET -> if (dark) R.style.ThemeOverlay_App_Accent_Violet_Dark else R.style.ThemeOverlay_App_Accent_Violet_Light
+    AccentColor.PINK -> if (dark) R.style.ThemeOverlay_App_Accent_Pink_Dark else R.style.ThemeOverlay_App_Accent_Pink_Light
+    AccentColor.WHITE -> if (dark) R.style.ThemeOverlay_App_Accent_White_Dark else R.style.ThemeOverlay_App_Accent_White_Light
 }
 
 @StyleRes

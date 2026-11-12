@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR
-import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR_DEFAULT
 import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_CONTRASTING_SURFACES
 import nodomain.freeyourgadget.gadgetbridge.di.ApplicationScope
 import nodomain.freeyourgadget.gadgetbridge.di.DefaultPrefs
@@ -50,11 +49,10 @@ class ThemeRepositoryImpl @Inject constructor(
 
     override fun getAvailableThemes(): List<AppTheme> = AppTheme.entries
 
-    override fun getAccentColor(): String =
-        dataSource.getString(PREF_ACCENT_COLOR, PREF_ACCENT_COLOR_DEFAULT) ?: PREF_ACCENT_COLOR_DEFAULT
+    override fun getAccentColor(): AccentColor = AccentColor.fromValue(dataSource.getString(PREF_ACCENT_COLOR, null))
 
-    override fun setAccentColor(accentColor: String) {
-        dataSource.edit { putString(PREF_ACCENT_COLOR, accentColor) }
+    override fun setAccentColor(accentColor: AccentColor) {
+        dataSource.edit { putString(PREF_ACCENT_COLOR, accentColor.value) }
     }
 
     override fun areContrastingSurfacesEnabled(dark: Boolean): Boolean =

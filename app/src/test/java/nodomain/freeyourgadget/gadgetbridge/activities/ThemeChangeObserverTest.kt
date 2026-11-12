@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import kotlinx.coroutines.flow.MutableStateFlow
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AccentColor
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeSettings
 import org.junit.Assert.assertEquals
@@ -68,7 +69,7 @@ class ThemeChangeObserverTest {
         val activity = Robolectric.buildActivity(RecordingActivity::class.java).setup().get()
         idle()
 
-        themeSettings.value = themeSettings.value.copy(accentColor = "teal")
+        themeSettings.value = themeSettings.value.copy(accentColor = AccentColor.TEAL)
         assertEquals(0, activity.recreations)
 
         idle()
@@ -80,7 +81,7 @@ class ThemeChangeObserverTest {
         val controller = Robolectric.buildActivity(RecordingActivity::class.java).setup()
         controller.pause().stop()
 
-        themeSettings.value = themeSettings.value.copy(accentColor = "teal")
+        themeSettings.value = themeSettings.value.copy(accentColor = AccentColor.TEAL)
         idle()
         assertEquals(0, controller.get().recreations)
 
@@ -105,7 +106,7 @@ class ThemeChangeObserverTest {
 
     private companion object {
         val INITIAL_SETTINGS =
-            ThemeSettings(AppTheme.SYSTEM, amoledBlack = false, accentColor = "red", contrastingSurfaces = null)
+            ThemeSettings(AppTheme.SYSTEM, amoledBlack = false, AccentColor.RED, contrastingSurfaces = null)
 
         // The activity is created by reflection, so it can only reach the flow through a static field
         val themeSettings = MutableStateFlow(INITIAL_SETTINGS)
