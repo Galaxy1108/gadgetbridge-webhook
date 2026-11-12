@@ -1,6 +1,8 @@
 package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
 import android.content.SharedPreferences
+import android.os.Build
+import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.core.content.edit
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
@@ -55,6 +57,12 @@ class ThemeSettingsDataSource @Inject constructor(
     fun setContrastingSurfaces(enabled: Boolean) {
         preferences.edit { putBoolean(PREF_CONTRASTING_SURFACES, enabled) }
     }
+
+    /**
+     * Whether the system keeps a night mode per application, from Android 12 on.
+     */
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
+    fun supportsApplicationNightMode(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
     /**
      * Emits whenever one of the theme settings changes while the flow is collected.

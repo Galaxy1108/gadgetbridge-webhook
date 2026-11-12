@@ -1,7 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.util.ui.data
 
 import android.app.UiModeManager
-import android.os.Build
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,7 +52,7 @@ class ThemeRepositoryImpl @Inject constructor(
     }
 
     override fun updateApplicationNightMode() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        if (!dataSource.supportsApplicationNightMode()) {
             return
         }
         val nightMode = when (getSelectedTheme()) {

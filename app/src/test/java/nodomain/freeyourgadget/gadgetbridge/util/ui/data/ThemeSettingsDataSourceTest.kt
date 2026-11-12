@@ -161,6 +161,17 @@ class ThemeSettingsDataSourceTest {
     }
 
     @Test
+    fun applicationNightModeIsNotSupportedBeforeAndroid12() {
+        assertFalse(dataSource.supportsApplicationNightMode())
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun applicationNightModeIsSupportedFromAndroid12() {
+        assertTrue(dataSource.supportsApplicationNightMode())
+    }
+
+    @Test
     @Config(sdk = [35])
     fun clearingThePreferencesEmitsBothChanges() {
         assertEquals(1, countEmissions(dataSource.themeSettingsChanges()) { store { clear() } })
