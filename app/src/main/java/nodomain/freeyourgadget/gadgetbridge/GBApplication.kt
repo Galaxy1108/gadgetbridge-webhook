@@ -437,9 +437,6 @@ open class GBApplication : Application() {
         const val ACTION_APP_IS_IN_FOREGROUND = "nodomain.freeyourgadget.gadgetbridge.action.app_foreground"
         const val ACTION_APP_IS_IN_BACKGROUND = "nodomain.freeyourgadget.gadgetbridge.action.app_background"
 
-        const val PREF_ACCENT_COLOR = "pref_key_accent_color"
-        const val PREF_CONTRASTING_SURFACES = "pref_key_contrasting_surfaces"
-
         @JvmStatic
         fun quit() {
             LOG.info("Quitting Gadgetbridge...")

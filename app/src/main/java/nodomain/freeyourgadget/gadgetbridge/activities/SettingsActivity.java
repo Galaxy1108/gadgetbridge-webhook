@@ -87,6 +87,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.ui.AccentColors;
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AccentColor;
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.AppTheme;
 import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeRepository;
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeSettingsDataSource;
 
 @AndroidEntryPoint
 public class SettingsActivity extends AbstractSettingsActivityV2 implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -501,10 +502,10 @@ public class SettingsActivity extends AbstractSettingsActivityV2 implements Acti
                 });
             }
 
-            final Preference theme = findPreference("pref_key_theme");
-            final Preference amoled_black = findPreference("pref_key_theme_amoled_black");
-            final Preference accentColor = findPreference("pref_key_accent_color");
-            final SwitchPreferenceCompat contrastingSurfaces = findPreference(GBApplication.PREF_CONTRASTING_SURFACES);
+            final Preference theme = findPreference(ThemeSettingsDataSource.PREF_THEME);
+            final Preference amoled_black = findPreference(ThemeSettingsDataSource.PREF_AMOLED_BLACK);
+            final Preference accentColor = findPreference(ThemeSettingsDataSource.PREF_ACCENT_COLOR);
+            final SwitchPreferenceCompat contrastingSurfaces = findPreference(ThemeSettingsDataSource.PREF_CONTRASTING_SURFACES);
 
             if (amoled_black != null) {
                 if (themeRepository.getSelectedTheme() == AppTheme.LIGHT)

@@ -6,60 +6,50 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_ACCENT_COLOR
-import nodomain.freeyourgadget.gadgetbridge.GBApplication.Companion.PREF_CONTRASTING_SURFACES
 import nodomain.freeyourgadget.gadgetbridge.di.ApplicationScope
-import nodomain.freeyourgadget.gadgetbridge.di.DefaultPrefs
-import nodomain.freeyourgadget.gadgetbridge.util.preferences.SharedPreferencesDataSource
 import javax.inject.Inject
 
 class ThemeRepositoryImpl @Inject constructor(
-    @DefaultPrefs private val dataSource: SharedPreferencesDataSource,
+    private val dataSource: ThemeSettingsDataSource,
     private val uiModeManager: UiModeManager?,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ThemeRepository {
     private var themeChanges: Job? = null
 
-    override val themeSettings: StateFlow<ThemeSettings> = dataSource.changedKeys()
-        .filter { it == null || it in THEME_SETTINGS_KEYS }
+    override val themeSettings: StateFlow<ThemeSettings> = dataSource.themeSettingsChanges()
         .map { readThemeSettings() }
         .stateIn(applicationScope, SharingStarted.Eagerly, readThemeSettings())
 
     private fun readThemeSettings() = ThemeSettings(
-        theme = getSelectedTheme(),
-        amoledBlack = dataSource.getBoolean(PREF_AMOLED_BLACK, false),
-        accentColor = getAccentColor(),
-        contrastingSurfaces = if (dataSource.contains(PREF_CONTRASTING_SURFACES)) {
-            dataSource.getBoolean(PREF_CONTRASTING_SURFACES, false)
-        } else {
-            null
-        },
+        theme = dataSource.getTheme(),
+        amoledBlack = dataSource.isAmoledBlack(),
+        accentColor = dataSource.getAccentColor(),
+        contrastingSurfaces = dataSource.getContrastingSurfaces(),
     )
 
-    override fun getSelectedTheme(): AppTheme = AppTheme.fromValue(dataSource.getString(PREF_THEME, null))
+    override fun getSelectedTheme(): AppTheme = dataSource.getTheme()
 
     override fun setSelectedTheme(theme: AppTheme) {
-        dataSource.edit { putString(PREF_THEME, theme.value) }
+        dataSource.setTheme(theme)
     }
 
     override fun getAvailableThemes(): List<AppTheme> = AppTheme.entries
 
-    override fun getAccentColor(): AccentColor = AccentColor.fromValue(dataSource.getString(PREF_ACCENT_COLOR, null))
+    override fun getAccentColor(): AccentColor = dataSource.getAccentColor()
 
     override fun setAccentColor(accentColor: AccentColor) {
-        dataSource.edit { putString(PREF_ACCENT_COLOR, accentColor.value) }
+        dataSource.setAccentColor(accentColor)
     }
 
     override fun areContrastingSurfacesEnabled(dark: Boolean): Boolean =
         readThemeSettings().areContrastingSurfacesEnabled(dark)
 
     override fun setContrastingSurfacesEnabled(enabled: Boolean) {
-        dataSource.edit { putBoolean(PREF_CONTRASTING_SURFACES, enabled) }
+        dataSource.setContrastingSurfaces(enabled)
     }
 
     override fun updateApplicationNightMode() {
@@ -80,8 +70,7 @@ class ThemeRepositoryImpl @Inject constructor(
 
     override fun register() {
         if (themeChanges?.isActive == true) return
-        themeChanges = dataSource.changedKeys()
-            .filter { it == PREF_THEME || it == null }
+        themeChanges = dataSource.themeChanges()
             .onEach { updateApplicationNightMode() }
             .launchIn(applicationScope)
     }
@@ -89,12 +78,5 @@ class ThemeRepositoryImpl @Inject constructor(
     override fun unregister() {
         themeChanges?.cancel()
         themeChanges = null
-    }
-
-    private companion object {
-        const val PREF_THEME = "pref_key_theme"
-        const val PREF_AMOLED_BLACK = "pref_key_theme_amoled_black"
-
-        val THEME_SETTINGS_KEYS = setOf(PREF_THEME, PREF_AMOLED_BLACK, PREF_ACCENT_COLOR, PREF_CONTRASTING_SURFACES)
     }
 }

@@ -11,6 +11,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.DeviceType
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec
 import nodomain.freeyourgadget.gadgetbridge.model.weather.Weather
 import nodomain.freeyourgadget.gadgetbridge.test.TestBase
+import nodomain.freeyourgadget.gadgetbridge.util.ui.data.ThemeSettingsDataSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -139,7 +140,7 @@ class GBApplicationStartupTest : TestBase() {
         app.onTerminate()
         assertEquals(0, prefsListenerCount(prefs))
         // Changing the theme after termination must not crash or reach the old application
-        prefs.edit(commit = true) { putString("pref_key_theme", "dark") }
+        prefs.edit(commit = true) { putString(ThemeSettingsDataSource.PREF_THEME, "dark") }
     }
 
     @Test

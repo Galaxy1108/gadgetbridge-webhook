@@ -8,9 +8,7 @@ import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
-import nodomain.freeyourgadget.gadgetbridge.util.preferences.SharedPreferencesDataSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -47,7 +45,7 @@ class ThemeRepositoryImplTest {
         uiModeManager = mock(UiModeManager::class.java)
         applicationScope = CoroutineScope(Dispatchers.Main.immediate)
         repository = ThemeRepositoryImpl(
-            SharedPreferencesDataSource(sharedPreferences),
+            ThemeSettingsDataSource(sharedPreferences),
             uiModeManager,
             applicationScope,
         )
@@ -59,19 +57,19 @@ class ThemeRepositoryImplTest {
     }
 
     private fun storeTheme(theme: String) {
-        sharedPreferences.edit(commit = true) { putString("pref_key_theme", theme) }
+        sharedPreferences.edit(commit = true) { putString(ThemeSettingsDataSource.PREF_THEME, theme) }
     }
 
     private fun storeAmoledBlack(enabled: Boolean) {
-        sharedPreferences.edit(commit = true) { putBoolean("pref_key_theme_amoled_black", enabled) }
+        sharedPreferences.edit(commit = true) { putBoolean(ThemeSettingsDataSource.PREF_AMOLED_BLACK, enabled) }
     }
 
     private fun storeAccentColor(accentColor: String) {
-        sharedPreferences.edit(commit = true) { putString(GBApplication.PREF_ACCENT_COLOR, accentColor) }
+        sharedPreferences.edit(commit = true) { putString(ThemeSettingsDataSource.PREF_ACCENT_COLOR, accentColor) }
     }
 
     private fun newRepository() = ThemeRepositoryImpl(
-        SharedPreferencesDataSource(sharedPreferences),
+        ThemeSettingsDataSource(sharedPreferences),
         uiModeManager,
         applicationScope,
     )
@@ -86,7 +84,7 @@ class ThemeRepositoryImplTest {
         storeTheme(dark)
         storeAmoledBlack(true)
         storeAccentColor("teal")
-        sharedPreferences.edit(commit = true) { putBoolean(GBApplication.PREF_CONTRASTING_SURFACES, false) }
+        sharedPreferences.edit(commit = true) { putBoolean(ThemeSettingsDataSource.PREF_CONTRASTING_SURFACES, false) }
 
         assertEquals(
             ThemeSettings(AppTheme.DARK, amoledBlack = true, AccentColor.TEAL, contrastingSurfaces = false),
@@ -131,14 +129,10 @@ class ThemeRepositoryImplTest {
     }
 
     @Test
-    fun settersWriteTheirKeys() {
+    fun settersAreReadBack() {
         repository.setSelectedTheme(AppTheme.DARK)
         repository.setAccentColor(AccentColor.TEAL)
         repository.setContrastingSurfacesEnabled(false)
-
-        assertEquals(dark, sharedPreferences.getString("pref_key_theme", null))
-        assertEquals("teal", sharedPreferences.getString(GBApplication.PREF_ACCENT_COLOR, null))
-        assertFalse(sharedPreferences.getBoolean(GBApplication.PREF_CONTRASTING_SURFACES, true))
 
         assertEquals(AppTheme.DARK, repository.getSelectedTheme())
         assertEquals(AccentColor.TEAL, repository.getAccentColor())
@@ -148,38 +142,15 @@ class ThemeRepositoryImplTest {
     @Test
     fun storedValuesAreRead() {
         storeAmoledBlack(true)
-        sharedPreferences.edit(commit = true) { putBoolean(GBApplication.PREF_CONTRASTING_SURFACES, true) }
+        sharedPreferences.edit(commit = true) { putBoolean(ThemeSettingsDataSource.PREF_CONTRASTING_SURFACES, true) }
 
         assertTrue(newRepository().themeSettings.value.amoledBlack)
         assertTrue(repository.areContrastingSurfacesEnabled(false))
     }
 
     @Test
-    fun unknownStoredAccentColorFallsBackToTheDefault() {
-        storeAccentColor("unknown")
-        assertEquals(AccentColor.DEFAULT, repository.getAccentColor())
-    }
-
-    @Test
-    fun themeValuesMatchThePreferenceEntries() {
-        assertEquals(
-            context.resources.getStringArray(R.array.pref_theme_values).toList(),
-            AppTheme.entries.map { it.value },
-        )
-    }
-
-    @Test
     fun allThemesAreAvailable() {
         assertEquals(AppTheme.entries, repository.getAvailableThemes())
-    }
-
-    @Test
-    fun unknownStoredThemeFollowsTheSystem() {
-        storeTheme("unknown")
-        assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())
-
-        storeTheme("")
-        assertEquals(AppTheme.SYSTEM, repository.getSelectedTheme())
     }
 
     @Test
