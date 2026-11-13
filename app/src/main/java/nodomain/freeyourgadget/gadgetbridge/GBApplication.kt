@@ -440,7 +440,7 @@ open class GBApplication : Application() {
         @JvmStatic
         fun quit() {
             LOG.info("Quitting Gadgetbridge...")
-            CompanionDeviceUtil.StopObservingAll(getContext())
+            CompanionDeviceUtil.StopObservingAll(appContext)
             val quitIntent = Intent(ACTION_QUIT)
             LocalBroadcastManager.getInstance(appContext).sendBroadcast(quitIntent)
             app().deviceServiceInstance.quit()
@@ -451,7 +451,7 @@ open class GBApplication : Application() {
         @JvmStatic
         fun restart() {
             LOG.info("Restarting Gadgetbridge...")
-            CompanionDeviceUtil.StopObservingAll(getContext())
+            CompanionDeviceUtil.StopObservingAll(appContext)
             val quitIntent = Intent(ACTION_QUIT)
             LocalBroadcastManager.getInstance(appContext).sendBroadcast(quitIntent)
             app().deviceServiceInstance.quit()
@@ -476,6 +476,20 @@ open class GBApplication : Application() {
             return app().gbPrefs.getBoolean("minimize_priority", false)
         }
 
+        /**
+         * Returns the application context.
+         *
+         * Deprecated: a static Context hides what a class really depends on. Instead, in order of preference:
+         * 1. Activities, Fragments, Services, receivers and DeviceSupport use their own Context, or its
+         *    application context when the object outlives the component.
+         * 2. Other classes depend on the narrowest framework object Hilt provides (a `PackageManager`,
+         *    `ContentResolver`, system service, ...), not on a raw `Context`.
+         * 3. Text shown on a screen is resolved in the UI layer. Other text goes through a narrow strings
+         *    dependency.
+         * 4. A class whose instances Hilt can't create (built by an enum, by reflection or from a static
+         *    function) does one Hilt entry-point lookup and passes the dependencies down through constructors.
+         */
+        @Deprecated("Use the component's own Context, or inject a narrower dependency through Hilt. See getContext()'s KDoc.")
         @JvmStatic
         fun getContext(): Context {
             return context as Context
@@ -643,7 +657,7 @@ open class GBApplication : Application() {
 
         @JvmStatic
         fun hasDirectInternetAccess(): Boolean {
-            return PermissionsUtils.checkPermission(getContext(), Manifest.permission.INTERNET)
+            return PermissionsUtils.checkPermission(appContext, Manifest.permission.INTERNET)
         }
 
         @JvmStatic
