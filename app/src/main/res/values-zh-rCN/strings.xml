@@ -6083,4 +6083,5 @@
     <string name="magic_touch_beep_summary">按下按钮时发出哔哔声</string>
     <string name="magic_touch_unplug_charger">拔出充电器来控制按摩仪</string>
     <string name="magic_touch_turn_on_first">先打开按摩仪</string>
+    <string name="devicetype_wearfit_x9_ultra">Wearfit X9 Ultra</string>
 </resources>
