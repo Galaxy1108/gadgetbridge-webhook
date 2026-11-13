@@ -21,8 +21,6 @@ import android.widget.SeekBar
 import dagger.hilt.android.AndroidEntryPoint
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -30,14 +28,11 @@ class VibrationActivity : AbstractGBActivity() {
     @Inject
     lateinit var deviceService: DeviceService
 
-    private lateinit var seekBar: SeekBar
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vibration)
 
-        seekBar = findViewById(R.id.vibration_seekbar)
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        findViewById<SeekBar>(R.id.vibration_seekbar).setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 var intensity = progress
                 if (intensity > 0) { // 1-16
@@ -52,9 +47,5 @@ class VibrationActivity : AbstractGBActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar) {
             }
         })
-    }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(VibrationActivity::class.java)
     }
 }
