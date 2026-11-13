@@ -36,12 +36,23 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.util.Locale;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.util.AndroidUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.BarShade;
 
-
+/**
+ * The base of Gadgetbridge's activities. It applies the theme and the language, finishes on quit, and pads
+ * the content for edge-to-edge.
+ * <p>
+ * It is a Hilt activity, so every subclass can host {@code @AndroidEntryPoint} fragments. Hilt injects by
+ * the annotated class, though: a subclass that declares its own {@code @Inject} fields needs its own
+ * {@code @AndroidEntryPoint}. Injected fields are set during {@code super.onCreate}, so code that runs
+ * before it, like {@link #init(GBActivity, int)}, can't use them: the theme and the language applied there
+ * keep looking up what they need themselves.
+ */
+@AndroidEntryPoint
 public abstract class AbstractGBActivity extends AppCompatActivity implements GBActivity {
     private boolean isLanguageInvalid = false;
     private BarShade.ScrollListener barShades;
