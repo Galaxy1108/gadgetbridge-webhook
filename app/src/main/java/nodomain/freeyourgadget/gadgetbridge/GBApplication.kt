@@ -492,15 +492,6 @@ open class GBApplication : Application() {
         }
 
         /**
-         * Returns the application context if [onCreate] has run, or null during early startup
-         * (e.g. while broadcast receivers are being registered) and in plain unit tests.
-         */
-        @JvmStatic
-        fun getContextOrNull(): Context? {
-            return appInstance
-        }
-
-        /**
          * Returns the facade for talking to devices. Devices are managed by
          * an Android Service and this facade provides access to its functionality.
          *
