@@ -14,46 +14,41 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.activities;
+package nodomain.freeyourgadget.gadgetbridge.activities
 
-import android.os.Bundle;
-import android.widget.SeekBar;
+import android.os.Bundle
+import android.widget.SeekBar
+import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import nodomain.freeyourgadget.gadgetbridge.R
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+class VibrationActivity : AbstractGBActivity() {
+    private lateinit var seekBar: SeekBar
 
-import nodomain.freeyourgadget.gadgetbridge.GBApplication;
-import nodomain.freeyourgadget.gadgetbridge.R;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_vibration)
 
-
-public class VibrationActivity extends AbstractGBActivity {
-    private static final Logger LOG = LoggerFactory.getLogger(VibrationActivity.class);
-    private SeekBar seekBar;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_vibration);
-
-        seekBar = (SeekBar) findViewById(R.id.vibration_seekbar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (progress > 0) { // 1-16
-                    progress = progress * 16 - 1; // max 255
+        seekBar = findViewById(R.id.vibration_seekbar)
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                var intensity = progress
+                if (intensity > 0) { // 1-16
+                    intensity = intensity * 16 - 1 // max 255
                 }
-                GBApplication.deviceService().onSetConstantVibration(progress);
+                GBApplication.deviceService().onSetConstantVibration(intensity)
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
             }
 
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
             }
-        });
+        })
+    }
+
+    companion object {
+        private val LOG: Logger = LoggerFactory.getLogger(VibrationActivity::class.java)
     }
 }
