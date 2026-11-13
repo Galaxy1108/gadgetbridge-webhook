@@ -18,12 +18,18 @@ package nodomain.freeyourgadget.gadgetbridge.activities
 
 import android.os.Bundle
 import android.widget.SeekBar
-import nodomain.freeyourgadget.gadgetbridge.GBApplication
+import dagger.hilt.android.AndroidEntryPoint
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.model.DeviceService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class VibrationActivity : AbstractGBActivity() {
+    @Inject
+    lateinit var deviceService: DeviceService
+
     private lateinit var seekBar: SeekBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +43,7 @@ class VibrationActivity : AbstractGBActivity() {
                 if (intensity > 0) { // 1-16
                     intensity = intensity * 16 - 1 // max 255
                 }
-                GBApplication.deviceService().onSetConstantVibration(intensity)
+                deviceService.onSetConstantVibration(intensity)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
