@@ -22,8 +22,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.spec.ChartTheme;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgRecord;
 import nodomain.freeyourgadget.gadgetbridge.model.EcgSample;
 
@@ -41,11 +41,12 @@ public class EcgWaveformChart {
         this.context = context;
         this.chart = chart;
 
-        final int chartTextColor = GBApplication.getSecondaryTextColor(context);
+        final ChartTheme chartTheme = ChartTheme.from(context);
+        final int chartTextColor = chartTheme.getSecondaryTextColor();
         final boolean darkTheme = (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
             == Configuration.UI_MODE_NIGHT_YES;
 
-        chart.setBackgroundColor(GBApplication.getBackgroundColor(context));
+        chart.setBackgroundColor(chartTheme.getBackgroundColor());
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(false);
         chart.setDoubleTapToZoomEnabled(false);
