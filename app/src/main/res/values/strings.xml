@@ -4827,10 +4827,10 @@
     <string name="loyalty_cards_syncing">Syncing %d loyalty cards to device</string>
     <string name="withings_calibration_text_hours">Please use the dial below to align the hour hand to the 12.</string>
     <string name="withings_calibration_text_minutes">Now use the dial to align the minute hand to the 12.</string>
-    <string name="withings_calibration_text_activity_target">Finally align the activity hand to 100%.</string>
+    <string name="withings_calibration_text_activity_target">Finally, align the activity hand to 100%.</string>
     <string name="withings_calibration_crown_text_hours">Use the crown on your watch to move the hour hand to the 12.</string>
     <string name="withings_calibration_crown_text_minutes">Now use the crown to move the minute hand to the 12.</string>
-    <string name="withings_calibration_crown_text_activity_target">Finally use the crown to move the activity hand to 100%.</string>
+    <string name="withings_calibration_crown_text_activity_target">Finally, use the crown to move the activity hand to 100%.</string>
     <string name="withings_calibration_mode_app">App dial</string>
     <string name="withings_calibration_mode_crown">Watch crown</string>
     <string name="withings_calibration_confirm">Confirm</string>
@@ -4851,8 +4851,7 @@
     <string name="withings_scanwatch_pref_spo2_mode_sleep_summary">Allow automatic measurements during sleep. Please note that this will decrease battery life.
 
 Measures every 30 minutes during sleep.
-The result is the average of all the measurements.
-Repeated low oxygen saturation levels during sleep could be a sign of pulmonary issues.</string>
+The result is the average of all the measurements.</string>
     <string name="withings_scanwatch_pref_respiratory_scan_title">Respiratory Scan</string>
     <string name="withings_scanwatch_pref_respiratory_scan_automatic">Automatic (scans some nights, minimal battery impact)</string>
     <string name="withings_scanwatch_pref_respiratory_scan_always">Always (scans every night, higher battery usage)</string>
@@ -4860,7 +4859,6 @@ Repeated low oxygen saturation levels during sleep could be a sign of pulmonary 
     <string name="withings_scanwatch_pref_afib_day_summary">Enable daytime atrial fibrillation detection</string>
     <string name="withings_scanwatch_pref_afib_night_title">AFib Detection (Night)</string>
     <string name="withings_scanwatch_pref_afib_night_summary">Enable night-time atrial fibrillation detection</string>
-    <string name="withings_ecg_result_seek_help">Irregular</string>
     <string name="withings_scanwatch_alarm_smart_wakeup_description">The watch will find the best moment to wake you up between the smart wakeup window start and your alarm time, based on your sleep cycle. Set the window to 0 to wake up exactly at the alarm time.</string>
 
     <!-- Quicklook / glance (raise-to-wake) -->
@@ -4868,17 +4866,15 @@ Repeated low oxygen saturation levels during sleep could be a sign of pulmonary 
     <string name="withings_scanwatch_pref_quicklook_summary">Show time when you raise your wrist</string>
 
     <!-- Brightness / luminosity -->
-    <string name="withings_scanwatch_pref_auto_brightness_title">Auto brightness</string>
     <string name="withings_scanwatch_pref_auto_brightness_summary">Automatically adjust screen brightness</string>
     <string name="withings_scanwatch_pref_brightness_level_title">Brightness level</string>
     <string name="withings_scanwatch_pref_brightness_level_summary">Manual brightness level (0-100)</string>
 
     <!-- Move hands (move hands to 10:10 when screen turns on) -->
-    <string name="withings_scanwatch_pref_move_hands_title">Move hands</string>
     <string name="withings_scanwatch_pref_move_hands_summary">Move watch hands to 10:10 when the screen turns on to avoid blocking the display</string>
 
     <string name="withings_scanwatch_pref_activity_reminder_title">Activity reminder</string>
-    <string name="withings_scanwatch_pref_activity_reminder_summary">ScanWatch can vibrate when it detects long periods of inactivity to help you stay active</string>
+    <string name="withings_scanwatch_pref_activity_reminder_summary">The watch can vibrate when it detects long periods of inactivity, to help you stay active</string>
 
     <!-- Shortcut (long-press crown) settings -->
     <string name="withings_scanwatch_pref_shortcut_title">Long-press crown shortcut</string>
@@ -4886,7 +4882,6 @@ Repeated low oxygen saturation levels during sleep could be a sign of pulmonary 
     <string name="withings_scanwatch_shortcut_spo2">SpO2 / Blood oxygen measurement</string>
     <string name="withings_scanwatch_shortcut_workout_start">Start workout</string>
     <string name="withings_scanwatch_shortcut_workout_selection">Workout selection</string>
-    <string name="withings_scanwatch_shortcut_timer">Timer</string>
     <string name="withings_scanwatch_pref_hr_alert_title">High/low resting heart rate alerts</string>
     <string name="withings_scanwatch_pref_hr_alert_automatic">Automatic (recommended)</string>
     <string name="withings_scanwatch_pref_hr_alert_custom">Custom threshold</string>

@@ -156,7 +156,7 @@
         android:key="withings_scanwatch_auto_brightness"
         android:persistent="true"
         android:summary="@string/withings_scanwatch_pref_auto_brightness_summary"
-        android:title="@string/withings_scanwatch_pref_auto_brightness_title" />
+        android:title="@string/pref_screen_auto_brightness_title" />
 
     <!-- Manual brightness level (only meaningful when auto brightness is OFF) -->
     <EditTextPreference
@@ -176,7 +176,7 @@
         android:key="withings_scanwatch_move_hands"
         android:persistent="true"
         android:summary="@string/withings_scanwatch_pref_move_hands_summary"
-        android:title="@string/withings_scanwatch_pref_move_hands_title" />
+        android:title="@string/watchface_setting_button_move_hands" />
 
     <SwitchPreference
         android:icon="@drawable/ic_chair"
