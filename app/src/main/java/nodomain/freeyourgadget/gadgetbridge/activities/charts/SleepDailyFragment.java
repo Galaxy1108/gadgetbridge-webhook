@@ -76,7 +76,6 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.RespiratoryRateSample;
-import nodomain.freeyourgadget.gadgetbridge.model.SleepBreathingSample;
 import nodomain.freeyourgadget.gadgetbridge.model.SleepScoreSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
 import nodomain.freeyourgadget.gadgetbridge.model.TemperatureSample;
@@ -145,7 +144,6 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
 
         final DeviceChartsProvider chartsProvider = device.getDeviceCoordinator().getChartsProvider();
         final Map<String, ActivitySummarySimpleEntry> customStats = chartsProvider.getDailySleepStats(requireContext(), db, device, getTSStart(), getTSEnd());
-        final SleepBreathingQualityAssessment breathingQualityAssessment = assessSleepBreathingQuality(db, device, sleepSessions);
 
         return new MyChartsData(
                 mySleepChartsData,
@@ -158,58 +156,8 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
                 intensityData.getMiddle(),
                 intensityData.getRight(),
                 overlay,
-                customStats,
-                breathingQualityAssessment
+                customStats
         );
-    }
-
-    private SleepBreathingQualityAssessment assessSleepBreathingQuality(final DBHandler db,
-                                                                        final GBDevice device,
-                                                                        final List<SleepSession> sleepSessions) {
-        if (!supportsSleepBreathingQuality(device) || sleepSessions.isEmpty()) {
-            return null;
-        }
-
-        final TimeSampleProvider<? extends SleepBreathingSample> provider =
-                device.getDeviceCoordinator().getSleepBreathingSampleProvider(device, db.getDaoSession());
-        if (provider == null) {
-            return null;
-        }
-
-        final long tsStart = sleepSessions.get(0).getStartTime();
-        final long tsEnd = sleepSessions.get(sleepSessions.size() - 1).getEndTime();
-        final List<? extends SleepBreathingSample> samples = provider.getAllSamples(tsStart, tsEnd);
-        if (samples.isEmpty()) {
-            return null;
-        }
-
-        double weightedProbability = 0;
-        long totalDurationMs = 0;
-        for (final SleepBreathingSample sample : samples) {
-            final int probability = sample.getBreathingEventProbability();
-            if (probability < 0 || probability > 127) {
-                continue;
-            }
-
-            final long sampleStart = sample.getTimestamp();
-            final long sampleDurationMs = Math.max(1, sample.getDuration()) * 1000L;
-            final long sampleEnd = sampleStart + sampleDurationMs;
-            for (final SleepSession session : sleepSessions) {
-                final long overlapStart = Math.max(sampleStart, session.getStartTime());
-                final long overlapEnd = Math.min(sampleEnd, session.getEndTime());
-                if (overlapEnd > overlapStart) {
-                    final long overlapDuration = overlapEnd - overlapStart;
-                    weightedProbability += probability * (double) overlapDuration;
-                    totalDurationMs += overlapDuration;
-                }
-            }
-        }
-
-        if (totalDurationMs == 0) {
-            return null;
-        }
-
-        return SleepBreathingQualityAssessment.fromAverageProbability(weightedProbability / totalDurationMs);
     }
 
     private float calculateSpo2Average(final DBHandler db,
@@ -426,22 +374,6 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
         binding.sleepchartInfo.setText(buildYouSleptText(pieData));
         binding.sleepchartInfo.setMovementMethod(new ScrollingMovementMethod());
 
-        final SleepBreathingQualityAssessment breathingQualityAssessment = mcd.getBreathingQualityAssessment();
-        if (breathingQualityAssessment == null) {
-            binding.sleepBreathingQualityCard.setVisibility(View.GONE);
-        } else {
-            binding.sleepBreathingQualityCard.setVisibility(View.VISIBLE);
-            StatTileGridUtilKt.applyStatTileStyle(binding.sleepBreathingQualityTile, null);
-            binding.sleepBreathingQualityValue.setText(getString(
-                    R.string.sleep_breathing_quality_estimated_value,
-                    getString(breathingQualityAssessment.titleRes),
-                    breathingQualityAssessment.score));
-            binding.sleepBreathingQualityValue.setTextColor(ContextCompat.getColor(requireContext(), breathingQualityAssessment.colorRes));
-            binding.sleepBreathingQualityDescription.setText(breathingQualityAssessment.descriptionRes);
-            binding.sleepBreathingQualityRange.setScore(breathingQualityAssessment.score);
-            binding.sleepBreathingQualityDisclaimer.setText(R.string.sleep_breathing_quality_disclaimer);
-        }
-
         updateStagesChart(mcd);
         int heartRateMin = mcd.getHeartRateAxisMin();
         int heartRateMax = mcd.getHeartRateAxisMax();
@@ -622,11 +554,6 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
         return coordinator.supportsSleepRespiratoryRate(device);
     }
 
-    public boolean supportsSleepBreathingQuality(final GBDevice device) {
-        final DeviceCoordinator coordinator = device.getDeviceCoordinator();
-        return coordinator.supportsSleepBreathingQuality(device);
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -772,8 +699,6 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
 
         private final SleepStagesChartData.Overlay overlay;
 
-        private final SleepBreathingQualityAssessment breathingQualityAssessment;
-
         public MyChartsData(MySleepChartsData pieData,
                             StageSamples stageSamples,
                             float heartRateAverage,
@@ -784,8 +709,7 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
                             float intensityAxisMin,
                             float intensityAxisMax,
                             SleepStagesChartData.Overlay overlay,
-                            Map<String, ActivitySummarySimpleEntry> customStats,
-                            SleepBreathingQualityAssessment breathingQualityAssessment) {
+                            Map<String, ActivitySummarySimpleEntry> customStats) {
             this.pieData = pieData;
             this.stageSamples = stageSamples;
             this.heartRateAverage = heartRateAverage;
@@ -797,7 +721,6 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
             this.intensityAxisMax = intensityAxisMax;
             this.overlay = overlay;
             this.customStats = customStats;
-            this.breathingQualityAssessment = breathingQualityAssessment;
         }
 
         public MySleepChartsData getPieData() {
@@ -842,48 +765,6 @@ public class SleepDailyFragment extends SleepFragment<SleepDailyFragment.MyChart
 
         public Map<String, ActivitySummarySimpleEntry> getCustomStats() {
             return customStats;
-        }
-
-        public SleepBreathingQualityAssessment getBreathingQualityAssessment() {
-            return breathingQualityAssessment;
-        }
-    }
-
-    static final class SleepBreathingQualityAssessment {
-        private static final int MAX_EVENT_PROBABILITY = 127;
-
-        private final int score;
-        private final int titleRes;
-        private final int descriptionRes;
-        private final int colorRes;
-
-        private SleepBreathingQualityAssessment(final int score, final int titleRes, final int descriptionRes, final int colorRes) {
-            this.score = score;
-            this.titleRes = titleRes;
-            this.descriptionRes = descriptionRes;
-            this.colorRes = colorRes;
-        }
-
-        static SleepBreathingQualityAssessment fromAverageProbability(final double averageProbability) {
-            final int score = Math.max(0, Math.min(100,
-                    (int) Math.round(100d * (1d - averageProbability / MAX_EVENT_PROBABILITY))));
-            if (score >= 61) {
-                return new SleepBreathingQualityAssessment(
-                        score, R.string.optimal, R.string.sleep_breathing_quality_optimal_description, R.color.hrv_status_balanced);
-            }
-            if (score >= 31) {
-                return new SleepBreathingQualityAssessment(
-                        score, R.string.sleep_score_fair, R.string.sleep_breathing_quality_fair_description, R.color.hrv_status_unbalanced);
-            }
-            return new SleepBreathingQualityAssessment(
-                    score,
-                    R.string.sleep_breathing_quality_needs_improvement,
-                    R.string.sleep_breathing_quality_needs_improvement_description,
-                    R.color.hrv_status_low);
-        }
-
-        int getScore() {
-            return score;
         }
     }
 }

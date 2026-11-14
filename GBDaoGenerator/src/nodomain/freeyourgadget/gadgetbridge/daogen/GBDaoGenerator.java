@@ -2334,10 +2334,9 @@ public class GBDaoGenerator {
     private static Entity addWithingsBreathingDisturbanceSample(Schema schema, Entity user, Entity device) {
         final Entity sample = addEntity(schema, "WithingsBreathingDisturbanceSample");
         addCommonTimeSampleProperties("AbstractTimeSample", sample, user, device);
-        sample.implementsInterface(MODEL_PACKAGE + ".SleepBreathingSample");
-        sample.addIntProperty("duration").notNull().codeBeforeGetter(OVERRIDE);
+        sample.addIntProperty("duration").notNull();
         sample.addIntProperty("apneaHypopneaIndex").notNull();
-        sample.addIntProperty("breathingEventProbability").notNull().codeBeforeGetter(OVERRIDE);
+        sample.addIntProperty("breathingEventProbability").notNull();
         return sample;
     }
 

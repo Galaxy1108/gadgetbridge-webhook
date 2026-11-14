@@ -76,7 +76,6 @@ import nodomain.freeyourgadget.gadgetbridge.model.MetricSample;
 import nodomain.freeyourgadget.gadgetbridge.model.PaiSample;
 import nodomain.freeyourgadget.gadgetbridge.model.RespiratoryRateSample;
 import nodomain.freeyourgadget.gadgetbridge.model.RestingMetabolicRateSample;
-import nodomain.freeyourgadget.gadgetbridge.model.SleepBreathingSample;
 import nodomain.freeyourgadget.gadgetbridge.model.SleepScoreSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
 import nodomain.freeyourgadget.gadgetbridge.model.StressSample;
@@ -426,12 +425,6 @@ public interface DeviceCoordinator {
     boolean supportsSleepRespiratoryRate(@NonNull final GBDevice device);
 
     /**
-     * Returns true if the device provides a sleep breathing-quality assessment independently
-     * of respiratory-rate samples.
-     */
-    boolean supportsSleepBreathingQuality(@NonNull final GBDevice device);
-
-    /**
      * Returns true if measurement and fetching of body weight is supported by the device
      * (with this coordinator).
      */
@@ -597,12 +590,6 @@ public interface DeviceCoordinator {
      */
     @Nullable
     TimeSampleProvider<? extends RespiratoryRateSample> getRespiratoryRateSampleProvider(@NonNull final GBDevice device, @NonNull final DaoSession session);
-
-    /**
-     * Returns the sample provider for sleep breathing data, for the device being supported.
-     */
-    @Nullable
-    TimeSampleProvider<? extends SleepBreathingSample> getSleepBreathingSampleProvider(@NonNull final GBDevice device, @NonNull final DaoSession session);
 
     /**
      * Returns the sample provider for weight data, for the device being supported.

@@ -72,7 +72,6 @@ public class WithingsScanwatchDeviceCoordinatorTest {
         assertTrue(coordinator.supportsEcgMeasurement(null));
         assertTrue(coordinator.supportsSpo2(null));
         assertTrue(coordinator.supportsRespiratoryScan(null));
-        assertTrue(coordinator.supportsSleepBreathingQuality(null));
         // Respiratory rate stays off until a ScanWatch 2 log shows real values
         assertFalse(coordinator.supportsRespiratoryRate(null));
     }
@@ -86,7 +85,6 @@ public class WithingsScanwatchDeviceCoordinatorTest {
         assertFalse(coordinator.supportsRespiratoryScan(null));
         assertFalse(coordinator.supportsRespiratoryRate(null));
         assertFalse(coordinator.supportsSleepRespiratoryRate(null));
-        assertFalse(coordinator.supportsSleepBreathingQuality(null));
         assertEquals(60, coordinator.getSmartWakeupMaxInterval(null));
     }
 
@@ -101,7 +99,7 @@ public class WithingsScanwatchDeviceCoordinatorTest {
     }
 
     @Test
-    public void scanwatchExposesBreathingQualityWithoutRespiratoryRate() {
+    public void scanwatchHasRespiratoryScanWithoutRespiratoryRate() {
         final WithingsScanwatchDeviceCoordinator coordinator = new WithingsScanwatchDeviceCoordinator();
 
         assertTrue(coordinator.supportsEcgMeasurement(null));
@@ -109,7 +107,6 @@ public class WithingsScanwatchDeviceCoordinatorTest {
         assertTrue(coordinator.supportsRespiratoryScan(null));
         assertFalse(coordinator.supportsRespiratoryRate(null));
         assertFalse(coordinator.supportsSleepRespiratoryRate(null));
-        assertTrue(coordinator.supportsSleepBreathingQuality(null));
     }
 
     @Test
