@@ -2097,7 +2097,7 @@
     <string name="activity_type_snowboarding">单板滑雪</string>
     <string name="activity_type_icehockey">冰球</string>
     <string name="activity_type_other">其他</string>
-    <string name="withings_calibration_text_activity_target">最后将活动表盘对齐到100％。请注意，这只活动表盘只能顺时针旋转。</string>
+    <string name="withings_calibration_text_activity_target">最后将活动指针对齐到100％。</string>
     <string name="withings_bt_calibration_next">之后</string>
     <string name="activity_type_rugby">橄榄球</string>
     <string name="activity_type_baseball">棒球</string>
@@ -6084,4 +6084,12 @@
     <string name="magic_touch_unplug_charger">拔出充电器来控制按摩仪</string>
     <string name="magic_touch_turn_on_first">先打开按摩仪</string>
     <string name="devicetype_wearfit_x9_ultra">Wearfit X9 Ultra</string>
+    <string name="heartrate_bpm_35">35 bpm</string>
+    <string name="heartrate_bpm_55">55 bpm</string>
+    <string name="ecg_sample_rate">采样率</string>
+    <string name="ecg_sample_rate_value">%1$.0f Hz</string>
+    <string name="ecg_disclaimer_title">不用于医疗用途。</string>
+    <string name="ecg_disclaimer">此数据可能错误或不完整，数据解读可能和制造商的应用不同。.\n\n该数据的目的只是提供信息。不要使用此数据来采取任何医疗操作。\n\n如您觉得不适，请联系专业医疗人士。对于胸痛、隐约或剧烈的呼吸困难，请立即呼叫急救服务。</string>
+    <string name="ecg_classification_sinus_rhythm">窦性心律</string>
+    <string name="ecg_classification_inconclusive_hr_under_50">非结论性：心率不到 50</string>
 </resources>
