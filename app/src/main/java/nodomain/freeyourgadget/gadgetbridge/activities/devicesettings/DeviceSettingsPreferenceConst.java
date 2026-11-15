@@ -439,6 +439,8 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_UGREEN_GAME_MODE = "ugreen_game_mode";
     public static final String PREF_UGREEN_DUAL_CONNECT = "ugreen_dual_connect";
     public static final String PREF_UGREEN_SPATIAL_AUDIO = "ugreen_spatial_audio";
+    public static final String PREF_BASEUS_BASS_BOOST = "baseus_bass_boost";
+    public static final String PREF_BASEUS_LOW_LATENCY = "baseus_low_latency";
     public static final String PREF_UGREEN_HIGH_QUALITY = "ugreen_high_quality";
 
     public static final String PREF_SOUNDPEATS_ANC_MODE = "soundpeats_anc_mode";

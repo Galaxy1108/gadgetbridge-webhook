@@ -6554,6 +6554,10 @@ The result is the average of all the measurements.</string>
     <string name="ugreen_high_quality_summary">Enable high-resolution audio decoding (LDAC)</string>
 
     <string name="devicetype_soundpeats_q3_pro" translatable="false">SOUNDPEATS Q3 Pro</string>
+    <string name="devicetype_baseus_bowie_mc1" translatable="false">Baseus Bowie MC1</string>
+    <string name="baseus_eq_classic" translatable="false">Baseus Classic</string>
+    <string name="baseus_eq_hifi_live">Hi-Fi Live</string>
+    <string name="baseus_eq_rock_classic">Rock Classic</string>
     <string name="soundpeats_movie_mode">Movie mode</string>
     <string name="soundpeats_movie_mode_summary">Optimize the sound stage for movies and series</string>
     <string name="soundpeats_touch_lock">Lock touch controls</string>
