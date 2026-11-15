@@ -58,12 +58,15 @@ class BaseusBowieMc1Support : AbstractHeadphoneBTBRDeviceSupport(LOG, BUFFER_SIZ
             PREF_BATTERY_POLLING_ENABLE, PREF_BATTERY_POLLING_INTERVAL -> scheduleBatteryPoll()
             PREF_BASEUS_BASS_BOOST ->
                 send("set bass boost", BaseusProtocol.encodeSetBassBoost(devicePrefs.getBoolean(config, false)))
+
             PREF_HEADPHONES_EQUALIZER -> send(
                 "set EQ preset",
                 BaseusProtocol.encodeSetEqPreset(BaseusEqPreset.fromPreference(devicePrefs.getString(config, null))),
             )
+
             PREF_BASEUS_LOW_LATENCY ->
                 send("set low latency", BaseusProtocol.encodeSetLowLatency(devicePrefs.getBoolean(config, false)))
+
             else -> super.onSendConfiguration(config)
         }
     }
@@ -76,10 +79,10 @@ class BaseusBowieMc1Support : AbstractHeadphoneBTBRDeviceSupport(LOG, BUFFER_SIZ
 
     private fun scheduleBatteryPoll() {
         batteryPollHandler.removeCallbacks(batteryPollRunnable)
-        if (devicePrefs.getBatteryPollingEnabled()) {
+        if (devicePrefs.batteryPollingEnabled) {
             batteryPollHandler.postDelayed(
                 batteryPollRunnable,
-                devicePrefs.getBatteryPollingIntervalMinutes() * 60 * 1000L,
+                devicePrefs.batteryPollingIntervalMinutes * 60 * 1000L,
             )
         }
     }
@@ -92,7 +95,9 @@ class BaseusBowieMc1Support : AbstractHeadphoneBTBRDeviceSupport(LOG, BUFFER_SIZ
     }
 
     override fun dispose() {
-        batteryPollHandler.removeCallbacksAndMessages(null)
-        super.dispose()
+        synchronized(ConnectionMonitor) {
+            batteryPollHandler.removeCallbacksAndMessages(null)
+            super.dispose()
+        }
     }
 }
