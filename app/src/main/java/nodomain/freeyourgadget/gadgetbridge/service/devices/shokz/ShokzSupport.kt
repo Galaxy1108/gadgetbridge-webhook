@@ -105,6 +105,12 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             queueCommand(ShokzCommand.NOISE_CANCELLING_GET)
             queueCommand(ShokzCommand.NOISE_CANCELLING_LEVEL_GET)
         }
+        if (shokzCoordinator?.supportsDolbyAtmos() == true) {
+            queueCommand(ShokzCommand.DOLBY_ATMOS_GET)
+        }
+        if (shokzCoordinator?.supportsHeadTracking() == true) {
+            queueCommand(ShokzCommand.HEAD_TRACKING_GET)
+        }
         queueCommand(ShokzCommand.LANGUAGE_GET)
 
         return builder
@@ -218,6 +224,8 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
 
             DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE -> setNoiseCancelling()
             DeviceSettingsPreferenceConst.PREF_SHOKZ_NOISE_CANCELLING_LEVEL -> setNoiseCancellingLevel()
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_DOLBY_ATMOS -> setDolbyAtmos()
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_HEAD_TRACKING -> setHeadTracking()
 
             DeviceSettingsPreferenceConst.PREF_BATTERY_POLLING_ENABLE,
             DeviceSettingsPreferenceConst.PREF_BATTERY_POLLING_INTERVAL -> rearmBatteryPollTimer()
@@ -352,6 +360,24 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             .coerceIn(0, 100)
         LOG.info("Setting noise cancelling level to {}", level)
         queueCommand(ShokzCommand.NOISE_CANCELLING_LEVEL_SET, intArgs(level))
+    }
+
+    private fun setDolbyAtmos() {
+        val enabled = devicePrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_SHOKZ_DOLBY_ATMOS, false)
+        LOG.info("Setting Dolby Atmos to {}", enabled)
+        queueCommand(ShokzCommand.DOLBY_ATMOS_SET, intArgs(if (enabled) 1 else 0))
+        if (!enabled && shokzCoordinator?.supportsHeadTracking() == true) {
+            queueCommand(ShokzCommand.HEAD_TRACKING_SET, intArgs(0))
+            evaluateGBDeviceEvent(
+                GBDeviceEventUpdatePreferences(DeviceSettingsPreferenceConst.PREF_SHOKZ_HEAD_TRACKING, false)
+            )
+        }
+    }
+
+    private fun setHeadTracking() {
+        val enabled = devicePrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_SHOKZ_HEAD_TRACKING, false)
+        LOG.info("Setting head tracking to {}", enabled)
+        queueCommand(ShokzCommand.HEAD_TRACKING_SET, intArgs(if (enabled) 1 else 0))
     }
 
     private fun intArgs(value: Int): ByteArray =
@@ -563,8 +589,32 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
                 )
             }
 
+            ShokzCommand.DOLBY_ATMOS_RET -> {
+                val enabled = readValueAfterZero(command, buf) ?: return
+                LOG.info("Got Dolby Atmos: {}", enabled)
+                evaluateGBDeviceEvent(
+                    GBDeviceEventUpdatePreferences(
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_DOLBY_ATMOS,
+                        enabled == 1
+                    )
+                )
+            }
+
+            ShokzCommand.HEAD_TRACKING_RET -> {
+                val enabled = readValueAfterZero(command, buf) ?: return
+                LOG.info("Got head tracking: {}", enabled)
+                evaluateGBDeviceEvent(
+                    GBDeviceEventUpdatePreferences(
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_HEAD_TRACKING,
+                        enabled == 1
+                    )
+                )
+            }
+
             ShokzCommand.NOISE_CANCELLING_ACK,
             ShokzCommand.NOISE_CANCELLING_LEVEL_ACK,
+            ShokzCommand.DOLBY_ATMOS_ACK,
+            ShokzCommand.HEAD_TRACKING_ACK,
             ShokzCommand.EQUALIZER_CUSTOM_ACK -> {
                 val status = if (buf.remaining() >= 4) buf.getInt() else -1
                 if (status != 0) {

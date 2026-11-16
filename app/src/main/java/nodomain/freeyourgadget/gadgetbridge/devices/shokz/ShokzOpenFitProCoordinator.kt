@@ -36,6 +36,12 @@ class ShokzOpenFitProCoordinator : ShokzCoordinator() {
         return true
     }
 
+    override fun supportsDolbyAtmos(): Boolean {
+        return true
+    }
+
+    override fun supportsHeadTracking(): Boolean = true
+
     override fun supportsBassTreble(): Boolean = true
 
     override fun supportsPrivacyEqualizer(): Boolean = true

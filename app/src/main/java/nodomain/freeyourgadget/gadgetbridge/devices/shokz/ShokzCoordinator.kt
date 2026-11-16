@@ -69,6 +69,14 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
      */
     open fun supportsNoiseCancelling(): Boolean = false
 
+    open fun supportsDolbyAtmos(): Boolean = false
+
+    /**
+     * Whether this device supports head tracking for Dolby Atmos (HEAD_TRACKING_GET/SET). The
+     * official app only offers it while Dolby Atmos is enabled, and turns it off along with it.
+     */
+    open fun supportsHeadTracking(): Boolean = false
+
     override fun getBatteryCount(device: GBDevice): Int = if (supportsTws()) 3 else 1
 
     override fun getBatteryConfig(device: GBDevice): Array<BatteryConfig> = if (supportsTws()) {
@@ -203,6 +211,7 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
                 keys = emptyList(),
                 optionalKeys = listOfNotNull(
                     DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE.takeIf { supportsNoiseCancelling() },
+                    DeviceSettingsPreferenceConst.PREF_SHOKZ_DOLBY_ATMOS.takeIf { supportsDolbyAtmos() },
                 ),
             )
         )
@@ -284,6 +293,23 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
                     max = 100,
                     defaultValue = 100,
                     dependency = DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE,
+                )
+            }
+        }
+
+        if (supportsDolbyAtmos()) {
+            switchSetting(
+                key = DeviceSettingsPreferenceConst.PREF_SHOKZ_DOLBY_ATMOS,
+                title = R.string.shokz_dolby_atmos,
+                icon = R.drawable.ic_surround,
+            )
+            if (supportsHeadTracking()) {
+                switchSetting(
+                    key = DeviceSettingsPreferenceConst.PREF_SHOKZ_HEAD_TRACKING,
+                    title = R.string.shokz_head_tracking,
+                    summary = R.string.shokz_head_tracking_summary,
+                    icon = R.drawable.ic_surround,
+                    dependency = DeviceSettingsPreferenceConst.PREF_SHOKZ_DOLBY_ATMOS,
                 )
             }
         }
