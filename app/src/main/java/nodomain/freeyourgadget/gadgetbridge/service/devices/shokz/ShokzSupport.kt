@@ -480,7 +480,7 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
         handleCommand(command, args)
 
         return pendingMessage?.let { msg ->
-            (msg.command.code or MASK_RESPONSE) == command.code
+            msg.command.group == command.group && (msg.command.code or MASK_RESPONSE) == command.code
         } ?: false
     }
 
