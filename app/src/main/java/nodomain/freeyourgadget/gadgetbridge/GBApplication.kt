@@ -53,6 +53,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import nodomain.freeyourgadget.gadgetbridge.di.ApplicationScope
 import nodomain.freeyourgadget.gadgetbridge.di.DefaultPrefs
+import nodomain.freeyourgadget.gadgetbridge.di.RootEntryPoints
 import nodomain.freeyourgadget.gadgetbridge.externalevents.BluetoothStateChangeReceiver
 import nodomain.freeyourgadget.gadgetbridge.externalevents.notifications.apps.NotificationAppRepository
 import nodomain.freeyourgadget.gadgetbridge.externalevents.opentracks.OpenTracksContentObserver
@@ -190,6 +191,7 @@ open class GBApplication : Application() {
      */
     override fun onCreate() {
         appInstance = this
+        RootEntryPoints.register(this)
         super.onCreate()
         ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
 
@@ -340,6 +342,7 @@ open class GBApplication : Application() {
         unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         bluetoothStateChangeReceiver?.let { unregisterReceiver(it) }
         bluetoothStateChangeReceiver = null
+        RootEntryPoints.unregister()
         super.onTerminate()
     }
 
