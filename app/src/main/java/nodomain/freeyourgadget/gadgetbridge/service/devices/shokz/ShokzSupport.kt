@@ -111,6 +111,9 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
         if (shokzCoordinator?.supportsHeadTracking() == true) {
             queueCommand(ShokzCommand.HEAD_TRACKING_GET)
         }
+        if (shokzCoordinator?.supportsWearingDetection() == true) {
+            queueCommand(ShokzCommand.WEARING_DETECTION_GET)
+        }
         queueCommand(ShokzCommand.LANGUAGE_GET)
 
         return builder
@@ -226,6 +229,7 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             DeviceSettingsPreferenceConst.PREF_SHOKZ_NOISE_CANCELLING_LEVEL -> setNoiseCancellingLevel()
             DeviceSettingsPreferenceConst.PREF_SHOKZ_DOLBY_ATMOS -> setDolbyAtmos()
             DeviceSettingsPreferenceConst.PREF_SHOKZ_HEAD_TRACKING -> setHeadTracking()
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_WEARING_DETECTION -> setWearingDetection()
 
             DeviceSettingsPreferenceConst.PREF_BATTERY_POLLING_ENABLE,
             DeviceSettingsPreferenceConst.PREF_BATTERY_POLLING_INTERVAL -> rearmBatteryPollTimer()
@@ -378,6 +382,12 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
         val enabled = devicePrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_SHOKZ_HEAD_TRACKING, false)
         LOG.info("Setting head tracking to {}", enabled)
         queueCommand(ShokzCommand.HEAD_TRACKING_SET, intArgs(if (enabled) 1 else 0))
+    }
+
+    private fun setWearingDetection() {
+        val enabled = devicePrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_SHOKZ_WEARING_DETECTION, true)
+        LOG.info("Setting wearing detection to {}", enabled)
+        queueCommand(ShokzCommand.WEARING_DETECTION_SET, intArgs(if (enabled) 1 else 0))
     }
 
     private fun intArgs(value: Int): ByteArray =
@@ -611,10 +621,22 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
                 )
             }
 
+            ShokzCommand.WEARING_DETECTION_RET -> {
+                val enabled = readValueAfterZero(command, buf) ?: return
+                LOG.info("Got wearing detection: {}", enabled)
+                evaluateGBDeviceEvent(
+                    GBDeviceEventUpdatePreferences(
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_WEARING_DETECTION,
+                        enabled == 1
+                    )
+                )
+            }
+
             ShokzCommand.NOISE_CANCELLING_ACK,
             ShokzCommand.NOISE_CANCELLING_LEVEL_ACK,
             ShokzCommand.DOLBY_ATMOS_ACK,
             ShokzCommand.HEAD_TRACKING_ACK,
+            ShokzCommand.WEARING_DETECTION_ACK,
             ShokzCommand.EQUALIZER_CUSTOM_ACK -> {
                 val status = if (buf.remaining() >= 4) buf.getInt() else -1
                 if (status != 0) {

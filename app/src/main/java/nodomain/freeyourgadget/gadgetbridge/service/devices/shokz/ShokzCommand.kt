@@ -87,6 +87,10 @@ enum class ShokzCommand(
     VOLUME_NOTIFY(0x03, 0x0005),
     VOLUME_RET(0x02, 0x8007),
     VOLUME_SET(0x01, 0x000a),
+    WEARING_DETECTION_ACK(0x01, 0x801f),
+    WEARING_DETECTION_GET(0x02, 0x0022),
+    WEARING_DETECTION_RET(0x02, 0x8022),
+    WEARING_DETECTION_SET(0x01, 0x001f),
     ;
 
     companion object {

@@ -696,6 +696,7 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_SHOKZ_NOISE_CANCELLING_LEVEL = "pref_shokz_noise_cancelling_level";
     public static final String PREF_SHOKZ_DOLBY_ATMOS = "pref_shokz_dolby_atmos";
     public static final String PREF_SHOKZ_HEAD_TRACKING = "pref_shokz_head_tracking";
+    public static final String PREF_SHOKZ_WEARING_DETECTION = "pref_shokz_wearing_detection";
 
     public static final String PREF_OVERRIDE_FEATURES_ENABLED = "override_features_enabled";
     public static final String PREF_OVERRIDE_FEATURES_LIST = "override_features_list";

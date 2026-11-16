@@ -42,6 +42,8 @@ class ShokzOpenFitProCoordinator : ShokzCoordinator() {
 
     override fun supportsHeadTracking(): Boolean = true
 
+    override fun supportsWearingDetection(): Boolean = true
+
     override fun supportsBassTreble(): Boolean = true
 
     override fun supportsPrivacyEqualizer(): Boolean = true

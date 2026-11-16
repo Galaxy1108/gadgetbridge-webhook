@@ -77,6 +77,11 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
      */
     open fun supportsHeadTracking(): Boolean = false
 
+    /**
+     * Whether this device supports toggling wearing detection (WEARING_DETECTION_GET/SET).
+     */
+    open fun supportsWearingDetection(): Boolean = false
+
     override fun getBatteryCount(device: GBDevice): Int = if (supportsTws()) 3 else 1
 
     override fun getBatteryConfig(device: GBDevice): Array<BatteryConfig> = if (supportsTws()) {
@@ -312,6 +317,14 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
                     dependency = DeviceSettingsPreferenceConst.PREF_SHOKZ_DOLBY_ATMOS,
                 )
             }
+        }
+
+        if (supportsWearingDetection()) {
+            switchSetting(
+                key = DeviceSettingsPreferenceConst.PREF_SHOKZ_WEARING_DETECTION,
+                title = R.string.shokz_wearing_detection,
+                icon = R.drawable.ic_ear_sound,
+            )
         }
 
         // Equalizer presets - same enum, filtered to entries valid for each media source
