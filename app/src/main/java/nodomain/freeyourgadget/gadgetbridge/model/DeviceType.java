@@ -562,6 +562,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.sbm_67.SanitasSBM67Coordinat
 import nodomain.freeyourgadget.gadgetbridge.devices.sbm_67.SilverCrestSBM67Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.scannable.ScannableDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sennheiser.SennheiserMomentumInEarWirelessCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenFitProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenRunPro2Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.shokz.ShokzOpenSwimProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sinilink.SinilinkCoordinator;
@@ -1130,6 +1131,7 @@ public enum DeviceType {
     PIXEL_BUDS_A(PixelBudsACoordinator::new),
     SHOKZ_OPENSWIM_PRO(ShokzOpenSwimProCoordinator::new),
     SHOKZ_OPENRUN_PRO_2(ShokzOpenRunPro2Coordinator::new),
+    SHOKZ_OPENFIT_PRO(ShokzOpenFitProCoordinator::new),
     BM2_BATTERY_MONITOR(Bm2Coordinator::new),
     BM6_BATTERY_MONITOR(Bm6Coordinator::new),
     VICTRON_SMARTSHUNT(VictronSmartShuntCoordinator::new),

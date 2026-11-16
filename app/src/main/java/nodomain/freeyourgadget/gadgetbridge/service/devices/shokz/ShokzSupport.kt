@@ -52,7 +52,7 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
     // is no notification for battery changes. Keep polling periodically so the UI doesn't get stuck
     // showing a stale level.
     private val batteryPollHandler = Handler(Looper.getMainLooper())
-    private val batteryPollRunnable = Runnable { queueCommand(ShokzCommand.BATTERY_GET) }
+    private val batteryPollRunnable = Runnable { queueBatteryCommands() }
 
     init {
         addSupportedService(UUID_SERVICE_SHOKZ)
@@ -87,7 +87,7 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
         if (supportsMp3) {
             queueCommand(ShokzCommand.MEDIA_SOURCE_GET)
         }
-        queueCommand(ShokzCommand.BATTERY_GET)
+        queueBatteryCommands()
         queueCommand(ShokzCommand.EQUALIZER_GET)
         queueCommand(ShokzCommand.PLAYBACK_STATUS_GET)
         queueCommand(ShokzCommand.VOLUME_GET)
@@ -96,6 +96,10 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
         }
         if (supportsControls) {
             queueCommand(ShokzCommand.CONTROLS_GET)
+        }
+        if (shokzCoordinator?.supportsNoiseCancelling() == true) {
+            queueCommand(ShokzCommand.NOISE_CANCELLING_GET)
+            queueCommand(ShokzCommand.NOISE_CANCELLING_LEVEL_GET)
         }
         queueCommand(ShokzCommand.LANGUAGE_GET)
 
@@ -202,6 +206,9 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             DeviceSettingsPreferenceConst.PREF_MEDIA_PLAYBACK_MODE -> setMediaPlaybackMode()
             DeviceSettingsPreferenceConst.PREF_SHOKZ_CONTROLS_LONG_PRESS_MULTI_FUNCTION,
             DeviceSettingsPreferenceConst.PREF_SHOKZ_CONTROLS_SIMULTANEOUS_VOLUME_UP_DOWN -> setControls()
+
+            DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE -> setNoiseCancelling()
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_NOISE_CANCELLING_LEVEL -> setNoiseCancellingLevel()
 
             DeviceSettingsPreferenceConst.PREF_BATTERY_POLLING_ENABLE,
             DeviceSettingsPreferenceConst.PREF_BATTERY_POLLING_INTERVAL -> rearmBatteryPollTimer()
@@ -320,6 +327,45 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             ShokzCommand.CONTROLS_SET,
             byteArrayOf(controls.code.toByte(), 0x00, 0x00, 0x00)
         )
+    }
+
+    private fun setNoiseCancelling() {
+        val enabled = devicePrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE, false)
+        LOG.info("Setting noise cancelling to {}", enabled)
+        queueCommand(ShokzCommand.NOISE_CANCELLING_SET, intArgs(if (enabled) 1 else 0))
+    }
+
+    private fun setNoiseCancellingLevel() {
+        val level = devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_NOISE_CANCELLING_LEVEL, 100)
+            .coerceIn(0, 100)
+        LOG.info("Setting noise cancelling level to {}", level)
+        queueCommand(ShokzCommand.NOISE_CANCELLING_LEVEL_SET, intArgs(level))
+    }
+
+    private fun intArgs(value: Int): ByteArray =
+        ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(value).array()
+
+    private fun queueBatteryCommands() {
+        queueCommand(ShokzCommand.BATTERY_GET)
+        if (shokzCoordinator?.supportsTws() == true) {
+            queueCommand(ShokzCommand.BATTERY_CASE_GET)
+        }
+    }
+
+    /**
+     * Most responses start with a zero status byte, followed by the actual value.
+     */
+    private fun readValueAfterZero(command: ShokzCommand, buf: ByteBuffer): Int? {
+        if (buf.remaining() < 2) {
+            LOG.warn("Payload too short for {}", command)
+            return null
+        }
+        val zero = buf.get().toInt()
+        if (zero != 0) {
+            LOG.warn("Unexpected non-zero byte 0x{} for {}", zero.toHexString(), command)
+            return null
+        }
+        return buf.get().toInt() and 0xff
     }
 
     private fun isMultipointDevicesResponse(payload: ByteArray): Boolean {
@@ -445,15 +491,72 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
                     LOG.warn("Unexpected non-zero byte 0x{} for {}", zero.toHexString(), command)
                     return
                 }
-                val batteryPercentage = ((buf.get().toInt() and 0xff) + 1) * 10
+                val batteryCount = if (shokzCoordinator?.supportsTws() == true) 2 else 1
+                for (batteryIndex in 0 until batteryCount) {
+                    if (!buf.hasRemaining()) {
+                        break
+                    }
+                    val raw = buf.get().toInt() and 0xff
+                    if (raw > 9) {
+                        LOG.warn("Ignoring unexpected battery value 0x{} for battery {}", raw.toHexString(), batteryIndex)
+                        continue
+                    }
+                    val batteryPercentage = (raw + 1) * 10
 
-                LOG.info("Got battery: {}%", batteryPercentage)
+                    LOG.info("Got battery {}: {}%", batteryIndex, batteryPercentage)
 
-                val batteryInfoEvent = GBDeviceEventBatteryInfo()
-                batteryInfoEvent.level = batteryPercentage
-                evaluateGBDeviceEvent(batteryInfoEvent)
+                    val batteryInfoEvent = GBDeviceEventBatteryInfo()
+                    batteryInfoEvent.batteryIndex = batteryIndex
+                    batteryInfoEvent.level = batteryPercentage
+                    evaluateGBDeviceEvent(batteryInfoEvent)
+                }
 
                 rearmBatteryPollTimer()
+            }
+
+            ShokzCommand.BATTERY_CASE_RET -> {
+                val batteryPercentage = readValueAfterZero(command, buf) ?: return
+                if (batteryPercentage > 100) {
+                    LOG.warn("Ignoring unexpected case battery value {}", batteryPercentage)
+                    return
+                }
+
+                LOG.info("Got case battery: {}%", batteryPercentage)
+
+                val batteryInfoEvent = GBDeviceEventBatteryInfo()
+                batteryInfoEvent.batteryIndex = 2
+                batteryInfoEvent.level = batteryPercentage
+                evaluateGBDeviceEvent(batteryInfoEvent)
+            }
+
+            ShokzCommand.NOISE_CANCELLING_RET -> {
+                val mode = readValueAfterZero(command, buf) ?: return
+                LOG.info("Got noise cancelling mode: {}", mode)
+                evaluateGBDeviceEvent(
+                    GBDeviceEventUpdatePreferences(
+                        DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE,
+                        mode == 1
+                    )
+                )
+            }
+
+            ShokzCommand.NOISE_CANCELLING_LEVEL_RET -> {
+                val level = readValueAfterZero(command, buf) ?: return
+                LOG.info("Got noise cancelling level: {}", level)
+                evaluateGBDeviceEvent(
+                    GBDeviceEventUpdatePreferences(
+                        DeviceSettingsPreferenceConst.PREF_SHOKZ_NOISE_CANCELLING_LEVEL,
+                        level.coerceIn(0, 100)
+                    )
+                )
+            }
+
+            ShokzCommand.NOISE_CANCELLING_ACK,
+            ShokzCommand.NOISE_CANCELLING_LEVEL_ACK -> {
+                val status = if (buf.remaining() >= 4) buf.getInt() else -1
+                if (status != 0) {
+                    LOG.warn("{} reported status 0x{}", command, status.toHexString())
+                }
             }
 
             ShokzCommand.EQUALIZER_RET, ShokzCommand.EQUALIZER_ACK -> {

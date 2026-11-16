@@ -20,6 +20,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.cards.QuickControlToggleGrou
 import nodomain.freeyourgadget.gadgetbridge.devices.cards.QuickControlTrailingAction
 import nodomain.freeyourgadget.gadgetbridge.devices.cards.QuickControls
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
+import nodomain.freeyourgadget.gadgetbridge.model.BatteryConfig
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
 import nodomain.freeyourgadget.gadgetbridge.service.devices.shokz.ShokzEqualizer
 import nodomain.freeyourgadget.gadgetbridge.service.devices.shokz.ShokzMediaSource
@@ -56,6 +57,29 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
      * headphones (e.g. the OpenRun Pro) are Bluetooth-only and don't support this.
      */
     open fun supportsMp3(): Boolean = true
+
+    /**
+     * Whether this device consists of two earbuds and a charging case (e.g. the OpenFit Pro),
+     * each reporting their own battery level.
+     */
+    open fun supportsTws(): Boolean = false
+
+    /**
+     * Whether this device supports toggling active noise cancelling and adjusting its level.
+     */
+    open fun supportsNoiseCancelling(): Boolean = false
+
+    override fun getBatteryCount(device: GBDevice): Int = if (supportsTws()) 3 else 1
+
+    override fun getBatteryConfig(device: GBDevice): Array<BatteryConfig> = if (supportsTws()) {
+        arrayOf(
+            BatteryConfig(0, R.drawable.ic_nothing_ear_l, R.string.left_earbud),
+            BatteryConfig(1, R.drawable.ic_nothing_ear_r, R.string.right_earbud),
+            BatteryConfig(2, R.drawable.ic_tws_case, R.string.battery_case),
+        )
+    } else {
+        super.getBatteryConfig(device)
+    }
 
     /**
      * Whether this device supports customizing the long-press multi-function button and
@@ -153,6 +177,16 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
             )
         }
 
+        controls.addAll(
+            QuickControls.fromDeviceSettings(
+                device,
+                keys = emptyList(),
+                optionalKeys = listOfNotNull(
+                    DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE.takeIf { supportsNoiseCancelling() },
+                ),
+            )
+        )
+
         controls.add(
             QuickControlDialog.forPreference(
                 key = DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_BLUETOOTH,
@@ -210,6 +244,28 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
                 icon = R.drawable.ic_music_note,
                 defaultValue = ShokzMediaSource.BLUETOOTH,
             )
+        }
+
+        if (supportsNoiseCancelling()) {
+            category(
+                key = "pref_key_header_shokz_noise_control",
+                title = R.string.prefs_noise_control,
+            ) {
+                switchSetting(
+                    key = DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE,
+                    title = R.string.prefs_active_noise_cancelling,
+                    icon = R.drawable.ic_noise_control_on,
+                )
+                seekbar(
+                    key = DeviceSettingsPreferenceConst.PREF_SHOKZ_NOISE_CANCELLING_LEVEL,
+                    title = R.string.prefs_active_noise_cancelling_level,
+                    icon = R.drawable.ic_surround,
+                    min = 0,
+                    max = 100,
+                    defaultValue = 100,
+                    dependency = DeviceSettingsPreferenceConst.PREF_ACTIVE_NOISE_CANCELLING_TOGGLE,
+                )
+            }
         }
 
         // Equalizer presets - same enum, filtered to entries valid for each media source
