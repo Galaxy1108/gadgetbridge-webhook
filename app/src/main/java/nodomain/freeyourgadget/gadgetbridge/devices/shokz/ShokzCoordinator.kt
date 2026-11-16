@@ -112,27 +112,46 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
     open fun supportsClassicAndVolumeBoost(): Boolean = false
 
     /**
+     * Whether this device supports the Privacy equalizer preset (code 0x09). Confirmed present on
+     * the OpenFit Pro; unverified on other Shokz devices, so disabled by default.
+     */
+    open fun supportsPrivacyEqualizer(): Boolean = false
+
+    /**
+     * Number of bands of the custom equalizer, each in the -5..5 range.
+     */
+    open fun customEqualizerBandCount(): Int = 5
+
+    /**
+     * Whether this device reads the equalizer via EQUALIZER_V2_GET and sets the custom equalizer
+     * via EQUALIZER_CUSTOM_SET, instead of EQUALIZER_GET and EQUALIZER_SET. Confirmed on the
+     * OpenFit Pro, whose official app never sends EQUALIZER_GET.
+     */
+    open fun supportsEqualizerV2(): Boolean = false
+
+    /**
      * Encodes the EQUALIZER_SET payload for a given preset. Beyond the preset code (first byte),
      * these carry extra device-specific tuning parameters that were reverse-engineered from the
      * respective official app/device traffic, and may not be identical across Shokz models.
      */
     open fun equalizerArgs(equalizer: ShokzEqualizer): ByteArray = when (equalizer) {
         ShokzEqualizer.STANDARD, ShokzEqualizer.SWIMMING, ShokzEqualizer.BASS, ShokzEqualizer.TREBLE,
-        ShokzEqualizer.CLASSIC, ShokzEqualizer.VOLUME_BOOST ->
+        ShokzEqualizer.CLASSIC, ShokzEqualizer.PRIVACY, ShokzEqualizer.VOLUME_BOOST ->
             byteArrayOf(equalizer.code.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
 
         ShokzEqualizer.VOCAL ->
             byteArrayOf(equalizer.code.toByte(), 0xfc.toByte(), 0x00, 0x03, 0x02, 0x02, 0x00, 0x00)
 
-        // CUSTOM carries 5 user-adjustable band gains, built separately from preferences by
+        // CUSTOM carries the user-adjustable band gains, built separately from preferences by
         // the caller - this default is never actually sent.
         ShokzEqualizer.CUSTOM ->
             byteArrayOf(equalizer.code.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
     }
 
     /**
-     * Encodes the EQUALIZER_SET payload for the custom equalizer, given the 5 band gains
-     * (each in the -5..5 range, as reverse-engineered from the official Shokz app).
+     * Encodes the payload for the custom equalizer, given [customEqualizerBandCount] band gains
+     * (each in the -5..5 range, as reverse-engineered from the official Shokz app). It is sent
+     * via EQUALIZER_CUSTOM_SET if [supportsEqualizerV2], otherwise via EQUALIZER_SET.
      */
     open fun customEqualizerArgs(bands: IntArray): ByteArray = byteArrayOf(
         ShokzEqualizer.CUSTOM.code.toByte(),
@@ -144,7 +163,8 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
         ShokzMediaSource.BLUETOOTH in equalizer.sources &&
             (supportsBassTreble() || equalizer != ShokzEqualizer.BASS && equalizer != ShokzEqualizer.TREBLE) &&
             (supportsCustomEqualizer() || equalizer != ShokzEqualizer.CUSTOM) &&
-            (supportsClassicAndVolumeBoost() || equalizer != ShokzEqualizer.CLASSIC && equalizer != ShokzEqualizer.VOLUME_BOOST)
+            (supportsClassicAndVolumeBoost() || equalizer != ShokzEqualizer.CLASSIC && equalizer != ShokzEqualizer.VOLUME_BOOST) &&
+            (supportsPrivacyEqualizer() || equalizer != ShokzEqualizer.PRIVACY)
 
     private fun mediaSource(device: GBDevice): ShokzMediaSource =
         if (!supportsMp3()) {
@@ -295,24 +315,10 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
                         ) == ShokzEqualizer.CUSTOM
                 },
             ) {
-                val bandKeys = listOf(
-                    DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_1,
-                    DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2,
-                    DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3,
-                    DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4,
-                    DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5,
-                )
-                val bandTitles = listOf(
-                    R.string.shokz_equalizer_band_1,
-                    R.string.shokz_equalizer_band_2,
-                    R.string.shokz_equalizer_band_3,
-                    R.string.shokz_equalizer_band_4,
-                    R.string.shokz_equalizer_band_5,
-                )
-                bandKeys.forEachIndexed { i, key ->
+                CUSTOM_EQUALIZER_BAND_KEYS.take(customEqualizerBandCount()).forEachIndexed { i, key ->
                     seekbar(
                         key = key,
-                        title = bandTitles[i],
+                        title = CUSTOM_EQUALIZER_BAND_TITLES[i],
                         icon = R.drawable.ic_graphic_eq,
                         min = -5,
                         max = 5,
@@ -369,4 +375,32 @@ abstract class ShokzCoordinator : AbstractBLClassicDeviceCoordinator() {
     override fun supportsPhoneCalls(device: GBDevice): Boolean = true
 
     override fun supportsCallControl(device: GBDevice): Boolean = true
+
+    companion object {
+        val CUSTOM_EQUALIZER_BAND_KEYS = listOf(
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_1,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_6,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_7,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_8,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_9,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_10,
+        )
+
+        private val CUSTOM_EQUALIZER_BAND_TITLES = listOf(
+            R.string.shokz_equalizer_band_1,
+            R.string.shokz_equalizer_band_2,
+            R.string.shokz_equalizer_band_3,
+            R.string.shokz_equalizer_band_4,
+            R.string.shokz_equalizer_band_5,
+            R.string.shokz_equalizer_band_6,
+            R.string.shokz_equalizer_band_7,
+            R.string.shokz_equalizer_band_8,
+            R.string.shokz_equalizer_band_9,
+            R.string.shokz_equalizer_band_10,
+        )
+    }
 }

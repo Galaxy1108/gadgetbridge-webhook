@@ -5928,6 +5928,12 @@ The result is the average of all the measurements.</string>
     <string name="shokz_equalizer_band_3">Band 3</string>
     <string name="shokz_equalizer_band_4">Band 4</string>
     <string name="shokz_equalizer_band_5">Band 5</string>
+    <string name="shokz_equalizer_band_6">Band 6</string>
+    <string name="shokz_equalizer_band_7">Band 7</string>
+    <string name="shokz_equalizer_band_8">Band 8</string>
+    <string name="shokz_equalizer_band_9">Band 9</string>
+    <string name="shokz_equalizer_band_10">Band 10</string>
+    <string name="shokz_equalizer_privacy">Privacy</string>
     <string name="shokz_controls_long_press_multi_function">Long-press the multi-function button</string>
     <string name="shokz_controls_simultaneous_volume_up_down">Long-press volume up and down simultaneously</string>
     <string name="track_name_required">Track name cannot be empty</string>

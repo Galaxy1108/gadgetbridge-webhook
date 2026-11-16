@@ -88,7 +88,11 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             queueCommand(ShokzCommand.MEDIA_SOURCE_GET)
         }
         queueBatteryCommands()
-        queueCommand(ShokzCommand.EQUALIZER_GET)
+        if (shokzCoordinator?.supportsEqualizerV2() == true) {
+            queueCommand(ShokzCommand.EQUALIZER_V2_GET)
+        } else {
+            queueCommand(ShokzCommand.EQUALIZER_GET)
+        }
         queueCommand(ShokzCommand.PLAYBACK_STATUS_GET)
         queueCommand(ShokzCommand.VOLUME_GET)
         if (supportsMp3) {
@@ -200,7 +204,12 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2,
             DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3,
             DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4,
-            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5 -> setCustomEqualizer()
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_6,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_7,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_8,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_9,
+            DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_10 -> setCustomEqualizer()
 
             DeviceSettingsPreferenceConst.PREF_MEDIA_SOURCE -> setMediaSource()
             DeviceSettingsPreferenceConst.PREF_MEDIA_PLAYBACK_MODE -> setMediaPlaybackMode()
@@ -240,30 +249,33 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
 
         LOG.info("Setting equalizer to {}", equalizer)
 
-        val args = if (equalizer == ShokzEqualizer.CUSTOM) {
-            customEqualizerArgs()
-        } else {
-            shokzCoordinator?.equalizerArgs(equalizer)
-                ?: byteArrayOf(equalizer.code.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+        if (equalizer == ShokzEqualizer.CUSTOM) {
+            setCustomEqualizer()
+            return
         }
+        val args = shokzCoordinator?.equalizerArgs(equalizer)
+            ?: byteArrayOf(equalizer.code.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
         queueCommand(ShokzCommand.EQUALIZER_SET, args)
     }
 
     private fun setCustomEqualizer() {
         LOG.info("Setting custom equalizer bands")
-        queueCommand(ShokzCommand.EQUALIZER_SET, customEqualizerArgs())
+        val command = if (shokzCoordinator?.supportsEqualizerV2() == true) {
+            ShokzCommand.EQUALIZER_CUSTOM_SET
+        } else {
+            ShokzCommand.EQUALIZER_SET
+        }
+        queueCommand(command, customEqualizerArgs())
     }
 
     private fun customEqualizerArgs(): ByteArray {
-        val bands = intArrayOf(
-            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_1, 0),
-            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2, 0),
-            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3, 0),
-            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4, 0),
-            devicePrefs.getInt(DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5, 0),
-        )
-        return shokzCoordinator?.customEqualizerArgs(bands)
-            ?: byteArrayOf(ShokzEqualizer.CUSTOM.code.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+        val coordinator = shokzCoordinator
+            ?: return byteArrayOf(ShokzEqualizer.CUSTOM.code.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+        val bands = ShokzCoordinator.CUSTOM_EQUALIZER_BAND_KEYS
+            .take(coordinator.customEqualizerBandCount())
+            .map { devicePrefs.getInt(it, 0).coerceIn(-5, 5) }
+            .toIntArray()
+        return coordinator.customEqualizerArgs(bands)
     }
 
     private fun setMediaSource() {
@@ -552,15 +564,16 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
             }
 
             ShokzCommand.NOISE_CANCELLING_ACK,
-            ShokzCommand.NOISE_CANCELLING_LEVEL_ACK -> {
+            ShokzCommand.NOISE_CANCELLING_LEVEL_ACK,
+            ShokzCommand.EQUALIZER_CUSTOM_ACK -> {
                 val status = if (buf.remaining() >= 4) buf.getInt() else -1
                 if (status != 0) {
                     LOG.warn("{} reported status 0x{}", command, status.toHexString())
                 }
             }
 
-            ShokzCommand.EQUALIZER_RET, ShokzCommand.EQUALIZER_ACK -> {
-                if (command == ShokzCommand.EQUALIZER_RET) {
+            ShokzCommand.EQUALIZER_RET, ShokzCommand.EQUALIZER_V2_RET, ShokzCommand.EQUALIZER_ACK -> {
+                if (command != ShokzCommand.EQUALIZER_ACK) {
                     val zero = buf.get().toInt()
                     if (zero != 0) {
                         LOG.warn("Unexpected non-zero byte 0x{} for {}", zero.toHexString(), command)
@@ -593,15 +606,18 @@ class ShokzSupport : AbstractHeadphoneBTBRDeviceSupport(LOG, MAX_MTU) {
                     equalizer.name.lowercase()
                 )
 
-                if (equalizer == ShokzEqualizer.CUSTOM && buf.remaining() >= 5) {
-                    val bandKeys = listOf(
-                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_1,
-                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_2,
-                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3,
-                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4,
-                        DeviceSettingsPreferenceConst.PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5,
-                    )
-                    for (bandKey in bandKeys) {
+                // EQUALIZER_V2_RET always carries a band count and the custom bands, even while
+                // a fixed preset is active.
+                val bandCount = if (command == ShokzCommand.EQUALIZER_V2_RET && buf.hasRemaining()) {
+                    buf.get().toInt() and 0xff
+                } else {
+                    5
+                }
+                val bandKeys = ShokzCoordinator.CUSTOM_EQUALIZER_BAND_KEYS
+                if (equalizer == ShokzEqualizer.CUSTOM &&
+                    bandCount <= bandKeys.size && buf.remaining() >= bandCount
+                ) {
+                    for (bandKey in bandKeys.take(bandCount)) {
                         equalizerEvent.withPreference(bandKey, buf.get().toInt())
                     }
                 }

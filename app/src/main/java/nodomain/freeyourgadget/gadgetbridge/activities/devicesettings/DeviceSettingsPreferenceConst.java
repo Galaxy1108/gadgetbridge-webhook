@@ -686,6 +686,11 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_3 = "pref_shokz_equalizer_custom_band_3";
     public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_4 = "pref_shokz_equalizer_custom_band_4";
     public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_5 = "pref_shokz_equalizer_custom_band_5";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_6 = "pref_shokz_equalizer_custom_band_6";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_7 = "pref_shokz_equalizer_custom_band_7";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_8 = "pref_shokz_equalizer_custom_band_8";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_9 = "pref_shokz_equalizer_custom_band_9";
+    public static final String PREF_SHOKZ_EQUALIZER_CUSTOM_BAND_10 = "pref_shokz_equalizer_custom_band_10";
     public static final String PREF_SHOKZ_CONTROLS_LONG_PRESS_MULTI_FUNCTION = "shokz_controls_long_press_multi_function";
     public static final String PREF_SHOKZ_CONTROLS_SIMULTANEOUS_VOLUME_UP_DOWN = "shokz_controls_simultaneous_volume_up_down";
     public static final String PREF_SHOKZ_NOISE_CANCELLING_LEVEL = "pref_shokz_noise_cancelling_level";
