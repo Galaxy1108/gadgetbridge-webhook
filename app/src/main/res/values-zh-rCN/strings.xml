@@ -6138,4 +6138,15 @@
     <string name="withings_scanwatch_pref_hr_alert_low_summary">当静息心率跌破这个值（bpm）时示警</string>
     <string name="withings_scanwatch_pref_hr_alert_high_title">高心率阈值</string>
     <string name="withings_scanwatch_pref_hr_alert_high_summary">当静息心率超出这个值（bpm）时示警</string>
+    <string name="shokz_equalizer_band_6">频段 6</string>
+    <string name="shokz_equalizer_band_7">频段 7</string>
+    <string name="shokz_equalizer_band_8">频段 8</string>
+    <string name="shokz_equalizer_band_9">频段 9</string>
+    <string name="shokz_equalizer_band_10">频段 10</string>
+    <string name="shokz_equalizer_privacy">隐私</string>
+    <string name="shokz_head_tracking">头部追踪</string>
+    <string name="shokz_head_tracking_summary">在你转头时保持 Dolby Atmos 音效舞台处于生效状态</string>
+    <string name="shokz_wearing_detection">穿戴检测</string>
+    <string name="baseus_eq_hifi_live">Hi-Fi Live</string>
+    <string name="baseus_eq_rock_classic">古典摇滚</string>
 </resources>
