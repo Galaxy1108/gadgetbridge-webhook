@@ -4,6 +4,7 @@ import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.enumList
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.equalizerPreset
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.multipointPairing
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings
@@ -45,6 +46,19 @@ class SennheiserMomentum3WirelessCoordinator : AbstractBLClassicDeviceCoordinato
             title = R.string.pref_header_sound,
             icon = R.drawable.ic_volume_up,
         ) {
+            enumList<SennheiserMomentum3NoiseControl>(
+                key = DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_NOISE_CONTROL,
+                title = R.string.prefs_noise_control,
+                icon = R.drawable.ic_noise_control_on,
+                defaultValue = SennheiserMomentum3NoiseControl.MAXIMUM,
+            )
+            switchSetting(
+                key = DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_TRANSPARENT_PAUSE,
+                title = R.string.sennheiser_momentum_3_transparent_pause_title,
+                summary = R.string.sennheiser_momentum_3_transparent_pause_summary,
+                icon = R.drawable.ic_pause,
+                defaultValue = true,
+            )
             switchSetting(
                 key = DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_HIGH_END,
                 title = R.string.sennheiser_momentum_3_high_end_title,

@@ -13,11 +13,14 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSett
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_EQUALIZER_MID
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_EQUALIZER_TREBLE
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_HIGH_END
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_NOISE_CONTROL
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_TRANSPARENT_PAUSE
 import nodomain.freeyourgadget.gadgetbridge.activities.multipoint.MultipointDevice
 import nodomain.freeyourgadget.gadgetbridge.activities.multipoint.MultipointPairingActivity
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventBatteryInfo
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventUpdatePreferences
 import nodomain.freeyourgadget.gadgetbridge.devices.sennheiser.SennheiserMomentum3EqualizerPreset
+import nodomain.freeyourgadget.gadgetbridge.devices.sennheiser.SennheiserMomentum3NoiseControl
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.BatteryState
 import nodomain.freeyourgadget.gadgetbridge.service.AbstractHeadphoneBTBRDeviceSupport
@@ -51,6 +54,8 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
     private val pairedDevices = sortedMapOf<Int, MultipointDevice>()
     private var receiverRegistered = false
     private var storedLevels: ByteArray? = null
+    private var transparentHearing = false
+    private var noiseCancellingMode = SennheiserMomentum3NoiseControl.MAXIMUM
 
     private data class Request(val group: Int, val command: Int, val data: ByteArray = byteArrayOf())
 
@@ -100,6 +105,9 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
         request(GROUP_DEVICES, CMD_OWN_DEVICE_INDEX)
         request(GROUP_EQUALIZER, CMD_EQUALIZER_READ_LEVELS, u16(0))
         request(GROUP_EQUALIZER, CMD_EQUALIZER_READ_LEVELS, u16(1))
+        request(GROUP_NOISE, CMD_NOISE_STATE)
+        request(GROUP_NOISE, CMD_NOISE_CANCELLING_MODE)
+        request(GROUP_NOISE, CMD_TRANSPARENT_KEEP_PLAYING)
         handler.postDelayed(batteryPoll, BATTERY_POLL_MILLIS)
         return builder
     }
@@ -165,6 +173,16 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
 
             GROUP_EQUALIZER to CMD_EQUALIZER_READ_LEVELS -> handleStoredLevels(readU16(request.data, 0), data)
 
+            GROUP_NOISE to CMD_NOISE_STATE -> handleNoiseState(data)
+
+            GROUP_NOISE to CMD_NOISE_CANCELLING_MODE -> if (data.size >= 2) {
+                SennheiserMomentum3NoiseControl.fromCode(readU16(data, 0))?.let { noiseCancellingMode = it }
+            }
+
+            GROUP_NOISE to CMD_TRANSPARENT_KEEP_PLAYING -> if (data.size >= 2) {
+                evaluateGBDeviceEvent(GBDeviceEventUpdatePreferences(PREF_SENNHEISER_MOMENTUM_3_TRANSPARENT_PAUSE, readU16(data, 0) == 0))
+            }
+
             else -> LOG.debug("Response {}/{}: {}", hex(request.group), hex(request.command), GB.hexdump(data))
         }
     }
@@ -205,6 +223,14 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
             PREF_SENNHEISER_MOMENTUM_3_EQUALIZER_TREBLE,
             PREF_SENNHEISER_MOMENTUM_3_HIGH_END -> sendEqualizer()
 
+            PREF_SENNHEISER_MOMENTUM_3_NOISE_CONTROL -> sendNoiseControl()
+
+            PREF_SENNHEISER_MOMENTUM_3_TRANSPARENT_PAUSE -> request(
+                GROUP_NOISE,
+                CMD_SET_TRANSPARENT_KEEP_PLAYING,
+                u16(if (devicePrefs.getBoolean(config, true)) 0 else 1),
+            )
+
             else -> super.onSendConfiguration(config)
         }
     }
@@ -241,8 +267,55 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
         }
     }
 
+    /**
+     * Switching transparent hearing off returns to the previous noise cancelling mode, so leaving it
+     * for another mode takes both commands.
+     */
+    private fun sendNoiseControl() {
+        val target = SennheiserMomentum3NoiseControl.fromPreference(
+            devicePrefs.getString(PREF_SENNHEISER_MOMENTUM_3_NOISE_CONTROL, "")
+        ) ?: return
+        val wantTransparent = target == SennheiserMomentum3NoiseControl.TRANSPARENT_HEARING
+        if (wantTransparent != transparentHearing) {
+            request(GROUP_NOISE, CMD_TOGGLE_TRANSPARENT_HEARING)
+            transparentHearing = wantTransparent
+        }
+        val code = target.code ?: return
+        if (target != noiseCancellingMode) {
+            request(GROUP_NOISE, CMD_SET_NOISE_CANCELLING_MODE, u16(code))
+            noiseCancellingMode = target
+        }
+    }
+
+    /** `state mode`: state 1 is noise cancelling in the given mode, 2 transparent hearing. */
+    private fun handleNoiseState(data: ByteArray) {
+        if (data.size < 4) {
+            return
+        }
+        val state = readU16(data, 0)
+        val mode = readU16(data, 2)
+        val control = when (state) {
+            NOISE_STATE_CANCELLING -> SennheiserMomentum3NoiseControl.fromCode(mode)?.also {
+                noiseCancellingMode = it
+                transparentHearing = false
+            }
+
+            NOISE_STATE_TRANSPARENT -> SennheiserMomentum3NoiseControl.TRANSPARENT_HEARING.also {
+                transparentHearing = true
+            }
+
+            else -> null
+        }
+        if (control == null) {
+            LOG.warn("Unknown noise control state {} mode {}", state, mode)
+            return
+        }
+        evaluateGBDeviceEvent(GBDeviceEventUpdatePreferences(PREF_SENNHEISER_MOMENTUM_3_NOISE_CONTROL, control.name.lowercase()))
+    }
+
     private fun handleNotification(frame: Frame) {
         when (frame.group to frame.command) {
+            GROUP_NOISE to NOTIFY_NOISE_STATE -> handleNoiseState(frame.data)
             GROUP_DEVICES to NOTIFY_DEVICE_STATE -> handleDeviceState(frame.data)
             else -> LOG.debug("Notification {}/{}: {}", hex(frame.group), hex(frame.command), GB.hexdump(frame.data))
         }
@@ -415,6 +488,17 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
 
         const val GROUP_BATTERY = 0x12
         const val CMD_BATTERY_LEVEL = 0x03
+
+        const val GROUP_NOISE = 0x17
+        const val CMD_SET_NOISE_CANCELLING_MODE = 0x08
+        const val CMD_NOISE_CANCELLING_MODE = 0x09
+        const val CMD_SET_TRANSPARENT_KEEP_PLAYING = 0x0A
+        const val CMD_TRANSPARENT_KEEP_PLAYING = 0x0B
+        const val NOTIFY_NOISE_STATE = 0x0E
+        const val CMD_NOISE_STATE = 0x10
+        const val CMD_TOGGLE_TRANSPARENT_HEARING = 0x11
+        private const val NOISE_STATE_CANCELLING = 1
+        private const val NOISE_STATE_TRANSPARENT = 2
 
         private fun hex(value: Int) = String.format("%02x", value)
     }
