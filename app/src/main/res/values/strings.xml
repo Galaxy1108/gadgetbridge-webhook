@@ -6552,6 +6552,12 @@ The result is the average of all the measurements.</string>
     <string name="sennheiser_momentum_voice_answer_summary">Accept or reject an incoming call by saying yes or no</string>
     <string name="sennheiser_momentum_swap_volume_buttons_title">Swap volume buttons</string>
     <string name="sennheiser_momentum_swap_volume_buttons_summary">Reverse the direction of the volume + and - buttons</string>
+    <string name="sennheiser_momentum_3_equalizer_movie">Movie</string>
+    <string name="sennheiser_momentum_3_equalizer_bass">Bass</string>
+    <string name="sennheiser_momentum_3_equalizer_mid">Mid</string>
+    <string name="sennheiser_momentum_3_equalizer_treble">Treble</string>
+    <string name="sennheiser_momentum_3_high_end_title">High-end sound tuning</string>
+    <string name="sennheiser_momentum_3_high_end_summary">Sennheiser\'s reference sound, used instead of the equalizer</string>
 
     <string name="devicetype_f8" translatable="false">F8</string>
     <string name="f8_prefs_users">Users</string>
