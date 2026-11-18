@@ -6562,6 +6562,9 @@ The result is the average of all the measurements.</string>
     <string name="sennheiser_momentum_3_noise_control_anti_wind">Anti-wind</string>
     <string name="sennheiser_momentum_3_noise_control_anti_pressure">Anti-pressure</string>
     <string name="sennheiser_momentum_3_noise_control_transparent_hearing">Transparent hearing</string>
+    <string name="sennheiser_momentum_3_noise_control_maximum_short">Max</string>
+    <string name="sennheiser_momentum_3_noise_control_anti_pressure_short">Pressure</string>
+    <string name="sennheiser_momentum_3_noise_control_transparent_hearing_short">Ambient</string>
     <string name="sennheiser_momentum_3_transparent_pause_title">Pause music automatically</string>
     <string name="sennheiser_momentum_3_transparent_pause_summary">Automatically pauses your music when transparent hearing is activated</string>
 
