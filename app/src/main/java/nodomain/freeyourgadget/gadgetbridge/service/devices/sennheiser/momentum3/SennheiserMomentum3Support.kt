@@ -1,7 +1,15 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.sennheiser.momentum3
 
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import nodomain.freeyourgadget.gadgetbridge.activities.multipoint.MultipointDevice
+import nodomain.freeyourgadget.gadgetbridge.activities.multipoint.MultipointPairingActivity
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventBatteryInfo
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.BatteryState
@@ -9,7 +17,9 @@ import nodomain.freeyourgadget.gadgetbridge.service.AbstractHeadphoneBTBRDeviceS
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.TransactionBuilder
 import nodomain.freeyourgadget.gadgetbridge.service.devices.sennheiser.momentum3.SennheiserMomentum3Protocol.Frame
 import nodomain.freeyourgadget.gadgetbridge.service.devices.sennheiser.momentum3.SennheiserMomentum3Protocol.readU16
+import nodomain.freeyourgadget.gadgetbridge.service.devices.sennheiser.momentum3.SennheiserMomentum3Protocol.u16
 import nodomain.freeyourgadget.gadgetbridge.util.GB
+import nodomain.freeyourgadget.gadgetbridge.util.kotlin.getParcelableCompat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.ArrayDeque
@@ -27,6 +37,12 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
     // so only the first frame of a connection carries a leading 0x2A.
     private var startDelimiterPending = false
 
+    private var ownDeviceIndex = 0
+    private var pairedDeviceCount = 0
+    private var pairedDeviceResponses = 0
+    private val pairedDevices = sortedMapOf<Int, MultipointDevice>()
+    private var receiverRegistered = false
+
     private data class Request(val group: Int, val command: Int, val data: ByteArray = byteArrayOf())
 
     init {
@@ -35,9 +51,28 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
 
     override fun useAutoConnect(): Boolean = false
 
+    override fun setContext(gbDevice: GBDevice, btAdapter: BluetoothAdapter, context: Context) {
+        super.setContext(gbDevice, btAdapter, context)
+        if (!receiverRegistered) {
+            val filter = IntentFilter().apply {
+                addAction(MultipointPairingActivity.ACTION_MULTIPOINT_GET_STATUS)
+                addAction(MultipointPairingActivity.ACTION_MULTIPOINT_GET_DEVICES)
+                addAction(MultipointPairingActivity.ACTION_MULTIPOINT_CONNECT_DEVICE)
+                addAction(MultipointPairingActivity.ACTION_MULTIPOINT_DISCONNECT_DEVICE)
+                addAction(MultipointPairingActivity.ACTION_MULTIPOINT_FORGET_DEVICE)
+            }
+            LocalBroadcastManager.getInstance(context).registerReceiver(multipointReceiver, filter)
+            receiverRegistered = true
+        }
+    }
+
     override fun dispose() {
         synchronized(ConnectionMonitor) {
             handler.removeCallbacksAndMessages(null)
+            if (receiverRegistered) {
+                LocalBroadcastManager.getInstance(context).unregisterReceiver(multipointReceiver)
+                receiverRegistered = false
+            }
             super.dispose()
         }
     }
@@ -53,6 +88,7 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
 
         request(GROUP_SYSTEM, CMD_PROTOCOL_VERSION)
         request(GROUP_BATTERY, CMD_BATTERY_LEVEL)
+        request(GROUP_DEVICES, CMD_OWN_DEVICE_INDEX)
         handler.postDelayed(batteryPoll, BATTERY_POLL_MILLIS)
         return builder
     }
@@ -92,14 +128,130 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
                 })
             }
 
+            GROUP_DEVICES to CMD_OWN_DEVICE_INDEX -> if (data.size >= 2) {
+                ownDeviceIndex = readU16(data, 0)
+            }
+
+            GROUP_DEVICES to CMD_PAIRED_DEVICE_COUNT -> if (data.size >= 2) {
+                pairedDeviceCount = readU16(data, 0)
+                pairedDeviceResponses = 0
+                pairedDevices.clear()
+                if (pairedDeviceCount == 0) {
+                    broadcastDeviceList()
+                }
+                for (index in 1..pairedDeviceCount) {
+                    request(GROUP_DEVICES, CMD_PAIRED_DEVICE, u16(index))
+                }
+            }
+
+            GROUP_DEVICES to CMD_PAIRED_DEVICE -> {
+                parsePairedDevice(data)?.let { pairedDevices[it.first] = it.second }
+                pairedDeviceResponses++
+                if (pairedDeviceResponses >= pairedDeviceCount) {
+                    broadcastDeviceList()
+                }
+            }
+
             else -> LOG.debug("Response {}/{}: {}", hex(request.group), hex(request.command), GB.hexdump(data))
         }
     }
 
     private fun handleNotification(frame: Frame) {
         when (frame.group to frame.command) {
+            GROUP_DEVICES to NOTIFY_DEVICE_STATE -> handleDeviceState(frame.data)
             else -> LOG.debug("Notification {}/{}: {}", hex(frame.group), hex(frame.command), GB.hexdump(frame.data))
         }
+    }
+
+    /** `0005 index state`: state 0 is disconnected, 1 connected and 0xFF forgotten. */
+    private fun handleDeviceState(data: ByteArray) {
+        if (data.size < 6) {
+            return
+        }
+        val index = readU16(data, 2)
+        when (val state = readU16(data, 4)) {
+            0, 1 -> {
+                val device = pairedDevices[index]
+                if (device == null) {
+                    request(GROUP_DEVICES, CMD_PAIRED_DEVICE_COUNT)
+                    return
+                }
+                pairedDevices[index] = device.copy(isConnected = state == 1)
+                broadcastDeviceList()
+            }
+
+            else -> request(GROUP_DEVICES, CMD_PAIRED_DEVICE_COUNT)
+        }
+    }
+
+    private fun parsePairedDevice(data: ByteArray): Pair<Int, MultipointDevice>? {
+        if (data.size < 6) {
+            return null
+        }
+        val index = readU16(data, 0)
+        val connected = readU16(data, 4) != 0
+        val name = StringBuilder()
+        var offset = 6
+        while (offset + 1 < data.size && offset < 6 + NAME_LENGTH) {
+            val c = readU16(data, offset)
+            if (c == 0) {
+                break
+            }
+            name.append(c.toChar())
+            offset += 2
+        }
+        // An unused slot comes without a name.
+        if (name.isBlank()) {
+            return null
+        }
+        return index to MultipointDevice(
+            address = index.toString(),
+            name = name.toString(),
+            isConnected = connected,
+            canForget = index != ownDeviceIndex,
+        )
+    }
+
+    private val multipointReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val device = intent.getParcelableCompat<GBDevice>(GBDevice.EXTRA_DEVICE)
+            if (device?.address != getDevice().address) {
+                return
+            }
+            val index = intent.getStringExtra(MultipointPairingActivity.EXTRA_DEVICE_ADDRESS)?.toIntOrNull()
+            when (intent.action) {
+                MultipointPairingActivity.ACTION_MULTIPOINT_GET_STATUS -> broadcastMultipointStatus()
+                MultipointPairingActivity.ACTION_MULTIPOINT_GET_DEVICES -> {
+                    request(GROUP_DEVICES, CMD_OWN_DEVICE_INDEX)
+                    request(GROUP_DEVICES, CMD_PAIRED_DEVICE_COUNT)
+                }
+
+                MultipointPairingActivity.ACTION_MULTIPOINT_CONNECT_DEVICE ->
+                    index?.let { request(GROUP_DEVICES, CMD_CONNECT_DEVICE, u16(it)) }
+
+                MultipointPairingActivity.ACTION_MULTIPOINT_DISCONNECT_DEVICE ->
+                    index?.let { request(GROUP_DEVICES, CMD_DISCONNECT_DEVICE, u16(it)) }
+
+                MultipointPairingActivity.ACTION_MULTIPOINT_FORGET_DEVICE ->
+                    index?.let { request(GROUP_DEVICES, CMD_FORGET_DEVICE, u16(it)) }
+            }
+        }
+    }
+
+    private fun broadcastMultipointStatus() {
+        val intent = Intent(MultipointPairingActivity.ACTION_MULTIPOINT_STATUS_UPDATE).apply {
+            putExtra(GBDevice.EXTRA_DEVICE, getDevice())
+            putExtra(MultipointPairingActivity.EXTRA_MULTIPOINT_ENABLED, true)
+        }
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+    }
+
+    private fun broadcastDeviceList() {
+        val intent = Intent(MultipointPairingActivity.ACTION_MULTIPOINT_DEVICE_LIST).apply {
+            putExtra(GBDevice.EXTRA_DEVICE, getDevice())
+            putParcelableArrayListExtra(MultipointPairingActivity.EXTRA_DEVICE_LIST, ArrayList(pairedDevices.values))
+        }
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
     }
 
     private val batteryPoll = object : Runnable {
@@ -157,9 +309,19 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
         private val START_DELIMITER = byteArrayOf(0x2A)
         private const val REQUEST_TIMEOUT_MILLIS = 2000L
         private const val BATTERY_POLL_MILLIS = 10 * 60 * 1000L
+        private const val NAME_LENGTH = 64
 
         const val GROUP_SYSTEM = 0x01
         const val CMD_PROTOCOL_VERSION = 0x16
+
+        const val GROUP_DEVICES = 0x06
+        const val CMD_PAIRED_DEVICE = 0x32
+        const val CMD_CONNECT_DEVICE = 0x33
+        const val CMD_DISCONNECT_DEVICE = 0x34
+        const val CMD_FORGET_DEVICE = 0x36
+        const val CMD_OWN_DEVICE_INDEX = 0x38
+        const val CMD_PAIRED_DEVICE_COUNT = 0x44
+        const val NOTIFY_DEVICE_STATE = 0xF0
 
         const val GROUP_BATTERY = 0x12
         const val CMD_BATTERY_LEVEL = 0x03

@@ -3,6 +3,7 @@ package nodomain.freeyourgadget.gadgetbridge.devices.sennheiser
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsScreen
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.components.multipointPairing
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.deviceSettings
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractBLClassicDeviceCoordinator
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator
@@ -35,6 +36,7 @@ class SennheiserMomentum3WirelessCoordinator : AbstractBLClassicDeviceCoordinato
     override fun createDeviceSupport(device: GBDevice): DeviceSupport = SennheiserMomentum3Support()
 
     override fun getDeviceSettings(device: GBDevice): DeviceSettingsSpec = deviceSettings {
+        multipointPairing()
         xmlScreen(
             DeviceSpecificSettingsScreen.CALLS_AND_NOTIFICATIONS,
             R.xml.devicesettings_headphones,
