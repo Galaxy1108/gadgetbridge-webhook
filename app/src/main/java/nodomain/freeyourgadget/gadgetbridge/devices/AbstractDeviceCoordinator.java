@@ -138,6 +138,7 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
 
     private final DeviceService deviceService;
     private final ScopedPrefsProvider scopedPrefs;
+    private final DeviceManager deviceManager;
 
     protected Pattern supportedDeviceName = null;
 
@@ -151,13 +152,15 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     }
 
     private AbstractDeviceCoordinator(final AbstractDeviceCoordinatorEntryPoint dependencies) {
-        this(dependencies.deviceService(), dependencies.scopedPrefs());
+        this(dependencies.deviceService(), dependencies.scopedPrefs(), dependencies.deviceManager());
     }
 
     protected AbstractDeviceCoordinator(@NonNull final DeviceService deviceService,
-                                        @NonNull final ScopedPrefsProvider scopedPrefs) {
+                                        @NonNull final ScopedPrefsProvider scopedPrefs,
+                                        @NonNull final DeviceManager deviceManager) {
         this.deviceService = deviceService;
         this.scopedPrefs = scopedPrefs;
+        this.deviceManager = deviceManager;
     }
 
     private static AbstractDeviceCoordinatorEntryPoint lookUpDependencies() {
@@ -183,6 +186,14 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     @NonNull
     protected ScopedPrefsProvider getScopedPrefs() {
         return scopedPrefs;
+    }
+
+    /**
+     * The devices the app knows about.
+     */
+    @NonNull
+    protected DeviceManager getDeviceManager() {
+        return deviceManager;
     }
 
     /**

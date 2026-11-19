@@ -19,6 +19,7 @@ class AbstractDeviceCoordinatorDependenciesTest {
 
     private val deviceService = mockk<DeviceService>()
     private val scopedPrefs = mockk<ScopedPrefsProvider>()
+    private val deviceManager = mockk<DeviceManager>()
 
     @Test
     fun theNoArgumentConstructorTakesTheRegisteredApplicationsDependencies() {
@@ -26,6 +27,7 @@ class AbstractDeviceCoordinatorDependenciesTest {
 
         assertSame(dependencies.deviceService, coordinator.getDeviceService())
         assertSame(dependencies.scopedPrefs, coordinator.getScopedPrefs())
+        assertSame(dependencies.deviceManager, coordinator.getDeviceManager())
     }
 
     @Test
@@ -38,16 +40,18 @@ class AbstractDeviceCoordinatorDependenciesTest {
 
     @Test
     fun theOtherConstructorTakesTheDependenciesItIsGiven() {
-        val coordinator = CoordinatorWithGivenDependencies(deviceService, scopedPrefs)
+        val coordinator = CoordinatorWithGivenDependencies(deviceService, scopedPrefs, deviceManager)
 
         assertSame(deviceService, coordinator.getDeviceService())
         assertSame(scopedPrefs, coordinator.getScopedPrefs())
+        assertSame(deviceManager, coordinator.getDeviceManager())
     }
 
     private class CoordinatorWithGivenDependencies(
         deviceService: DeviceService,
         scopedPrefs: ScopedPrefsProvider,
-    ) : AbstractDeviceCoordinator(deviceService, scopedPrefs) {
+        deviceManager: DeviceManager,
+    ) : AbstractDeviceCoordinator(deviceService, scopedPrefs, deviceManager) {
         override fun getManufacturer(): String = throw UnsupportedOperationException()
 
         override fun createDeviceSupport(device: GBDevice): DeviceSupport = throw UnsupportedOperationException()

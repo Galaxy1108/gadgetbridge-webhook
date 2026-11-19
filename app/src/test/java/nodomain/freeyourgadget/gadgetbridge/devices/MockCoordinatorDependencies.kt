@@ -21,10 +21,12 @@ import org.junit.rules.ExternalResource
 class MockCoordinatorDependencies : ExternalResource() {
     val deviceService = mockk<DeviceService>()
     val scopedPrefs = mockk<ScopedPrefsProvider>()
+    val deviceManager = mockk<DeviceManager>()
 
     private val entryPoint = mockk<AbstractDeviceCoordinatorEntryPoint> {
         every { deviceService() } returns this@MockCoordinatorDependencies.deviceService
         every { scopedPrefs() } returns this@MockCoordinatorDependencies.scopedPrefs
+        every { deviceManager() } returns this@MockCoordinatorDependencies.deviceManager
     }
 
     override fun before() {

@@ -980,7 +980,7 @@ public class TestDeviceCoordinator extends AbstractDeviceCoordinator {
             return null;
         }
 
-        final List<GBDevice> devices = app.getDeviceManager().getDevices();
+        final List<GBDevice> devices = getDeviceManager().getDevices();
         for (GBDevice device : devices) {
             if (DeviceType.TEST == device.getType()) {
                 return device;

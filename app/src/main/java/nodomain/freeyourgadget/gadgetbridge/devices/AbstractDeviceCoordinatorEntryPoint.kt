@@ -15,4 +15,6 @@ interface AbstractDeviceCoordinatorEntryPoint {
     fun deviceService(): DeviceService
 
     fun scopedPrefs(): ScopedPrefsProvider
+
+    fun deviceManager(): DeviceManager
 }
