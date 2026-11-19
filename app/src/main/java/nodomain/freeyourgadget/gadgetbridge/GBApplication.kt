@@ -584,22 +584,22 @@ open class GBApplication : Application() {
             return app().doNotDisturbPolicy.getGrantedInterruptionFilter()
         }
 
+        /**
+         * - In a coordinator: `getScopedPrefs().getDeviceSpecificSharedPrefs(deviceIdentifier)`.
+         */
         @Deprecated("Use Hilt DI to inject ScopedPrefsProvider instead.")
         @JvmStatic
         fun getDeviceSpecificSharedPrefs(deviceIdentifier: CharSequence?): SharedPreferences {
             return app().scopedPrefs.getDeviceSpecificSharedPrefs(deviceIdentifier)
         }
 
+        /**
+         * - In a coordinator: `getScopedPrefs().getDevicePrefs(gbDevice)`.
+         */
         @Deprecated("Use Hilt DI to inject ScopedPrefsProvider instead.")
         @JvmStatic
         fun getDevicePrefs(gbDevice: GBDevice): DevicePrefs {
             return app().scopedPrefs.getDevicePrefs(gbDevice)
-        }
-
-        @Deprecated("Use Hilt DI to inject ScopedPrefsProvider instead.")
-        @JvmStatic
-        fun deleteDeviceSpecificSharedPrefs(deviceIdentifier: CharSequence?) {
-            app().scopedPrefs.deleteDeviceSpecificSharedPrefs(deviceIdentifier)
         }
 
         /**

@@ -6,6 +6,7 @@ import nodomain.freeyourgadget.gadgetbridge.di.RootEntryPoints
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceService
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport
+import nodomain.freeyourgadget.gadgetbridge.util.preferences.ScopedPrefsProvider
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -17,12 +18,14 @@ class AbstractDeviceCoordinatorDependenciesTest {
     val dependencies = MockCoordinatorDependencies()
 
     private val deviceService = mockk<DeviceService>()
+    private val scopedPrefs = mockk<ScopedPrefsProvider>()
 
     @Test
     fun theNoArgumentConstructorTakesTheRegisteredApplicationsDependencies() {
         val coordinator = UnknownDeviceCoordinator()
 
         assertSame(dependencies.deviceService, coordinator.getDeviceService())
+        assertSame(dependencies.scopedPrefs, coordinator.getScopedPrefs())
     }
 
     @Test
@@ -35,14 +38,16 @@ class AbstractDeviceCoordinatorDependenciesTest {
 
     @Test
     fun theOtherConstructorTakesTheDependenciesItIsGiven() {
-        val coordinator = CoordinatorWithGivenDependencies(deviceService)
+        val coordinator = CoordinatorWithGivenDependencies(deviceService, scopedPrefs)
 
         assertSame(deviceService, coordinator.getDeviceService())
+        assertSame(scopedPrefs, coordinator.getScopedPrefs())
     }
 
     private class CoordinatorWithGivenDependencies(
         deviceService: DeviceService,
-    ) : AbstractDeviceCoordinator(deviceService) {
+        scopedPrefs: ScopedPrefsProvider,
+    ) : AbstractDeviceCoordinator(deviceService, scopedPrefs) {
         override fun getManufacturer(): String = throw UnsupportedOperationException()
 
         override fun createDeviceSupport(device: GBDevice): DeviceSupport = throw UnsupportedOperationException()

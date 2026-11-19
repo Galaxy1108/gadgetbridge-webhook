@@ -121,6 +121,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.permissions.DevicePermission;
 import nodomain.freeyourgadget.gadgetbridge.util.permissions.GBPermission;
 import nodomain.freeyourgadget.gadgetbridge.util.preferences.DevicePrefs;
+import nodomain.freeyourgadget.gadgetbridge.util.preferences.ScopedPrefsProvider;
 import nodomain.freeyourgadget.gadgetbridge.widgets.DeviceWidgetsProvider;
 
 /**
@@ -136,6 +137,7 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDeviceCoordinator.class);
 
     private final DeviceService deviceService;
+    private final ScopedPrefsProvider scopedPrefs;
 
     protected Pattern supportedDeviceName = null;
 
@@ -149,11 +151,13 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     }
 
     private AbstractDeviceCoordinator(final AbstractDeviceCoordinatorEntryPoint dependencies) {
-        this(dependencies.deviceService());
+        this(dependencies.deviceService(), dependencies.scopedPrefs());
     }
 
-    protected AbstractDeviceCoordinator(@NonNull final DeviceService deviceService) {
+    protected AbstractDeviceCoordinator(@NonNull final DeviceService deviceService,
+                                        @NonNull final ScopedPrefsProvider scopedPrefs) {
         this.deviceService = deviceService;
+        this.scopedPrefs = scopedPrefs;
     }
 
     private static AbstractDeviceCoordinatorEntryPoint lookUpDependencies() {
@@ -171,6 +175,14 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     @NonNull
     protected DeviceService getDeviceService() {
         return deviceService;
+    }
+
+    /**
+     * The preferences files scoped to a single device.
+     */
+    @NonNull
+    protected ScopedPrefsProvider getScopedPrefs() {
+        return scopedPrefs;
     }
 
     /**
@@ -290,7 +302,7 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
         }
 
         LOG.debug("Deleting device shared preferences");
-        GBApplication.deleteDeviceSpecificSharedPrefs(gbDevice.getAddress());
+        getScopedPrefs().deleteDeviceSpecificSharedPrefs(gbDevice.getAddress());
 
         LOG.debug("Will delete devices data from database");
         try (DBHandler dbHandler = GBApplication.acquireDB()) {
