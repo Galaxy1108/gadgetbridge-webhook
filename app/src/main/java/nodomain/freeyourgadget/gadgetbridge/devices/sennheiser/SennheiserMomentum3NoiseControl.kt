@@ -15,7 +15,7 @@ enum class SennheiserMomentum3NoiseControl(
     MAXIMUM(R.string.sennheiser_momentum_3_noise_control_maximum, R.string.sennheiser_momentum_3_noise_control_maximum_short, R.drawable.ic_noise_control_on, 1),
     ANTI_WIND(R.string.sennheiser_momentum_3_noise_control_anti_wind, R.string.sennheiser_momentum_3_noise_control_anti_wind, R.drawable.ic_air, 3),
     ANTI_PRESSURE(R.string.sennheiser_momentum_3_noise_control_anti_pressure, R.string.sennheiser_momentum_3_noise_control_anti_pressure_short, R.drawable.ic_pressure, 4),
-    TRANSPARENT_HEARING(R.string.sennheiser_momentum_3_noise_control_transparent_hearing, R.string.sennheiser_momentum_3_noise_control_transparent_hearing_short, R.drawable.ic_hearing, null);
+    TRANSPARENT_HEARING(R.string.sennheiser_momentum_3_noise_control_transparent_hearing, R.string.sony_ambient_sound_ambient_sound_short, R.drawable.ic_hearing, null);
 
     companion object {
         fun fromCode(code: Int): SennheiserMomentum3NoiseControl? = entries.firstOrNull { it.code == code }

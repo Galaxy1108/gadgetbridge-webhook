@@ -111,9 +111,9 @@ class SennheiserMomentum3WirelessCoordinator : AbstractBLClassicDeviceCoordinato
                 dependency = DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_HIGH_END,
             )
             listOf(
-                DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_EQUALIZER_BASS to R.string.sennheiser_momentum_3_equalizer_bass,
+                DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_EQUALIZER_BASS to R.string.haylou_s35_anc_eq_bass,
                 DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_EQUALIZER_MID to R.string.sennheiser_momentum_3_equalizer_mid,
-                DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_EQUALIZER_TREBLE to R.string.sennheiser_momentum_3_equalizer_treble,
+                DeviceSettingsPreferenceConst.PREF_SENNHEISER_MOMENTUM_3_EQUALIZER_TREBLE to R.string.ugreen_equalizer_treble,
             ).forEach { (key, title) ->
                 seekbar(
                     key = key,

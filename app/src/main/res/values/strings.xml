@@ -6553,9 +6553,7 @@ The result is the average of all the measurements.</string>
     <string name="sennheiser_momentum_swap_volume_buttons_title">Swap volume buttons</string>
     <string name="sennheiser_momentum_swap_volume_buttons_summary">Reverse the direction of the volume + and - buttons</string>
     <string name="sennheiser_momentum_3_equalizer_movie">Movie</string>
-    <string name="sennheiser_momentum_3_equalizer_bass">Bass</string>
     <string name="sennheiser_momentum_3_equalizer_mid">Mid</string>
-    <string name="sennheiser_momentum_3_equalizer_treble">Treble</string>
     <string name="sennheiser_momentum_3_high_end_title">High-end sound tuning</string>
     <string name="sennheiser_momentum_3_high_end_summary">Sennheiser\'s reference sound, used instead of the equalizer</string>
     <string name="sennheiser_momentum_3_noise_control_maximum">Maximum</string>
@@ -6564,7 +6562,6 @@ The result is the average of all the measurements.</string>
     <string name="sennheiser_momentum_3_noise_control_transparent_hearing">Transparent hearing</string>
     <string name="sennheiser_momentum_3_noise_control_maximum_short">Max</string>
     <string name="sennheiser_momentum_3_noise_control_anti_pressure_short">Pressure</string>
-    <string name="sennheiser_momentum_3_noise_control_transparent_hearing_short">Ambient</string>
     <string name="sennheiser_momentum_3_transparent_pause_title">Pause music automatically</string>
     <string name="sennheiser_momentum_3_transparent_pause_summary">Automatically pauses your music when transparent hearing is activated</string>
 
