@@ -498,6 +498,8 @@ open class GBApplication : Application() {
          * Returns the facade for talking to devices. Devices are managed by
          * an Android Service and this facade provides access to its functionality.
          *
+         * - In a coordinator: `getDeviceService()`.
+         *
          * @return the facade for talking to the service/devices.
          */
         @Deprecated("Use Hilt DI to inject DeviceService instead.")
@@ -509,6 +511,8 @@ open class GBApplication : Application() {
         /**
          * Returns the facade for talking to a specific device. Devices are managed by
          * an Android Service and this facade provides access to its functionality.
+         *
+         * - In a coordinator: `getDeviceService().forDevice(device)`.
          *
          * @return the facade for talking to the service/device.
          */
