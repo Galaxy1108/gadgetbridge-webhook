@@ -98,7 +98,6 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
             inFlight = null
             startDelimiterPending = true
         }
-        builder.setDeviceState(GBDevice.State.INITIALIZED)
 
         request(GROUP_SYSTEM, CMD_PROTOCOL_VERSION)
         request(GROUP_BATTERY, CMD_BATTERY_LEVEL)
@@ -109,6 +108,7 @@ class SennheiserMomentum3Support : AbstractHeadphoneBTBRDeviceSupport(LOG, 1024)
         request(GROUP_NOISE, CMD_NOISE_CANCELLING_MODE)
         request(GROUP_NOISE, CMD_TRANSPARENT_KEEP_PLAYING)
         handler.postDelayed(batteryPoll, BATTERY_POLL_MILLIS)
+        builder.setDeviceState(GBDevice.State.INITIALIZED)
         return builder
     }
 
