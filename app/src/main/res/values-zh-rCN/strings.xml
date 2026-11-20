@@ -6149,4 +6149,17 @@
     <string name="shokz_wearing_detection">穿戴检测</string>
     <string name="baseus_eq_hifi_live">Hi-Fi Live</string>
     <string name="baseus_eq_rock_classic">古典摇滚</string>
+    <string name="sennheiser_momentum_3_equalizer_movie">影院</string>
+    <string name="sennheiser_momentum_3_equalizer_mid">Mid</string>
+    <string name="sennheiser_momentum_3_high_end_title">高端调音</string>
+    <string name="sennheiser_momentum_3_high_end_summary">使用森海塞尔的参考声音而非均衡器</string>
+    <string name="sennheiser_momentum_3_noise_control_maximum">最大</string>
+    <string name="sennheiser_momentum_3_noise_control_anti_wind">抗风</string>
+    <string name="sennheiser_momentum_3_noise_control_anti_pressure">抗压</string>
+    <string name="sennheiser_momentum_3_noise_control_transparent_hearing">透明聆听</string>
+    <string name="sennheiser_momentum_3_noise_control_maximum_short">最大</string>
+    <string name="sennheiser_momentum_3_noise_control_anti_pressure_short">压力</string>
+    <string name="sennheiser_momentum_3_transparent_pause_title">自动暂停音乐</string>
+    <string name="sennheiser_momentum_3_transparent_pause_summary">透明聆听激活时自动暂停音乐</string>
+    <string name="magic_touch_head_init_title">按摩头初始化</string>
 </resources>
