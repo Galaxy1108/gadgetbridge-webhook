@@ -5220,7 +5220,7 @@
     <string name="workout_power_zone_6">Strefa 6</string>
     <string name="workout_power_zone_7">Strefa 7</string>
     <string name="workout_weight_body_weight">Masa ciała</string>
-    <string name="workout_weight_percent_1rm">% 1RM</string>
+    <string name="workout_weight_percent_1rm">%% 1RM</string>
     <string name="workout_weight_rm">Maksymalna liczba powtórzeń (RM)</string>
     <string name="workout_swim_stroke_choice">Wybór</string>
     <string name="workout_swim_stroke_individual_medley">Styl zmienny</string>

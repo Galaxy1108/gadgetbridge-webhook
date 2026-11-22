@@ -1858,7 +1858,7 @@
     <string name="workout_power_zone_6">Zona 6</string>
     <string name="workout_power_zone_7">Zona 7</string>
     <string name="workout_weight_body_weight">Peso corporal</string>
-    <string name="workout_weight_percent_1rm">% de 1MR</string>
+    <string name="workout_weight_percent_1rm">%% de 1MR</string>
     <string name="workout_weight_rm">Máx de rep (MR)</string>
     <string name="workout_weight_load_category">Categoría da carga</string>
     <string name="workout_load_heavy">Pesada</string>

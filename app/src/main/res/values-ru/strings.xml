@@ -4903,10 +4903,10 @@
     <string name="stress_daily_levels">Ежедневный уровень стресса</string>
     <string name="pref_summary_do_not_archive_activity_data">Не отмечайте действия как синхронизированные на устройстве. Полезно, если Gadgetbridge используется вместе с другими приложениями. Это может привести к нехватке памяти на часах и/или нарушению синхронизации.</string>
     <plurals name="workout_list_activity_count">
-        <item quantity="one">активность</item>
-        <item quantity="few">активности</item>
-        <item quantity="many">активностей</item>
-        <item quantity="other">активностей</item>
+        <item quantity="one">%d активность</item>
+        <item quantity="few">%d активности</item>
+        <item quantity="many">%d активностей</item>
+        <item quantity="other">%d активностей</item>
     </plurals>
     <string name="pref_endurain_replace_on_track_change_summary">Чтобы изменить маршрут загруженной тренировки, нужно удалить ее и загрузить заново, чтобы у нее появился новый адрес. Тренировки, которые вы редактировали в Endurain, остануться без изменений.</string>
     <string name="activity_db_management_data_label">Внешние данные</string>
