@@ -63,6 +63,9 @@ snakeyaml = "2.7"
 zxing = "3.5.4"
 
 [libraries]
+android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle-plugin" }
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+ksp-gradle-plugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 ahocorasick = { group = "org.ahocorasick", name = "ahocorasick", version.ref = "ahocorasick" }
 android-emojify-contract = { group = "com.github.wax911.android-emojify", name = "contract", version.ref = "android-emojify" }
 android-emojify-emojify = { group = "com.github.wax911.android-emojify", name = "emojify", version.ref = "android-emojify" }
@@ -153,6 +156,14 @@ mapsforge = [
     "mapsforge-map-android",
     "mapsforge-map-reader",
     "mapsforge-themes",
+]
+unit-test = [
+    "junit",
+    "mockito",
+    "robolectric",
+    "hamcrest",
+    "kotlinx-coroutines-test",
+    "json",
 ]
 
 [plugins]
