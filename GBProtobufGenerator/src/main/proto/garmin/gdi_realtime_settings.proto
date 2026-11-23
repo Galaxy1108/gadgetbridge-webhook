@@ -6,29 +6,29 @@ option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiRealtimeSettings";
 
 message RealtimeSettingsService {
-    optional CompositionRequest definitionRequest = 1;
-    optional CompositionResponse definitionResponse = 2;
+    optional CompositionRequest composition_request = 1;
+    optional CompositionResponse composition_response = 2;
 
-    optional SettingsRequest stateRequest = 3;
-    optional SettingsResponse stateResponse = 4;
+    optional SettingsRequest settings_request = 3;
+    optional SettingsResponse settings_response = 4;
 
-    optional SettingsChangeRequest changeRequest = 5;
-    optional SettingsChangeResponse changeResponse = 6;
+    optional SettingsChangeRequest settings_change_request = 5;
+    optional SettingsChangeResponse settings_change_response = 6;
 
-    optional SettingsUpdatedNotification changeNotification = 7;
+    optional SettingsUpdatedNotification settings_updated_notification = 7;
 
-    optional StartUpDataRequest initRequest = 8;
-    optional StartUpDataResponse initResponse = 9;
+    optional StartUpDataRequest start_up_data_request = 8;
+    optional StartUpDataResponse start_up_data_response = 9;
 
-    optional MenuChangeRequest unk10 = 10;
-    optional MenuChangeResponse unk11 = 11;
+    optional MenuChangeRequest menu_change_request = 10;
+    optional MenuChangeResponse menu_change_response = 11;
 
-    optional SettingsStateRequest unk12 = 12;
-    optional SettingsStateResponse unk13 = 13;
+    optional SettingsStateRequest settings_state_request = 12;
+    optional SettingsStateResponse settings_state_response = 13;
 }
 
 message MenuChangeRequest {
-  optional uint32 unk1 = 1;
+  optional uint32 composition_id = 1;
 }
 
 message MenuChangeResponse {
@@ -41,101 +41,97 @@ message SettingsStateResponse {
 }
 
 message CompositionRequest {
-  optional uint32 screenId = 1;
-  optional uint32 unk2 = 2; // 0
-  optional string locale = 3; // en_US
+  optional uint32 composition_id = 1;
+  optional int32 depth = 2;
+  optional string app_locale = 3; // en_US
 }
 
 message CompositionResponse {
   optional uint32 status = 1; // 0 = success, 2 = fail
-  optional Composition definition = 2;
+  optional Composition compositions = 2;
 }
 
 message Composition {
-  optional uint32 screenId = 1;
-  optional uint32 unk2 = 2; // 0
-  optional uint32 unk3 = 3; // 928002
+  optional uint32 composition_id = 1;
+  optional uint32 version = 2; // 0
+  optional uint32 global_version = 3; // 928002
   optional FormattableString title = 4;
-  repeated CompositionRow entry = 5;
-  repeated MenuItem menu_entry = 6;
+  repeated CompositionRow rows = 5;
+  repeated MenuItem menu_items = 6;
 }
 
 message FormattableString {
-  optional string id = 1;
+  optional bytes handle = 1;
   optional string text = 2;
-  repeated string unk3 = 3;
-  repeated bytes unk4 = 4;
+  repeated string format_args = 3;
+  repeated bytes format_args_handles = 4;
 }
 
 message CompositionRow {
-  optional uint32 id = 1;
-  optional RowType rowType = 2;
+  optional uint32 row_id = 1;
+  optional RowType type = 2;
   optional FormattableString title = 3;
-  optional uint32 unk4 = 4;
+  optional uint32 platform = 4;
   optional Icon icon = 5;
-  optional ScreenEntryMessage6 unk6 = 6;
-  optional ScreenEntryMessage7 unk7 = 7;
-  optional ScreenEntryMessage8 unk8 = 8;
-  optional LinkOptions target = 9;
-  optional ActionOptions action = 10;
-  optional Icon iconRight = 11;
-  optional ReorderListOptions sortOptions = 12;
-  optional EditTextOptions textOption = 13;
-  optional ScreenEntryMessage14 unk14 = 14;
-  optional InformationMessage unk15 = 15; // info text if nothing can be set?
-  optional Icon iconLeft = 17;
-  optional ControlsMenuIconSetOptions unk18 = 18;
+  optional TextOptions text_options = 6;
+  optional SpacerOptions spacer_options = 7;
+  optional ToggleOptions toggle_options = 8;
+  optional LinkOptions link_options = 9;
+  optional ActionOptions action_options = 10;
+  optional Icon right_drawable = 11;
+  optional ReorderListOptions reorder_list_options = 12;
+  optional EditTextOptions edit_text_options = 13;
+  optional DataScreenIconSetOptions data_screen_icon = 14;
+  optional EmptyStateViewOptions empty_state_view_options = 15; // info text if nothing can be set
+  optional Icon left_drawable = 17;
+  optional ControlsMenuIconSetOptions controls_menu_icon = 18;
 }
 
-message ScreenEntryMessage6 {
-  optional uint32 unk1 = 1;
-  optional string unk2 = 2;
-  optional uint32 unk3 = 3;
+message TextOptions {
+  optional uint32 style = 1;
+  optional string redirect_url = 2;
+  optional uint32 gravity = 3;
 }
 
-message ScreenEntryMessage7 {
+message SpacerOptions {
 }
 
-message ScreenEntryMessage8 {
+message ToggleOptions {
 }
 
 message ActionOptions {
-  optional ConfirmationMessage unk1 = 1;
+  optional ConfirmationMessage confirmation = 1;
 }
 
-message ScreenEntryMessage14 {
-  optional uint32 unk1 = 1;
-  optional uint32 unk2 = 2;
-  optional uint32 unk3 = 3;
-  optional uint32 unk4 = 4;
+message DataScreenIconSetOptions {
+  optional uint32 icon_set = 1;
+  optional uint32 number_of_fields = 2;
+  optional uint32 layout = 3;
+  optional bool is_preview = 4;
 }
 
-message InformationMessage {
-  optional FormattableString unk1 = 1;
-  optional FormattableString unk2 = 2;
+message EmptyStateViewOptions {
+  optional FormattableString description = 1;
+  optional FormattableString action_text = 2;
 }
 
 message ControlsMenuIconSetOptions {
-  optional uint32 unk1 = 1;
-  optional uint32 unk2 = 2;
+  optional uint32 icon_set = 1;
+  optional uint32 control = 2;
 }
 
 message ReorderListOptions {
-  optional uint32 unk3 = 3; // 1
-  repeated ReorderListItem entries = 5;
+  optional uint32 action_type = 3; // 1
+  repeated ReorderListItem list_items = 5;
 }
 
 message ReorderListItem {
-  optional uint32 id = 1;
+  optional uint32 row_id = 1;
   optional FormattableString title = 2;
-  optional uint32 unk5 = 5; // 1
-  optional SortEntryMessage6 unk6 = 6;
+  optional bool action_enabled = 5;
+  optional ControlsMenuIconSetOptions controls_menu_icon = 6;
 }
 
-message SortEntryMessage6 {
-  optional uint32 unk1 = 1;
-  optional uint32 unk2 = 2;
-}
 
 message EditTextOptions {
   enum KeyBoardType {
@@ -143,23 +139,23 @@ message EditTextOptions {
       INTEGER = 1;
       FLOAT = 2;
   }
-  optional EditTextProperties limits = 1;
-  optional KeyBoardType keyboard = 2;
-  optional EditTextIntegerOptions integerLimits = 3;
+  optional EditTextProperties edit_text_properties = 1;
+  optional KeyBoardType edit_text_type = 2;
+  optional EditTextIntegerOptions edit_text_integer_options = 3;
 }
 
 message EditTextProperties {
-  optional uint32 maxLength = 1;
+  optional int32 maximum_code_point_length = 1;
 }
 
 message EditTextIntegerOptions {
-    optional int32 minValue = 1;
-    optional int32 maxValue = 2;
+    optional int32 minimum = 1;
+    optional int32 maximum = 2;
 }
 
 message EditTextDecimalOptions {
-    optional float minValue = 1;
-    optional float maxValue = 2;
+    optional float minimum = 1;
+    optional float maximum = 2;
     optional int32 precision = 3;
 }
 
@@ -280,165 +276,156 @@ message LinkOptions {
         TYPE_UNK_39 = 39;
     }
 
-  optional LinkType type = 1;
-  optional uint32 subscreen = 2; // when 0
-  optional ExternalLinkDestination activity = 3; // when 6
-  optional SelectionOptions options = 4; // when 1
-  optional TimePickerOptions durationOptions = 5;
-  optional FloatPickerOptions floatOptions = 7;
-  optional IntegerPickerOptions integerPicker = 8;
-  optional CIQLinkOptions ciq = 11;
+  optional LinkType link_type = 1;
+  optional uint32 dest_composition_id = 2;
+  optional ExternalLinkDestination dest_page = 3;
+  optional SelectionOptions selection_options = 4;
+  optional TimePickerOptions time_picker_options = 5;
+  optional FloatPickerOptions float_picker_options = 7;
+  optional IntegerPickerOptions integer_picker_options = 8;
+  optional CIQLinkOptions ciq_link_options = 11;
 }
 
 message TimePickerOptions {
-  optional uint32 minSeconds = 1;
-  optional uint32 maxSeconds = 2;
-  optional uint32 stepSize = 3;
+  optional uint32 min_time_seconds = 1;
+  optional uint32 max_time_seconds = 2;
+  optional uint32 granularity_seconds = 3;
 }
 
 message FloatPickerOptions {
-  optional float minValue = 1;
-  optional float maxValue = 2;
-  optional uint32 unk3 = 3;
-  optional float stepSize = 4;
+  optional float minimum = 1;
+  optional float maximum = 2;
+  optional uint32 precision = 3;
+  optional float granularity = 4;
 }
 
 message CIQLinkOptions {
-  optional int32 unk1 = 1;
-  optional bytes store_app = 2;
+  optional int32 device_id = 1;
+  optional bytes store_app_id = 2;
   optional uint32 app_type = 5;
-  optional uint32 unk6 = 6;
+  optional uint32 destination = 6;
 }
 
 message SettingsRequest {
-  optional uint32 screenId = 1;
+  optional uint32 composition_id = 1;
 }
 
 message SelectionOptions {
-  repeated SelectionItem option = 1;
-  repeated MenuItem menu_entry = 2;
-  optional uint32 unk3 = 3;
+  repeated SelectionItem rows = 1;
+  repeated MenuItem menu_items = 2;
+  optional bool exit_items_on_tap = 3;
 }
 
 message SelectionItem {
-  optional uint32 unk1 = 1;
-  optional RowType rowType = 2;
+  optional uint32 row_id = 1;
+  optional RowType type = 2;
   optional FormattableString title = 3;
-  optional FormattableString subtitle = 4;
+  optional FormattableString subtext = 4;
   optional Icon icon = 6;
-  optional TargetOptionEntryMessage7 unk7 = 7;
+  optional DataScreenIconSetOptions data_screen_icon = 7;
 }
 
-message TargetOptionEntryMessage7 {
-  optional uint32 unk1 = 1;
-  optional uint32 unk2 = 2;
-  optional uint32 unk3 = 3;
-  optional uint32 unk4 = 4;
-}
 
 message IntegerPickerOptions {
-  optional uint32 min = 1;
-  optional uint32 max = 2;
-  optional uint32 step = 3; // maybe? 1 on weight
+  optional int32 minimum = 1;
+  optional int32 maximum = 2;
+  optional int32 granularity = 3;
 }
 
 message SettingsResponse {
-  optional uint32 unk1 = 1; // 0
-  optional Settings state = 2;
+  optional uint32 status = 1;
+  optional Settings settings = 2;
 }
 
 message Settings {
-  optional uint32 screenId = 1;
-  optional uint32 unk2 = 2; // 0
-  optional uint32 unk3 = 3; // 928002
-  repeated RowValue state = 4;
+  optional uint32 composition_id = 1;
+  optional uint32 composition_version = 2;
+  optional uint32 global_version = 3;
+  repeated RowValue rows = 4;
 }
 
 message RowValue {
-  optional uint32 id = 1;
-  optional uint32 state = 2;
-  optional ToggleSettings switch = 3;
-  optional DoubleLabelSettings summary = 4;
-  optional AlertVolumeSettings alertSettings = 6;
-  optional EntryStateMessage7 unk7 = 7;
-  optional EntryStateMessage8 unk8 = 8;
-  optional EntryStateMessage9 unk9 = 9;
+  optional uint32 row_id = 1;
+  optional uint32 view_state = 2;
+  optional ToggleSettings toggle_settings = 3;
+  optional DoubleLabelSettings double_label_settings = 4;
+  optional AlertVolumeSettings alert_volume_settings = 6;
+  optional EditTextSettings edit_text_settings = 7;
+  optional SelectionSettings single_label_selection_settings = 8;
+  optional ActionSettings action_view_settings = 9;
 }
 
-message EntryStateMessage7 {
-  optional FormattableString label1 = 1;
-  optional FormattableString label2 = 2;
+message EditTextSettings {
+  optional FormattableString formatted_value = 1;
+  optional FormattableString edit_text_value = 2;
 }
 
-message EntryStateMessage8 {
-  optional uint32 unk1 = 1;
-}
 
-message EntryStateMessage9 {
-  optional FormattableString label1 = 1;
+message ActionSettings {
+  optional FormattableString subtext = 1;
 }
 
 message AlertVolumeSettings {
-  optional string dialect = 1;
+  required string alert_dialect = 1;
 }
 
 message ToggleSettings {
-  optional bool enabled = 1;
-  optional FormattableString title = 2;
+  optional bool toggle_value = 1;
+  optional FormattableString subtext = 2;
 }
 
 message DoubleLabelSettings {
-  optional FormattableString title = 1;
-  optional SelectionSettings valueList = 2;
-  optional TimePickerSettings valueDuration = 3;
-  optional TODPickerSettings valueTimeOfDay = 4;
-  optional FloatPickerSettings valueFloat = 5;
-  optional IntegerPickerSettings valueInteger = 6;
-  optional DatePickerSettings valueDate = 8;
-  optional HeightPickerSettings valueHeight = 10;
+  optional FormattableString subtext = 1;
+  optional SelectionSettings selection_settings = 2;
+  optional TimePickerSettings time_picker_settings = 3;
+  optional TODPickerSettings tod_picker_settings = 4;
+  optional FloatPickerSettings float_picker_settings = 5;
+  optional IntegerPickerSettings integer_picker_settings = 6;
+  optional DatePickerSettings date_picker_settings = 8;
+  optional HeightPickerSettings height_picker_settings = 10;
 }
 
 message SelectionSettings {
-  optional uint32 index = 1;
+  optional uint32 selected_index = 1;
 }
 
 message TODPickerSettings {
   optional uint32 seconds = 1;
-  optional FormattableString formatted = 2;
-  optional uint32 timeFormat = 3; // 0 12h, 1 24h
+  optional FormattableString formatted_value = 2;
+  optional uint32 time_format = 3; // 0 12h, 1 24h
 }
 
 message TimePickerSettings {
   optional uint32 seconds = 1;
-  optional FormattableString formatted = 2;
-  optional FormattableString title = 3;
+  optional FormattableString formatted_value = 2;
+  optional FormattableString picker_title = 3;
 }
 
 message FloatPickerSettings {
-  optional float value = 1;
-  optional FormattableString formatted = 2;
-  optional FormattableString title = 3;
-  optional FormattableString uom = 4;
+  optional float float_value = 1;
+  optional FormattableString formatted_value = 2;
+  optional FormattableString picker_title = 3;
+  optional FormattableString measurement_unit = 4;
 }
 
 message IntegerPickerSettings {
-  optional uint32 value = 1;
-  optional FormattableString formatted = 2;
-  optional FormattableString title = 3;
-  optional FormattableString unit = 4;
+  optional int32 integer_value = 1;
+  optional FormattableString formatted_value = 2;
+  optional FormattableString picker_title = 3;
+  optional FormattableString measurement_unit = 4;
 }
 
 message DatePickerSettings {
-  optional FormattableString subtitle = 1;
-  optional Date currentDate = 2;
-  optional Date minDate = 3;
-  optional Date maxDate = 4;
+  optional FormattableString formatted_value = 1;
+  optional Date selected_date = 2;
+  optional Date minimum_date = 3;
+  optional Date maximum_date = 4;
 }
 
 message HeightPickerSettings {
-  optional FormattableString subtitle = 1;
-  optional uint32 value = 2;
-  optional uint32 unit = 3; // 0 cm
+  optional FormattableString formatted_value = 1;
+  optional uint32 height_value = 2;
+  optional uint32 measurement_unit = 3;
 }
 
 message Date {
@@ -448,91 +435,91 @@ message Date {
 }
 
 message SettingsChangeRequest {
-  optional uint32 screenId = 1;
-  optional uint32 entryId = 2;
-  optional ToggleChange switch = 3;
-  optional SelectionChange option = 4;
-  optional TimePickerChange duration = 5;
-  optional TODPickerChange timeOfDay = 6;
-  optional FloatPickerChange floatValue = 7;
-  optional IntegerPickerChange integerValue = 8;
-  optional ReorderableItemChange position = 11;
-  optional DatePickerChange newDate = 12;
-  optional EditTextValueChange text = 14;
-  optional HeightPickerValueChange height = 15;
+  optional uint32 composition_id = 1;
+  optional uint32 row_id = 2;
+  optional ToggleChange toggle_change = 3;
+  optional SelectionChange selection_change = 4;
+  optional TimePickerChange time_picker_change = 5;
+  optional TODPickerChange tod_picker_change = 6;
+  optional FloatPickerChange float_picker_change = 7;
+  optional IntegerPickerChange integer_picker_change = 8;
+  optional ReorderableItemChange reorderable_item_change = 11;
+  optional DatePickerChange date_picker_change = 12;
+  optional EditTextValueChange edit_text_value_change = 14;
+  optional HeightPickerValueChange height_picker_value_change = 15;
 }
 
 message ToggleChange {
-  required bool value = 1;
+  required bool new_toggle_value = 1;
 }
 
 message SelectionChange {
-  optional uint32 index = 1;
+  optional uint32 new_selected_index = 1;
 }
 
 message TimePickerChange {
-  optional uint32 seconds = 1;
+  optional uint32 new_seconds = 1;
 }
 
 message TODPickerChange {
-  optional uint32 seconds = 1;
+  optional uint32 new_seconds = 1;
 }
 
 message IntegerPickerChange {
-  optional uint32 value = 1;
+  optional int32 new_integer_value = 1;
 }
 
 message ReorderableItemChange {
-  optional uint32 index = 1;
-  optional bool delete = 2;
+  optional uint32 new_list_position = 1;
+  optional bool is_delete = 2;
 }
 
 message DatePickerChange {
-  optional Date value = 1;
+  optional Date new_date = 1;
 }
 
 message EditTextValueChange {
-  optional string value = 1;
+  optional string new_edit_text_value = 1;
 }
 
 message HeightPickerValueChange {
-  optional uint32 value = 1;
-  optional uint32 unit = 2;
+  optional uint32 height_value = 1;
+  optional uint32 measurement_unit = 2;
 }
 
 message FloatPickerChange {
-  optional float value = 1;
+  optional float new_float_value = 1;
 }
 
 message SettingsChangeResponse {
   optional ResponseStatus status = 1;
-  optional InformationMessageResponse unk2 = 2;
-  optional Settings state = 3;
-  optional bool unk4 = 4;
-  optional bool shouldReturn = 5;
+  optional InformationMessage information_message = 2;
+  optional Settings updated_settings = 3;
+  optional bool is_invalidate = 4;
+  optional bool is_exit_instance = 5;
 }
 
-message InformationMessageResponse {
-  optional FormattableString unk1 = 1;
-  optional FormattableString unk2 = 2;
-  optional FormattableString unk3 = 3;
+message InformationMessage {
+  optional FormattableString title = 1;
+  optional FormattableString message = 2;
+  optional FormattableString neutral_text = 3;
 }
 
 message StartUpDataRequest {
-  optional string language = 1; // en_US
-  optional string region = 2; // us
+  optional string app_locale = 1; // en_US
+  optional string app_consent_country = 2; // us
 }
 
 message StartUpDataResponse {
-  optional string part_number_1 = 1;
-  optional string part_number_2 = 2;
-  repeated uint32 unk3 = 3;
-  optional uint32 unk4 = 4;
+  optional string app_locale_language_part_number = 1;
+  optional string device_locale_language_part_number = 2;
+  repeated uint32 icon_sets = 3;
+  optional uint32 communicate_type = 4;
 }
 
 enum ResponseStatus {
   SUCCESS = 0;
-  GENERIC_ERROR = 1;
+  FAIL = 1;
 }
 
 message SettingsUpdatedNotification {
@@ -541,21 +528,21 @@ message SettingsUpdatedNotification {
 message ConfirmationMessage {
   optional FormattableString title = 1;
   optional FormattableString message = 2;
-  optional FormattableString yes = 3;
-  optional FormattableString no = 4;
-  optional uint32 unk5 = 5;
-  optional uint32 unk6 = 6;
+  optional FormattableString positive_text = 3;
+  optional FormattableString negative_text = 4;
+  optional bool destructive_positive_action = 5;
+  optional bool destructive_negative_action = 6;
 }
 
 message MenuItem {
-  optional uint32 unk1 = 1;
-  optional uint32 unk2 = 2;
-  optional FormattableString label = 3;
-  optional uint32 unk4 = 4;
-  optional LinkOptions target = 5;
-  optional uint32 unk6 = 6;
-  optional uint32 unk7 = 7;
-  optional ConfirmationMessage menu_message = 9;
+  optional uint32 type = 1;
+  optional uint32 show_on_bar = 2;
+  optional FormattableString title = 3;
+  optional uint32 menu_id = 4;
+  optional LinkOptions link_options = 5;
+  optional uint32 destructive_action = 6;
+  optional uint32 item_position = 7;
+  optional ConfirmationMessage confirmation_message = 9;
 }
 
 enum Icon {
