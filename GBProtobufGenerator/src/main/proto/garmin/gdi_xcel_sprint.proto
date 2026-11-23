@@ -4,5 +4,5 @@ package GDI.Proto.XcelSprint;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiXcelSprint";
 
-message Service {
+message XcelSprintService {
 }

@@ -1,4 +1,4 @@
-﻿syntax = "proto2";
+syntax = "proto2";
 package GDI.Proto.IopMessage;
 
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
