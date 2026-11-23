@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package garmin_vivomovehr;
+package GDI.Proto.RealtimeSettings;
 
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiRealtimeSettings";
@@ -47,7 +47,13 @@ message CompositionRequest {
 }
 
 message CompositionResponse {
-  optional uint32 status = 1; // 0 = success, 2 = fail
+  enum ResponseStatus {
+    SUCCESS = 0;
+    PARTIAL_SUCCESS = 1;
+    FAIL = 2;
+  }
+
+  optional CompositionResponse.ResponseStatus status = 1;
   optional Composition compositions = 2;
 }
 
@@ -68,10 +74,17 @@ message FormattableString {
 }
 
 message CompositionRow {
+  enum Platform {
+    ALL = 0;
+    ANDROID = 1;
+    IOS = 2;
+    DEVICE = 3;
+  }
+
   optional uint32 row_id = 1;
   optional RowType type = 2;
   optional FormattableString title = 3;
-  optional uint32 platform = 4;
+  optional CompositionRow.Platform platform = 4;
   optional Icon icon = 5;
   optional TextOptions text_options = 6;
   optional SpacerOptions spacer_options = 7;
@@ -88,9 +101,24 @@ message CompositionRow {
 }
 
 message TextOptions {
-  optional uint32 style = 1;
+  enum TextGravity {
+    START = 0;
+    CENTER = 1;
+  }
+
+  enum TextStyle {
+    BODY = 0;
+    BULLET = 1;
+    INFO = 2;
+    LINK = 3;
+    SUBTITLE = 4;
+    TITLE = 5;
+    TITLE2 = 6;
+  }
+
+  optional TextOptions.TextStyle style = 1;
   optional string redirect_url = 2;
-  optional uint32 gravity = 3;
+  optional TextOptions.TextGravity gravity = 3;
 }
 
 message SpacerOptions {
@@ -104,9 +132,49 @@ message ActionOptions {
 }
 
 message DataScreenIconSetOptions {
-  optional uint32 icon_set = 1;
+  enum LayoutField {
+    NONE = 0;
+    NO_LABEL = 1;
+    STACK = 2;
+    RING = 3;
+    QUAD = 4;
+    THREE_ROW = 5;
+    MIXED = 6;
+    A = 7;
+    B = 8;
+    C = 9;
+    D = 10;
+    E = 11;
+    F = 12;
+    MAP_NONE = 13;
+    MAP_A = 14;
+    MAP_B = 15;
+    COMPASS_NONE = 16;
+    LAP_SUMMARY_NONE = 17;
+    LAP_SUMMARY_A = 18;
+    LAP_SUMMARY_B = 19;
+    SEGMENT_NONE = 20;
+    SEGMENT_A = 21;
+    SEGMENT_B = 22;
+    SEGMENT_C = 23;
+    STAMINA_NONE = 24;
+    STAMINA_A = 25;
+    STAMINA_B = 26;
+    SOLAR_NONE = 27;
+    EBIKE_NONE = 28;
+    EBIKE_A = 29;
+    EBIKE_B = 30;
+    SHIMANO_STEPS_NONE = 31;
+    ELEVATION_NONE = 32;
+    CLIMB_PRO_NONE = 33;
+    WORKOUT_NONE = 34;
+    CYCLING_DYNAMICS_NONE = 35;
+    POWER_GUIDANCE_NONE = 36;
+  }
+
+  optional IconSet icon_set = 1;
   optional uint32 number_of_fields = 2;
-  optional uint32 layout = 3;
+  optional DataScreenIconSetOptions.LayoutField layout = 3;
   optional bool is_preview = 4;
 }
 
@@ -116,12 +184,18 @@ message EmptyStateViewOptions {
 }
 
 message ControlsMenuIconSetOptions {
-  optional uint32 icon_set = 1;
+  optional IconSet icon_set = 1;
   optional uint32 control = 2;
 }
 
 message ReorderListOptions {
-  optional uint32 action_type = 3; // 1
+  enum ActionType {
+    ADD = 0;
+    DELETE = 1;
+    NONE = 2;
+  }
+
+  optional ReorderListOptions.ActionType action_type = 3;
   repeated ReorderListItem list_items = 5;
 }
 
@@ -137,7 +211,7 @@ message EditTextOptions {
   enum KeyBoardType {
       ALPHANUMERIC = 0;
       INTEGER = 1;
-      FLOAT = 2;
+      DECIMAL = 2;
   }
   optional EditTextProperties edit_text_properties = 1;
   optional KeyBoardType edit_text_type = 2;
@@ -161,119 +235,119 @@ message EditTextDecimalOptions {
 
 message LinkOptions {
     enum ExternalLinkDestination {
-        ACTIVITY_UNK_0 = 0;
-        ACTIVITY_WIFI_SETUP = 1;
-        ACTIVITY_GARMIN_PAY = 2;
-        ACTIVITY_UNK_3 = 3;
-        ACTIVITY_UNK_4 = 4;
-        ACTIVITY_UNK_5 = 5;
-        ACTIVITY_UNK_6 = 6;
-        ACTIVITY_TEXT_RESPONSE = 7;
-        ACTIVITY_MUSIC_PROVIDERS = 8;
-        ACTIVITY_SAFETY_SETUP = 9;
-        ACTIVITY_STRIDE_LENGTH = 10;
-        ACTIVITY_UNK_11 = 11;
-        ACTIVITY_UNK_12 = 12;
-        ACTIVITY_GOAL_STEPS = 13;
-        ACTIVITY_GOAL_FLOORS = 14;
-        ACTIVITY_GOAL_MINUTES = 15;
-        ACTIVITY_LIVE_TRACK = 16;
-        ACTIVITY_SOLAR_INTENSITY = 17;
-        ACTIVITY_UNK_18 = 18;
-        ACTIVITY_UNK_19 = 19;
-        ACTIVITY_UNK_20 = 20;
-        ACTIVITY_UNK_21 = 21;
-        ACTIVITY_UNK_22 = 22;
-        ACTIVITY_UNK_23 = 23;
-        ACTIVITY_UNK_24 = 24;
-        ACTIVITY_BACKUPS = 25;
-        ACTIVITY_UNK_26 = 26;
-        ACTIVITY_UNK_27 = 27;
-        ACTIVITY_LIVE_EVENT_SHARING = 28;
-        ACTIVITY_ECG_SETUP = 29;
-        ACTIVITY_ECG = 30;
-        ACTIVITY_UNK_31 = 31;
-        ACTIVITY_SET_PASSCODE = 32;
-        ACTIVITY_CHANGE_PASSCODE = 33;
-        ACTIVITY_UNK_34 = 34;
-        ACTIVITY_UNK_35 = 35;
-        ACTIVITY_UNK_36 = 36;
-        ACTIVITY_UNK_37 = 37;
-        ACTIVITY_UNK_38 = 38;
-        ACTIVITY_UNK_39 = 39;
-        ACTIVITY_UNK_40 = 40;
-        ACTIVITY_UNK_41 = 41;
-        ACTIVITY_UNK_42 = 42;
-        ACTIVITY_UNK_43 = 43;
-        ACTIVITY_UNK_44 = 44;
-        ACTIVITY_UNK_45 = 45;
-        ACTIVITY_UNK_46 = 46;
-        ACTIVITY_UNK_47 = 47;
-        ACTIVITY_UNK_48 = 48;
-        ACTIVITY_UNK_49 = 49;
-        ACTIVITY_UNK_50 = 50;
-        ACTIVITY_UNK_51 = 51;
-        ACTIVITY_UNK_52 = 52;
-        ACTIVITY_UNK_53 = 53;
-        ACTIVITY_UNK_54 = 54;
-        ACTIVITY_UNK_55 = 55;
-        ACTIVITY_UNK_56 = 56;
-        ACTIVITY_UNK_57 = 57;
-        ACTIVITY_UNK_58 = 58;
-        ACTIVITY_UNK_59 = 59;
-        ACTIVITY_UNK_60 = 60;
-        ACTIVITY_UNK_61 = 61;
-        ACTIVITY_UNK_62 = 62;
-        ACTIVITY_UNK_63 = 63;
-        ACTIVITY_UNK_64 = 64;
-        ACTIVITY_UNK_65 = 65;
-        ACTIVITY_UNK_66 = 66;
-        ACTIVITY_UNK_67 = 67;
-        ACTIVITY_UNK_68 = 68;
-        ACTIVITY_UNK_69 = 69;
+        UNKNOWN_LINK = 0;
+        WIFI_SETUP = 1;
+        GARMIN_PAY_SETUP = 2;
+        BOUNDED_CONTROLS_MENU = 3;
+        WIDGET_LIST_SETUP = 4;
+        APP_LIST_SETUP = 5;
+        USER_PROFILE = 6;
+        TEXT_RESPONSE_SETUP = 7;
+        MUSIC_PROVIDERS = 8;
+        SAFETY_FEATURES = 9;
+        WALK_STRIDE_LENGTH = 10;
+        RUN_STRIDE_LENGTH = 11;
+        UNBOUNDED_CONTROLS_MENU = 12;
+        STEPS_GOAL = 13;
+        FLOORS_GOAL = 14;
+        INTENSITY_MINUTES_GOAL = 15;
+        LIVE_TRACK = 16;
+        SOLAR_INTENSITY = 17;
+        SOLAR_CHARGE = 18;
+        FIND_MY_EDGE = 19;
+        LAST_KNOWN_LOCATION = 20;
+        BIKE_ALARM = 21;
+        TRANSFER_ACTIVITY_PROFILES = 22;
+        TRANSFER_SENSORS = 23;
+        LTE_SETUP = 24;
+        DEVICE_BACKUPS = 25;
+        MANAGE_APP_NOTIFICATIONS = 26;
+        PUSHES_GOAL = 27;
+        LIVE_EVENT_SHARING = 28;
+        ECG_SETUP = 29;
+        ECG_FEATURE = 30;
+        LTE_AND_INREACH_SETUP = 31;
+        SET_PASSCODE = 32;
+        CHANGE_PASSCODE = 33;
+        CONFIRM_PASSCODE = 34;
+        DEVICE_FIRMWARE_UPDATE = 35;
+        DEVICE_GENERATED_ACTIVITIES = 36;
+        RECORD_AN_ACTIVITY_GENESIS = 37;
+        FIND_MY_DEVICE_MAP = 38;
+        DEVICE_WORKOUT_LIST = 39;
+        NOTIFICATIONS = 40;
+        GC_PLUS_PAYWALL = 41;
+        TUTORIALS = 42;
+        AUTO_ACTIVITY_CONSENT = 43;
+        UPLOAD_ACTIVITIES = 44;
+        DESTINATION_45 = 45;
+        DESTINATION_46 = 46;
+        DESTINATION_47 = 47;
+        DESTINATION_48 = 48;
+        DESTINATION_49 = 49;
+        DESTINATION_50 = 50;
+        DESTINATION_51 = 51;
+        DESTINATION_52 = 52;
+        DESTINATION_53 = 53;
+        DESTINATION_54 = 54;
+        DESTINATION_55 = 55;
+        DESTINATION_56 = 56;
+        DESTINATION_57 = 57;
+        DESTINATION_58 = 58;
+        DESTINATION_59 = 59;
+        DESTINATION_60 = 60;
+        DESTINATION_61 = 61;
+        DESTINATION_62 = 62;
+        DESTINATION_63 = 63;
+        DESTINATION_64 = 64;
+        DESTINATION_65 = 65;
+        DESTINATION_66 = 66;
+        DESTINATION_67 = 67;
+        DESTINATION_68 = 68;
+        DESTINATION_69 = 69;
     }
 
     enum LinkType {
-        TYPE_SUBSCREEN = 0;
-        TYPE_LIST = 1;
-        TYPE_DURATION = 2;
-        TYPE_TIME_OF_DAY = 3;
-        TYPE_FLOAT = 4;
-        TYPE_INTEGER = 5;
-        TYPE_ACTIVITY = 6;
-        TYPE_HIDDEN = 7;
-        TYPE_UNK_8 = 8;
-        TYPE_SUBSCREEN_OPTIONS = 9;
-        TYPE_DATE = 10;
-        TYPE_UNK_11 = 11;
-        TYPE_CONNECT_IQ_STORE = 12;
-        TYPE_HEIGHT = 13;
-        TYPE_UNK_14 = 14;
-        SELECT_AND_CONFIRM = 15;
-        TYPE_UNK_16 = 16;
-        TYPE_UNK_17 = 17;
-        TYPE_UNK_18 = 18;
-        TYPE_UNK_19 = 19;
-        TYPE_UNK_20 = 20;
-        TYPE_UNK_21 = 21;
-        TYPE_UNK_22 = 22;
-        TYPE_UNK_23 = 23;
-        TYPE_UNK_24 = 24;
-        TYPE_UNK_25 = 25;
-        TYPE_UNK_26 = 26;
-        TYPE_UNK_27 = 27;
-        TYPE_UNK_28 = 28;
-        TYPE_UNK_29 = 29;
-        TYPE_UNK_30 = 30;
-        TYPE_UNK_31 = 31;
-        TYPE_UNK_32 = 32;
-        TYPE_UNK_33 = 33;
-        TYPE_UNK_34 = 34;
-        TYPE_UNK_35 = 35;
-        TYPE_UNK_36 = 36;
-        TYPE_UNK_37 = 37;
-        TYPE_UNK_38 = 38;
-        TYPE_UNK_39 = 39;
+        INTERNAL = 0;
+        SELECTION = 1;
+        TIME_PICKER = 2;
+        TOD_PICKER = 3;
+        FLOAT_PICKER = 4;
+        INTEGER_PICKER = 5;
+        EXTERNAL = 6;
+        DEVICE_ONLY = 7;
+        INTEGER_INPUT = 8;
+        INTERNAL_REINSTANTIATE = 9;
+        DATE_PICKER = 10;
+        MULTI_SELECTION = 11;
+        CIQ_LINK = 12;
+        HEIGHT_PICKER = 13;
+        INTERNAL_APP = 14;
+        SELECTION_WITH_CONFIRMATION = 15;
+        TYPE_16 = 16;
+        TYPE_17 = 17;
+        TYPE_18 = 18;
+        TYPE_19 = 19;
+        TYPE_20 = 20;
+        TYPE_21 = 21;
+        TYPE_22 = 22;
+        TYPE_23 = 23;
+        TYPE_24 = 24;
+        TYPE_25 = 25;
+        TYPE_26 = 26;
+        TYPE_27 = 27;
+        TYPE_28 = 28;
+        TYPE_29 = 29;
+        TYPE_30 = 30;
+        TYPE_31 = 31;
+        TYPE_32 = 32;
+        TYPE_33 = 33;
+        TYPE_34 = 34;
+        TYPE_35 = 35;
+        TYPE_36 = 36;
+        TYPE_37 = 37;
+        TYPE_38 = 38;
+        TYPE_39 = 39;
     }
 
   optional LinkType link_type = 1;
@@ -300,10 +374,24 @@ message FloatPickerOptions {
 }
 
 message CIQLinkOptions {
+  enum AppType {
+    WATCH_APP = 0;
+    WATCH_FACE = 1;
+    DATA_FIELD = 2;
+    WIDGET = 3;
+    AUDIO_CONTENT_PROVIDER_APP = 4;
+  }
+
+  enum CIQLinkDestination {
+    APP_STORE = 0;
+    APP_SETTINGS = 1;
+    APP_DETAILS = 2;
+  }
+
   optional int32 device_id = 1;
   optional bytes store_app_id = 2;
-  optional uint32 app_type = 5;
-  optional uint32 destination = 6;
+  optional CIQLinkOptions.AppType app_type = 5;
+  optional CIQLinkOptions.CIQLinkDestination destination = 6;
 }
 
 message SettingsRequest {
@@ -333,7 +421,12 @@ message IntegerPickerOptions {
 }
 
 message SettingsResponse {
-  optional uint32 status = 1;
+  enum ResponseStatus {
+    SUCCESS = 0;
+    FAIL = 1;
+  }
+
+  optional SettingsResponse.ResponseStatus status = 1;
   optional Settings settings = 2;
 }
 
@@ -345,8 +438,14 @@ message Settings {
 }
 
 message RowValue {
+  enum ViewState {
+    VISIBLE = 0;
+    HIDDEN = 1;
+    DISABLED = 2;
+  }
+
   optional uint32 row_id = 1;
-  optional uint32 view_state = 2;
+  optional RowValue.ViewState view_state = 2;
   optional ToggleSettings toggle_settings = 3;
   optional DoubleLabelSettings double_label_settings = 4;
   optional AlertVolumeSettings alert_volume_settings = 6;
@@ -390,9 +489,14 @@ message SelectionSettings {
 }
 
 message TODPickerSettings {
+  enum TimeFormat {
+    TWELVE_HOUR = 0;
+    TWENTY_FOUR_HOUR = 1;
+  }
+
   optional uint32 seconds = 1;
   optional FormattableString formatted_value = 2;
-  optional uint32 time_format = 3; // 0 12h, 1 24h
+  optional TODPickerSettings.TimeFormat time_format = 3;
 }
 
 message TimePickerSettings {
@@ -513,13 +617,32 @@ message StartUpDataRequest {
 message StartUpDataResponse {
   optional string app_locale_language_part_number = 1;
   optional string device_locale_language_part_number = 2;
-  repeated uint32 icon_sets = 3;
-  optional uint32 communicate_type = 4;
+  repeated IconSet icon_sets = 3;
+  optional CommunicateType communicate_type = 4;
 }
 
 enum ResponseStatus {
   SUCCESS = 0;
   FAIL = 1;
+}
+
+enum IconSet {
+  BASE = 0;
+  DATA_SCREEN_CIRCULAR = 1;
+  DATA_SCREEN_EDGE_PORTRAIT = 2;
+  DATA_SCREEN_INSTINCT = 3;
+  CONTROLS_MENU = 4;
+  ACTIVITIES_APPS = 5;
+  WATCH_FACES = 6;
+  DATA_SCREEN_RECTANGULAR = 7;
+  WATCH_FACES_PREVIEW_LILY2 = 8;
+  WATCH_FACES_PREVIEW_LILY2_ACTIVE = 9;
+  DATA_SCREEN_ANALOG_HANDS = 10;
+}
+
+enum CommunicateType {
+  REQUEST_RESPONSE = 0;
+  NOTIFICATION = 1;
 }
 
 message SettingsUpdatedNotification {
@@ -535,157 +658,180 @@ message ConfirmationMessage {
 }
 
 message MenuItem {
-  optional uint32 type = 1;
+  enum FallbackClickEvent {
+    NONE = 0;
+    EXIT_INSTANTIATE = 1;
+    EXIT = 2;
+  }
+
+  enum MenuType {
+    UNKNOWN_OPTION = 0;
+    SYNC_DEVICE = 1;
+    REMOVE_DEVICE = 2;
+    PULSE_OX_HELP = 3;
+    TEXT = 4;
+    ACTION_SAVE = 5;
+    ACTION_CANCEL = 6;
+    CUSTOM_ACTION = 7;
+    MANAGE_DEVICE_PRIORITY = 8;
+  }
+
+  enum Position {
+    RIGHT = 0;
+    LEFT = 1;
+  }
+
+  optional MenuItem.MenuType type = 1;
   optional uint32 show_on_bar = 2;
   optional FormattableString title = 3;
   optional uint32 menu_id = 4;
   optional LinkOptions link_options = 5;
   optional uint32 destructive_action = 6;
-  optional uint32 item_position = 7;
+  optional MenuItem.Position item_position = 7;
   optional ConfirmationMessage confirmation_message = 9;
 }
 
 enum Icon {
-    ICON_NO_ICON = 0;
-    ICON_ACTIVITIES_AND_APPS = 1;
-    ICON_GLANCES = 2;
-    ICON_CONTROLS = 3;
-    ICON_CLOCKS = 4;
-    ICON_SENSORS_AND_ACCESSORIES = 5;
-    ICON_MAP = 6;
-    ICON_MUSIC = 7;
-    ICON_PHONE = 8;
-    ICON_UNK_9 = 9;
-    ICON_UNK_10 = 10;
-    ICON_CONNECTIVITY = 11;
-    ICON_UNK_12 = 12;
-    ICON_AUDIO_PROMPTS = 13;
-    ICON_USER_PROFILE = 14;
-    ICON_SAFETY_AND_TRACKING = 15;
-    ICON_ACTIVITY_TRACKING = 16;
-    ICON_NAVIGATION = 17;
-    ICON_POWER_MANAGER = 18;
-    ICON_SYSTEM = 19;
-    ICON_GARMIN_PAY = 20;
-    ICON_TEXT_RESPONSES = 21;
-    ICON_SOLAR = 22;
-    ICON_UNK_23 = 23;
-    ICON_UNK_24 = 24;
-    ICON_UNK_25 = 25;
-    ICON_APPEARANCE = 26;
-    ICON_NOTIFICATIONS_AND_ALERTS = 27;
-    ICON_UNK_28 = 28;
-    ICON_UNK_29 = 29;
-    ICON_WRIST_HEARTRATE = 30;
-    ICON_UNK_31 = 31;
-    ICON_UNK_32 = 32;
-    ICON_ACTION_ADD = 33;
-    ICON_ACTION_REMOVE = 34;
-    ICON_INREACH_TRACKING = 35;
-    ICON_INREACH_REMOTE = 36;
-    ICON_SOUND_SETTINGS = 37;
-    ICON_ALARMS = 38;
-    ICON_SHORTCUT = 39;
-    ICON_UNK_40 = 40;
-    ICON_UNK_41 = 41;
-    ICON_DISPLAY = 42;
-    ICON_UNK_43 = 43;
-    ICON_HEALTH_AND_WELLNESS = 44;
-    ICON_UNK_45 = 45;
-    ICON_WATCH_SENSORS = 46;
-    ICON_ACCESSORIES = 47;
-    ICON_UNK_48 = 48;
-    ICON_UNK_49 = 49;
-    ICON_UNK_50 = 50;
-    ICON_UNK_51 = 51;
-    ICON_UNK_52 = 52;
-    ICON_UNK_53 = 53;
-    ICON_UNK_54 = 54;
-    ICON_UNK_55 = 55;
-    ICON_UNK_56 = 56;
-    ICON_UNK_57 = 57;
-    ICON_UNK_58 = 58;
-    ICON_UNK_59 = 59;
-    ICON_SOUND_AND_VIBE = 60;
-    ICON_DISPLAY_AND_BRIGHTNESS = 61;
-    ICON_FOCUS_MODES = 62;
-    ICON_ACCESSIBILITY = 63;
-    ICON_UNK_64 = 64;
-    ICON_UNK_65 = 65;
-    ICON_UNK_66 = 66;
-    ICON_UNK_67 = 67;
-    ICON_UNK_68 = 68;
-    ICON_UNK_69 = 69;
-    ICON_UNK_70 = 70;
-    ICON_UNK_71 = 71;
-    ICON_UNK_72 = 72;
-    ICON_UNK_73 = 73;
-    ICON_UNK_74 = 74;
-    ICON_UNK_75 = 75;
-    ICON_UNK_76 = 76;
-    ICON_UNK_77 = 77;
-    ICON_UNK_78 = 78;
-    ICON_UNK_79 = 79;
-    ICON_UNK_80 = 80;
-    ICON_UNK_81 = 81;
-    ICON_UNK_82 = 82;
-    ICON_UNK_83 = 83;
-    ICON_UNK_84 = 84;
-    ICON_UNK_85 = 85;
-    ICON_UNK_86 = 86;
-    ICON_UNK_87 = 87;
-    ICON_UNK_88 = 88;
-    ICON_UNK_89 = 89;
-    ICON_UNK_90 = 90;
-    ICON_UNK_91 = 91;
-    ICON_UNK_92 = 92;
-    ICON_UNK_93 = 93;
-    ICON_UNK_94 = 94;
-    ICON_UNK_95 = 95;
-    ICON_UNK_96 = 96;
-    ICON_UNK_97 = 97;
-    ICON_UNK_98 = 98;
-    ICON_UNK_99 = 99;
+    NO_ICON = 0;
+    ACTIVITIES_AND_APPS = 1;
+    WIDGETS = 2;
+    CONTROLS = 3;
+    WATCH_FACE = 4;
+    SENSORS_AND_ACCESSORIES = 5;
+    MAP = 6;
+    MUSIC = 7;
+    PHONE = 8;
+    WIFI = 9;
+    LTE = 10;
+    CONNECTIVITY = 11;
+    PHYSIO_METRICS = 12;
+    AUDIO_PROMPTS = 13;
+    USER_PROFILE = 14;
+    SAFETY = 15;
+    ACTIVITY_TRACKING = 16;
+    NAVIGATION = 17;
+    POWER_SETTINGS = 18;
+    SYSTEM_SETTINGS = 19;
+    GARMIN_PAY = 20;
+    TEXT_RESPONSES = 21;
+    SOLAR_OPTIONS = 22;
+    AVIATION_OPTIONS = 23;
+    DIVE_OPTIONS = 24;
+    LIVE_TRACK = 25;
+    APPEARANCE = 26;
+    NOTIFICATIONS_AND_ALERTS = 27;
+    DEFAULT = 28;
+    ADD = 29;
+    WRIST_HR = 30;
+    DEEP_LINK_NAVIGATION = 31;
+    EMPTY_STATE_ALARM = 32;
+    ADD_ACTION = 33;
+    DELETE_ACTION = 34;
+    INREACH_TRACKING = 35;
+    INREACH_REMOTE = 36;
+    SOUND_SETTINGS = 37;
+    ALARMS = 38;
+    SHORTCUT = 39;
+    DO_NOT_DISTURB = 40;
+    HANDS_ALIGN = 41;
+    DISPLAY = 42;
+    ALERT_VIBRATION = 43;
+    HEALTH_AND_WELLNESS = 44;
+    DEVICE_BACKUPS = 45;
+    WATCH_SENSORS = 46;
+    ACCESSORIES = 47;
+    GEOCACHING = 48;
+    TRACKING = 49;
+    INFO = 50;
+    EXPEDITION_MODE = 51;
+    WAYPOINT = 52;
+    COMPASS = 53;
+    ALTIMETER = 54;
+    MARINE = 55;
+    POSITION_FORMAT = 56;
+    UNITS = 57;
+    RESET = 58;
+    ECG = 59;
+    SOUND_AND_VIB = 60;
+    DISPLAY_AND_BRIGHTNESS = 61;
+    FOCUS_MODES = 62;
+    ACCESSIBILITY = 63;
+    APPLIED_BALLISTICS = 64;
+    CALIBRATION = 65;
+    ACTION_BUTTON = 66;
+    DATA_RECORDING = 67;
+    MESSENGER = 68;
+    CAMERA = 69;
+    ANALOG_HANDS = 70;
+    BOAT_MODE_SETTINGS = 71;
+    HELP = 72;
+    CIRCLE = 73;
+    STRENGTH_ACTIVITY = 74;
+    DAILY_STATS_ICON = 75;
+    SILENT_MODE_ON = 76;
+    SILENT_MODE_OFF = 77;
+    RECORD_ACTIVITY = 78;
+    AUTO_DETECTED_ACTIVITY = 79;
+    WORKOUTS = 80;
+    PRX_ALARM = 81;
+    GC_PLUS = 82;
+    RADIO = 83;
+    RUN_SPRINT = 84;
+    RUN_SPRINT_RECORDING = 85;
+    UPLOAD = 86;
+    RENTAL_SETTINGS = 87;
+    ICON_88 = 88;
+    ICON_89 = 89;
+    ICON_90 = 90;
+    ICON_91 = 91;
+    ICON_92 = 92;
+    ICON_93 = 93;
+    ICON_94 = 94;
+    ICON_95 = 95;
+    ICON_96 = 96;
+    ICON_97 = 97;
+    ICON_98 = 98;
+    ICON_99 = 99;
 }
 
 enum RowType {
-    ROW_NOTICE = 0;
-    ROW_CATEGORY = 1;
-    ROW_SPACE = 2;
-    ROW_SWITCH = 3;
-    ROW_SINGLE_LINE = 4;
-    ROW_DOUBLE_LINE = 5;
-    ROW_UNK_6 = 6;
-    ROW_ACTION = 7;
-    ROW_DEVICE = 8;
-    ROW_FINISH_SETUP = 9;
-    ROW_FIND_MY_DEVICE = 10;
-    ROW_PREFERRED_ACTIVITY_TRACKER = 11;
-    ROW_ALERT_VOLUME = 12;
-    ROW_HELP_AND_INFO = 13;
-    ROW_SORTABLE_AND_DELETABLE = 15;
-    ROW_TEXT = 16;
-    ROW_ICON = 17;
-    ROW_SINGLE_ACTION = 18;
-    ROW_EMPTY = 19;
-    ROW_UNK_20 = 20;
-    ROW_UNK_21 = 21;
-    ROW_UNK_22 = 22;
-    ROW_UNK_23 = 23;
-    ROW_AVAILABLE_ACCESSORIES = 24;
-    ROW_UNK_25 = 25;
-    ROW_UNK_26 = 26;
-    ROW_UNK_27 = 27;
-    ROW_UNK_28 = 28;
-    ROW_UNK_29 = 29;
-    ROW_UNK_30 = 30;
-    ROW_UNK_31 = 31;
-    ROW_UNK_32 = 32;
-    ROW_UNK_33 = 33;
-    ROW_UNK_34 = 34;
-    ROW_UNK_35 = 35;
-    ROW_UNK_36 = 36;
-    ROW_UNK_37 = 37;
-    ROW_UNK_38 = 38;
-    ROW_UNK_39 = 39;
+    TEXT = 0;
+    HEADER = 1;
+    SPACER = 2;
+    TOGGLE = 3;
+    SINGLE_LABEL = 4;
+    DOUBLE_LABEL = 5;
+    SELECTION_ITEM = 6;
+    ACTION = 7;
+    DEVICE_VIEW = 8;
+    FEATURE_SETUP = 9;
+    FIND_MY_DEVICE = 10;
+    PREFERRED_ACTIVITY_TRACKER = 11;
+    ALERT_VOLUME = 12;
+    HELP_AND_INFO = 13;
+    REORDER_ITEM = 15;
+    EDIT_TEXT = 16;
+    IMAGE_CENTER_ALIGNED = 17;
+    SINGLE_LABEL_WITH_ACTION_ICON = 18;
+    EMPTY_STATE_VIEW = 19;
+    DOUBLE_LABEL_WITH_ACTION_ICON = 20;
+    MULTI_SELECTION_ITEM = 21;
+    PRIMARY_TRAINING_DEVICE = 22;
+    HAND_ALIGNMENT = 23;
+    AVAILABLE_ACCESSORIES = 24;
+    WATCH_FACE_GRID = 25;
+    BATTERY_STATUS = 26;
+    ROW_27 = 27;
+    ROW_28 = 28;
+    ROW_29 = 29;
+    ROW_30 = 30;
+    ROW_31 = 31;
+    ROW_32 = 32;
+    ROW_33 = 33;
+    ROW_34 = 34;
+    ROW_35 = 35;
+    ROW_36 = 36;
+    ROW_37 = 37;
+    ROW_38 = 38;
+    ROW_39 = 39;
 }

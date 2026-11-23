@@ -84,7 +84,7 @@ message Smart {
     optional EcgService samd_service = 39;
     optional NavigationSyncService navigation_sync_service = 40;
     optional KidDeviceService kid_device_service = 41;
-    optional RealtimeSettingsService realtime_settings_service = 42;
+    optional GDI.Proto.RealtimeSettings.RealtimeSettingsService realtime_settings_service = 42;
     optional GDI.Proto.FileAccess.Service file_access_service = 43;
     optional Service44 service44 = 44;
     optional DezlService dezl_service = 45;

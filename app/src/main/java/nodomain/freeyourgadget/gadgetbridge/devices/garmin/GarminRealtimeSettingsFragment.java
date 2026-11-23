@@ -293,8 +293,8 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
 
             if (entry.hasLinkOptions()) {
                 switch (entry.getLinkOptions().getLinkType()) {
-                    case TYPE_SUBSCREEN: // subscreen
-                    case TYPE_SUBSCREEN_OPTIONS: // subscreen with options for a specific preference
+                    case INTERNAL: // subscreen
+                    case INTERNAL_REINSTANTIATE: // subscreen with options for a specific preference
                         pref = new Preference(activity);
                         pref.setOnPreferenceClickListener(preference -> {
                             final Intent newIntent = new Intent(requireContext(), GarminRealtimeSettingsActivity.class);
@@ -304,7 +304,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                             return true;
                         });
                         break;
-                    case TYPE_LIST: // list preference
+                    case SELECTION: // list preference
                         pref = new ListPreference(activity);
                         final CharSequence[] values = new String[entry.getLinkOptions().getSelectionOptions().getRowsList().size()];
                         int optionIndex = 0;
@@ -356,19 +356,18 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                         });
                         break;
 
-                    case TYPE_TIME_OF_DAY: // time
+                    case TOD_PICKER: // time
                         pref = new XTimePreference(activity, null);
                         ((XTimePreference) pref).setValue(
                                 Objects.requireNonNull(state).getDoubleLabelSettings().getTodPickerSettings().getSeconds() / 3600,
                                 (Objects.requireNonNull(state).getDoubleLabelSettings().getTodPickerSettings().getSeconds() % 3600) / 60
                         );
                         if (state.getDoubleLabelSettings().getTodPickerSettings().hasTimeFormat()) {
-                            final int timeFormat = state.getDoubleLabelSettings().getTodPickerSettings().getTimeFormat();
-                            switch (timeFormat) {
-                                case 0: // 12h
+                            switch (state.getDoubleLabelSettings().getTodPickerSettings().getTimeFormat()) {
+                                case TWELVE_HOUR:
                                     ((XTimePreference) pref).setFormat(XTimePreference.Format.FORMAT_12H);
                                     break;
-                                case 1: // 24h
+                                case TWENTY_FOUR_HOUR:
                                     ((XTimePreference) pref).setFormat(XTimePreference.Format.FORMAT_24H);
                                     break;
                             }
@@ -392,29 +391,29 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                             return true;
                         });
                         break;
-                    case TYPE_INTEGER: {
+                    case INTEGER_PICKER: {
                         final IntegerPicker integerPicker = new IntegerPicker(entry, screenId);
                         pref = integerPicker.createPreference(activity, state);
                         break;
                     }
-                    case TYPE_FLOAT: {
+                    case FLOAT_PICKER: {
                         final FloatPicker floatPicker = new FloatPicker(entry, screenId);
                         pref = floatPicker.createPreference(activity, state);
                         break;
                     }
-                    case TYPE_DURATION: {
+                    case TIME_PICKER: {
                         final DurationPicker durationPicker = new DurationPicker(entry, screenId);
                         pref = durationPicker.createPreference(activity, state);
                         break;
                     }
-                    case TYPE_ACTIVITY: // activity
+                    case EXTERNAL: // activity
                         switch (entry.getLinkOptions().getDestPage()) {
-                            case ACTIVITY_GARMIN_PAY:
-                            case ACTIVITY_TEXT_RESPONSE:
-                            case ACTIVITY_MUSIC_PROVIDERS:
-                            case ACTIVITY_SOLAR_INTENSITY:
-                            case ACTIVITY_ECG_SETUP:
-                            case ACTIVITY_ECG:
+                            case GARMIN_PAY_SETUP:
+                            case TEXT_RESPONSE_SETUP:
+                            case MUSIC_PROVIDERS:
+                            case SOLAR_INTENSITY:
+                            case ECG_SETUP:
+                            case ECG_FEATURE:
                                 pref = new Preference(activity);
                                 pref.setVisible(debug);
                                 pref.setEnabled(false);
@@ -427,12 +426,12 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                         }
 
                         break;
-                    case TYPE_HIDDEN: // hidden?
+                    case DEVICE_ONLY: // hidden?
                         pref = new Preference(activity);
                         pref.setVisible(debug);
                         pref.setEnabled(false);
                         break;
-                    case TYPE_DATE: // date picker
+                    case DATE_PICKER: // date picker
                         pref = new XDatePreference(activity, null);
                         ((XDatePreference) pref).setValue(
                                 Objects.requireNonNull(state).getDoubleLabelSettings().getDatePickerSettings().getSelectedDate().getYear(),
@@ -480,12 +479,12 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                             return true;
                         });
                         break;
-                    case TYPE_CONNECT_IQ_STORE: // Connect IQ Store
+                    case CIQ_LINK: // Connect IQ Store
                         pref = new Preference(activity);
                         pref.setVisible(debug);
                         pref.setEnabled(false);
                         break;
-                    case TYPE_HEIGHT: // height
+                    case HEIGHT_PICKER: // height
                         pref = new EditTextPreference(activity);
                         ((EditTextPreference) pref).setText(String.valueOf(state.getDoubleLabelSettings().getHeightPickerSettings().getHeightValue()));
                         ((EditTextPreference) pref).setSummary(state.getDoubleLabelSettings().getHeightPickerSettings().getFormattedValue().getText());
@@ -524,18 +523,18 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                 }
             } else { // No target
                 switch (entry.getType()) {
-                    case ROW_NOTICE: // notice
+                    case TEXT: // notice
                         pref = new Preference(activity);
                         pref.setSummary(entry.getTitle().getText());
                         break;
-                    case ROW_CATEGORY: // category
+                    case HEADER: // category
                         pref = new PreferenceCategory(activity);
                         break;
-                    case ROW_SPACE: // space
+                    case SPACER: // space
                         pref = new PreferenceCategory(activity);
                         pref.setTitle("");
                         break;
-                    case ROW_SWITCH: // switch
+                    case TOGGLE: // switch
                         pref = new SwitchPreferenceCompat(activity);
                         pref.setLayoutResource(R.layout.preference_checkbox);
                         ((SwitchPreferenceCompat) pref).setChecked(Objects.requireNonNull(state).getToggleSettings().getToggleValue());
@@ -554,12 +553,12 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                         });
 
                         break;
-                    case ROW_SINGLE_LINE: // single line + optional icon
-                    case ROW_DOUBLE_LINE: // double line
+                    case SINGLE_LABEL: // single line + optional icon
+                    case DOUBLE_LABEL: // double line
                         pref = new Preference(activity);
                         break;
-                    case ROW_SINGLE_ACTION: // single line with action (eg. glances)
-                    case ROW_ACTION: // single line, normally in list for selection?
+                    case SINGLE_LABEL_WITH_ACTION_ICON: // single line with action (eg. glances)
+                    case ACTION: // single line, normally in list for selection?
                         pref = new Preference(activity);
                         pref.setOnPreferenceClickListener(preference -> {
                             pref.setEnabled(false);
@@ -571,17 +570,17 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                             return true;
                         });
                         break;
-                    case ROW_DEVICE: // device + status?
-                    case ROW_FINISH_SETUP: // finish setup
-                    case ROW_FIND_MY_DEVICE: // find my device
-                    case ROW_PREFERRED_ACTIVITY_TRACKER: // preferred activity tracker
-                    case ROW_HELP_AND_INFO: // help & info
-                    case ROW_AVAILABLE_ACCESSORIES: // available accessories?
+                    case DEVICE_VIEW: // device + status?
+                    case FEATURE_SETUP: // finish setup
+                    case FIND_MY_DEVICE: // find my device
+                    case PREFERRED_ACTIVITY_TRACKER: // preferred activity tracker
+                    case HELP_AND_INFO: // help & info
+                    case AVAILABLE_ACCESSORIES: // available accessories?
                         pref = new Preference(activity);
                         pref.setVisible(debug);
                         pref.setEnabled(false);
                         break;
-                    case ROW_SORTABLE_AND_DELETABLE: // sortable + delete
+                    case REORDER_ITEM: // sortable + delete
                         // Add all sortable items and then continue
                         for (int i = 0; i < entry.getReorderListOptions().getListItemsCount(); i++) {
                             final GdiRealtimeSettings.ReorderListItem sortEntry = entry.getReorderListOptions().getListItems(i);
@@ -643,7 +642,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                         }
 
                         continue; // We already added all options above, continue
-                    case ROW_TEXT: // text
+                    case EDIT_TEXT: // text
                         pref = new EditTextPreference(activity);
 
                         ((EditTextPreference) pref).setOnBindEditTextListener(p -> {
@@ -677,8 +676,8 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
             }
 
             if (StringUtils.isNullOrEmpty(pref.getTitle())
-                    && entry.getType() != GdiRealtimeSettings.RowType.ROW_NOTICE
-                    && entry.getType() != GdiRealtimeSettings.RowType.ROW_SPACE) {
+                    && entry.getType() != GdiRealtimeSettings.RowType.TEXT
+                    && entry.getType() != GdiRealtimeSettings.RowType.SPACER) {
                 pref.setTitle(!StringUtils.isEmpty(entry.getTitle().getText()) ? entry.getTitle().getText() : activity.getString(R.string.unknown));
 
                 if (pref instanceof DialogPreference) {
@@ -699,10 +698,10 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
 
             if (state != null && state.hasViewState()) {
                 switch (state.getViewState()) {
-                    case 1:
+                    case HIDDEN:
                         pref.setVisible(false);
                         break;
-                    case 2:
+                    case DISABLED:
                         pref.setEnabled(false);
                         break;
                     default:
@@ -790,8 +789,8 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
 
             if (menuEntry.hasLinkOptions()) {
                 switch (menuEntry.getLinkOptions().getLinkType()) {
-                    case TYPE_SUBSCREEN: // subscreen
-                    case TYPE_SUBSCREEN_OPTIONS: // subscreen with options for a specific preference
+                    case INTERNAL: // subscreen
+                    case INTERNAL_REINSTANTIATE: // subscreen with options for a specific preference
                         menuItem.setOnMenuItemClickListener(item -> {
                             final Intent newIntent = new Intent(requireContext(), GarminRealtimeSettingsActivity.class);
                             newIntent.putExtra(GBDevice.EXTRA_DEVICE, device);
@@ -976,80 +975,80 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
             switch (entry.getIcon()) {
                 //
                 // Main menu
-                case ICON_GARMIN_PAY: // Garmin Pay
+                case GARMIN_PAY: // Garmin Pay
                     return R.drawable.ic_credit_card;
-                case ICON_TEXT_RESPONSES: // Text Responses
+                case TEXT_RESPONSES: // Text Responses
                     return R.drawable.ic_reply;
-                case ICON_CLOCKS: // Clocks
+                case WATCH_FACE: // Clocks
                     return R.drawable.ic_access_time;
-                case ICON_GLANCES: // Glances
+                case WIDGETS: // Glances
                     return R.drawable.ic_widgets;
-                case ICON_CONTROLS: // Controls
+                case CONTROLS: // Controls
                     return R.drawable.ic_menu;
-                case ICON_ACTIVITIES_AND_APPS: // Activities / Apps, have the same icon
+                case ACTIVITIES_AND_APPS: // Activities / Apps, have the same icon
                     return R.drawable.ic_activity_unknown_small;
-                case ICON_SHORTCUT: // Shortcut
+                case SHORTCUT: // Shortcut
                     return R.drawable.ic_shortcut;
-                case ICON_NOTIFICATIONS_AND_ALERTS: // Notifications & Alerts
+                case NOTIFICATIONS_AND_ALERTS: // Notifications & Alerts
                     return R.drawable.ic_notifications;
-                case ICON_WRIST_HEARTRATE: // Wrist heart rate frequency
+                case WRIST_HR: // Wrist heart rate frequency
                     return R.drawable.ic_heartrate;
-                case ICON_ALARMS: // Alarms
+                case ALARMS: // Alarms
                     return R.drawable.ic_access_alarms;
-                case ICON_SENSORS_AND_ACCESSORIES: // Sensors & accessories
-                case ICON_WATCH_SENSORS: // Watch Sensors
+                case SENSORS_AND_ACCESSORIES: // Sensors & accessories
+                case WATCH_SENSORS: // Watch Sensors
                     return R.drawable.ic_sensor_calibration;
-                case ICON_ACCESSORIES: // Accessories
+                case ACCESSORIES: // Accessories
                     return R.drawable.ic_bluetooth_searching;
-                case ICON_MAP: // Map
+                case MAP: // Map
                     return R.drawable.ic_map;
-                case ICON_MUSIC: // Music
+                case MUSIC: // Music
                     return R.drawable.ic_music_note;
-                case ICON_PHONE: // Phone
+                case PHONE: // Phone
                     return R.drawable.ic_phone;
-                case ICON_CONNECTIVITY: // Connectivity
+                case CONNECTIVITY: // Connectivity
                     return R.drawable.ic_bluetooth_searching;
-                case ICON_AUDIO_PROMPTS: // Audio Prompts
-                case ICON_SOUND_AND_VIBE: // Sound & Vibe
+                case AUDIO_PROMPTS: // Audio Prompts
+                case SOUND_AND_VIB: // Sound & Vibe
                     return R.drawable.ic_volume_up;
-                case ICON_DISPLAY_AND_BRIGHTNESS: // Display & Brightness
+                case DISPLAY_AND_BRIGHTNESS: // Display & Brightness
                     return R.drawable.ic_wb_sunny;
-                case ICON_FOCUS_MODES: // Focus Modes
+                case FOCUS_MODES: // Focus Modes
                     return R.drawable.ic_focus;
-                case ICON_USER_PROFILE: // User Profile
+                case USER_PROFILE: // User Profile
                     return R.drawable.ic_person;
-                case ICON_SAFETY_AND_TRACKING: // Safety & Tracking
+                case SAFETY: // Safety & Tracking
                     return R.drawable.ic_emergency;
-                case ICON_ACTIVITY_TRACKING: // Activity Tracking
+                case ACTIVITY_TRACKING: // Activity Tracking
                     return R.drawable.ic_activity_unknown_small;
-                case ICON_NAVIGATION: // Navigation
+                case NAVIGATION: // Navigation
                     return R.drawable.ic_navigation;
-                case ICON_POWER_MANAGER: // Power manager
+                case POWER_SETTINGS: // Power manager
                     return R.drawable.ic_battery;
-                case ICON_SYSTEM: // System
+                case SYSTEM_SETTINGS: // System
                     return R.drawable.ic_settings;
-                case ICON_SOLAR: // Solar
+                case SOLAR_OPTIONS: // Solar
                     return R.drawable.ic_wb_sunny;
-                case ICON_APPEARANCE: // Appearance
+                case APPEARANCE: // Appearance
                     return R.drawable.ic_paint;
-                case ICON_HEALTH_AND_WELLNESS: // Health & wellness
+                case HEALTH_AND_WELLNESS: // Health & wellness
                     return R.drawable.ic_health;
-                case ICON_ACCESSIBILITY: // Accessibility
+                case ACCESSIBILITY: // Accessibility
                     return R.drawable.ic_accessibility_new;
 
                 //
                 // Sortable screens (glances, apps, etc)
-                case ICON_ACTION_ADD:
+                case ADD_ACTION:
                     return R.drawable.ic_add_gray;
-                case ICON_ACTION_REMOVE:
+                case DELETE_ACTION:
                     return R.drawable.ic_remove;
-                case ICON_INREACH_TRACKING: // inReach tracking
+                case INREACH_TRACKING: // inReach tracking
                     return R.drawable.ic_share_location;
-                case ICON_INREACH_REMOTE: // inReach remote
+                case INREACH_REMOTE: // inReach remote
                     return R.drawable.ic_settings_remote;
-                case ICON_SOUND_SETTINGS: // sound settings
+                case SOUND_SETTINGS: // sound settings
                     return R.drawable.ic_notifications_active;
-                case ICON_DISPLAY:
+                case DISPLAY:
                     return R.drawable.ic_device_display;
                 default:
                     LOG.info("no icon mapping found for: {}", entry.getIcon());
