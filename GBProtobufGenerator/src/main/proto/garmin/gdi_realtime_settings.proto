@@ -5,221 +5,254 @@ package GDI.Proto.RealtimeSettings;
 option java_package = "nodomain.freeyourgadget.gadgetbridge.proto.garmin";
 option java_outer_classname = "GdiRealtimeSettings";
 
+import "garmin/gdi_data_types.proto";
+
 message RealtimeSettingsService {
-    optional CompositionRequest composition_request = 1;
-    optional CompositionResponse composition_response = 2;
+    optional GDI.Proto.RealtimeSettings.CompositionRequest composition_request = 1;
+    optional GDI.Proto.RealtimeSettings.CompositionResponse composition_response = 2;
 
-    optional SettingsRequest settings_request = 3;
-    optional SettingsResponse settings_response = 4;
+    optional GDI.Proto.RealtimeSettings.SettingsRequest settings_request = 3;
+    optional GDI.Proto.RealtimeSettings.SettingsResponse settings_response = 4;
 
-    optional SettingsChangeRequest settings_change_request = 5;
-    optional SettingsChangeResponse settings_change_response = 6;
+    optional GDI.Proto.RealtimeSettings.SettingsChangeRequest settings_change_request = 5;
+    optional GDI.Proto.RealtimeSettings.SettingsChangeResponse settings_change_response = 6;
 
-    optional SettingsUpdatedNotification settings_updated_notification = 7;
+    optional GDI.Proto.RealtimeSettings.SettingsUpdatedNotification settings_updated_notification = 7;
 
-    optional StartUpDataRequest start_up_data_request = 8;
-    optional StartUpDataResponse start_up_data_response = 9;
+    optional GDI.Proto.RealtimeSettings.StartUpDataRequest start_up_data_request = 8;
+    optional GDI.Proto.RealtimeSettings.StartUpDataResponse start_up_data_response = 9;
 
-    optional MenuChangeRequest menu_change_request = 10;
-    optional MenuChangeResponse menu_change_response = 11;
+    optional GDI.Proto.RealtimeSettings.MenuChangeRequest menu_change_request = 10;
+    optional GDI.Proto.RealtimeSettings.MenuChangeResponse menu_change_response = 11;
 
-    optional SettingsStateRequest settings_state_request = 12;
-    optional SettingsStateResponse settings_state_response = 13;
+    optional GDI.Proto.RealtimeSettings.SettingsStateRequest settings_state_request = 12;
+    optional GDI.Proto.RealtimeSettings.SettingsStateResponse settings_state_response = 13;
 }
 
 message MenuChangeRequest {
-  optional uint32 composition_id = 1;
+    optional uint32 composition_id = 1;
+    optional uint32 menu_id = 2;
 }
 
 message MenuChangeResponse {
+    optional GDI.Proto.RealtimeSettings.ResponseStatus status = 1;
+    optional GDI.Proto.RealtimeSettings.InformationMessage information_message = 2;
+    optional bool is_invalidate = 3;
+    optional bool is_exit_instance = 4;
 }
 
 message SettingsStateRequest {
+    enum WellKnownSettingState {
+        UNKNOWN = 0;
+        SOFTWARE_UPDATE = 1;
+        DESCENT_TRANSMITTER_LIST = 2;
+    }
+
+    repeated GDI.Proto.RealtimeSettings.SettingsStateRequest.WellKnownSettingState setting_ids = 1;
 }
 
 message SettingsStateResponse {
+    repeated string setting_states = 1;
 }
 
 message CompositionRequest {
-  optional uint32 composition_id = 1;
-  optional int32 depth = 2;
-  optional string app_locale = 3; // en_US
+    enum AppId {
+        GCM = 0;
+        DIVE = 1;
+        EXPLORE = 2;
+    }
+
+    optional uint32 composition_id = 1;
+    optional int32 depth = 2;
+    optional string app_locale = 3; // en_US
+    optional bool app_localized_text_initialization_complete = 4;
+    optional GDI.Proto.RealtimeSettings.CompositionRequest.AppId app_id = 5;
 }
 
 message CompositionResponse {
-  enum ResponseStatus {
-    SUCCESS = 0;
-    PARTIAL_SUCCESS = 1;
-    FAIL = 2;
-  }
+    enum ResponseStatus {
+        SUCCESS = 0;
+        PARTIAL_SUCCESS = 1;
+        FAIL = 2;
+    }
 
-  optional CompositionResponse.ResponseStatus status = 1;
-  optional Composition compositions = 2;
+    optional GDI.Proto.RealtimeSettings.CompositionResponse.ResponseStatus status = 1;
+    optional GDI.Proto.RealtimeSettings.Composition compositions = 2;
 }
 
 message Composition {
-  optional uint32 composition_id = 1;
-  optional uint32 version = 2; // 0
-  optional uint32 global_version = 3; // 928002
-  optional FormattableString title = 4;
-  repeated CompositionRow rows = 5;
-  repeated MenuItem menu_items = 6;
+    optional uint32 composition_id = 1;
+    optional uint32 version = 2; // 0
+    optional uint32 global_version = 3; // 928002
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 4;
+    repeated GDI.Proto.RealtimeSettings.CompositionRow rows = 5;
+    repeated GDI.Proto.RealtimeSettings.MenuItem menu_items = 6;
 }
 
 message FormattableString {
-  optional bytes handle = 1;
-  optional string text = 2;
-  repeated string format_args = 3;
-  repeated bytes format_args_handles = 4;
+    optional bytes handle = 1;
+    optional string text = 2;
+    repeated string format_args = 3;
+    repeated bytes format_args_handles = 4;
 }
 
 message CompositionRow {
-  enum Platform {
-    ALL = 0;
-    ANDROID = 1;
-    IOS = 2;
-    DEVICE = 3;
-  }
+    enum Platform {
+        ALL = 0;
+        ANDROID = 1;
+        IOS = 2;
+        DEVICE = 3;
+    }
 
-  optional uint32 row_id = 1;
-  optional RowType type = 2;
-  optional FormattableString title = 3;
-  optional CompositionRow.Platform platform = 4;
-  optional Icon icon = 5;
-  optional TextOptions text_options = 6;
-  optional SpacerOptions spacer_options = 7;
-  optional ToggleOptions toggle_options = 8;
-  optional LinkOptions link_options = 9;
-  optional ActionOptions action_options = 10;
-  optional Icon right_drawable = 11;
-  optional ReorderListOptions reorder_list_options = 12;
-  optional EditTextOptions edit_text_options = 13;
-  optional DataScreenIconSetOptions data_screen_icon = 14;
-  optional EmptyStateViewOptions empty_state_view_options = 15; // info text if nothing can be set
-  optional Icon left_drawable = 17;
-  optional ControlsMenuIconSetOptions controls_menu_icon = 18;
+    optional uint32 row_id = 1;
+    optional GDI.Proto.RealtimeSettings.RowType type = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 3;
+    optional GDI.Proto.RealtimeSettings.CompositionRow.Platform platform = 4;
+    optional GDI.Proto.RealtimeSettings.Icon icon = 5;
+    optional GDI.Proto.RealtimeSettings.TextOptions text_options = 6;
+    optional GDI.Proto.RealtimeSettings.SpacerOptions spacer_options = 7;
+    optional GDI.Proto.RealtimeSettings.ToggleOptions toggle_options = 8;
+    optional GDI.Proto.RealtimeSettings.LinkOptions link_options = 9;
+    optional GDI.Proto.RealtimeSettings.ActionOptions action_options = 10;
+    optional GDI.Proto.RealtimeSettings.Icon right_drawable = 11;
+    optional GDI.Proto.RealtimeSettings.ReorderListOptions reorder_list_options = 12;
+    optional GDI.Proto.RealtimeSettings.EditTextOptions edit_text_options = 13;
+    optional GDI.Proto.RealtimeSettings.DataScreenIconSetOptions data_screen_icon = 14;
+    optional GDI.Proto.RealtimeSettings.EmptyStateViewOptions empty_state_view_options = 15; // info text if nothing can be set
+    optional GDI.Proto.RealtimeSettings.WatchFaceIconSetOptions watch_face_icon = 16;
+    optional GDI.Proto.RealtimeSettings.Icon left_drawable = 17;
+    optional GDI.Proto.RealtimeSettings.ControlsMenuIconSetOptions controls_menu_icon = 18;
+    optional GDI.Proto.RealtimeSettings.WatchFaceGridOptions watch_face_grid_options = 19;
+    optional GDI.Proto.RealtimeSettings.SliderOptions slider_options = 20;
 }
 
 message TextOptions {
-  enum TextGravity {
-    START = 0;
-    CENTER = 1;
-  }
+    enum TextGravity {
+        START = 0;
+        CENTER = 1;
+    }
 
-  enum TextStyle {
-    BODY = 0;
-    BULLET = 1;
-    INFO = 2;
-    LINK = 3;
-    SUBTITLE = 4;
-    TITLE = 5;
-    TITLE2 = 6;
-  }
+    enum TextStyle {
+        BODY = 0;
+        BULLET = 1;
+        INFO = 2;
+        LINK = 3;
+        SUBTITLE = 4;
+        TITLE = 5;
+        TITLE2 = 6;
+    }
 
-  optional TextOptions.TextStyle style = 1;
-  optional string redirect_url = 2;
-  optional TextOptions.TextGravity gravity = 3;
+    optional GDI.Proto.RealtimeSettings.TextOptions.TextStyle style = 1;
+    optional string redirect_url = 2;
+    optional GDI.Proto.RealtimeSettings.TextOptions.TextGravity gravity = 3;
 }
 
 message SpacerOptions {
+    optional uint32 spacer_multiple = 1;
 }
 
 message ToggleOptions {
+    optional GDI.Proto.RealtimeSettings.ConfirmationMessage confirmation = 1;
 }
 
 message ActionOptions {
-  optional ConfirmationMessage confirmation = 1;
+    optional GDI.Proto.RealtimeSettings.ConfirmationMessage confirmation = 1;
 }
 
 message DataScreenIconSetOptions {
-  enum LayoutField {
-    NONE = 0;
-    NO_LABEL = 1;
-    STACK = 2;
-    RING = 3;
-    QUAD = 4;
-    THREE_ROW = 5;
-    MIXED = 6;
-    A = 7;
-    B = 8;
-    C = 9;
-    D = 10;
-    E = 11;
-    F = 12;
-    MAP_NONE = 13;
-    MAP_A = 14;
-    MAP_B = 15;
-    COMPASS_NONE = 16;
-    LAP_SUMMARY_NONE = 17;
-    LAP_SUMMARY_A = 18;
-    LAP_SUMMARY_B = 19;
-    SEGMENT_NONE = 20;
-    SEGMENT_A = 21;
-    SEGMENT_B = 22;
-    SEGMENT_C = 23;
-    STAMINA_NONE = 24;
-    STAMINA_A = 25;
-    STAMINA_B = 26;
-    SOLAR_NONE = 27;
-    EBIKE_NONE = 28;
-    EBIKE_A = 29;
-    EBIKE_B = 30;
-    SHIMANO_STEPS_NONE = 31;
-    ELEVATION_NONE = 32;
-    CLIMB_PRO_NONE = 33;
-    WORKOUT_NONE = 34;
-    CYCLING_DYNAMICS_NONE = 35;
-    POWER_GUIDANCE_NONE = 36;
-  }
+    enum LayoutField {
+        NONE = 0;
+        NO_LABEL = 1;
+        STACK = 2;
+        RING = 3;
+        QUAD = 4;
+        THREE_ROW = 5;
+        MIXED = 6;
+        A = 7;
+        B = 8;
+        C = 9;
+        D = 10;
+        E = 11;
+        F = 12;
+        MAP_NONE = 13;
+        MAP_A = 14;
+        MAP_B = 15;
+        COMPASS_NONE = 16;
+        LAP_SUMMARY_NONE = 17;
+        LAP_SUMMARY_A = 18;
+        LAP_SUMMARY_B = 19;
+        SEGMENT_NONE = 20;
+        SEGMENT_A = 21;
+        SEGMENT_B = 22;
+        SEGMENT_C = 23;
+        STAMINA_NONE = 24;
+        STAMINA_A = 25;
+        STAMINA_B = 26;
+        SOLAR_NONE = 27;
+        EBIKE_NONE = 28;
+        EBIKE_A = 29;
+        EBIKE_B = 30;
+        SHIMANO_STEPS_NONE = 31;
+        ELEVATION_NONE = 32;
+        CLIMB_PRO_NONE = 33;
+        WORKOUT_NONE = 34;
+        CYCLING_DYNAMICS_NONE = 35;
+        POWER_GUIDANCE_NONE = 36;
+    }
 
-  optional IconSet icon_set = 1;
-  optional uint32 number_of_fields = 2;
-  optional DataScreenIconSetOptions.LayoutField layout = 3;
-  optional bool is_preview = 4;
+    optional GDI.Proto.RealtimeSettings.IconSet icon_set = 1;
+    optional uint32 number_of_fields = 2;
+    optional GDI.Proto.RealtimeSettings.DataScreenIconSetOptions.LayoutField layout = 3;
+    optional bool is_preview = 4;
 }
 
 message EmptyStateViewOptions {
-  optional FormattableString description = 1;
-  optional FormattableString action_text = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString description = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString action_text = 2;
 }
 
 message ControlsMenuIconSetOptions {
-  optional IconSet icon_set = 1;
-  optional uint32 control = 2;
+    optional GDI.Proto.RealtimeSettings.IconSet icon_set = 1;
+    optional uint32 control = 2;
 }
 
 message ReorderListOptions {
-  enum ActionType {
-    ADD = 0;
-    DELETE = 1;
-    NONE = 2;
-  }
+    enum ActionType {
+        ADD = 0;
+        DELETE = 1;
+        NONE = 2;
+    }
 
-  optional ReorderListOptions.ActionType action_type = 3;
-  repeated ReorderListItem list_items = 5;
+    optional uint32 group_id = 2;
+    optional GDI.Proto.RealtimeSettings.ReorderListOptions.ActionType action_type = 3;
+    optional GDI.Proto.RealtimeSettings.ConfirmationMessage delete_confirmation = 4;
+    repeated GDI.Proto.RealtimeSettings.ReorderListItem list_items = 5;
 }
 
 message ReorderListItem {
-  optional uint32 row_id = 1;
-  optional FormattableString title = 2;
-  optional bool action_enabled = 5;
-  optional ControlsMenuIconSetOptions controls_menu_icon = 6;
+    optional uint32 row_id = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 2;
+    optional GDI.Proto.RealtimeSettings.Icon icon = 3;
+    optional GDI.Proto.RealtimeSettings.DataScreenIconSetOptions icon_set = 4;
+    optional bool action_enabled = 5;
+    optional GDI.Proto.RealtimeSettings.ControlsMenuIconSetOptions controls_menu_icon = 6;
 }
 
 
 message EditTextOptions {
-  enum KeyBoardType {
-      ALPHANUMERIC = 0;
-      INTEGER = 1;
-      DECIMAL = 2;
-  }
-  optional EditTextProperties edit_text_properties = 1;
-  optional KeyBoardType edit_text_type = 2;
-  optional EditTextIntegerOptions edit_text_integer_options = 3;
+    enum KeyBoardType {
+        ALPHANUMERIC = 0;
+        INTEGER = 1;
+        DECIMAL = 2;
+    }
+    optional GDI.Proto.RealtimeSettings.EditTextProperties edit_text_properties = 1;
+    optional GDI.Proto.RealtimeSettings.EditTextOptions.KeyBoardType edit_text_type = 2;
+    optional GDI.Proto.RealtimeSettings.EditTextIntegerOptions edit_text_integer_options = 3;
+    optional GDI.Proto.RealtimeSettings.EditTextDecimalOptions edit_text_decimal_options = 4;
 }
 
 message EditTextProperties {
-  optional int32 maximum_code_point_length = 1;
+    optional int32 maximum_code_point_length = 1;
 }
 
 message EditTextIntegerOptions {
@@ -280,7 +313,7 @@ message LinkOptions {
         TUTORIALS = 42;
         AUTO_ACTIVITY_CONSENT = 43;
         UPLOAD_ACTIVITIES = 44;
-        DESTINATION_45 = 45;
+        BODY_COMP_REFERENCE_VALUES = 45;
         DESTINATION_46 = 46;
         DESTINATION_47 = 47;
         DESTINATION_48 = 48;
@@ -350,345 +383,376 @@ message LinkOptions {
         TYPE_39 = 39;
     }
 
-  optional LinkType link_type = 1;
-  optional uint32 dest_composition_id = 2;
-  optional ExternalLinkDestination dest_page = 3;
-  optional SelectionOptions selection_options = 4;
-  optional TimePickerOptions time_picker_options = 5;
-  optional FloatPickerOptions float_picker_options = 7;
-  optional IntegerPickerOptions integer_picker_options = 8;
-  optional CIQLinkOptions ciq_link_options = 11;
+    optional GDI.Proto.RealtimeSettings.LinkOptions.LinkType link_type = 1;
+    optional uint32 dest_composition_id = 2;
+    optional GDI.Proto.RealtimeSettings.LinkOptions.ExternalLinkDestination dest_page = 3;
+    optional GDI.Proto.RealtimeSettings.SelectionOptions selection_options = 4;
+    optional GDI.Proto.RealtimeSettings.TimePickerOptions time_picker_options = 5;
+    optional GDI.Proto.RealtimeSettings.TODPickerOptions tod_picker_options = 6;
+    optional GDI.Proto.RealtimeSettings.FloatPickerOptions float_picker_options = 7;
+    optional GDI.Proto.RealtimeSettings.IntegerPickerOptions integer_picker_options = 8;
+    optional GDI.Proto.RealtimeSettings.IntegerInputOptions integer_input_options = 9;
+    optional uint32 data_bundle = 10;
+    optional GDI.Proto.RealtimeSettings.CIQLinkOptions ciq_link_options = 11;
+    optional GDI.Proto.RealtimeSettings.DatePickerOptions date_picker_options = 12;
 }
 
 message TimePickerOptions {
-  optional uint32 min_time_seconds = 1;
-  optional uint32 max_time_seconds = 2;
-  optional uint32 granularity_seconds = 3;
+    optional uint32 min_time_seconds = 1;
+    optional uint32 max_time_seconds = 2;
+    optional uint32 granularity_seconds = 3;
 }
 
 message FloatPickerOptions {
-  optional float minimum = 1;
-  optional float maximum = 2;
-  optional uint32 precision = 3;
-  optional float granularity = 4;
+    optional float minimum = 1;
+    optional float maximum = 2;
+    optional uint32 precision = 3;
+    optional float granularity = 4;
 }
 
 message CIQLinkOptions {
-  enum AppType {
-    WATCH_APP = 0;
-    WATCH_FACE = 1;
-    DATA_FIELD = 2;
-    WIDGET = 3;
-    AUDIO_CONTENT_PROVIDER_APP = 4;
-  }
+    enum AppType {
+        WATCH_APP = 0;
+        WATCH_FACE = 1;
+        DATA_FIELD = 2;
+        WIDGET = 3;
+        AUDIO_CONTENT_PROVIDER_APP = 4;
+    }
 
-  enum CIQLinkDestination {
-    APP_STORE = 0;
-    APP_SETTINGS = 1;
-    APP_DETAILS = 2;
-  }
+    enum CIQLinkDestination {
+        APP_STORE = 0;
+        APP_SETTINGS = 1;
+        APP_DETAILS = 2;
+    }
 
-  optional int32 device_id = 1;
-  optional bytes store_app_id = 2;
-  optional CIQLinkOptions.AppType app_type = 5;
-  optional CIQLinkOptions.CIQLinkDestination destination = 6;
+    optional uint32 device_id = 1;
+    optional bytes store_app_id = 2;
+    optional uint32 app_version = 3;
+    optional bytes mac_address = 4;
+    optional GDI.Proto.RealtimeSettings.CIQLinkOptions.AppType app_type = 5;
+    optional GDI.Proto.RealtimeSettings.CIQLinkOptions.CIQLinkDestination destination = 6;
 }
 
 message SettingsRequest {
-  optional uint32 composition_id = 1;
+    optional uint32 composition_id = 1;
+    optional string app_locale = 2;
+    optional uint32 data_bundle = 3;
 }
 
 message SelectionOptions {
-  repeated SelectionItem rows = 1;
-  repeated MenuItem menu_items = 2;
-  optional bool exit_items_on_tap = 3;
+    repeated GDI.Proto.RealtimeSettings.SelectionItem rows = 1;
+    repeated GDI.Proto.RealtimeSettings.MenuItem menu_items = 2;
+    optional bool exit_items_on_tap = 3;
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 4;
 }
 
 message SelectionItem {
-  optional uint32 row_id = 1;
-  optional RowType type = 2;
-  optional FormattableString title = 3;
-  optional FormattableString subtext = 4;
-  optional Icon icon = 6;
-  optional DataScreenIconSetOptions data_screen_icon = 7;
+    optional uint32 row_id = 1;
+    optional GDI.Proto.RealtimeSettings.RowType type = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 3;
+    optional GDI.Proto.RealtimeSettings.FormattableString subtext = 4;
+    optional GDI.Proto.RealtimeSettings.LinkOptions link_options = 5;
+    optional GDI.Proto.RealtimeSettings.Icon icon = 6;
+    optional GDI.Proto.RealtimeSettings.DataScreenIconSetOptions data_screen_icon = 7;
+    optional GDI.Proto.RealtimeSettings.WatchFaceIconSetOptions watch_face_icon = 8;
+    optional GDI.Proto.RealtimeSettings.ControlsMenuIconSetOptions controls_menu_icon = 9;
+    optional GDI.Proto.RealtimeSettings.ConfirmationMessage confirmation = 10;
+    optional GDI.Proto.RealtimeSettings.IconSettings icon_settings = 11;
 }
 
 
 message IntegerPickerOptions {
-  optional int32 minimum = 1;
-  optional int32 maximum = 2;
-  optional int32 granularity = 3;
+    optional int32 minimum = 1;
+    optional int32 maximum = 2;
+    optional int32 granularity = 3;
 }
 
 message SettingsResponse {
-  enum ResponseStatus {
-    SUCCESS = 0;
-    FAIL = 1;
-  }
+    enum ResponseStatus {
+        SUCCESS = 0;
+        FAIL = 1;
+    }
 
-  optional SettingsResponse.ResponseStatus status = 1;
-  optional Settings settings = 2;
+    optional GDI.Proto.RealtimeSettings.SettingsResponse.ResponseStatus status = 1;
+    optional GDI.Proto.RealtimeSettings.Settings settings = 2;
 }
 
 message Settings {
-  optional uint32 composition_id = 1;
-  optional uint32 composition_version = 2;
-  optional uint32 global_version = 3;
-  repeated RowValue rows = 4;
+    optional uint32 composition_id = 1;
+    optional uint32 composition_version = 2;
+    optional uint32 global_version = 3;
+    repeated GDI.Proto.RealtimeSettings.RowValue rows = 4;
 }
 
 message RowValue {
-  enum ViewState {
-    VISIBLE = 0;
-    HIDDEN = 1;
-    DISABLED = 2;
-  }
+    enum ViewState {
+        VISIBLE = 0;
+        HIDDEN = 1;
+        DISABLED = 2;
+    }
 
-  optional uint32 row_id = 1;
-  optional RowValue.ViewState view_state = 2;
-  optional ToggleSettings toggle_settings = 3;
-  optional DoubleLabelSettings double_label_settings = 4;
-  optional AlertVolumeSettings alert_volume_settings = 6;
-  optional EditTextSettings edit_text_settings = 7;
-  optional SelectionSettings single_label_selection_settings = 8;
-  optional ActionSettings action_view_settings = 9;
+    optional uint32 row_id = 1;
+    optional GDI.Proto.RealtimeSettings.RowValue.ViewState view_state = 2;
+    optional GDI.Proto.RealtimeSettings.ToggleSettings toggle_settings = 3;
+    optional GDI.Proto.RealtimeSettings.DoubleLabelSettings double_label_settings = 4;
+    optional GDI.Proto.RealtimeSettings.AlertVolumeSettings alert_volume_settings = 6;
+    optional GDI.Proto.RealtimeSettings.EditTextSettings edit_text_settings = 7;
+    optional GDI.Proto.RealtimeSettings.SelectionSettings single_label_selection_settings = 8;
+    optional GDI.Proto.RealtimeSettings.ActionSettings action_view_settings = 9;
+    optional GDI.Proto.RealtimeSettings.WatchFaceGridSettings watch_face_grid_settings = 10;
+    optional GDI.Proto.RealtimeSettings.TextSettings text_settings = 11;
+    optional GDI.Proto.RealtimeSettings.BatteryStatusSettings battery_status_settings = 12;
+    optional GDI.Proto.RealtimeSettings.SliderSettings slider_settings = 13;
 }
 
 message EditTextSettings {
-  optional FormattableString formatted_value = 1;
-  optional FormattableString edit_text_value = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString edit_text_value = 2;
 }
 
 
 message ActionSettings {
-  optional FormattableString subtext = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString subtext = 1;
 }
 
 message AlertVolumeSettings {
-  required string alert_dialect = 1;
+    optional string alert_dialect = 1;
 }
 
 message ToggleSettings {
-  optional bool toggle_value = 1;
-  optional FormattableString subtext = 2;
+    optional bool toggle_value = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString subtext = 2;
 }
 
 message DoubleLabelSettings {
-  optional FormattableString subtext = 1;
-  optional SelectionSettings selection_settings = 2;
-  optional TimePickerSettings time_picker_settings = 3;
-  optional TODPickerSettings tod_picker_settings = 4;
-  optional FloatPickerSettings float_picker_settings = 5;
-  optional IntegerPickerSettings integer_picker_settings = 6;
-  optional DatePickerSettings date_picker_settings = 8;
-  optional HeightPickerSettings height_picker_settings = 10;
+    optional GDI.Proto.RealtimeSettings.FormattableString subtext = 1;
+    optional GDI.Proto.RealtimeSettings.SelectionSettings selection_settings = 2;
+    optional GDI.Proto.RealtimeSettings.TimePickerSettings time_picker_settings = 3;
+    optional GDI.Proto.RealtimeSettings.TODPickerSettings tod_picker_settings = 4;
+    optional GDI.Proto.RealtimeSettings.FloatPickerSettings float_picker_settings = 5;
+    optional GDI.Proto.RealtimeSettings.IntegerPickerSettings integer_picker_settings = 6;
+    optional GDI.Proto.RealtimeSettings.IntegerInputSettings integer_input_settings = 7;
+    optional GDI.Proto.RealtimeSettings.DatePickerSettings date_picker_settings = 8;
+    optional GDI.Proto.RealtimeSettings.MultiSelectionSettings multi_selection_settings = 9;
+    optional GDI.Proto.RealtimeSettings.HeightPickerSettings height_picker_settings = 10;
+    optional GDI.Proto.RealtimeSettings.IconSettings icon_settings = 11;
 }
 
 message SelectionSettings {
-  optional uint32 selected_index = 1;
+    optional uint32 selected_index = 1;
 }
 
 message TODPickerSettings {
-  enum TimeFormat {
-    TWELVE_HOUR = 0;
-    TWENTY_FOUR_HOUR = 1;
-  }
+    enum TimeFormat {
+        TWELVE_HOUR = 0;
+        TWENTY_FOUR_HOUR = 1;
+    }
 
-  optional uint32 seconds = 1;
-  optional FormattableString formatted_value = 2;
-  optional TODPickerSettings.TimeFormat time_format = 3;
+    optional uint32 seconds = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 2;
+    optional GDI.Proto.RealtimeSettings.TODPickerSettings.TimeFormat time_format = 3;
+    optional GDI.Proto.RealtimeSettings.FormattableString picker_title = 4;
 }
 
 message TimePickerSettings {
-  optional uint32 seconds = 1;
-  optional FormattableString formatted_value = 2;
-  optional FormattableString picker_title = 3;
+    optional uint32 seconds = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString picker_title = 3;
 }
 
 message FloatPickerSettings {
-  optional float float_value = 1;
-  optional FormattableString formatted_value = 2;
-  optional FormattableString picker_title = 3;
-  optional FormattableString measurement_unit = 4;
+    optional float float_value = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString picker_title = 3;
+    optional GDI.Proto.RealtimeSettings.FormattableString measurement_unit = 4;
 }
 
 message IntegerPickerSettings {
-  optional int32 integer_value = 1;
-  optional FormattableString formatted_value = 2;
-  optional FormattableString picker_title = 3;
-  optional FormattableString measurement_unit = 4;
+    optional int32 integer_value = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString picker_title = 3;
+    optional GDI.Proto.RealtimeSettings.FormattableString measurement_unit = 4;
 }
 
 message DatePickerSettings {
-  optional FormattableString formatted_value = 1;
-  optional Date selected_date = 2;
-  optional Date minimum_date = 3;
-  optional Date maximum_date = 4;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 1;
+    optional GDI.Proto.RealtimeSettings.Date selected_date = 2;
+    optional GDI.Proto.RealtimeSettings.Date minimum_date = 3;
+    optional GDI.Proto.RealtimeSettings.Date maximum_date = 4;
 }
 
 message HeightPickerSettings {
-  optional FormattableString formatted_value = 1;
-  optional uint32 height_value = 2;
-  optional uint32 measurement_unit = 3;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 1;
+    optional uint32 height_value = 2;
+    optional GDI.Proto.DataTypes.MeasurementUnit measurement_unit = 3;
 }
 
 message Date {
-  optional uint32 month = 1;
-  optional uint32 day = 2;
-  optional uint32 year = 3;
+    optional int32 month = 1;
+    optional int32 day = 2;
+    optional int32 year = 3;
 }
 
 message SettingsChangeRequest {
-  optional uint32 composition_id = 1;
-  optional uint32 row_id = 2;
-  optional ToggleChange toggle_change = 3;
-  optional SelectionChange selection_change = 4;
-  optional TimePickerChange time_picker_change = 5;
-  optional TODPickerChange tod_picker_change = 6;
-  optional FloatPickerChange float_picker_change = 7;
-  optional IntegerPickerChange integer_picker_change = 8;
-  optional ReorderableItemChange reorderable_item_change = 11;
-  optional DatePickerChange date_picker_change = 12;
-  optional EditTextValueChange edit_text_value_change = 14;
-  optional HeightPickerValueChange height_picker_value_change = 15;
+    optional uint32 composition_id = 1;
+    optional uint32 row_id = 2;
+    optional GDI.Proto.RealtimeSettings.ToggleChange toggle_change = 3;
+    optional GDI.Proto.RealtimeSettings.SelectionChange selection_change = 4;
+    optional GDI.Proto.RealtimeSettings.TimePickerChange time_picker_change = 5;
+    optional GDI.Proto.RealtimeSettings.TODPickerChange tod_picker_change = 6;
+    optional GDI.Proto.RealtimeSettings.FloatPickerChange float_picker_change = 7;
+    optional GDI.Proto.RealtimeSettings.IntegerPickerChange integer_picker_change = 8;
+    optional GDI.Proto.RealtimeSettings.IntegerInputChange integer_input_change = 9;
+    optional uint32 data_bundle = 10;
+    optional GDI.Proto.RealtimeSettings.ReorderableItemChange reorderable_item_change = 11;
+    optional GDI.Proto.RealtimeSettings.DatePickerChange date_picker_change = 12;
+    optional GDI.Proto.RealtimeSettings.MultiSelectionChange multi_selection_change = 13;
+    optional GDI.Proto.RealtimeSettings.EditTextValueChange edit_text_value_change = 14;
+    optional GDI.Proto.RealtimeSettings.HeightPickerValueChange height_picker_value_change = 15;
+    optional GDI.Proto.RealtimeSettings.WatchFaceGridValueChange watch_face_grid_value_change = 16;
+    optional GDI.Proto.RealtimeSettings.SliderValueChange slider_value_change = 17;
 }
 
 message ToggleChange {
-  required bool new_toggle_value = 1;
+    optional bool new_toggle_value = 1;
 }
 
 message SelectionChange {
-  optional uint32 new_selected_index = 1;
+    optional uint32 new_selected_index = 1;
 }
 
 message TimePickerChange {
-  optional uint32 new_seconds = 1;
+    optional uint32 new_seconds = 1;
 }
 
 message TODPickerChange {
-  optional uint32 new_seconds = 1;
+    optional uint32 new_seconds = 1;
 }
 
 message IntegerPickerChange {
-  optional int32 new_integer_value = 1;
+    optional int32 new_integer_value = 1;
 }
 
 message ReorderableItemChange {
-  optional uint32 new_list_position = 1;
-  optional bool is_delete = 2;
+    optional uint32 new_list_position = 1;
+    optional bool is_delete = 2;
 }
 
 message DatePickerChange {
-  optional Date new_date = 1;
+    optional GDI.Proto.RealtimeSettings.Date new_date = 1;
 }
 
 message EditTextValueChange {
-  optional string new_edit_text_value = 1;
+    optional string new_edit_text_value = 1;
+    optional int32 new_integer_value = 2;
+    optional float new_float_value = 3;
 }
 
 message HeightPickerValueChange {
-  optional uint32 height_value = 1;
-  optional uint32 measurement_unit = 2;
+    optional uint32 height_value = 1;
+    optional GDI.Proto.DataTypes.MeasurementUnit measurement_unit = 2;
 }
 
 message FloatPickerChange {
-  optional float new_float_value = 1;
+    optional float new_float_value = 1;
 }
 
 message SettingsChangeResponse {
-  optional ResponseStatus status = 1;
-  optional InformationMessage information_message = 2;
-  optional Settings updated_settings = 3;
-  optional bool is_invalidate = 4;
-  optional bool is_exit_instance = 5;
+    optional GDI.Proto.RealtimeSettings.ResponseStatus status = 1;
+    optional GDI.Proto.RealtimeSettings.InformationMessage information_message = 2;
+    optional GDI.Proto.RealtimeSettings.Settings updated_settings = 3;
+    optional bool is_invalidate = 4;
+    optional bool is_exit_instance = 5;
 }
 
 message InformationMessage {
-  optional FormattableString title = 1;
-  optional FormattableString message = 2;
-  optional FormattableString neutral_text = 3;
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString message = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString neutral_text = 3;
 }
 
 message StartUpDataRequest {
-  optional string app_locale = 1; // en_US
-  optional string app_consent_country = 2; // us
+    optional string app_locale = 1; // en_US
+    optional string app_consent_country = 2; // us
 }
 
 message StartUpDataResponse {
-  optional string app_locale_language_part_number = 1;
-  optional string device_locale_language_part_number = 2;
-  repeated IconSet icon_sets = 3;
-  optional CommunicateType communicate_type = 4;
+    optional string app_locale_language_part_number = 1;
+    optional string device_locale_language_part_number = 2;
+    repeated GDI.Proto.RealtimeSettings.IconSet icon_sets = 3;
+    optional GDI.Proto.RealtimeSettings.CommunicateType communicate_type = 4;
 }
 
 enum ResponseStatus {
-  SUCCESS = 0;
-  FAIL = 1;
+    SUCCESS = 0;
+    FAIL = 1;
+    CURRENTLY_UNAVAILABLE = 2;
 }
 
 enum IconSet {
-  BASE = 0;
-  DATA_SCREEN_CIRCULAR = 1;
-  DATA_SCREEN_EDGE_PORTRAIT = 2;
-  DATA_SCREEN_INSTINCT = 3;
-  CONTROLS_MENU = 4;
-  ACTIVITIES_APPS = 5;
-  WATCH_FACES = 6;
-  DATA_SCREEN_RECTANGULAR = 7;
-  WATCH_FACES_PREVIEW_LILY2 = 8;
-  WATCH_FACES_PREVIEW_LILY2_ACTIVE = 9;
-  DATA_SCREEN_ANALOG_HANDS = 10;
+    BASE = 0;
+    DATA_SCREEN_CIRCULAR = 1;
+    DATA_SCREEN_EDGE_PORTRAIT = 2;
+    DATA_SCREEN_INSTINCT = 3;
+    CONTROLS_MENU = 4;
+    ACTIVITIES_APPS = 5;
+    WATCH_FACES = 6;
+    DATA_SCREEN_RECTANGULAR = 7;
+    WATCH_FACES_PREVIEW_LILY2 = 8;
+    WATCH_FACES_PREVIEW_LILY2_ACTIVE = 9;
+    DATA_SCREEN_ANALOG_HANDS = 10;
 }
 
 enum CommunicateType {
-  REQUEST_RESPONSE = 0;
-  NOTIFICATION = 1;
+    REQUEST_RESPONSE = 0;
+    NOTIFICATION = 1;
 }
 
 message SettingsUpdatedNotification {
 }
 
 message ConfirmationMessage {
-  optional FormattableString title = 1;
-  optional FormattableString message = 2;
-  optional FormattableString positive_text = 3;
-  optional FormattableString negative_text = 4;
-  optional bool destructive_positive_action = 5;
-  optional bool destructive_negative_action = 6;
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString message = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString positive_text = 3;
+    optional GDI.Proto.RealtimeSettings.FormattableString negative_text = 4;
+    optional bool destructive_positive_action = 5;
+    optional bool destructive_negative_action = 6;
 }
 
 message MenuItem {
-  enum FallbackClickEvent {
-    NONE = 0;
-    EXIT_INSTANTIATE = 1;
-    EXIT = 2;
-  }
+    enum FallbackClickEvent {
+        NONE = 0;
+        EXIT_INSTANTIATE = 1;
+        EXIT = 2;
+    }
 
-  enum MenuType {
-    UNKNOWN_OPTION = 0;
-    SYNC_DEVICE = 1;
-    REMOVE_DEVICE = 2;
-    PULSE_OX_HELP = 3;
-    TEXT = 4;
-    ACTION_SAVE = 5;
-    ACTION_CANCEL = 6;
-    CUSTOM_ACTION = 7;
-    MANAGE_DEVICE_PRIORITY = 8;
-  }
+    enum MenuType {
+        UNKNOWN_OPTION = 0;
+        SYNC_DEVICE = 1;
+        REMOVE_DEVICE = 2;
+        PULSE_OX_HELP = 3;
+        TEXT = 4;
+        ACTION_SAVE = 5;
+        ACTION_CANCEL = 6;
+        CUSTOM_ACTION = 7;
+        MANAGE_DEVICE_PRIORITY = 8;
+    }
 
-  enum Position {
-    RIGHT = 0;
-    LEFT = 1;
-  }
+    enum Position {
+        RIGHT = 0;
+        LEFT = 1;
+    }
 
-  optional MenuItem.MenuType type = 1;
-  optional uint32 show_on_bar = 2;
-  optional FormattableString title = 3;
-  optional uint32 menu_id = 4;
-  optional LinkOptions link_options = 5;
-  optional uint32 destructive_action = 6;
-  optional MenuItem.Position item_position = 7;
-  optional ConfirmationMessage confirmation_message = 9;
+    optional GDI.Proto.RealtimeSettings.MenuItem.MenuType type = 1;
+    optional bool show_on_bar = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 3;
+    optional uint32 menu_id = 4;
+    optional GDI.Proto.RealtimeSettings.LinkOptions link_options = 5;
+    optional bool destructive_action = 6;
+    optional GDI.Proto.RealtimeSettings.MenuItem.Position item_position = 7;
+    optional GDI.Proto.RealtimeSettings.MenuItem.FallbackClickEvent fallback_click_event = 8;
+    optional GDI.Proto.RealtimeSettings.ConfirmationMessage confirmation_message = 9;
 }
 
 enum Icon {
@@ -821,7 +885,7 @@ enum RowType {
     AVAILABLE_ACCESSORIES = 24;
     WATCH_FACE_GRID = 25;
     BATTERY_STATUS = 26;
-    ROW_27 = 27;
+    SLIDER = 27;
     ROW_28 = 28;
     ROW_29 = 29;
     ROW_30 = 30;
@@ -834,4 +898,155 @@ enum RowType {
     ROW_37 = 37;
     ROW_38 = 38;
     ROW_39 = 39;
+}
+
+message IntegerInputOptions {
+    optional GDI.Proto.RealtimeSettings.FormattableString title = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString information_message = 2;
+    optional int32 default_value = 3;
+    optional int32 minimum_value = 4;
+    optional int32 maximum_value = 5;
+    optional GDI.Proto.RealtimeSettings.FormattableString error_message = 6;
+}
+
+message IntegerInputChange {
+    optional int32 new_integer_input_value = 1;
+}
+
+message IntegerInputSettings {
+    optional int32 integer_value = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 2;
+    optional GDI.Proto.RealtimeSettings.FormattableString measurement_unit = 3;
+}
+
+message MultiSelectionChange {
+    optional uint32 index = 1;
+}
+
+message MultiSelectionSettings {
+    repeated uint32 selected_indexes = 1;
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 2;
+}
+
+message WatchFaceGridOptions {
+    optional GDI.Proto.RealtimeSettings.IconSet icon_set = 1;
+    optional string frame_image_name = 2;
+    repeated GDI.Proto.RealtimeSettings.WatchFaceGridItem watch_face_grid_items = 3;
+}
+
+message WatchFaceGridItem {
+    optional uint32 index = 1;
+    optional string image_name = 2;
+}
+
+message WatchFaceGridSettings {
+    repeated GDI.Proto.RealtimeSettings.WatchFaceGridItemSettings watch_face_grid_item_settings = 1;
+}
+
+message WatchFaceGridValueChange {
+    optional uint32 index = 1;
+}
+
+message WatchFaceGridItemSettings {
+    optional uint32 index = 1;
+    optional bool is_selected = 2;
+}
+
+message WatchFaceIconSetOptions {
+    enum LayoutStyle {
+        NONE = 0;
+        CLASSIC = 1;
+        ELEGANT = 2;
+        CLEAR = 3;
+        SIMPLE = 4;
+        MODERN_1 = 5;
+        MODERN_2 = 6;
+    }
+
+    optional GDI.Proto.RealtimeSettings.IconSet icon_set = 1;
+    optional uint32 number_of_complications = 2;
+    optional GDI.Proto.RealtimeSettings.WatchFaceIconSetOptions.LayoutStyle layout_style = 3;
+    optional bool is_preview = 4;
+}
+
+message IconSettings {
+    optional uint32 light_color = 2;
+    optional uint32 dark_color = 3;
+}
+
+message TextSettings {
+    optional GDI.Proto.RealtimeSettings.FormattableString text = 1;
+}
+
+message BatteryStatusSettings {
+    optional uint32 state_of_charge = 1;
+    optional bool is_charging = 2;
+}
+
+message TODPickerOptions {
+}
+
+message DatePickerOptions {
+    optional bool isNotBirthdayRow = 1;
+}
+
+message SliderOptions {
+    optional float minimum_value = 1;
+    optional string minimum_value_text = 2;
+    optional float maximum_value = 3;
+    optional string maximum_value_text = 4;
+    optional float granularity = 5;
+    optional float default_value = 6;
+    optional bool show_icons = 7;
+}
+
+message SliderSettings {
+    optional GDI.Proto.RealtimeSettings.FormattableString formatted_value = 1;
+    optional float slider_value = 2;
+}
+
+message SliderValueChange {
+    optional float slider_value = 1;
+}
+
+enum WellKnownCompositionId {
+    DEVICE_SETTINGS_HOME = 36352;
+    TEST_MENU = 36353;
+    PULSE_OX_SETTINGS = 36354;
+    DIVE_SETUP = 36355;
+    APP_DEFAULT_SETTINGS = 36356;
+    ALARM_SETTINGS = 36357;
+    ACTIVITY_TRACKING_SETTINGS = 36358;
+    WIDGETS_SETTINGS = 36359;
+    INREACH_TRACKING_SETTINGS = 36360;
+    WATCH_FACE_SETTINGS = 36361;
+    DISPLAY_NAME_SETTINGS = 36362;
+    STRESS_ALERT_SETTINGS = 36363;
+    TOPOACTIVE_MAPS_MENU = 36364;
+    ADD_SMART_WAKE_ALARM = 36365;
+    UMS_ENABLED = 36366;
+    WORKOUT_TYPE_SELECTION = 36367;
+    COLOR_SETTINGS = 36368;
+    DAILY_STATS = 36369;
+    MORNING_REPORT = 36370;
+    HEALTH_AND_WELLNESS_SETTINGS = 36371;
+    ACTIVITY_SETTINGS = 36372;
+    POWER_MANAGER = 36373;
+    NOTIFICATION_SETTINGS = 36374;
+    SELECT_ACTIVITY = 36375;
+    ACTIVITY_OPTIONS = 36376;
+    INCIDENT_DETECTION_MENU = 36377;
+    FALL_DETECTION_MENU = 36378;
+    FALL_DETECTION_PAUSE = 36379;
+}
+
+enum AppWellKnownCompositionId {
+    INVALID = 7680;
+    PULSE_OX_HELP = 7681;
+    BLOOD_OXYGEN_HELP = 7682;
+    POWER_ZONE_HELP = 7683;
+    CYCLING_POWER_ZONE_HELP = 7684;
+    NON_CYCLING_POWER_ZONE_HELP = 7685;
+    XCSKI_POWER_ZONE_HELP = 7686;
+    RUNNING_POWER_ZONE_HELP = 7687;
 }

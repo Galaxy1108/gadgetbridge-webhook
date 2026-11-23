@@ -44,7 +44,7 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.protobuf.InvalidProtocolBufferException;
-
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiDataTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
     public static final String EXTRA_SCREEN_ID = "screenId";
     public static final String PREF_DEBUG = "garmin_rt_debug_mode";
 
-    public static final int ROOT_SCREEN_ID = 36352;
+    public static final int ROOT_SCREEN_ID = GdiRealtimeSettings.WellKnownCompositionId.DEVICE_SETTINGS_HOME_VALUE;
 
     private GBDevice device;
     private int screenId = ROOT_SCREEN_ID;
@@ -488,7 +488,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                         pref = new EditTextPreference(activity);
                         ((EditTextPreference) pref).setText(String.valueOf(state.getDoubleLabelSettings().getHeightPickerSettings().getHeightValue()));
                         ((EditTextPreference) pref).setSummary(state.getDoubleLabelSettings().getHeightPickerSettings().getFormattedValue().getText());
-                        if (state.getDoubleLabelSettings().getHeightPickerSettings().getMeasurementUnit() == 0) {
+                        if (state.getDoubleLabelSettings().getHeightPickerSettings().getMeasurementUnit() == GdiDataTypes.MeasurementUnit.METRIC) {
                             ((EditTextPreference) pref).setDialogTitle(R.string.activity_prefs_height_cm);
                             ((EditTextPreference) pref).setTitle(R.string.activity_prefs_height_cm);
                         } else {
