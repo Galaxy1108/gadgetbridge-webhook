@@ -24,12 +24,12 @@ message RealtimeSettingsService {
     optional Message13 unk13 = 13;
 }
 
-  message Message11 {
-    optional uint32 unk1 = 1;
-  }
+message Message11 {
+  optional uint32 unk1 = 1;
+}
 
-  message Message13 {
-  }
+message Message13 {
+}
 
 
 message ScreenDefinitionRequest {
@@ -60,51 +60,56 @@ message Label {
 }
 
 message ScreenEntry {
-  message Message6 {
-    optional uint32 unk1 = 1;
-    optional string unk2 = 2;
-    optional uint32 unk3 = 3;
-  }
-  message Message7 {
-
-  }
-  message Message8 {
-  }
-
-  message Action {
-    optional MenuMessage unk1 = 1;
-  }
-  message Message14 {
-    optional uint32 unk1 = 1;
-    optional uint32 unk2 = 2;
-    optional uint32 unk3 = 3;
-    optional uint32 unk4 = 4;
-  }
-  message Message15 {
-    optional Label unk1 = 1;
-    optional Label unk2 = 2;
-  }
-  message Message18 {
-    optional uint32 unk1 = 1;
-    optional uint32 unk2 = 2;
-  }
   optional uint32 id = 1;
   optional RowType rowType = 2;
   optional Label title = 3;
   optional uint32 unk4 = 4;
   optional Icon icon = 5;
-  optional Message6 unk6 = 6;
-  optional Message7 unk7 = 7;
-  optional Message8 unk8 = 8;
+  optional ScreenEntryMessage6 unk6 = 6;
+  optional ScreenEntryMessage7 unk7 = 7;
+  optional ScreenEntryMessage8 unk8 = 8;
   optional Target target = 9;
-  optional Action action = 10;
+  optional ScreenEntryAction action = 10;
   optional Icon iconRight = 11;
   optional SortOptions sortOptions = 12;
   optional TextOption textOption = 13;
-  optional Message14 unk14 = 14;
-  optional Message15 unk15 = 15; // info text if nothing can be set?
+  optional ScreenEntryMessage14 unk14 = 14;
+  optional ScreenEntryMessage15 unk15 = 15; // info text if nothing can be set?
   optional Icon iconLeft = 17;
-  optional Message18 unk18 = 18;
+  optional ScreenEntryMessage18 unk18 = 18;
+}
+
+message ScreenEntryMessage6 {
+  optional uint32 unk1 = 1;
+  optional string unk2 = 2;
+  optional uint32 unk3 = 3;
+}
+
+message ScreenEntryMessage7 {
+}
+
+message ScreenEntryMessage8 {
+}
+
+message ScreenEntryAction {
+  optional MenuMessage unk1 = 1;
+}
+
+message ScreenEntryMessage14 {
+  optional uint32 unk1 = 1;
+  optional uint32 unk2 = 2;
+  optional uint32 unk3 = 3;
+  optional uint32 unk4 = 4;
+}
+
+message ScreenEntryMessage15 {
+  optional Label unk1 = 1;
+  optional Label unk2 = 2;
+}
+
+message ScreenEntryMessage18 {
+  optional uint32 unk1 = 1;
+  optional uint32 unk2 = 2;
 }
 
 message SortOptions {
@@ -113,14 +118,15 @@ message SortOptions {
 }
 
 message SortEntry {
-  message Message6 {
-      optional uint32 unk1 = 1;
-      optional uint32 unk2 = 2;
-  }
   optional uint32 id = 1;
   optional Label title = 2;
   optional uint32 unk5 = 5; // 1
-  optional Message6 unk6 = 6;
+  optional SortEntryMessage6 unk6 = 6;
+}
+
+message SortEntryMessage6 {
+  optional uint32 unk1 = 1;
+  optional uint32 unk2 = 2;
 }
 
 message TextOption {
@@ -266,31 +272,34 @@ message Target {
         TYPE_UNK_39 = 39;
     }
 
-  message DurationOptions {
-    optional uint32 minSeconds = 1;
-    optional uint32 maxSeconds = 2;
-    optional uint32 stepSize = 3;
-  }
-  message FloatOptions {
-    optional float minValue = 1;
-    optional float maxValue = 2;
-    optional uint32 unk3 = 3;
-    optional float stepSize = 4;
-  }
-  message CIQ {
-    optional int32 unk1 = 1;
-    optional bytes store_app = 2;
-    optional uint32 app_type = 5;
-    optional uint32 unk6 = 6;
-  }
   optional Type type = 1;
   optional uint32 subscreen = 2; // when 0
   optional Activity activity = 3; // when 6
   optional TargetOptions options = 4; // when 1
-  optional DurationOptions durationOptions = 5;
-  optional FloatOptions floatOptions = 7;
+  optional TargetDurationOptions durationOptions = 5;
+  optional TargetFloatOptions floatOptions = 7;
   optional IntegerPicker integerPicker = 8;
-  optional CIQ ciq = 11;
+  optional TargetCIQ ciq = 11;
+}
+
+message TargetDurationOptions {
+  optional uint32 minSeconds = 1;
+  optional uint32 maxSeconds = 2;
+  optional uint32 stepSize = 3;
+}
+
+message TargetFloatOptions {
+  optional float minValue = 1;
+  optional float maxValue = 2;
+  optional uint32 unk3 = 3;
+  optional float stepSize = 4;
+}
+
+message TargetCIQ {
+  optional int32 unk1 = 1;
+  optional bytes store_app = 2;
+  optional uint32 app_type = 5;
+  optional uint32 unk6 = 6;
 }
 
 message ScreenStateRequest {
@@ -304,18 +313,19 @@ message TargetOptions {
 }
 
 message TargetOptionEntry {
-  message Message7 {
-    optional uint32 unk1 = 1;
-    optional uint32 unk2 = 2;
-    optional uint32 unk3 = 3;
-    optional uint32 unk4 = 4;
-  }
   optional uint32 unk1 = 1;
   optional RowType rowType = 2;
   optional Label title = 3;
   optional Label subtitle = 4;
   optional Icon icon = 6;
-  optional Message7 unk7 = 7;
+  optional TargetOptionEntryMessage7 unk7 = 7;
+}
+
+message TargetOptionEntryMessage7 {
+  optional uint32 unk1 = 1;
+  optional uint32 unk2 = 2;
+  optional uint32 unk3 = 3;
+  optional uint32 unk4 = 4;
 }
 
 message IntegerPicker {
@@ -337,27 +347,31 @@ message ScreenState {
 }
 
 message EntryState {
-  message Message7 {
-    optional Label label1 = 1;
-    optional Label label2 = 2;
-  }
-  message Message8 {
-    optional uint32 unk1 = 1;
-  }
-  message Message9 {
-    optional Label label1 = 1;
-  }
-  message AlertSettings {
-      optional string dialect = 1;
-  }
   optional uint32 id = 1;
   optional uint32 state = 2;
   optional Switch switch = 3;
   optional Summary summary = 4;
-  optional AlertSettings alertSettings = 6;
-  optional Message7 unk7 = 7;
-  optional Message8 unk8 = 8;
-  optional Message9 unk9 = 9;
+  optional EntryStateAlertSettings alertSettings = 6;
+  optional EntryStateMessage7 unk7 = 7;
+  optional EntryStateMessage8 unk8 = 8;
+  optional EntryStateMessage9 unk9 = 9;
+}
+
+message EntryStateMessage7 {
+  optional Label label1 = 1;
+  optional Label label2 = 2;
+}
+
+message EntryStateMessage8 {
+  optional uint32 unk1 = 1;
+}
+
+message EntryStateMessage9 {
+  optional Label label1 = 1;
+}
+
+message EntryStateAlertSettings {
+  optional string dialect = 1;
 }
 
 message Switch {
@@ -428,59 +442,68 @@ message Date {
 message ChangeRequest {
   optional uint32 screenId = 1;
   optional uint32 entryId = 2;
-  optional Switch switch = 3;
-  optional Option option = 4;
-  optional Time duration = 5;
-  optional Time timeOfDay = 6;
-  optional FloatValue floatValue = 7;
-  optional IntegerValue integerValue = 8;
-  optional Position position = 11;
-  optional NewDate newDate = 12;
-  optional Text text = 14;
-  optional Height height = 15;
+  optional ChangeRequestSwitch switch = 3;
+  optional ChangeRequestOption option = 4;
+  optional ChangeRequestTime duration = 5;
+  optional ChangeRequestTime timeOfDay = 6;
+  optional ChangeRequestFloatValue floatValue = 7;
+  optional ChangeRequestIntegerValue integerValue = 8;
+  optional ChangeRequestPosition position = 11;
+  optional ChangeRequestNewDate newDate = 12;
+  optional ChangeRequestText text = 14;
+  optional ChangeRequestHeight height = 15;
+}
 
-  message Switch {
-    required bool value = 1;
-  }
-  message Option {
-    optional uint32 index = 1;
-  }
-  message Time {
-    optional uint32 seconds = 1;
-  }
-  message IntegerValue {
-    optional uint32 value = 1;
-  }
-  message Position {
-    optional uint32 index = 1;
-    optional bool delete = 2;
-  }
-  message NewDate {
-    optional Date value = 1;
-  }
-  message Text {
-    optional string value = 1;
-  }
-  message Height {
-    optional uint32 value = 1;
-    optional uint32 unit = 2;
-  }
-  message FloatValue {
-    optional float value = 1;
-  }
+message ChangeRequestSwitch {
+  required bool value = 1;
+}
+
+message ChangeRequestOption {
+  optional uint32 index = 1;
+}
+
+message ChangeRequestTime {
+  optional uint32 seconds = 1;
+}
+
+message ChangeRequestIntegerValue {
+  optional uint32 value = 1;
+}
+
+message ChangeRequestPosition {
+  optional uint32 index = 1;
+  optional bool delete = 2;
+}
+
+message ChangeRequestNewDate {
+  optional Date value = 1;
+}
+
+message ChangeRequestText {
+  optional string value = 1;
+}
+
+message ChangeRequestHeight {
+  optional uint32 value = 1;
+  optional uint32 unit = 2;
+}
+
+message ChangeRequestFloatValue {
+  optional float value = 1;
 }
 
 message ChangeResponse {
-  message Message2 {
-    optional Label unk1 = 1;
-    optional Label unk2 = 2;
-    optional Label unk3 = 3;
-  }
   optional ResponseStatus status = 1;
-  optional Message2 unk2 = 2;
+  optional ChangeResponseMessage2 unk2 = 2;
   optional ScreenState state = 3;
   optional bool unk4 = 4;
   optional bool shouldReturn = 5;
+}
+
+message ChangeResponseMessage2 {
+  optional Label unk1 = 1;
+  optional Label unk2 = 2;
+  optional Label unk3 = 3;
 }
 
 message InitRequest {

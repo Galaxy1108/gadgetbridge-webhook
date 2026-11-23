@@ -348,7 +348,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                     GdiRealtimeSettings.ChangeRequest.newBuilder()
                                             .setScreenId(screenId)
                                             .setEntryId(entry.getId())
-                                            .setOption(GdiRealtimeSettings.ChangeRequest.Option.newBuilder()
+                                            .setOption(GdiRealtimeSettings.ChangeRequestOption.newBuilder()
                                                     .setIndex(newValueIdx)
                                             )
                             );
@@ -385,7 +385,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                     GdiRealtimeSettings.ChangeRequest.newBuilder()
                                             .setScreenId(screenId)
                                             .setEntryId(entry.getId())
-                                            .setTimeOfDay(GdiRealtimeSettings.ChangeRequest.Time.newBuilder()
+                                            .setTimeOfDay(GdiRealtimeSettings.ChangeRequestTime.newBuilder()
                                                     .setSeconds(hour * 3600 + minute * 60)
                                             )
                             );
@@ -470,7 +470,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                     GdiRealtimeSettings.ChangeRequest.newBuilder()
                                             .setScreenId(screenId)
                                             .setEntryId(entry.getId())
-                                            .setNewDate(GdiRealtimeSettings.ChangeRequest.NewDate.newBuilder()
+                                            .setNewDate(GdiRealtimeSettings.ChangeRequestNewDate.newBuilder()
                                                     .setValue(GdiRealtimeSettings.Date.newBuilder()
                                                             .setYear(year).setMonth(month).setDay(day)
                                                     )
@@ -509,7 +509,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                     GdiRealtimeSettings.ChangeRequest.newBuilder()
                                             .setScreenId(screenId)
                                             .setEntryId(entry.getId())
-                                            .setHeight(GdiRealtimeSettings.ChangeRequest.Height.newBuilder()
+                                            .setHeight(GdiRealtimeSettings.ChangeRequestHeight.newBuilder()
                                                     .setValue(newValueInt)
                                                     .setUnit(state.getSummary().getValueHeight().getUnit())
                                             )
@@ -546,7 +546,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                     GdiRealtimeSettings.ChangeRequest.newBuilder()
                                             .setScreenId(screenId)
                                             .setEntryId(entry.getId())
-                                            .setSwitch(GdiRealtimeSettings.ChangeRequest.Switch.newBuilder()
+                                            .setSwitch(GdiRealtimeSettings.ChangeRequestSwitch.newBuilder()
                                                     .setValue((Boolean) newValue)
                                             )
                             );
@@ -596,7 +596,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                             GdiRealtimeSettings.ChangeRequest.newBuilder()
                                                     .setScreenId(screenId)
                                                     .setEntryId(sortEntry.getId())
-                                                    .setPosition(GdiRealtimeSettings.ChangeRequest.Position.newBuilder()
+                                                    .setPosition(GdiRealtimeSettings.ChangeRequestPosition.newBuilder()
                                                             .setIndex(iFinal - 1)
                                                     )
                                     );
@@ -609,7 +609,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                             GdiRealtimeSettings.ChangeRequest.newBuilder()
                                                     .setScreenId(screenId)
                                                     .setEntryId(sortEntry.getId())
-                                                    .setPosition(GdiRealtimeSettings.ChangeRequest.Position.newBuilder()
+                                                    .setPosition(GdiRealtimeSettings.ChangeRequestPosition.newBuilder()
                                                             .setIndex(iFinal + 1)
                                                     )
                                     );
@@ -621,7 +621,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                     GdiRealtimeSettings.ChangeRequest.newBuilder()
                                                 .setScreenId(screenId)
                                                 .setEntryId(sortEntry.getId())
-                                                .setPosition(GdiRealtimeSettings.ChangeRequest.Position.newBuilder()
+                                                .setPosition(GdiRealtimeSettings.ChangeRequestPosition.newBuilder()
                                                         .setDelete(true)
                                                 )
                                 );
@@ -662,7 +662,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                                 GdiRealtimeSettings.ChangeRequest.newBuilder()
                                             .setScreenId(screenId)
                                             .setEntryId(entry.getId())
-                                            .setText(GdiRealtimeSettings.ChangeRequest.Text.newBuilder()
+                                            .setText(GdiRealtimeSettings.ChangeRequestText.newBuilder()
                                                     .setValue(newValue.toString())
                                             )
                             );
@@ -850,7 +850,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                 GdiRealtimeSettings.ChangeRequest.newBuilder()
                             .setScreenId(integerScreenId)
                             .setEntryId(integerEntry.getId())
-                            .setIntegerValue(GdiRealtimeSettings.ChangeRequest.IntegerValue.newBuilder()
+                            .setIntegerValue(GdiRealtimeSettings.ChangeRequestIntegerValue.newBuilder()
                                     .setValue(newValueInt)
                             )
             );
@@ -901,7 +901,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                 GdiRealtimeSettings.ChangeRequest.newBuilder()
                             .setScreenId(durationScreenId)
                             .setEntryId(durationEntry.getId())
-                            .setDuration(GdiRealtimeSettings.ChangeRequest.Time.newBuilder()
+                            .setDuration(GdiRealtimeSettings.ChangeRequestTime.newBuilder()
                                     .setSeconds(newSeconds)
                             )
             );
@@ -952,7 +952,7 @@ public class GarminRealtimeSettingsFragment extends AbstractPreferenceFragment {
                 GdiRealtimeSettings.ChangeRequest.newBuilder()
                             .setScreenId(floatScreenId)
                             .setEntryId(floatEntry.getId())
-                            .setFloatValue(GdiRealtimeSettings.ChangeRequest.FloatValue.newBuilder()
+                            .setFloatValue(GdiRealtimeSettings.ChangeRequestFloatValue.newBuilder()
                                     .setValue(newFloat)
                             )
             );
