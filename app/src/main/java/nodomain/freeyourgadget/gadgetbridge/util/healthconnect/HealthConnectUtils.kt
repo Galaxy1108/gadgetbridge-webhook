@@ -337,7 +337,15 @@ class HealthConnectUtils {
                 totalDataTypesProcessed++
 
 
-                val metadata = Metadata.autoRecorded(device)
+                val metadata = when (dataType) {
+                    HealthConnectPermissionManager.HealthConnectDataType.HYDRATION -> Metadata.manualEntry(device)
+
+                    HealthConnectPermissionManager.HealthConnectDataType.BLOOD_GLUCOSE,
+                    HealthConnectPermissionManager.HealthConnectDataType.BLOOD_PRESSURE,
+                    HealthConnectPermissionManager.HealthConnectDataType.WEIGHT -> Metadata.activelyRecorded(device)
+
+                    else -> Metadata.autoRecorded(device)
+                }
 
                 var currentSliceStartTs = currentDataTypeStartTsFromDb
 
