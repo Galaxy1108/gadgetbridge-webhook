@@ -112,7 +112,7 @@ public class GBDaoGenerator {
             outputDir.mkdirs();
         }
 
-        final Schema schema = new Schema(162, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(163, MAIN_PACKAGE + ".entities");
 
         final List<Entity> sampleProvidersToGenerate = new LinkedList<>();
         final List<Entity> batterySampleProvidersToGenerate = new LinkedList<>();
@@ -183,6 +183,7 @@ public class GBDaoGenerator {
         addLefunBiometricSample(schema, user, device);
         addLefunSleepSample(schema, user, device);
         addSonySWR12Sample(schema, user, device);
+        addGearFitActivitySample(schema, user, device);
         addBangleJSActivitySample(schema, user, device);
         addCasioGBX100Sample(schema, user, device);
         addFitProActivitySample(schema, user, device);
@@ -337,8 +338,6 @@ public class GBDaoGenerator {
         final DeviceDataTablesGenerator deviceDataTablesGenerator = new DeviceDataTablesGenerator(schema, device);
         deviceDataTablesGenerator.validate();
 
-        deleteOldFiles(outputDirPath);
-
         new DaoGenerator().generateAll(schema, outputDirPath);
 
         deviceDataTablesGenerator.generate(loadTemplate("gadgetbridge/device-data-tables.ftl"), outputDirPath);
@@ -406,65 +405,6 @@ public class GBDaoGenerator {
                             "Fix by calling entity.implementsSerializable() when defining them in " +
                             GBDaoGenerator.class.getSimpleName());
         }
-    }
-
-    private static void deleteOldFiles(final String outputDirPath) throws IOException {
-        // Cleanup the legacy directory to avoid classpath conflicts during build for users that pull the latest changes
-        // FIXME: Remove this eventually, and app/src/main/java/nodomain/freeyourgadget/gadgetbridge/entities/.gitignore as well
-        if (new File(LEGACY_DIR, "DaoSession.java").isFile()) {
-            Files.walkFileTree(new File(LEGACY_DIR).toPath(), new SimpleFileVisitor<>() {
-                @SuppressWarnings("NullableProblems")
-                @Override
-                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) {
-                    if (Files.isSymbolicLink(dir)) {
-                        return FileVisitResult.SKIP_SUBTREE;
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @SuppressWarnings("NullableProblems")
-                @Override
-                public FileVisitResult visitFile(final Path path, final BasicFileAttributes attrs) throws IOException {
-                    final File file = path.toFile();
-                    if (!file.isFile()) {
-                        return FileVisitResult.SKIP_SUBTREE;
-                    }
-                    if (file.getName().endsWith(".java")) {
-                        if (!file.getName().startsWith("Abstract") && !file.getName().equals("GenericActivitySample.java")) {
-                            System.out.println("Deleting legacy file: " + path);
-                            Files.delete(path);
-                        }
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        }
-
-        Files.walkFileTree(new File(outputDirPath).toPath(), new SimpleFileVisitor<>() {
-            @SuppressWarnings("NullableProblems")
-            @Override
-            public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) {
-                if (Files.isSymbolicLink(dir)) {
-                    return FileVisitResult.SKIP_SUBTREE;
-                }
-                return FileVisitResult.CONTINUE;
-            }
-
-            @SuppressWarnings("NullableProblems")
-            @Override
-            public FileVisitResult visitFile(final Path path, final BasicFileAttributes attrs) throws IOException {
-                if (!path.toFile().isFile()) {
-                    return FileVisitResult.SKIP_SUBTREE;
-                }
-                if (path.toString().endsWith(".java")) {
-                    if (Boolean.getBoolean("verbose")) {
-                        System.out.println("Deleting: " + path);
-                    }
-                    Files.delete(path);
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
     }
 
     private static Entity addTag(Schema schema) {
@@ -1459,6 +1399,19 @@ public class GBDaoGenerator {
         activitySample.addIntProperty(SAMPLE_STEPS).notNull().codeBeforeGetterAndSetter(OVERRIDE);
         activitySample.addIntProperty(SAMPLE_RAW_KIND).notNull().codeBeforeGetterAndSetter(OVERRIDE);
         activitySample.addIntProperty(SAMPLE_RAW_INTENSITY).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        return activitySample;
+    }
+
+    private static Entity addGearFitActivitySample(Schema schema, Entity user, Entity device) {
+        Entity activitySample = addEntity(schema, "GearFitActivitySample");
+        activitySample.implementsSerializable();
+        addCommonActivitySampleProperties("AbstractActivitySample", activitySample, user, device);
+        activitySample.addIntProperty(SAMPLE_STEPS).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        activitySample.addIntProperty("distanceCm").notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        activitySample.addIntProperty("activeCalories").notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        activitySample.addIntProperty(SAMPLE_RAW_KIND).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        activitySample.addIntProperty(SAMPLE_RAW_INTENSITY).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        addHeartRateProperties(activitySample);
         return activitySample;
     }
 

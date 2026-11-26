@@ -33,7 +33,7 @@
      （图标 `ic_file_upload`，标题 `webhook_pref_title`）。
 5. `app/src/main/res/values/strings.xml` 与 `values-zh-rCN/strings.xml`
    - 追加 `webhook_*` 字符串（纯增量）。
-6. `app/build.gradle` — mainline flavor 增加 `applicationIdSuffix ".webhook"`
+6. `app/build.gradle.kts` — mainline flavor 增加 `applicationIdSuffix = ".webhook"`
    （安装包名 = `nodomain.freeyourgadget.gadgetbridge.webhook`：保持官方命名主体，
    仅后缀标识 fork，可与官方版并存安装；`@string/applicationId` 由 AGP 自动生成，无需手改）。
 

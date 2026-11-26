@@ -28,6 +28,8 @@
 package nodomain.freeyourgadget.gadgetbridge.model;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinatorEntryPoint;
+import nodomain.freeyourgadget.gadgetbridge.di.RootEntryPoints;
 import nodomain.freeyourgadget.gadgetbridge.devices.UnknownDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.aawireless.AAWirelessCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.asteroidos.AsteroidOSDeviceCoordinator;
@@ -590,6 +592,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.sony.headphones.coordinators
 import nodomain.freeyourgadget.gadgetbridge.devices.sony.headphones.coordinators.SonyWISP600NCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sony.reonpocket.SonyReonPocketProCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sony.wena3.SonyWena3Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.samsung_gearfit.GearFitCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.sonyswr12.SonySWR12DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.soundbrenner.SoundbrennerCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.soundcore.SoundcoreP42iCoordinator;
@@ -1086,6 +1089,7 @@ public enum DeviceType {
     AAWIRELESS(AAWirelessCoordinator::new),
     VIBRATISSIMO(VibratissimoCoordinator::new),
     SONY_SWR12(SonySWR12DeviceCoordinator::new),
+    SAMSUNG_GEAR_FIT(GearFitCoordinator::new),
     LIVEVIEW(LiveviewCoordinator::new),
     WASPOS(WaspOSCoordinator::new),
     UM25(UM25Coordinator::new),
@@ -1385,8 +1389,6 @@ public enum DeviceType {
     INNOVO_IP900BP_B(InnovoPulseOximeterCoordinator::new),
     TEST(TestDeviceCoordinator::new);
 
-    private DeviceCoordinator coordinator;
-
     private final CoordinatorBuilder coordinatorBuilder;
 
     DeviceType(CoordinatorBuilder coordinatorBuilder) {
@@ -1416,9 +1418,8 @@ public enum DeviceType {
     }
 
     public DeviceCoordinator getDeviceCoordinator() {
-        if (coordinator == null) {
-            coordinator = coordinatorBuilder.build();
-        }
-        return coordinator;
+        return RootEntryPoints.INSTANCE.get(DeviceCoordinatorEntryPoint.class)
+                .deviceCoordinatorFactory()
+                .get(this, coordinatorBuilder::build);
     }
 }
