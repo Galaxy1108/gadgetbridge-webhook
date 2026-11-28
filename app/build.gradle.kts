@@ -258,6 +258,10 @@ androidComponents {
 }
 
 tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+    // Vintage is kept on purpose for the JUnit 4 tests, so its deprecation notice is noise.
+    systemProperty("junit.vintage.discovery.issue.reporting.enabled", "false")
+
     val miFirmwareDir = providers.systemProperty("MiFirmwareDir")
     if (miFirmwareDir.isPresent) {
         systemProperty("MiFirmwareDir", miFirmwareDir.get())
@@ -340,7 +344,10 @@ dependencies {
     implementation(project(":GBProtobufGenerator"))
 
     // Testing
+    testImplementation(platform(libs.junit.bom))
     testImplementation(libs.bundles.unit.test)
+    testRuntimeOnly(libs.junit.vintage.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 kaitai {
